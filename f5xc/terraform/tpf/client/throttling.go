@@ -312,6 +312,7 @@ func computeBackoffDelay(attempt int, policy throttlingPolicy) time.Duration {
 	if policy.JitterRatio > 0 {
 		minFactor := 1.0 - policy.JitterRatio
 		maxFactor := 1.0 + policy.JitterRatio
+		// #nosec G404 -- jitter backoff does not require cryptographically secure random numbers
 		factor := minFactor + rand.Float64()*(maxFactor-minFactor)
 		delay = time.Duration(float64(delay) * factor)
 	}

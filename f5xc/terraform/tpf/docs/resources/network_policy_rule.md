@@ -14,18 +14,50 @@
 page_title: "f5xc_network_policy_rule Resource - F5 XC Distributed Cloud"
 subcategory: "Networking & Connectivity"
 description: |-
-  Network Policy Rule Object Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule. Local Endpoint is picked from the network policy to which this rule has been attached Action on a match can be * Allow * Deny Match Criteria * Ports specify the port range to be matched, if not set it matches to any * Protocol specify the protocol to be matched Supported values are * tcp * udp * icmp * Remote Endpoint * prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint. * prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression. * Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector Label Preference An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference, * Labels from the interface for the address * Labels from POD or Service for the address * Labels from Virtual Network for the address * Labels from Namespace for the address Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached Prefix selector labels (BNF grammar): <selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax> <requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ] <set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set> <inclusion-exclusion>     ::= <inclusion> | <exclusion> <exclusion>               ::= 'notin' <inclusion>               ::= 'in' <value-set>               ::= '(' <values> ')' <values>                  ::= VALUE | VALUE ',' <values> <exact-match-restriction> ::= ['='|'=='|'!='] VALUE KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\t') Note: (1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUEs in its requirement (2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUEs in its requirement or does not exist (3) The empty string is a valid VALUE (4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE. (5) A requirement with just !KEY requires that the KEY not exist.
+  Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule.<br>Local Endpoint is picked from the network policy to which this rule has been attached<br><br>Action on a match can be<br>* Allow<br>* Deny<br><br>Match Criteria<br>* Ports specify the port range to be matched, if not set it matches to any<br>* Protocol specify the protocol to be matched<br>Supported values are<br>* tcp<br>* udp<br>* icmp<br>* Remote Endpoint<br>* prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint.<br>* prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.<br>* ip_prefix_set: Reference to list of IP configured prefixes. However its different from 'prefix' because it is a reference to ip-prefix-set object, which can be re-used across objects<br>* Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector<br><br>Label Preference<br>An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,<br>* Labels from the interface for the address<br>* Labels from POD or Service for the address<br>* Labels from Virtual Network for the address<br>* Labels from Namespace for the address<br><br>Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached<br><br>Prefix selector labels (BNF grammar):<br><selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax><br><requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ]<br><set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set><br><inclusion-exclusion>     ::= <inclusion> | <exclusion><br><exclusion>               ::= 'notin'<br><inclusion>               ::= 'in'<br><value-set>               ::= '(' <values> ')'<br><values>                  ::= VALUE | VALUE ',' <values><br><exact-match-restriction> ::= ['='|'=='|'!='] VALUE<br><br>KEY is a sequence of one or more characters. Max length is 63 characters.<br>VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters.<br>Delimiter is white space: (' ', '\t')<br><br>Note:<br>(1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the<br>VALUEs in its requirement<br>(2) Exclusion - ' notin ' - denotes that the KEY is not equal to any<br>of the VALUEs in its requirement or does not exist<br>(3) The empty string is a valid VALUE<br>(4) A requirement with just a KEY - as in 'y' above - denotes that<br>the KEY exists and can be any VALUE.<br>(5) A requirement with just !KEY requires that the KEY not exist.
 ---
 
 # f5xc_network_policy_rule (Resource)
 
-Network Policy Rule Object Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule. Local Endpoint is picked from the network policy to which this rule has been attached Action on a match can be * Allow * Deny Match Criteria * Ports specify the port range to be matched, if not set it matches to any * Protocol specify the protocol to be matched Supported values are * tcp * udp * icmp * Remote Endpoint * prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint. * prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression. * Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector Label Preference An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference, * Labels from the interface for the address * Labels from POD or Service for the address * Labels from Virtual Network for the address * Labels from Namespace for the address Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached Prefix selector labels (BNF grammar): <selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax> <requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ] <set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set> <inclusion-exclusion>     ::= <inclusion> | <exclusion> <exclusion>               ::= 'notin' <inclusion>               ::= 'in' <value-set>               ::= '(' <values> ')' <values>                  ::= VALUE | VALUE ',' <values> <exact-match-restriction> ::= ['='|'=='|'!='] VALUE KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\t') Note: (1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUEs in its requirement (2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUEs in its requirement or does not exist (3) The empty string is a valid VALUE (4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE. (5) A requirement with just !KEY requires that the KEY not exist.
+Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule.<br>Local Endpoint is picked from the network policy to which this rule has been attached<br><br>Action on a match can be<br>* Allow<br>* Deny<br><br>Match Criteria<br>* Ports specify the port range to be matched, if not set it matches to any<br>* Protocol specify the protocol to be matched<br>Supported values are<br>* tcp<br>* udp<br>* icmp<br>* Remote Endpoint<br>* prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint.<br>* prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.<br>* ip_prefix_set: Reference to list of IP configured prefixes. However its different from 'prefix' because it is a reference to ip-prefix-set object, which can be re-used across objects<br>* Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector<br><br>Label Preference<br>An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,<br>* Labels from the interface for the address<br>* Labels from POD or Service for the address<br>* Labels from Virtual Network for the address<br>* Labels from Namespace for the address<br><br>Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached<br><br>Prefix selector labels (BNF grammar):<br><selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax><br><requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ]<br><set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set><br><inclusion-exclusion>     ::= <inclusion> | <exclusion><br><exclusion>               ::= 'notin'<br><inclusion>               ::= 'in'<br><value-set>               ::= '(' <values> ')'<br><values>                  ::= VALUE | VALUE ',' <values><br><exact-match-restriction> ::= ['='|'=='|'!='] VALUE<br><br>KEY is a sequence of one or more characters. Max length is 63 characters.<br>VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\.])'. Max length is 63 characters.<br>Delimiter is white space: (' ', '\t')<br><br>Note:<br>(1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the<br>VALUEs in its requirement<br>(2) Exclusion - ' notin ' - denotes that the KEY is not equal to any<br>of the VALUEs in its requirement or does not exist<br>(3) The empty string is a valid VALUE<br>(4) A requirement with just a KEY - as in 'y' above - denotes that<br>the KEY exists and can be any VALUE.<br>(5) A requirement with just !KEY requires that the KEY not exist.
 
 To get more information about f5xc_network_policy_rule, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/network-policy-rule)
 
+## Example Usage
 
+```terraform
+# Example: Network Policy Rule - Full
+
+resource "f5xc_network_policy_rule" "example" {
+  name      = "example-network-policy-rule"
+  namespace = "terraform-example"
+
+  labels = {
+    env  = "example"
+    team = "platform"
+  }
+
+  annotations = {
+    owner = "example-owner"
+  }
+
+  action   = ["ALLOW"]
+  protocol = "TCP"
+  ports    = ["53", "80", "443", "10000-10010"]
+
+  remote_endpoint_choice = {
+    prefix = {
+      prefix = ["10.1.0.0/16", "10.2.0.0/16"]
+    }
+  }
+
+  advanced_action = {
+    action = ["LOG"]
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -44,8 +76,8 @@ To get more information about f5xc_network_policy_rule, refer:
 - `label_matcher` (Attributes) label matcher List of label keys to be matched in prefix_selector configured in remote_endpoint (see [below for nested schema](#nestedatt--label_matcher))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `ports` (List of String) ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192
-- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`
-- `remote_endpoint_choice` (Attributes) Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint (see [below for nested schema](#nestedatt--remote_endpoint_choice))
+- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`
+- `remote_endpoint_choice` (Attributes) Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint<br>Exactly one of `ip_prefix_set`, `prefix`, or `prefix_selector` must be specified when `remote_endpoint_choice` is configured. (see [below for nested schema](#nestedatt--remote_endpoint_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -73,9 +105,9 @@ Optional:
 
 Optional:
 
-- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint (see [below for nested schema](#nestedatt--remote_endpoint_choice--ip_prefix_set))
-- `prefix` (Attributes) prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix))
-- `prefix_selector` (Attributes) prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix_selector))
+- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `prefix` and `prefix_selector`. (see [below for nested schema](#nestedatt--remote_endpoint_choice--ip_prefix_set))
+- `prefix` (Attributes) prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination<br>Conflicts with `ip_prefix_set` and `prefix_selector`. (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix))
+- `prefix_selector` (Attributes) prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple<br>Conflicts with `ip_prefix_set` and `prefix`. (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix_selector))
 
 <a id="nestedatt--remote_endpoint_choice--ip_prefix_set"></a>
 ### Nested Schema for `remote_endpoint_choice.ip_prefix_set`
@@ -131,7 +163,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -139,13 +171,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_network_policy_rule.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_network_policy_rule.example"
+	to = f5xc_network_policy_rule.example
 }
 ```

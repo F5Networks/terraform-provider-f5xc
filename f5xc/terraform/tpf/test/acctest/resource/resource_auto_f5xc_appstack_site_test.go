@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCAppstackSite_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-appstack-" + testAccRunSuffix(t)
+	name := "example-appstack-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCAppstackSite_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,10 +62,10 @@ func TestAccResourceAutoF5XCAppstackSite_basic(t *testing.T) {
 func TestAccResourceAutoF5XCAppstackSite_withNetworkConfig(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-appstack-" + testAccRunSuffix(t)
+	name := "example-appstack-site-" + acctest.RandString(t, 8)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAppstackSiteDestroyProducer(t),
@@ -74,30 +74,34 @@ func TestAccResourceAutoF5XCAppstackSite_withNetworkConfig(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_withNetworkConfig(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_withNetworkConfigUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAppstackSiteConfig_withNetworkConfigUpdated("example-appstack-site", "system"),
+		})
 }
 
 func TestAccResourceAutoF5XCAppstackSite_withBondDevices(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-appstack-" + testAccRunSuffix(t)
+	name := "example-appstack-site-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,10 +113,10 @@ func TestAccResourceAutoF5XCAppstackSite_withBondDevices(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_withBondDevices(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -122,7 +126,7 @@ func TestAccResourceAutoF5XCAppstackSite_withBondDevices(t *testing.T) {
 func TestAccResourceAutoF5XCAppstackSite_withGPUVariants(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-appstack-" + testAccRunSuffix(t)
+	name := "example-appstack-site-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -134,20 +138,20 @@ func TestAccResourceAutoF5XCAppstackSite_withGPUVariants(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_withGPU(name, namespace, "enable_gpu"),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_withGPU(name, namespace, "disable_gpu"),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -157,7 +161,7 @@ func TestAccResourceAutoF5XCAppstackSite_withGPUVariants(t *testing.T) {
 func TestAccResourceAutoF5XCAppstackSite_withBlockedServices(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-appstack-" + testAccRunSuffix(t)
+	name := "example-appstack-site-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -169,10 +173,10 @@ func TestAccResourceAutoF5XCAppstackSite_withBlockedServices(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_withBlockedServices(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -182,10 +186,10 @@ func TestAccResourceAutoF5XCAppstackSite_withBlockedServices(t *testing.T) {
 func TestAccResourceAutoF5XCAppstackSite_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-appstack-" + testAccRunSuffix(t)
+	name := "example-appstack-site-" + acctest.RandString(t, 8)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAppstackSiteDestroyProducer(t),
@@ -194,24 +198,28 @@ func TestAccResourceAutoF5XCAppstackSite_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppstackSiteConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_appstack_site.test",
+				ResourceName:                         "f5xc_appstack_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_appstack_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAppstackSiteConfig_full("example-appstack-site", "system"),
+		})
 }
 
 func testAccCheckAppstackSiteDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -220,7 +228,7 @@ func testAccCheckAppstackSiteDestroyProducer(t *testing.T) func(*terraform.State
 
 func testAccResourceAutoF5XCAppstackSiteConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name      = %q
   namespace = %q
 
@@ -271,7 +279,7 @@ resource "f5xc_appstack_site" "test" {
 
 func testAccResourceAutoF5XCAppstackSiteConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name        = %q
   namespace   = %q
   description = "Updated appstack site"
@@ -323,7 +331,7 @@ resource "f5xc_appstack_site" "test" {
 
 func testAccResourceAutoF5XCAppstackSiteConfig_withNetworkConfig(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name      = %q
   namespace = %q
 
@@ -374,7 +382,7 @@ resource "f5xc_appstack_site" "test" {
 
 func testAccResourceAutoF5XCAppstackSiteConfig_withNetworkConfigUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name        = %q
   namespace   = %q
   description = "Updated with network config"
@@ -447,7 +455,7 @@ resource "f5xc_appstack_site" "test" {
 
 func testAccResourceAutoF5XCAppstackSiteConfig_withBondDevices(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name        = %q
   namespace   = %q
   description = "Appstack with no bond devices"
@@ -508,7 +516,7 @@ func testAccResourceAutoF5XCAppstackSiteConfig_withGPU(name, namespace, gpuChoic
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name      = %q
   namespace = %q
 
@@ -558,7 +566,7 @@ resource "f5xc_appstack_site" "test" {
 
 func testAccResourceAutoF5XCAppstackSiteConfig_withBlockedServices(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name        = %q
   namespace   = %q
   description = "Appstack with blocked services"
@@ -612,13 +620,13 @@ resource "f5xc_appstack_site" "test" {
 
 func testAccResourceAutoF5XCAppstackSiteConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name        = %q
   namespace   = %q
   description = "Full appstack site configuration"
 
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v1"
   }
 
@@ -671,13 +679,13 @@ resource "f5xc_appstack_site" "test" {
 
 func testAccResourceAutoF5XCAppstackSiteConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_appstack_site" "test" {
+resource "f5xc_appstack_site" "example" {
   name        = %q
   namespace   = %q
   description = "Full appstack site configuration updated"
 
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v2"
   }
 

@@ -42,6 +42,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/oneofbranchplanmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
@@ -54,6 +55,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_fleet "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/fleet"
 	ves_io_schema_network_firewall "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_firewall"
@@ -759,6 +761,7 @@ type AppstackSiteSecretType struct {
 type AppstackSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type AppstackSiteBlindfoldSecretInfo struct {
@@ -1017,7 +1020,6 @@ type ResourceF5XCAppstackSiteModel struct {
 	GpuChoice                types.Object   `tfsdk:"gpu_choice"`
 	K8SClusterChoice         types.Object   `tfsdk:"k8s_cluster_choice"`
 	KubernetesUpgradeDrain   types.Object   `tfsdk:"kubernetes_upgrade_drain"`
-	LaunchIkeInNamespace     types.Bool     `tfsdk:"launch_ike_in_namespace"`
 	LogsReceiverChoice       types.Object   `tfsdk:"logs_receiver_choice"`
 	MasterNodeConfiguration  types.List     `tfsdk:"master_node_configuration"`
 	NetworkCfgChoice         types.Object   `tfsdk:"network_cfg_choice"`
@@ -1046,7 +1048,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> BlockedServicesChoice
+// Attribute map for OneOfField --> BlockedServicesChoice
 var AppstackSiteBlockedServicesChoiceModelAttributeMap = map[string]attr.Type{
 
 	"blocked_services": types.ObjectType{
@@ -1092,7 +1094,7 @@ var AppstackSiteBlockedServicesChoiceBlockedServicesBlockedSeviceBlockedServices
 	"web_user_interface": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> BondChoice
+// Attribute map for OneOfField --> BondChoice
 var AppstackSiteBondChoiceModelAttributeMap = map[string]attr.Type{
 
 	"bond_device_list": types.ObjectType{
@@ -1167,7 +1169,7 @@ var AppstackSiteCustomDnsModelAttributeMap = map[string]attr.Type{
 	"outside_nameserver_v6": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> GpuChoice
+// Attribute map for OneOfField --> GpuChoice
 var AppstackSiteGpuChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_gpu": types.BoolType,
@@ -1187,7 +1189,7 @@ var AppstackSiteGpuChoiceEnableVgpuModelAttributeMap = map[string]attr.Type{
 	"server_port":    types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> K8SClusterChoice
+// Attribute map for OneOfField --> K8SClusterChoice
 var AppstackSiteK8SClusterChoiceModelAttributeMap = map[string]attr.Type{
 
 	"k8s_cluster": types.ObjectType{
@@ -1236,7 +1238,7 @@ var AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUp
 	"drain_max_unavailable_node_count": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> LogsReceiverChoice
+// Attribute map for OneOfField --> LogsReceiverChoice
 var AppstackSiteLogsReceiverChoiceModelAttributeMap = map[string]attr.Type{
 
 	"log_receiver": types.ObjectType{
@@ -1260,7 +1262,7 @@ var AppstackSiteMasterNodeConfigurationModelAttributeMap = map[string]attr.Type{
 	"public_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkCfgChoice
+// Attribute map for OneOfField --> NetworkCfgChoice
 var AppstackSiteNetworkCfgChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_network_config": types.ObjectType{
@@ -1303,7 +1305,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigModelAttributeMap = map[strin
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -1336,7 +1338,7 @@ var AppstackSiteForwardProxyPoliciesObjectRefModelAttributeMap = map[string]attr
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> GlobalNetworkChoice
+// Attribute map for OneOfField --> GlobalNetworkChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network_list": types.ObjectType{
@@ -1415,7 +1417,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceGlobalNetw
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfaceChoice
+// Attribute map for OneOfField --> InterfaceChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_interface_config": types.BoolType,
@@ -1461,7 +1463,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
+// Attribute map for OneOfField --> DcClusterGroupConnectivityInterfaceChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group_connectivity_interface_disabled": types.BoolType,
@@ -1509,14 +1511,14 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	"monitor_disabled": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> NodeChoice
+// Attribute map for OneOfField --> NodeChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster": types.BoolType,
 	"node":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PrimaryChoice
+// Attribute map for OneOfField --> PrimaryChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap = map[string]attr.Type{
 
 	"is_primary":  types.BoolType,
@@ -1533,7 +1535,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NodeChoice
+// Attribute map for OneOfField --> NodeChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster": types.BoolType,
@@ -1569,7 +1571,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AddressChoice
+// Attribute map for OneOfField --> AddressChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dhcp_client": types.BoolType,
@@ -1646,14 +1648,14 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DnsChoice
+// Attribute map for OneOfField --> DnsChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dns_address": types.StringType,
 	"same_as_dgw": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> GatewayChoice
+// Attribute map for OneOfField --> GatewayChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dgw_address":   types.StringType,
@@ -1674,7 +1676,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	"start_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
+// Attribute map for OneOfField --> InterfacesAddressingChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic_from_end":   types.BoolType,
@@ -1755,7 +1757,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AutoconfigChoice
+// Attribute map for OneOfField --> AutoconfigChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"host": types.BoolType,
@@ -1852,7 +1854,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	"start_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
+// Attribute map for OneOfField --> InterfacesAddressingChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic_from_end":   types.BoolType,
@@ -1905,7 +1907,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> LocalDnsChoice
+// Attribute map for OneOfField --> LocalDnsChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"configured_address": types.StringType,
@@ -1963,7 +1965,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	"monitor_disabled": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"segment_network": types.ObjectType{
@@ -1982,21 +1984,21 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NodeChoice
+// Attribute map for OneOfField --> NodeChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster": types.BoolType,
 	"node":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PrimaryChoice
+// Attribute map for OneOfField --> PrimaryChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap = map[string]attr.Type{
 
 	"is_primary":  types.BoolType,
 	"not_primary": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> VlanChoice
+// Attribute map for OneOfField --> VlanChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap = map[string]attr.Type{
 
 	"untagged": types.BoolType,
@@ -2026,7 +2028,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"site_local_inside_network": types.BoolType,
@@ -2090,7 +2092,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListI
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkPolicyChoice
+// Attribute map for OneOfField --> NetworkPolicyChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_enhanced_firewall_policies": types.ObjectType{
@@ -2148,7 +2150,7 @@ var AppstackSiteNetworkPoliciesObjectRefModelAttributeMap = map[string]attr.Type
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
+// Attribute map for OneOfField --> SiteMeshGroupChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"site_to_site_tunnel_ip":  types.StringType,
@@ -2156,7 +2158,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttri
 	"sm_connection_pvt_ip":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> SloChoice
+// Attribute map for OneOfField --> SloChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_config": types.BoolType,
@@ -2182,7 +2184,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigModelAttrib
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group": types.ObjectType{
@@ -2199,7 +2201,7 @@ var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGr
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> StaticRouteChoice
+// Attribute map for OneOfField --> StaticRouteChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_static_routes": types.BoolType,
@@ -2300,7 +2302,7 @@ var AppstackSiteInterfaceObjectRefModelAttributeMap = map[string]attr.Type{
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> StaticV6RouteChoice
+// Attribute map for OneOfField --> StaticV6RouteChoice
 var AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_static_v6_routes": types.BoolType,
@@ -2401,7 +2403,7 @@ var AppstackSiteOfflineSurvivabilityModeModelAttributeMap = map[string]attr.Type
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OfflineSurvivabilityModeChoice
+// Attribute map for OneOfField --> OfflineSurvivabilityModeChoice
 var AppstackSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"enable_offline_survivability_mode": types.BoolType,
@@ -2416,14 +2418,14 @@ var AppstackSiteOsModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OperatingSystemVersionChoice
+// Attribute map for OneOfField --> OperatingSystemVersionChoice
 var AppstackSiteOsOperatingSystemVersionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_os_version":       types.BoolType,
 	"operating_system_version": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SriovInterfaceChoice
+// Attribute map for OneOfField --> SriovInterfaceChoice
 var AppstackSiteSriovInterfaceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_sriov_interface": types.BoolType,
@@ -2481,7 +2483,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigModelAttributeMap = map[strin
 	},
 }
 
-// Attribute map for RequiredOneOfField --> StaticRouteChoice
+// Attribute map for OneOfField --> StaticRouteChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_static_routes": types.BoolType,
@@ -2574,7 +2576,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceStaticRoutes
 	"node": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> StorageClassChoice
+// Attribute map for OneOfField --> StorageClassChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_storage_class": types.BoolType,
@@ -2777,6 +2779,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStorageIscsiChapPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2811,6 +2814,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2960,6 +2964,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3008,6 +3013,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3067,7 +3073,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -3093,7 +3099,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -3222,6 +3228,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3256,6 +3263,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3290,6 +3298,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanClientPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3338,6 +3347,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3397,7 +3407,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -3423,7 +3433,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -3616,6 +3626,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashArrayFlashArraysApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3704,6 +3715,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3735,7 +3747,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDev
 	"nfs_endpoint_ip":       types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> StorageInterfaceChoice
+// Attribute map for OneOfField --> StorageInterfaceChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_storage_interfaces": types.BoolType,
@@ -3850,7 +3862,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AddressChoice
+// Attribute map for OneOfField --> AddressChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dhcp_client": types.BoolType,
@@ -3927,14 +3939,14 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DnsChoice
+// Attribute map for OneOfField --> DnsChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dns_address": types.StringType,
 	"same_as_dgw": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> GatewayChoice
+// Attribute map for OneOfField --> GatewayChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dgw_address":   types.StringType,
@@ -3955,7 +3967,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	"start_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
+// Attribute map for OneOfField --> InterfacesAddressingChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic_from_end":   types.BoolType,
@@ -4036,7 +4048,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AutoconfigChoice
+// Attribute map for OneOfField --> AutoconfigChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"host": types.BoolType,
@@ -4133,7 +4145,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	"start_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
+// Attribute map for OneOfField --> InterfacesAddressingChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic_from_end":   types.BoolType,
@@ -4186,7 +4198,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	},
 }
 
-// Attribute map for RequiredOneOfField --> LocalDnsChoice
+// Attribute map for OneOfField --> LocalDnsChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"configured_address": types.StringType,
@@ -4244,7 +4256,7 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	"monitor_disabled": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"segment_network": types.ObjectType{
@@ -4263,21 +4275,21 @@ var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorage
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NodeChoice
+// Attribute map for OneOfField --> NodeChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster": types.BoolType,
 	"node":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PrimaryChoice
+// Attribute map for OneOfField --> PrimaryChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfacePrimaryChoiceModelAttributeMap = map[string]attr.Type{
 
 	"is_primary":  types.BoolType,
 	"not_primary": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> VlanChoice
+// Attribute map for OneOfField --> VlanChoice
 var AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceVlanChoiceModelAttributeMap = map[string]attr.Type{
 
 	"untagged": types.BoolType,
@@ -4292,14 +4304,14 @@ var AppstackSiteSwModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> VolterraSwVersionChoice
+// Attribute map for OneOfField --> VolterraSwVersionChoice
 var AppstackSiteSwVolterraSwVersionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_sw_version":        types.BoolType,
 	"volterra_software_version": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> UsbPolicyChoice
+// Attribute map for OneOfField --> UsbPolicyChoice
 var AppstackSiteUsbPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"allow_all_usb": types.BoolType,
@@ -4350,8 +4362,8 @@ func (r *ResourceF5XCAppstackSite) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a voltstack_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of voltstack_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a voltstack_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of voltstack_site) etc. can be fetched",
+		MarkdownDescription: "App Stack site defines a required parameters that can be used in CRUD, to create and manage an App Stack site.",
+		Description:         "App Stack site defines a required parameters that can be used in CRUD, to create and manage an App Stack site.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -4407,7 +4419,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -4422,30 +4434,34 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"address": schema.StringAttribute{
 				Description:         "address Site's geographical address that can be used to determine its latitude and longitude.",
-				MarkdownDescription: "address Site's geographical address that can be used to determine its latitude and longitude.<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "address Site's geographical address that can be used to determine its latitude and longitude.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
 			},
 			"blocked_services_choice": schema.SingleNestedAttribute{
 				Description:         "Configure Blocked Services Select to use default or custom blocked service configuration",
-				MarkdownDescription: "Configure Blocked Services Select to use default or custom blocked service configuration",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Configure Blocked Services Select to use default or custom blocked service configuration<br>Exactly one of `blocked_services` or `default_blocked_services` must be specified when `blocked_services_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"blocked_services",
 						"default_blocked_services",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"blocked_services": schema.SingleNestedAttribute{
 						Description:         "Custom Blocked Services Configuration Use custom blocked services configuration",
-						MarkdownDescription: "Custom Blocked Services Configuration Use custom blocked services configuration",
+						MarkdownDescription: "Custom Blocked Services Configuration Use custom blocked services configuration<br>Conflicts with `default_blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4463,7 +4479,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									Attributes: map[string]schema.Attribute{
 										"blocked_services_value_type_choice": schema.SingleNestedAttribute{
 											Description:         "blocked_services_type_choice Choose the Nodel Local Service to disable",
-											MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable",
+											MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns`, `ssh`, or `web_user_interface` must be specified when `blocked_services_value_type_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -4477,7 +4493,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 											Attributes: map[string]schema.Attribute{
 												"dns": schema.BoolAttribute{
 													Description:         "DNS Matches DNS port 53",
-													MarkdownDescription: "DNS Matches DNS port 53",
+													MarkdownDescription: "DNS Matches DNS port 53<br>Conflicts with `ssh` and `web_user_interface`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4487,7 +4503,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 												},
 												"ssh": schema.BoolAttribute{
 													Description:         "SSH",
-													MarkdownDescription: "SSH",
+													MarkdownDescription: "SSH<br>Conflicts with `dns` and `web_user_interface`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4497,7 +4513,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 												},
 												"web_user_interface": schema.BoolAttribute{
 													Description:         "Web UI",
-													MarkdownDescription: "Web UI",
+													MarkdownDescription: "Web UI<br>Conflicts with `dns` and `ssh`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4527,7 +4543,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"default_blocked_services": schema.BoolAttribute{
 						Description:         "Default Blocked Service Configuration Use default behavior, which allows SSH (port 22), HTTPS (port 65500) and ICMP node access in blocked services",
-						MarkdownDescription: "Default Blocked Service Configuration Use default behavior, which allows SSH (port 22), HTTPS (port 65500) and ICMP node access in blocked services",
+						MarkdownDescription: "Default Blocked Service Configuration Use default behavior, which allows SSH (port 22), HTTPS (port 65500) and ICMP node access in blocked services<br>Conflicts with `blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4539,20 +4555,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"bond_choice": schema.SingleNestedAttribute{
 				Description:         "Select Bond Configuration Add bond interface devices to the App Stack site",
-				MarkdownDescription: "Select Bond Configuration Add bond interface devices to the App Stack site",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select Bond Configuration Add bond interface devices to the App Stack site<br>Exactly one of `bond_device_list` or `no_bond_devices` must be specified when `bond_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"bond_device_list",
 						"no_bond_devices",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"bond_device_list": schema.SingleNestedAttribute{
 						Description:         "Configure Bond Devices Configure Bond Devices for this App Stack site",
-						MarkdownDescription: "Configure Bond Devices Configure Bond Devices for this App Stack site",
+						MarkdownDescription: "Configure Bond Devices Configure Bond Devices for this App Stack site<br>Conflicts with `no_bond_devices`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4584,7 +4603,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 										},
 										"lacp_choice": schema.SingleNestedAttribute{
 											Description:         "Select Bond Mode Select how bonding will happen, Active/Backup or LACP",
-											MarkdownDescription: "Select Bond Mode Select how bonding will happen, Active/Backup or LACP",
+											MarkdownDescription: "Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -4597,7 +4616,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 											Attributes: map[string]schema.Attribute{
 												"active_backup": schema.BoolAttribute{
 													Description:         "Active/Backup Configure active/backup based bond device",
-													MarkdownDescription: "Active/Backup Configure active/backup based bond device",
+													MarkdownDescription: "Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4607,7 +4626,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 												},
 												"lacp": schema.SingleNestedAttribute{
 													Description:         "LACP (802.3ad) Configure LACP (802.3ad) based bond device",
-													MarkdownDescription: "LACP (802.3ad) Configure LACP (802.3ad) based bond device",
+													MarkdownDescription: "LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4666,7 +4685,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"no_bond_devices": schema.BoolAttribute{
 						Description:         "No Bond Devices No Bond Devices configured for this App Stack site",
-						MarkdownDescription: "No Bond Devices No Bond Devices configured for this App Stack site",
+						MarkdownDescription: "No Bond Devices No Bond Devices configured for this App Stack site<br>Conflicts with `bond_device_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4762,21 +4781,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"gpu_choice": schema.SingleNestedAttribute{
 				Description:         "Select GPU Enable/Disable Enable or Disable GPU for this Site",
-				MarkdownDescription: "Select GPU Enable/Disable Enable or Disable GPU for this Site",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select GPU Enable/Disable Enable or Disable GPU for this Site<br>Exactly one of `disable_gpu`, `enable_gpu`, or `enable_vgpu` must be specified when `gpu_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"disable_gpu",
 						"enable_gpu",
 						"enable_vgpu",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"disable_gpu": schema.BoolAttribute{
 						Description:         "GPU Disabled GPU is not enabled for this Site",
-						MarkdownDescription: "GPU Disabled GPU is not enabled for this Site",
+						MarkdownDescription: "GPU Disabled GPU is not enabled for this Site<br>Conflicts with `enable_gpu` and `enable_vgpu`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4786,7 +4808,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"enable_gpu": schema.BoolAttribute{
 						Description:         "GPU Enabled GPU is enabled for this Site",
-						MarkdownDescription: "GPU Enabled GPU is enabled for this Site",
+						MarkdownDescription: "GPU Enabled GPU is enabled for this Site<br>Conflicts with `disable_gpu` and `enable_vgpu`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4796,7 +4818,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"enable_vgpu": schema.SingleNestedAttribute{
 						Description:         "vGPU Enabled Enable NVIDIA vGPU hosted on VMware",
-						MarkdownDescription: "vGPU Enabled Enable NVIDIA vGPU hosted on VMware",
+						MarkdownDescription: "vGPU Enabled Enable NVIDIA vGPU hosted on VMware<br>Conflicts with `disable_gpu` and `enable_gpu`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4843,20 +4865,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"k8s_cluster_choice": schema.SingleNestedAttribute{
 				Description:         "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-				MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access<br>Exactly one of `k8s_cluster` or `no_k8s_cluster` must be specified when `k8s_cluster_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"k8s_cluster",
 						"no_k8s_cluster",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"k8s_cluster": schema.SingleNestedAttribute{
 						Description:         "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
-						MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
+						MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object<br>Conflicts with `no_k8s_cluster`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4882,14 +4907,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
 					},
 					"no_k8s_cluster": schema.BoolAttribute{
 						Description:         "Disable Site Local K8s API access Site Local K8s API access is disabled",
-						MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled",
+						MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled<br>Conflicts with `k8s_cluster`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4908,7 +4933,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"kubernetes_upgrade_drain_enable_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
-						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
+						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -4921,7 +4946,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 						Attributes: map[string]schema.Attribute{
 							"disable_upgrade_drain": schema.BoolAttribute{
 								Description:         "Disable upgrade drain",
-								MarkdownDescription: "Disable upgrade drain",
+								MarkdownDescription: "Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -4931,14 +4956,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"enable_upgrade_drain": schema.SingleNestedAttribute{
 								Description:         "Enable Node by Node Upgrade",
-								MarkdownDescription: "Enable Node by Node Upgrade",
+								MarkdownDescription: "Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"drain_max_unavailable_choice": schema.SingleNestedAttribute{
 										Description:         "Node Batch Size Max number of worker nodes to be upgraded in parallel",
-										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel",
+										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -4980,30 +5005,25 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 				},
 			},
-			"launch_ike_in_namespace": schema.BoolAttribute{
-				Description:         "launch_ike_in_namespace Identify that the CE needs to run IKE in namespace",
-				MarkdownDescription: "launch_ike_in_namespace Identify that the CE needs to run IKE in namespace<br>**Default:** `false`",
+			"logs_receiver_choice": schema.SingleNestedAttribute{
+				Description:         "Logs Streaming Select Logs receiver for logs streaming",
+				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming<br>Exactly one of `log_receiver` or `logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
-				Default:             booldefault.StaticBool(false),
-			},
-			"logs_receiver_choice": schema.SingleNestedAttribute{
-				Description:         "Logs Streaming Select Logs receiver for logs streaming",
-				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"log_receiver",
 						"logs_streaming_disabled",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"log_receiver": schema.SingleNestedAttribute{
 						Description:         "Disable Logs Streaming Select log receiver for logs streaming",
-						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming",
+						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming<br>Conflicts with `logs_streaming_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5029,14 +5049,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
 					},
 					"logs_streaming_disabled": schema.BoolAttribute{
 						Description:         "Disable Logs Receiver Logs Streaming is disabled",
-						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled",
+						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled<br>Conflicts with `log_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5082,20 +5102,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"network_cfg_choice": schema.SingleNestedAttribute{
 				Description:         "Select to Configure Networking Select to use default or custom networking configuration",
-				MarkdownDescription: "Select to Configure Networking Select to use default or custom networking configuration",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select to Configure Networking Select to use default or custom networking configuration<br>Exactly one of `custom_network_config` or `default_network_config` must be specified when `network_cfg_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"custom_network_config",
 						"default_network_config",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"custom_network_config": schema.SingleNestedAttribute{
 						Description:         "Custom Network Configuration Use custom networking configuration",
-						MarkdownDescription: "Custom Network Configuration Use custom networking configuration",
+						MarkdownDescription: "Custom Network Configuration Use custom networking configuration<br>Conflicts with `default_network_config`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5141,21 +5164,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"forward_proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Forward Proxy Manage Forward Proxy for this site",
-								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_forward_proxy_policies",
 										"forward_proxy_allow_all",
 										"no_forward_proxy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_forward_proxy_policies": schema.SingleNestedAttribute{
 										Description:         "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
-										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
+										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5192,7 +5218,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -5202,7 +5228,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"forward_proxy_allow_all": schema.BoolAttribute{
 										Description:         "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
-										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
+										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5212,7 +5238,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"no_forward_proxy": schema.BoolAttribute{
 										Description:         "Disable Forward Proxy Disable Forward Proxy for this site",
-										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site",
+										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5224,20 +5250,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"global_network_choice": schema.SingleNestedAttribute{
 								Description:         "Connect to Global Network Select global networks to connect to site local network",
-								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"global_network_list",
 										"no_global_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"global_network_list": schema.SingleNestedAttribute{
 										Description:         "Connect Global Networks List of global network connections",
-										MarkdownDescription: "Connect Global Networks List of global network connections",
+										MarkdownDescription: "Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5255,7 +5284,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 													Attributes: map[string]schema.Attribute{
 														"connection_choice": schema.SingleNestedAttribute{
 															Description:         "Connector Choice Select the networks and method in which they are connected.",
-															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5268,7 +5297,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"sli_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5301,7 +5330,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -5310,7 +5339,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"slo_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5343,7 +5372,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -5359,7 +5388,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"no_global_network": schema.BoolAttribute{
 										Description:         "Do not Connect Global Networks No global network to connect",
-										MarkdownDescription: "Do not Connect Global Networks No global network to connect",
+										MarkdownDescription: "Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5371,20 +5400,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"interface_choice": schema.SingleNestedAttribute{
 								Description:         "Select Interface Config Select how interfaces are configured for this site",
-								MarkdownDescription: "Select Interface Config Select how interfaces are configured for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select Interface Config Select how interfaces are configured for this site<br>Exactly one of `default_interface_config` or `interface_list` must be specified when `interface_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_interface_config",
 										"interface_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"default_interface_config": schema.BoolAttribute{
 										Description:         "Bootstrap Interface Configuration Interface configuration is done based on certified hardware for this site",
-										MarkdownDescription: "Bootstrap Interface Configuration Interface configuration is done based on certified hardware for this site",
+										MarkdownDescription: "Bootstrap Interface Configuration Interface configuration is done based on certified hardware for this site<br>Conflicts with `interface_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5394,7 +5426,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"interface_list": schema.SingleNestedAttribute{
 										Description:         "List of Interfaces Add all interfaces belonging to this site",
-										MarkdownDescription: "List of Interfaces Add all interfaces belonging to this site",
+										MarkdownDescription: "List of Interfaces Add all interfaces belonging to this site<br>Conflicts with `default_interface_config`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5413,20 +5445,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 													Attributes: map[string]schema.Attribute{
 														"dc_cluster_group_connectivity_interface_choice": schema.SingleNestedAttribute{
 															Description:         "DC Cluster Group Connectivity Controls whether this interface will be used to connect to other sites in DC Cluster Group. If no interfaces are enabled, the default gateway interface will be used.",
-															MarkdownDescription: "DC Cluster Group Connectivity Controls whether this interface will be used to connect to other sites in DC Cluster Group. If no interfaces are enabled, the default gateway interface will be used.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "DC Cluster Group Connectivity Controls whether this interface will be used to connect to other sites in DC Cluster Group. If no interfaces are enabled, the default gateway interface will be used.<br>Exactly one of `dc_cluster_group_connectivity_interface_disabled` or `dc_cluster_group_connectivity_interface_enabled` must be specified when `dc_cluster_group_connectivity_interface_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"dc_cluster_group_connectivity_interface_disabled",
 																	"dc_cluster_group_connectivity_interface_enabled",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"dc_cluster_group_connectivity_interface_disabled": schema.BoolAttribute{
 																	Description:         "DC Cluster Group Interface Default Do not use this interface to connect to DC Cluster Group peers.",
-																	MarkdownDescription: "DC Cluster Group Interface Default Do not use this interface to connect to DC Cluster Group peers.",
+																	MarkdownDescription: "DC Cluster Group Interface Default Do not use this interface to connect to DC Cluster Group peers.<br>Conflicts with `dc_cluster_group_connectivity_interface_enabled`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5436,7 +5471,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"dc_cluster_group_connectivity_interface_enabled": schema.BoolAttribute{
 																	Description:         "DC Cluster Group Interface Enabled Use this interface to connect to DC Cluster Group peers.",
-																	MarkdownDescription: "DC Cluster Group Interface Enabled Use this interface to connect to DC Cluster Group peers.",
+																	MarkdownDescription: "DC Cluster Group Interface Enabled Use this interface to connect to DC Cluster Group peers.<br>Conflicts with `dc_cluster_group_connectivity_interface_disabled`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5458,7 +5493,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 														},
 														"interface_choice": schema.SingleNestedAttribute{
 															Description:         "Interface Config Type Select the interface configuration type",
-															MarkdownDescription: "Interface Config Type Select the interface configuration type",
+															MarkdownDescription: "Interface Config Type Select the interface configuration type<br>Exactly one of `dedicated_interface`, `dedicated_management_interface`, `ethernet_interface`, or `tunnel_interface` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5473,7 +5508,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"dedicated_interface": schema.SingleNestedAttribute{
 																	Description:         "Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet",
-																	MarkdownDescription: "Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet",
+																	MarkdownDescription: "Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet<br>Conflicts with `dedicated_management_interface`, `ethernet_interface`, and `tunnel_interface`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5490,7 +5525,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"monitoring_choice": schema.SingleNestedAttribute{
 																			Description:         "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
-																			MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
+																			MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5503,7 +5538,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"monitor": schema.BoolAttribute{
 																					Description:         "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
-																					MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
+																					MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.<br>Conflicts with `monitor_disabled`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5513,7 +5548,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"monitor_disabled": schema.BoolAttribute{
 																					Description:         "Monitoring disabled Link quality monitoring disabled on the interface.",
-																					MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.",
+																					MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.<br>Conflicts with `monitor`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5524,34 +5559,37 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
 																		},
 																		"node_choice": schema.SingleNestedAttribute{
 																			Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"cluster",
 																					"node",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"cluster": schema.BoolAttribute{
 																					Description:         "Cluster Configuration will apply to given device on all nodes of the site.",
-																					MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.",
+																					MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5561,7 +5599,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"node": schema.StringAttribute{
 																					Description:         "Node Configuration will apply to a device on the given node of the site.",
-																					MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`",
+																					MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5573,20 +5611,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"primary_choice": schema.SingleNestedAttribute{
 																			Description:         "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-																			MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet<br>Exactly one of `is_primary` or `not_primary` must be specified when `primary_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"is_primary",
 																					"not_primary",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"is_primary": schema.BoolAttribute{
 																					Description:         "Interface is Primary This interface is primary",
-																					MarkdownDescription: "Interface is Primary This interface is primary",
+																					MarkdownDescription: "Interface is Primary This interface is primary<br>Conflicts with `not_primary`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5596,7 +5637,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"not_primary": schema.BoolAttribute{
 																					Description:         "Interface is Not Primary This interface is not primary",
-																					MarkdownDescription: "Interface is Not Primary This interface is not primary",
+																					MarkdownDescription: "Interface is Not Primary This interface is not primary<br>Conflicts with `is_primary`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5620,7 +5661,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"dedicated_management_interface": schema.SingleNestedAttribute{
 																	Description:         "Dedicated Management Interface Fallback management interfaces can be made into dedicated management interface",
-																	MarkdownDescription: "Dedicated Management Interface Fallback management interfaces can be made into dedicated management interface",
+																	MarkdownDescription: "Dedicated Management Interface Fallback management interfaces can be made into dedicated management interface<br>Conflicts with `dedicated_interface`, `ethernet_interface`, and `tunnel_interface`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5636,34 +5677,37 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
 																		},
 																		"node_choice": schema.SingleNestedAttribute{
 																			Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"cluster",
 																					"node",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"cluster": schema.BoolAttribute{
 																					Description:         "Cluster Configuration will apply to given device on all nodes of the site.",
-																					MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.",
+																					MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5673,7 +5717,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"node": schema.StringAttribute{
 																					Description:         "Node Configuration will apply to a device on the given node of the site.",
-																					MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`",
+																					MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5687,28 +5731,31 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"ethernet_interface": schema.SingleNestedAttribute{
 																	Description:         "Ethernet Interface Ethernet interface configuration.",
-																	MarkdownDescription: "Ethernet Interface Ethernet interface configuration.",
+																	MarkdownDescription: "Ethernet Interface Ethernet interface configuration.<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, and `tunnel_interface`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"address_choice": schema.SingleNestedAttribute{
 																			Description:         "Interface Addressing Select how ip address will be assigned to Interface",
-																			MarkdownDescription: "Interface Addressing Select how ip address will be assigned to Interface",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Interface Addressing Select how ip address will be assigned to Interface<br>Exactly one of `dhcp_client`, `dhcp_server`, or `static_ip` must be specified when `address_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"dhcp_client",
 																					"dhcp_server",
 																					"static_ip",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"dhcp_client": schema.BoolAttribute{
 																					Description:         "DHCP Client Interface gets it's IP address from external DHCP server",
-																					MarkdownDescription: "DHCP Client Interface gets it's IP address from external DHCP server",
+																					MarkdownDescription: "DHCP Client Interface gets it's IP address from external DHCP server<br>Conflicts with `dhcp_server` and `static_ip`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5718,7 +5765,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"dhcp_server": schema.SingleNestedAttribute{
 																					Description:         "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.",
-																					MarkdownDescription: "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.",
+																					MarkdownDescription: "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.<br>Conflicts with `dhcp_client` and `static_ip`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5737,20 +5784,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								Attributes: map[string]schema.Attribute{
 																									"dns_choice": schema.SingleNestedAttribute{
 																										Description:         "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.",
-																										MarkdownDescription: "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.",
-																										Required:            true,
-																										Optional:            false,
-																										Computed:            false,
+																										MarkdownDescription: "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dns_address` or `same_as_dgw` must be specified when `dns_choice` is configured.",
+																										Required:            false,
+																										Optional:            true,
+																										Computed:            true,
 																										Validators: []validator.Object{
-																											exactlyoneofvalidator.RequiredExactlyOneOf(
+																											exactlyoneofvalidator.ExactlyOneOf(
 																												"dns_address",
 																												"same_as_dgw",
 																											),
 																										},
+																										PlanModifiers: []planmodifier.Object{
+																											objectplanmodifier.UseNonNullStateForUnknown(),
+																										},
 																										Attributes: map[string]schema.Attribute{
 																											"dns_address": schema.StringAttribute{
 																												Description:         "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
-																												MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
+																												MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.<br>Conflicts with `same_as_dgw`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -5763,7 +5813,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"same_as_dgw": schema.BoolAttribute{
 																												Description:         "Default Gateway Address DNS server address is same as default gateway address",
-																												MarkdownDescription: "Default Gateway Address DNS server address is same as default gateway address",
+																												MarkdownDescription: "Default Gateway Address DNS server address is same as default gateway address<br>Conflicts with `dns_address`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -5775,21 +5825,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"gateway_choice": schema.SingleNestedAttribute{
 																										Description:         "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.",
-																										MarkdownDescription: "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.",
-																										Required:            true,
-																										Optional:            false,
-																										Computed:            false,
+																										MarkdownDescription: "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dgw_address`, `first_address`, or `last_address` must be specified when `gateway_choice` is configured.",
+																										Required:            false,
+																										Optional:            true,
+																										Computed:            true,
 																										Validators: []validator.Object{
-																											exactlyoneofvalidator.RequiredExactlyOneOf(
+																											exactlyoneofvalidator.ExactlyOneOf(
 																												"dgw_address",
 																												"first_address",
 																												"last_address",
 																											),
 																										},
+																										PlanModifiers: []planmodifier.Object{
+																											objectplanmodifier.UseNonNullStateForUnknown(),
+																										},
 																										Attributes: map[string]schema.Attribute{
 																											"dgw_address": schema.StringAttribute{
 																												Description:         "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
-																												MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
+																												MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.<br>Conflicts with `first_address` and `last_address`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -5802,7 +5855,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"first_address": schema.BoolAttribute{
 																												Description:         "First Address First usable address from the network prefix is chosen as default gateway",
-																												MarkdownDescription: "First Address First usable address from the network prefix is chosen as default gateway",
+																												MarkdownDescription: "First Address First usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `last_address`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -5812,7 +5865,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"last_address": schema.BoolAttribute{
 																												Description:         "Last Address Last usable address from the network prefix is chosen as default gateway",
-																												MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as default gateway",
+																												MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `first_address`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -5824,7 +5877,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"network_prefix_choice": schema.SingleNestedAttribute{
 																										Description:         "Network Prefix choice Select DHCP network prefix for the site",
-																										MarkdownDescription: "Network Prefix choice Select DHCP network prefix for the site",
+																										MarkdownDescription: "Network Prefix choice Select DHCP network prefix for the site<br>`network_prefix` must be specified.",
 																										Required:            true,
 																										Optional:            false,
 																										Computed:            false,
@@ -5930,21 +5983,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"interfaces_addressing_choice": schema.SingleNestedAttribute{
 																							Description:         "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																							MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																							Required:            true,
-																							Optional:            false,
-																							Computed:            false,
+																							MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            true,
 																							Validators: []validator.Object{
-																								exactlyoneofvalidator.RequiredExactlyOneOf(
+																								exactlyoneofvalidator.ExactlyOneOf(
 																									"automatic_from_end",
 																									"automatic_from_start",
 																									"interface_ip_map",
 																								),
 																							},
+																							PlanModifiers: []planmodifier.Object{
+																								objectplanmodifier.UseNonNullStateForUnknown(),
+																							},
 																							Attributes: map[string]schema.Attribute{
 																								"automatic_from_end": schema.BoolAttribute{
 																									Description:         "Automatic End Assign automatically from end of the first network in the DHCP Network list",
-																									MarkdownDescription: "Automatic End Assign automatically from end of the first network in the DHCP Network list",
+																									MarkdownDescription: "Automatic End Assign automatically from end of the first network in the DHCP Network list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -5954,7 +6010,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"automatic_from_start": schema.BoolAttribute{
 																									Description:         "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
-																									MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
+																									MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the DHCP Network list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -5964,7 +6020,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"interface_ip_map": schema.SingleNestedAttribute{
 																									Description:         "Static IPv4 Configuration Statically configure a IPv4 address for every node",
-																									MarkdownDescription: "Static IPv4 Configuration Statically configure a IPv4 address for every node",
+																									MarkdownDescription: "Static IPv4 Configuration Statically configure a IPv4 address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -5994,14 +6050,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"static_ip": schema.SingleNestedAttribute{
 																					Description:         "Static IP Interface IP is configured statically",
-																					MarkdownDescription: "Static IP Interface IP is configured statically",
+																					MarkdownDescription: "Static IP Interface IP is configured statically<br>Conflicts with `dhcp_client` and `dhcp_server`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
 																					Attributes: map[string]schema.Attribute{
 																						"network_prefix_choice": schema.SingleNestedAttribute{
 																							Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-																							MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+																							MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 																							Required:            true,
 																							Optional:            false,
 																							Computed:            false,
@@ -6014,7 +6070,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"cluster_static_ip": schema.SingleNestedAttribute{
 																									Description:         "Node Specific Static IP configuration for a specific node",
-																									MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+																									MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -6054,7 +6110,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														Computed:            false,
 																														Validators: []validator.String{
 																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																																"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																															),
 																														},
@@ -6066,7 +6122,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"node_static_ip": schema.SingleNestedAttribute{
 																									Description:         "Node Static IP configuration for the Node",
-																									MarkdownDescription: "Node Static IP configuration for the Node",
+																									MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -6092,7 +6148,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Computed:            false,
 																											Validators: []validator.String{
 																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																													"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																												),
 																											},
@@ -6117,7 +6173,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"ipv6_address_choice": schema.SingleNestedAttribute{
 																			Description:         "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface",
-																			MarkdownDescription: "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface",
+																			MarkdownDescription: "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            true,
@@ -6129,33 +6185,36 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				),
 																			},
 																			PlanModifiers: []planmodifier.Object{
-																				objectplanmodifier.UseStateForUnknown(),
+																				objectplanmodifier.UseNonNullStateForUnknown(),
 																				oneofbranchplanmodifier.PreserveSelectedBranch(),
 																			},
 																			Attributes: map[string]schema.Attribute{
 																				"ipv6_auto_config": schema.SingleNestedAttribute{
 																					Description:         "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration",
-																					MarkdownDescription: "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration",
+																					MarkdownDescription: "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
 																					Attributes: map[string]schema.Attribute{
 																						"autoconfig_choice": schema.SingleNestedAttribute{
 																							Description:         "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration",
-																							MarkdownDescription: "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration",
-																							Required:            true,
-																							Optional:            false,
-																							Computed:            false,
+																							MarkdownDescription: "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            true,
 																							Validators: []validator.Object{
-																								exactlyoneofvalidator.RequiredExactlyOneOf(
+																								exactlyoneofvalidator.ExactlyOneOf(
 																									"host",
 																									"router",
 																								),
 																							},
+																							PlanModifiers: []planmodifier.Object{
+																								objectplanmodifier.UseNonNullStateForUnknown(),
+																							},
 																							Attributes: map[string]schema.Attribute{
 																								"host": schema.BoolAttribute{
 																									Description:         "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.",
-																									MarkdownDescription: "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.",
+																									MarkdownDescription: "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -6165,14 +6224,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"router": schema.SingleNestedAttribute{
 																									Description:         "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.",
-																									MarkdownDescription: "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.",
+																									MarkdownDescription: "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
 																									Attributes: map[string]schema.Attribute{
 																										"address_choice": schema.SingleNestedAttribute{
 																											Description:         "address choice Specify how the address need to be obtained for interfaces and clients",
-																											MarkdownDescription: "address choice Specify how the address need to be obtained for interfaces and clients",
+																											MarkdownDescription: "address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified.",
 																											Required:            true,
 																											Optional:            false,
 																											Computed:            false,
@@ -6185,13 +6244,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Attributes: map[string]schema.Attribute{
 																												"network_prefix": schema.StringAttribute{
 																													Description:         "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862",
-																													MarkdownDescription: "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862",
+																													MarkdownDescription: "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.",
 																													Required:            false,
 																													Optional:            true,
 																													Computed:            false,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
-																															regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																															regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																															"must be a valid IPv6 prefix (CIDR notation)",
 																														),
 																														stringvalidator.RegexMatches(
@@ -6202,7 +6261,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												},
 																												"stateful": schema.SingleNestedAttribute{
 																													Description:         "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag",
-																													MarkdownDescription: "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag",
+																													MarkdownDescription: "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`.",
 																													Required:            false,
 																													Optional:            true,
 																													Computed:            false,
@@ -6221,7 +6280,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																Attributes: map[string]schema.Attribute{
 																																	"network_prefix_choice": schema.SingleNestedAttribute{
 																																		Description:         "Network Prefix choice Select DHCP network prefix for a site",
-																																		MarkdownDescription: "Network Prefix choice Select DHCP network prefix for a site",
+																																		MarkdownDescription: "Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified.",
 																																		Required:            true,
 																																		Optional:            false,
 																																		Computed:            false,
@@ -6239,7 +6298,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																				Computed:            false,
 																																				Validators: []validator.String{
 																																					stringvalidator.RegexMatches(
-																																						regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																																						regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																																						"must be a valid IPv6 prefix (CIDR notation)",
 																																					),
 																																				},
@@ -6324,21 +6383,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														},
 																														"interfaces_addressing_choice": schema.SingleNestedAttribute{
 																															Description:         "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																															MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																															Required:            true,
-																															Optional:            false,
-																															Computed:            false,
+																															MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured.",
+																															Required:            false,
+																															Optional:            true,
+																															Computed:            true,
 																															Validators: []validator.Object{
-																																exactlyoneofvalidator.RequiredExactlyOneOf(
+																																exactlyoneofvalidator.ExactlyOneOf(
 																																	"automatic_from_end",
 																																	"automatic_from_start",
 																																	"interface_ip_map",
 																																),
 																															},
+																															PlanModifiers: []planmodifier.Object{
+																																objectplanmodifier.UseNonNullStateForUnknown(),
+																															},
 																															Attributes: map[string]schema.Attribute{
 																																"automatic_from_end": schema.BoolAttribute{
 																																	Description:         "Automatic End Assign automatically from End of the first network in the list",
-																																	MarkdownDescription: "Automatic End Assign automatically from End of the first network in the list",
+																																	MarkdownDescription: "Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.",
 																																	Required:            false,
 																																	Optional:            true,
 																																	Computed:            false,
@@ -6348,7 +6410,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																},
 																																"automatic_from_start": schema.BoolAttribute{
 																																	Description:         "Automatic Start Assign automatically from start of the first network in the list",
-																																	MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the list",
+																																	MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.",
 																																	Required:            false,
 																																	Optional:            true,
 																																	Computed:            false,
@@ -6358,7 +6420,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																},
 																																"interface_ip_map": schema.SingleNestedAttribute{
 																																	Description:         "Configured Address Configured address for every node",
-																																	MarkdownDescription: "Configured Address Configured address for every node",
+																																	MarkdownDescription: "Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`.",
 																																	Required:            false,
 																																	Optional:            true,
 																																	Computed:            false,
@@ -6397,7 +6459,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Attributes: map[string]schema.Attribute{
 																												"dns_choice": schema.SingleNestedAttribute{
 																													Description:         "DNS server Address Select how DNS server address is determined",
-																													MarkdownDescription: "DNS server Address Select how DNS server address is determined",
+																													MarkdownDescription: "DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified.",
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
@@ -6410,7 +6472,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Attributes: map[string]schema.Attribute{
 																														"configured_list": schema.SingleNestedAttribute{
 																															Description:         "Configured Address List Configured address outside network range - external dns server",
-																															MarkdownDescription: "Configured Address List Configured address outside network range - external dns server",
+																															MarkdownDescription: "Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -6435,28 +6497,31 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														},
 																														"local_dns": schema.SingleNestedAttribute{
 																															Description:         "Local Dns Address Choose the address from the network prefix range as dns server",
-																															MarkdownDescription: "Local Dns Address Choose the address from the network prefix range as dns server",
+																															MarkdownDescription: "Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
 																															Attributes: map[string]schema.Attribute{
 																																"local_dns_choice": schema.SingleNestedAttribute{
 																																	Description:         "Local Dns Address Select address from network prefix range as dns server",
-																																	MarkdownDescription: "Local Dns Address Select address from network prefix range as dns server",
-																																	Required:            true,
-																																	Optional:            false,
-																																	Computed:            false,
+																																	MarkdownDescription: "Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured.",
+																																	Required:            false,
+																																	Optional:            true,
+																																	Computed:            true,
 																																	Validators: []validator.Object{
-																																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																																		exactlyoneofvalidator.ExactlyOneOf(
 																																			"configured_address",
 																																			"first_address",
 																																			"last_address",
 																																		),
 																																	},
+																																	PlanModifiers: []planmodifier.Object{
+																																		objectplanmodifier.UseNonNullStateForUnknown(),
+																																	},
 																																	Attributes: map[string]schema.Attribute{
 																																		"configured_address": schema.StringAttribute{
 																																			Description:         "Configured Address Configured address from the network prefix is chosen as dns server",
-																																			MarkdownDescription: "Configured Address Configured address from the network prefix is chosen as dns server",
+																																			MarkdownDescription: "Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.",
 																																			Required:            false,
 																																			Optional:            true,
 																																			Computed:            false,
@@ -6469,7 +6534,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		},
 																																		"first_address": schema.BoolAttribute{
 																																			Description:         "First Address First usable address from the network prefix is chosen as dns server",
-																																			MarkdownDescription: "First Address First usable address from the network prefix is chosen as dns server",
+																																			MarkdownDescription: "First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.",
 																																			Required:            false,
 																																			Optional:            true,
 																																			Computed:            false,
@@ -6479,7 +6544,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		},
 																																		"last_address": schema.BoolAttribute{
 																																			Description:         "Last Address Last usable address from the network prefix is chosen as dns server",
-																																			MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as dns server",
+																																			MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.",
 																																			Required:            false,
 																																			Optional:            true,
 																																			Computed:            false,
@@ -6503,7 +6568,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"no_ipv6_address": schema.BoolAttribute{
 																					Description:         "no_ipv6_address Interface does not have an IPv6 Address.",
-																					MarkdownDescription: "no_ipv6_address Interface does not have an IPv6 Address.",
+																					MarkdownDescription: "no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6513,14 +6578,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"static_ipv6_address": schema.SingleNestedAttribute{
 																					Description:         "Static IP Interface IP is configured statically",
-																					MarkdownDescription: "Static IP Interface IP is configured statically",
+																					MarkdownDescription: "Static IP Interface IP is configured statically<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
 																					Attributes: map[string]schema.Attribute{
 																						"network_prefix_choice": schema.SingleNestedAttribute{
 																							Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-																							MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+																							MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 																							Required:            true,
 																							Optional:            false,
 																							Computed:            false,
@@ -6533,7 +6598,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"cluster_static_ip": schema.SingleNestedAttribute{
 																									Description:         "Node Specific Static IP configuration for a specific node",
-																									MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+																									MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -6573,7 +6638,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														Computed:            false,
 																														Validators: []validator.String{
 																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																																"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																															),
 																														},
@@ -6585,7 +6650,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"node_static_ip": schema.SingleNestedAttribute{
 																									Description:         "Node Static IP configuration for the Node",
-																									MarkdownDescription: "Node Static IP configuration for the Node",
+																									MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -6611,7 +6676,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Computed:            false,
 																											Validators: []validator.String{
 																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																													"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																												),
 																											},
@@ -6626,7 +6691,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"monitoring_choice": schema.SingleNestedAttribute{
 																			Description:         "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
-																			MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
+																			MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6639,7 +6704,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"monitor": schema.BoolAttribute{
 																					Description:         "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
-																					MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
+																					MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.<br>Conflicts with `monitor_disabled`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6649,7 +6714,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"monitor_disabled": schema.BoolAttribute{
 																					Description:         "Monitoring disabled Link quality monitoring disabled on the interface.",
-																					MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.",
+																					MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.<br>Conflicts with `monitor`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6660,14 +6725,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            true,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
@@ -6677,22 +6742,25 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"network_choice": schema.SingleNestedAttribute{
 																			Description:         "Network for this Interface Select virtual network of this interface",
-																			MarkdownDescription: "Network for this Interface Select virtual network of this interface",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Network for this Interface Select virtual network of this interface<br>Exactly one of `segment_network`, `site_local_inside_network`, `site_local_network`, or `storage_network` must be specified when `network_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"segment_network",
 																					"site_local_inside_network",
 																					"site_local_network",
 																					"storage_network",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"segment_network": schema.SingleNestedAttribute{
 																					Description:         "Segment",
-																					MarkdownDescription: "Segment",
+																					MarkdownDescription: "Segment<br>Conflicts with `site_local_inside_network`, `site_local_network`, and `storage_network`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6718,14 +6786,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Optional:            false,
 																							Computed:            true,
 																							PlanModifiers: []planmodifier.String{
-																								stringplanmodifier.UseStateForUnknown(),
+																								stringplanmodifier.UseNonNullStateForUnknown(),
 																							},
 																						},
 																					},
 																				},
 																				"site_local_inside_network": schema.BoolAttribute{
 																					Description:         "Site Local Network Inside Interface belongs to site local network inside",
-																					MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+																					MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_network`, and `storage_network`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6735,7 +6803,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"site_local_network": schema.BoolAttribute{
 																					Description:         "Site Local Network Interface belongs to site local network (outside)",
-																					MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+																					MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `segment_network`, `site_local_inside_network`, and `storage_network`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6745,7 +6813,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"storage_network": schema.BoolAttribute{
 																					Description:         "Storage Network Interface belongs to site local network inside",
-																					MarkdownDescription: "Storage Network Interface belongs to site local network inside",
+																					MarkdownDescription: "Storage Network Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_inside_network`, and `site_local_network`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6757,20 +6825,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"node_choice": schema.SingleNestedAttribute{
 																			Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.",
-																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"cluster",
 																					"node",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"cluster": schema.BoolAttribute{
 																					Description:         "Node Independent Configuration will apply to given device on all nodes of the site.",
-																					MarkdownDescription: "Node Independent Configuration will apply to given device on all nodes of the site.",
+																					MarkdownDescription: "Node Independent Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6780,7 +6851,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"node": schema.StringAttribute{
 																					Description:         "Node Configuration will apply to a device on the given node.",
-																					MarkdownDescription: "Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`",
+																					MarkdownDescription: "Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6792,20 +6863,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"primary_choice": schema.SingleNestedAttribute{
 																			Description:         "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-																			MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet<br>Exactly one of `is_primary` or `not_primary` must be specified when `primary_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"is_primary",
 																					"not_primary",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"is_primary": schema.BoolAttribute{
 																					Description:         "Interface is Primary This interface is primary",
-																					MarkdownDescription: "Interface is Primary This interface is primary",
+																					MarkdownDescription: "Interface is Primary This interface is primary<br>Conflicts with `not_primary`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6815,7 +6889,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"not_primary": schema.BoolAttribute{
 																					Description:         "Interface is Not Primary This interface is not primary",
-																					MarkdownDescription: "Interface is Not Primary This interface is not primary",
+																					MarkdownDescription: "Interface is Not Primary This interface is not primary<br>Conflicts with `is_primary`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6840,20 +6914,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"vlan_choice": schema.SingleNestedAttribute{
 																			Description:         "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-																			MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged<br>Exactly one of `untagged` or `vlan_id` must be specified when `vlan_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"untagged",
 																					"vlan_id",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"untagged": schema.BoolAttribute{
 																					Description:         "Untagged Configure a untagged ethernet interface",
-																					MarkdownDescription: "Untagged Configure a untagged ethernet interface",
+																					MarkdownDescription: "Untagged Configure a untagged ethernet interface<br>Conflicts with `vlan_id`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6863,7 +6940,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"vlan_id": schema.Int64Attribute{
 																					Description:         "VLAN Id Configure a VLAN tagged ethernet interface",
-																					MarkdownDescription: "VLAN Id Configure a VLAN tagged ethernet interface",
+																					MarkdownDescription: "VLAN Id Configure a VLAN tagged ethernet interface<br>Conflicts with `untagged`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6877,40 +6954,43 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"tunnel_interface": schema.SingleNestedAttribute{
 																	Description:         "Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices.",
-																	MarkdownDescription: "Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices.",
+																	MarkdownDescription: "Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices.<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, and `ethernet_interface`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"mtu": schema.Int64Attribute{
-																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																			MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Validators: []validator.Int64{
 																				int64validator.Any(
-																					int64validator.Between(512, 8000),
+																					int64validator.Between(512, 9000),
 																					int64validator.OneOf(0),
 																				),
 																			},
 																		},
 																		"network_choice": schema.SingleNestedAttribute{
 																			Description:         "Network for this Interface Select virtual network of this interface",
-																			MarkdownDescription: "Network for this Interface Select virtual network of this interface",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Network for this Interface Select virtual network of this interface<br>Exactly one of `site_local_inside_network` or `site_local_network` must be specified when `network_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"site_local_inside_network",
 																					"site_local_network",
 																				),
 																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
+																			},
 																			Attributes: map[string]schema.Attribute{
 																				"site_local_inside_network": schema.BoolAttribute{
 																					Description:         "Site Local Network Inside Interface belongs to site local network inside",
-																					MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+																					MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `site_local_network`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6920,7 +7000,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"site_local_network": schema.BoolAttribute{
 																					Description:         "Site Local Network Interface belongs to site local network (outside)",
-																					MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+																					MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `site_local_inside_network`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6932,7 +7012,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"node_choice": schema.SingleNestedAttribute{
 																			Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node.",
-																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node.",
+																			MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node.<br>`node` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -6973,7 +7053,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"network_prefix_choice": schema.SingleNestedAttribute{
 																					Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-																					MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+																					MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -6986,7 +7066,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Attributes: map[string]schema.Attribute{
 																						"cluster_static_ip": schema.SingleNestedAttribute{
 																							Description:         "Node Specific Static IP configuration for a specific node",
-																							MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+																							MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -7026,7 +7106,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												Computed:            false,
 																												Validators: []validator.String{
 																													stringvalidator.RegexMatches(
-																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																														"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																													),
 																												},
@@ -7038,7 +7118,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"node_static_ip": schema.SingleNestedAttribute{
 																							Description:         "Node Static IP configuration for the Node",
-																							MarkdownDescription: "Node Static IP configuration for the Node",
+																							MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -7064,7 +7144,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Computed:            false,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																										),
 																									},
@@ -7103,7 +7183,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -7129,21 +7209,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"network_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Firewall Policy Manage Firewall Policy via this view",
-								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_enhanced_firewall_policies",
 										"active_network_policies",
 										"no_network_policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_enhanced_firewall_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
-										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
+										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7180,7 +7263,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -7190,7 +7273,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"active_network_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy Firewall Policies active for this site.",
-										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.",
+										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7227,7 +7310,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -7237,7 +7320,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"no_network_policy": schema.BoolAttribute{
 										Description:         "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
-										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
+										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7301,21 +7384,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"site_mesh_group_choice": schema.SingleNestedAttribute{
 								Description:         "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `site_to_site_tunnel_ip`, `sm_connection_public_ip`, or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"site_to_site_tunnel_ip",
 										"sm_connection_public_ip",
 										"sm_connection_pvt_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"site_to_site_tunnel_ip": schema.StringAttribute{
 										Description:         "Site Mesh Group Connection Via Virtual Ip Site Mesh Group Connection Via Virtual IP. This option will use the Virtual IP provided for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Virtual Ip Site Mesh Group Connection Via Virtual IP. This option will use the Virtual IP provided for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Virtual Ip Site Mesh Group Connection Via Virtual IP. This option will use the Virtual IP provided for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip` and `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7328,7 +7414,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"sm_connection_public_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use the statically configured public IPs of each master node for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use the statically configured public IPs of each master node for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use the statically configured public IPs of each master node for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `site_to_site_tunnel_ip` and `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7338,7 +7424,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"sm_connection_pvt_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use the SLO addresses for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use the SLO addresses for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use the SLO addresses for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `site_to_site_tunnel_ip` and `sm_connection_public_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7350,20 +7436,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"slo_choice": schema.SingleNestedAttribute{
 								Description:         "Site Local Network Select to configure site local network",
-								MarkdownDescription: "Site Local Network Select to configure site local network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Local Network Select to configure site local network<br>Exactly one of `default_config` or `slo_config` must be specified when `slo_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_config",
 										"slo_config",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"default_config": schema.BoolAttribute{
 										Description:         "Default Configuration Use default configuration for site local network",
-										MarkdownDescription: "Default Configuration Use default configuration for site local network",
+										MarkdownDescription: "Default Configuration Use default configuration for site local network<br>Conflicts with `slo_config`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7373,27 +7462,30 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"slo_config": schema.SingleNestedAttribute{
 										Description:         "Configure Site Local Network Configuration for site local network",
-										MarkdownDescription: "Configure Site Local Network Configuration for site local network",
+										MarkdownDescription: "Configure Site Local Network Configuration for site local network<br>Conflicts with `default_config`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"dc_cluster_group_choice": schema.SingleNestedAttribute{
 												Description:         "Select DC Cluster Group Is this site member of a dc cluster group via this network",
-												MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via this network",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via this network<br>Exactly one of `dc_cluster_group` or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"dc_cluster_group",
 														"no_dc_cluster_group",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"dc_cluster_group": schema.SingleNestedAttribute{
 														Description:         "Member of DC cluster Group This site is member of dc cluster group via network",
-														MarkdownDescription: "Member of DC cluster Group This site is member of dc cluster group via network",
+														MarkdownDescription: "Member of DC cluster Group This site is member of dc cluster group via network<br>Conflicts with `no_dc_cluster_group`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7419,14 +7511,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
 													},
 													"no_dc_cluster_group": schema.BoolAttribute{
 														Description:         "Not a Member This site is not a member of dc cluster group",
-														MarkdownDescription: "Not a Member This site is not a member of dc cluster group",
+														MarkdownDescription: "Not a Member This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7446,20 +7538,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 											},
 											"static_route_choice": schema.SingleNestedAttribute{
 												Description:         "Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets.",
-												MarkdownDescription: "Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets.",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets.<br>Exactly one of `no_static_routes` or `static_routes` must be specified when `static_route_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_static_routes",
 														"static_routes",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_static_routes": schema.BoolAttribute{
 														Description:         "Do Not Manage Static Routes Static Routes disabled for site local network.",
-														MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for site local network.",
+														MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for site local network.<br>Conflicts with `static_routes`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7469,7 +7564,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 													},
 													"static_routes": schema.SingleNestedAttribute{
 														Description:         "Manage Static routes Manage static routes for site local network.",
-														MarkdownDescription: "Manage Static routes Manage static routes for site local network.",
+														MarkdownDescription: "Manage Static routes Manage static routes for site local network.<br>Conflicts with `no_static_routes`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7488,14 +7583,15 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
+																				listvalidator.UniqueValues(),
 																			},
 																		},
 																		"ip_prefixes": schema.ListAttribute{
@@ -7516,7 +7612,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"next_hop_choice": schema.SingleNestedAttribute{
 																			Description:         "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
-																			MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
+																			MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -7530,7 +7626,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"default_gateway": schema.BoolAttribute{
 																					Description:         "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-																					MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+																					MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -7540,7 +7636,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"ip_address": schema.StringAttribute{
 																					Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
-																					MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
+																					MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -7553,7 +7649,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"node_interface": schema.SingleNestedAttribute{
 																					Description:         "Node Interface Traffic matching the ip prefixes is sent to this interface",
-																					MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface",
+																					MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -7601,7 +7697,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Optional:            false,
 																													Computed:            true,
 																													PlanModifiers: []planmodifier.String{
-																														stringplanmodifier.UseStateForUnknown(),
+																														stringplanmodifier.UseNonNullStateForUnknown(),
 																													},
 																												},
 																											},
@@ -7630,20 +7726,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 											},
 											"static_v6_route_choice": schema.SingleNestedAttribute{
 												Description:         "Manage IPv6 Static Routes Add static IPv6 routes to network. Used to reach indirectly connected IPv6 subnets.",
-												MarkdownDescription: "Manage IPv6 Static Routes Add static IPv6 routes to network. Used to reach indirectly connected IPv6 subnets.",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Manage IPv6 Static Routes Add static IPv6 routes to network. Used to reach indirectly connected IPv6 subnets.<br>Exactly one of `no_static_v6_routes` or `static_v6_routes` must be specified when `static_v6_route_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_static_v6_routes",
 														"static_v6_routes",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_static_v6_routes": schema.BoolAttribute{
 														Description:         "Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for site local network.",
-														MarkdownDescription: "Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for site local network.",
+														MarkdownDescription: "Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for site local network.<br>Conflicts with `static_v6_routes`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7653,7 +7752,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 													},
 													"static_v6_routes": schema.SingleNestedAttribute{
 														Description:         "Manage IPv6 Static routes Manage static IPv6 routes for site local network.",
-														MarkdownDescription: "Manage IPv6 Static routes Manage static IPv6 routes for site local network.",
+														MarkdownDescription: "Manage IPv6 Static routes Manage static IPv6 routes for site local network.<br>Conflicts with `no_static_v6_routes`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7672,14 +7771,15 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"attrs": schema.ListAttribute{
 																			Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+																			MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 																			ElementType:         types.StringType,
 																			Required:            false,
 																			Optional:            true,
-																			Computed:            true,
-																			Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																				listvalidator.SizeAtMost(4),
+																				listvalidator.UniqueValues(),
 																			},
 																		},
 																		"ip_prefixes": schema.ListAttribute{
@@ -7692,7 +7792,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Validators: []validator.List{
 																				listvalidator.SizeBetween(1, 256),
 																				listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																					regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																					regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																					"must be a valid IPv6 prefix",
 																				)),
 																				listvalidator.UniqueValues(),
@@ -7700,7 +7800,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"next_hop_choice": schema.SingleNestedAttribute{
 																			Description:         "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
-																			MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
+																			MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -7714,7 +7814,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"default_gateway": schema.BoolAttribute{
 																					Description:         "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-																					MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+																					MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -7724,7 +7824,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"ip_address": schema.StringAttribute{
 																					Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
-																					MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
+																					MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -7737,7 +7837,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"node_interface": schema.SingleNestedAttribute{
 																					Description:         "Node Interface Traffic matching the ip prefixes is sent to this interface",
-																					MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface",
+																					MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -7785,7 +7885,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Optional:            false,
 																													Computed:            true,
 																													PlanModifiers: []planmodifier.String{
-																														stringplanmodifier.UseStateForUnknown(),
+																														stringplanmodifier.UseNonNullStateForUnknown(),
 																													},
 																												},
 																											},
@@ -7818,10 +7918,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"tunnel_dead_timeout": schema.Int64Attribute{
 								Description:         "tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.",
-								MarkdownDescription: "tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.",
+								MarkdownDescription: "tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 180000),
 								},
@@ -7843,7 +7944,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"default_network_config": schema.BoolAttribute{
 						Description:         "Default Network Configuration Use default networking configuration based on certified hardware.",
-						MarkdownDescription: "Default Network Configuration Use default networking configuration based on certified hardware.",
+						MarkdownDescription: "Default Network Configuration Use default networking configuration based on certified hardware.<br>Conflicts with `custom_network_config`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7862,20 +7963,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"offline_survivability_mode_choice": schema.SingleNestedAttribute{
 						Description:         "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.",
-						MarkdownDescription: "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.<br>Exactly one of `enable_offline_survivability_mode` or `no_offline_survivability_mode` must be specified when `offline_survivability_mode_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"enable_offline_survivability_mode",
 								"no_offline_survivability_mode",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"enable_offline_survivability_mode": schema.BoolAttribute{
 								Description:         "Enable Offline Survivability Mode",
-								MarkdownDescription: "Enable Offline Survivability Mode",
+								MarkdownDescription: "Enable Offline Survivability Mode<br>Conflicts with `no_offline_survivability_mode`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -7885,7 +7989,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"no_offline_survivability_mode": schema.BoolAttribute{
 								Description:         "Disable Offline Survivability Mode",
-								MarkdownDescription: "Disable Offline Survivability Mode",
+								MarkdownDescription: "Disable Offline Survivability Mode<br>Conflicts with `enable_offline_survivability_mode`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -7899,10 +8003,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"operating_system_version": schema.StringAttribute{
 				Description:         "Operating System Version Desired Operating System version that should be installed on the site",
-				MarkdownDescription: "Operating System Version Desired Operating System version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "Operating System Version Desired Operating System version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
@@ -7912,24 +8017,30 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				MarkdownDescription: "Operating System Operating System Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"operating_system_version_choice": schema.SingleNestedAttribute{
 						Description:         "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
-						MarkdownDescription: "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.<br>Exactly one of `default_os_version` or `operating_system_version` must be specified when `operating_system_version_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_os_version",
 								"operating_system_version",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_os_version": schema.BoolAttribute{
 								Description:         "Default OS Version Will assign latest available OS version",
-								MarkdownDescription: "Default OS Version Will assign latest available OS version",
+								MarkdownDescription: "Default OS Version Will assign latest available OS version<br>Conflicts with `operating_system_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -7939,7 +8050,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"operating_system_version": schema.StringAttribute{
 								Description:         "Operating System Version Specify a OS version to be used e.g. 9.2024.6.",
-								MarkdownDescription: "Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`",
+								MarkdownDescription: "Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_os_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -7953,20 +8064,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"sriov_interface_choice": schema.SingleNestedAttribute{
 				Description:         "Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration",
-				MarkdownDescription: "Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration<br>Exactly one of `default_sriov_interface` or `sriov_interfaces` must be specified when `sriov_interface_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"default_sriov_interface",
 						"sriov_interfaces",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"default_sriov_interface": schema.BoolAttribute{
 						Description:         "Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces",
-						MarkdownDescription: "Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces",
+						MarkdownDescription: "Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces<br>Conflicts with `sriov_interfaces`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7976,7 +8090,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"sriov_interfaces": schema.SingleNestedAttribute{
 						Description:         "Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces",
-						MarkdownDescription: "Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces",
+						MarkdownDescription: "Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces<br>Conflicts with `default_sriov_interface`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8022,7 +8136,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"storage_cfg_choice": schema.SingleNestedAttribute{
 				Description:         "Select to Configure Storage Select to use default or custom storage configuration",
-				MarkdownDescription: "Select to Configure Storage Select to use default or custom storage configuration",
+				MarkdownDescription: "Select to Configure Storage Select to use default or custom storage configuration<br>Exactly one of `custom_storage_config` or `default_storage_config` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -8035,27 +8149,30 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"custom_storage_config": schema.SingleNestedAttribute{
 						Description:         "Custom Storage Configuration Use custom storage configuration",
-						MarkdownDescription: "Custom Storage Configuration Use custom storage configuration",
+						MarkdownDescription: "Custom Storage Configuration Use custom storage configuration<br>Conflicts with `default_storage_config`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Storage Static Routes Add static routes for storage network. Used to reach indirectly connected storage devices.",
-								MarkdownDescription: "Manage Storage Static Routes Add static routes for storage network. Used to reach indirectly connected storage devices.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Storage Static Routes Add static routes for storage network. Used to reach indirectly connected storage devices.<br>Exactly one of `no_static_routes` or `static_routes` must be specified when `static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_static_routes",
 										"static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes not required for storage network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes not required for storage network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes not required for storage network.<br>Conflicts with `static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8065,7 +8182,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for storage network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for storage network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for storage network.<br>Conflicts with `no_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8084,14 +8201,15 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 													Attributes: map[string]schema.Attribute{
 														"attrs": schema.ListAttribute{
 															Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-															MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)<br>**Default:** `ROUTE_ATTR_NO_OP`",
+															MarkdownDescription: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ROUTE_ATTR_NO_OP")),
+															Computed:            false,
 															Validators: []validator.List{
 																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+																listvalidator.SizeAtMost(4),
+																listvalidator.UniqueValues(),
 															},
 														},
 														"ip_prefixes": schema.ListAttribute{
@@ -8112,7 +8230,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 														},
 														"next_hop_choice": schema.SingleNestedAttribute{
 															Description:         "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
-															MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
+															MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -8126,7 +8244,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"default_gateway": schema.BoolAttribute{
 																	Description:         "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-																	MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+																	MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8136,7 +8254,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"ip_address": schema.StringAttribute{
 																	Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
-																	MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
+																	MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8149,7 +8267,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"node_interface": schema.SingleNestedAttribute{
 																	Description:         "Node Interface Traffic matching the ip prefixes is sent to this interface",
-																	MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface",
+																	MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8197,7 +8315,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Optional:            false,
 																									Computed:            true,
 																									PlanModifiers: []planmodifier.String{
-																										stringplanmodifier.UseStateForUnknown(),
+																										stringplanmodifier.UseNonNullStateForUnknown(),
 																									},
 																								},
 																							},
@@ -8226,20 +8344,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"storage_class_choice": schema.SingleNestedAttribute{
 								Description:         "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site<br>Exactly one of `default_storage_class` or `storage_class_list` must be specified when `storage_class_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_storage_class",
 										"storage_class_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"default_storage_class": schema.BoolAttribute{
 										Description:         "Default Storage Class Use only default storage class in kubernetes",
-										MarkdownDescription: "Default Storage Class Use only default storage class in kubernetes",
+										MarkdownDescription: "Default Storage Class Use only default storage class in kubernetes<br>Conflicts with `storage_class_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8249,7 +8370,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"storage_class_list": schema.SingleNestedAttribute{
 										Description:         "Custom Storage Class Add additional custom storage classes in kubernetes",
-										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes",
+										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes<br>Conflicts with `default_storage_class`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8308,7 +8429,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 														},
 														"device_choice": schema.SingleNestedAttribute{
 															Description:         "Select Storage Class Configuration Select storage Class configuration",
-															MarkdownDescription: "Select Storage Class Configuration Select storage Class configuration",
+															MarkdownDescription: "Select Storage Class Configuration Select storage Class configuration<br>Exactly one of `custom_storage`, `hpe_storage`, `netapp_trident`, or `pure_service_orchestrator` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -8323,7 +8444,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"custom_storage": schema.SingleNestedAttribute{
 																	Description:         "Custom Storage Storage configuration for Custom Storage",
-																	MarkdownDescription: "Custom Storage Storage configuration for Custom Storage",
+																	MarkdownDescription: "Custom Storage Storage configuration for Custom Storage<br>Conflicts with `hpe_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8346,7 +8467,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"hpe_storage": schema.SingleNestedAttribute{
 																	Description:         "HPE Storage Storage configuration for HPE Storage",
-																	MarkdownDescription: "HPE Storage Storage configuration for HPE Storage",
+																	MarkdownDescription: "HPE Storage Storage configuration for HPE Storage<br>Conflicts with `custom_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8499,7 +8620,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"netapp_trident": schema.SingleNestedAttribute{
 																	Description:         "NetApp Trident Storage class Device configuration for NetApp Trident",
-																	MarkdownDescription: "NetApp Trident Storage class Device configuration for NetApp Trident",
+																	MarkdownDescription: "NetApp Trident Storage class Device configuration for NetApp Trident<br>Conflicts with `custom_storage`, `hpe_storage`, and `pure_service_orchestrator`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8526,14 +8647,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"pure_service_orchestrator": schema.SingleNestedAttribute{
 																	Description:         "Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator",
-																	MarkdownDescription: "Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator",
+																	MarkdownDescription: "Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator<br>Conflicts with `custom_storage`, `hpe_storage`, and `netapp_trident`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"backend": schema.StringAttribute{
 																			Description:         "Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.",
-																			MarkdownDescription: "Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.<br>**Default:** `block`",
+																			MarkdownDescription: "Backend Defines type of Pure storage backend block or file. The volume will have the aspects defined in the chosen virtual pool.<br>**Default:** `block`<br>**Allowed Values (choose one):** `['block', 'file']`",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            true,
@@ -8612,7 +8733,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"storage_device_choice": schema.SingleNestedAttribute{
 								Description:         "Storage Device Configuration Configure storage devices for this site",
-								MarkdownDescription: "Storage Device Configuration Configure storage devices for this site",
+								MarkdownDescription: "Storage Device Configuration Configure storage devices for this site<br>Exactly one of `no_storage_device` or `storage_device_list` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -8625,7 +8746,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 								Attributes: map[string]schema.Attribute{
 									"no_storage_device": schema.BoolAttribute{
 										Description:         "No Storage Devices This site does not have any storage devices",
-										MarkdownDescription: "No Storage Devices This site does not have any storage devices",
+										MarkdownDescription: "No Storage Devices This site does not have any storage devices<br>Conflicts with `storage_device_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8635,7 +8756,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"storage_device_list": schema.SingleNestedAttribute{
 										Description:         "List of Storage Interfaces Add all storage devices belonging to this site",
-										MarkdownDescription: "List of Storage Interfaces Add all storage devices belonging to this site",
+										MarkdownDescription: "List of Storage Interfaces Add all storage devices belonging to this site<br>Conflicts with `no_storage_device`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8668,7 +8789,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 														},
 														"device_choice": schema.SingleNestedAttribute{
 															Description:         "Select Storage Device Configuration Select type of storage device driver to configure",
-															MarkdownDescription: "Select Storage Device Configuration Select type of storage device driver to configure",
+															MarkdownDescription: "Select Storage Device Configuration Select type of storage device driver to configure<br>Exactly one of `custom_storage`, `hpe_storage`, `netapp_trident`, or `pure_service_orchestrator` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -8683,7 +8804,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"custom_storage": schema.BoolAttribute{
 																	Description:         "Custom Storage Device configuration for Custom Storage",
-																	MarkdownDescription: "Custom Storage Device configuration for Custom Storage",
+																	MarkdownDescription: "Custom Storage Device configuration for Custom Storage<br>Conflicts with `hpe_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8693,7 +8814,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"hpe_storage": schema.SingleNestedAttribute{
 																	Description:         "HPE Storage Device configuration for HPE Storage",
-																	MarkdownDescription: "HPE Storage Device configuration for HPE Storage",
+																	MarkdownDescription: "HPE Storage Device configuration for HPE Storage<br>Conflicts with `custom_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8717,7 +8838,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -8725,12 +8846,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						exactlyoneofvalidator.RequiredExactlyOneOf(
 																							"blindfold_secret_info",
 																							"clear_secret_info",
+																							"none",
 																						),
 																					},
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -8748,6 +8870,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
+																									WriteOnly:           true,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
 																											regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -8769,7 +8892,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -8800,6 +8923,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										),
 																									},
 																								},
+																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            false,
+																							Validators: []validator.Bool{
+																								boolvalidator.Equals(true),
 																							},
 																						},
 																					},
@@ -8825,7 +8958,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -8833,12 +8966,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						exactlyoneofvalidator.RequiredExactlyOneOf(
 																							"blindfold_secret_info",
 																							"clear_secret_info",
+																							"none",
 																						),
 																					},
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -8856,6 +8990,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
+																									WriteOnly:           true,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
 																											regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -8877,7 +9012,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -8908,6 +9043,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										),
 																									},
 																								},
+																							},
+																						},
+																						"none": schema.BoolAttribute{
+																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            false,
+																							Validators: []validator.Bool{
+																								boolvalidator.Equals(true),
 																							},
 																						},
 																					},
@@ -8954,14 +9099,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"netapp_trident": schema.SingleNestedAttribute{
 																	Description:         "NetApp Trident Device configuration for NetApp Trident",
-																	MarkdownDescription: "NetApp Trident Device configuration for NetApp Trident",
+																	MarkdownDescription: "NetApp Trident Device configuration for NetApp Trident<br>Conflicts with `custom_storage`, `hpe_storage`, and `pure_service_orchestrator`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"backend_choice": schema.SingleNestedAttribute{
 																			Description:         "Select NetApp Trident Backend Select type of backend to configure",
-																			MarkdownDescription: "Select NetApp Trident Backend Select type of backend to configure",
+																			MarkdownDescription: "Select NetApp Trident Backend Select type of backend to configure<br>Exactly one of `netapp_backend_ontap_nas` or `netapp_backend_ontap_san` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -8974,7 +9119,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																			Attributes: map[string]schema.Attribute{
 																				"netapp_backend_ontap_nas": schema.SingleNestedAttribute{
 																					Description:         "ONTAP NAS Backend configuration for ONTAP NAS",
-																					MarkdownDescription: "ONTAP NAS Backend configuration for ONTAP NAS",
+																					MarkdownDescription: "ONTAP NAS Backend configuration for ONTAP NAS<br>Conflicts with `netapp_backend_ontap_san`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -8996,7 +9141,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Validators: []validator.List{
 																										listvalidator.SizeAtMost(128),
 																										listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																											regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																											regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																											"must be a valid IPv6 prefix",
 																										)),
 																										listvalidator.UniqueValues(),
@@ -9057,7 +9202,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -9065,12 +9210,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -9088,6 +9234,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9109,7 +9256,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -9142,13 +9289,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												},
 																											},
 																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
+																											},
+																										},
 																									},
 																								},
 																							},
 																						},
 																						"data_lif_choice": schema.SingleNestedAttribute{
 																							Description:         "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
-																							MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
+																							MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.<br>Exactly one of `data_lif_dns_name` or `data_lif_ip` must be specified when `data_lif_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -9161,7 +9318,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"data_lif_dns_name": schema.StringAttribute{
 																									Description:         "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																									MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																									MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `data_lif_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9175,7 +9332,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"data_lif_ip": schema.StringAttribute{
 																									Description:         "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
-																									MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
+																									MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address<br>Conflicts with `data_lif_dns_name`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9218,7 +9375,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"management_lif_choice": schema.SingleNestedAttribute{
 																							Description:         "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
-																							MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
+																							MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF<br>Exactly one of `management_lif_dns_name` or `management_lif_ip` must be specified.",
 																							Required:            true,
 																							Optional:            false,
 																							Computed:            false,
@@ -9231,7 +9388,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"management_lif_dns_name": schema.StringAttribute{
 																									Description:         "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																									MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																									MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `management_lif_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9245,7 +9402,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"management_lif_ip": schema.StringAttribute{
 																									Description:         "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
-																									MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
+																									MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address<br>Conflicts with `management_lif_dns_name`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9274,7 +9431,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -9282,12 +9439,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -9305,6 +9463,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9326,7 +9485,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -9357,6 +9516,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -9420,21 +9589,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"qos_policy_choice": schema.SingleNestedAttribute{
 																												Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																												MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																												Required:            true,
-																												Optional:            false,
-																												Computed:            false,
+																												MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																												Required:            false,
+																												Optional:            true,
+																												Computed:            true,
 																												Validators: []validator.Object{
-																													exactlyoneofvalidator.RequiredExactlyOneOf(
+																													exactlyoneofvalidator.ExactlyOneOf(
 																														"adaptive_qos_policy",
 																														"no_qos",
 																														"qos_policy",
 																													),
 																												},
+																												PlanModifiers: []planmodifier.Object{
+																													objectplanmodifier.UseNonNullStateForUnknown(),
+																												},
 																												Attributes: map[string]schema.Attribute{
 																													"adaptive_qos_policy": schema.StringAttribute{
 																														Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																														MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																														MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -9444,7 +9616,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													},
 																													"no_qos": schema.BoolAttribute{
 																														Description:         "No QoS No QoS configured",
-																														MarkdownDescription: "No QoS No QoS configured",
+																														MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -9454,7 +9626,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													},
 																													"qos_policy": schema.StringAttribute{
 																														Description:         "QoS Policy Name Enter QoS Policy Name",
-																														MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																														MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -9495,7 +9667,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"space_reserve": schema.StringAttribute{
 																												Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            true,
@@ -9540,7 +9712,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"storage_driver_name": schema.StringAttribute{
 																							Description:         "Storage Backend Driver Configuration of Backend Name",
-																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`",
+																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`<br>**Allowed Values (choose one):** `['ontap-nas', 'ontap-nas-economy', 'ontap-nas-flexgroup']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -9610,21 +9782,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"qos_policy_choice": schema.SingleNestedAttribute{
 																									Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																									MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																									Required:            true,
-																									Optional:            false,
-																									Computed:            false,
+																									MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																									Required:            false,
+																									Optional:            true,
+																									Computed:            true,
 																									Validators: []validator.Object{
-																										exactlyoneofvalidator.RequiredExactlyOneOf(
+																										exactlyoneofvalidator.ExactlyOneOf(
 																											"adaptive_qos_policy",
 																											"no_qos",
 																											"qos_policy",
 																										),
 																									},
+																									PlanModifiers: []planmodifier.Object{
+																										objectplanmodifier.UseNonNullStateForUnknown(),
+																									},
 																									Attributes: map[string]schema.Attribute{
 																										"adaptive_qos_policy": schema.StringAttribute{
 																											Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																											MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																											MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -9634,7 +9809,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"no_qos": schema.BoolAttribute{
 																											Description:         "No QoS No QoS configured",
-																											MarkdownDescription: "No QoS No QoS configured",
+																											MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -9644,7 +9819,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"qos_policy": schema.StringAttribute{
 																											Description:         "QoS Policy Name Enter QoS Policy Name",
-																											MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																											MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -9685,7 +9860,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"space_reserve": schema.StringAttribute{
 																									Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            true,
@@ -9722,14 +9897,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"netapp_backend_ontap_san": schema.SingleNestedAttribute{
 																					Description:         "ONTAP SAN Backend configuration for ONTAP SAN",
-																					MarkdownDescription: "ONTAP SAN Backend configuration for ONTAP SAN",
+																					MarkdownDescription: "ONTAP SAN Backend configuration for ONTAP SAN<br>Conflicts with `netapp_backend_ontap_nas`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
 																					Attributes: map[string]schema.Attribute{
 																						"chap_choice": schema.SingleNestedAttribute{
 																							Description:         "Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers.",
-																							MarkdownDescription: "Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers.",
+																							MarkdownDescription: "Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers.<br>Exactly one of `no_chap` or `use_chap` must be specified when `chap_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -9742,7 +9917,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"no_chap": schema.BoolAttribute{
 																									Description:         "CHAP Disabled CHAP disabled",
-																									MarkdownDescription: "CHAP Disabled CHAP disabled",
+																									MarkdownDescription: "CHAP Disabled CHAP disabled<br>Conflicts with `use_chap`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9752,7 +9927,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"use_chap": schema.SingleNestedAttribute{
 																									Description:         "Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP",
-																									MarkdownDescription: "Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP",
+																									MarkdownDescription: "Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP<br>Conflicts with `no_chap`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9766,7 +9941,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Attributes: map[string]schema.Attribute{
 																												"secret_info_choice": schema.SingleNestedAttribute{
 																													Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																													MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																													MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
@@ -9774,12 +9949,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														exactlyoneofvalidator.RequiredExactlyOneOf(
 																															"blindfold_secret_info",
 																															"clear_secret_info",
+																															"none",
 																														),
 																													},
 																													Attributes: map[string]schema.Attribute{
 																														"blindfold_secret_info": schema.SingleNestedAttribute{
 																															Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																															MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																															MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -9797,6 +9973,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																	Required:            true,
 																																	Optional:            false,
 																																	Computed:            false,
+																																	WriteOnly:           true,
 																																	Validators: []validator.String{
 																																		stringvalidator.RegexMatches(
 																																			regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9818,7 +9995,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														},
 																														"clear_secret_info": schema.SingleNestedAttribute{
 																															Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																															MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																															MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -9849,6 +10026,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		),
 																																	},
 																																},
+																															},
+																														},
+																														"none": schema.BoolAttribute{
+																															Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																															Required:            false,
+																															Optional:            true,
+																															Computed:            false,
+																															Validators: []validator.Bool{
+																																boolvalidator.Equals(true),
 																															},
 																														},
 																													},
@@ -9864,7 +10051,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Attributes: map[string]schema.Attribute{
 																												"secret_info_choice": schema.SingleNestedAttribute{
 																													Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																													MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																													MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
@@ -9872,12 +10059,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														exactlyoneofvalidator.RequiredExactlyOneOf(
 																															"blindfold_secret_info",
 																															"clear_secret_info",
+																															"none",
 																														),
 																													},
 																													Attributes: map[string]schema.Attribute{
 																														"blindfold_secret_info": schema.SingleNestedAttribute{
 																															Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																															MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																															MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -9895,6 +10083,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																	Required:            true,
 																																	Optional:            false,
 																																	Computed:            false,
+																																	WriteOnly:           true,
 																																	Validators: []validator.String{
 																																		stringvalidator.RegexMatches(
 																																			regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -9916,7 +10105,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														},
 																														"clear_secret_info": schema.SingleNestedAttribute{
 																															Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																															MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																															MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -9947,6 +10136,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		),
 																																	},
 																																},
+																															},
+																														},
+																														"none": schema.BoolAttribute{
+																															Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																															MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																															Required:            false,
+																															Optional:            true,
+																															Computed:            false,
+																															Validators: []validator.Bool{
+																																boolvalidator.Equals(true),
 																															},
 																														},
 																													},
@@ -9996,7 +10195,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -10004,12 +10203,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -10027,6 +10227,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -10048,7 +10249,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -10081,13 +10282,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												},
 																											},
 																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
+																											},
+																										},
 																									},
 																								},
 																							},
 																						},
 																						"data_lif_choice": schema.SingleNestedAttribute{
 																							Description:         "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
-																							MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
+																							MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.<br>Exactly one of `data_lif_dns_name` or `data_lif_ip` must be specified when `data_lif_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -10100,7 +10311,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"data_lif_dns_name": schema.StringAttribute{
 																									Description:         "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																									MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																									MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `data_lif_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -10114,7 +10325,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"data_lif_ip": schema.StringAttribute{
 																									Description:         "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
-																									MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
+																									MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address<br>Conflicts with `data_lif_dns_name`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -10170,7 +10381,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"management_lif_choice": schema.SingleNestedAttribute{
 																							Description:         "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
-																							MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
+																							MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF<br>Exactly one of `management_lif_dns_name` or `management_lif_ip` must be specified.",
 																							Required:            true,
 																							Optional:            false,
 																							Computed:            false,
@@ -10183,7 +10394,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"management_lif_dns_name": schema.StringAttribute{
 																									Description:         "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																									MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																									MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `management_lif_ip`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -10197,7 +10408,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"management_lif_ip": schema.StringAttribute{
 																									Description:         "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
-																									MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
+																									MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address<br>Conflicts with `management_lif_dns_name`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -10219,7 +10430,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -10227,12 +10438,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										exactlyoneofvalidator.RequiredExactlyOneOf(
 																											"blindfold_secret_info",
 																											"clear_secret_info",
+																											"none",
 																										),
 																									},
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -10250,6 +10462,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													Required:            true,
 																													Optional:            false,
 																													Computed:            false,
+																													WriteOnly:           true,
 																													Validators: []validator.String{
 																														stringvalidator.RegexMatches(
 																															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -10271,7 +10484,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -10302,6 +10515,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														),
 																													},
 																												},
+																											},
+																										},
+																										"none": schema.BoolAttribute{
+																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																											Required:            false,
+																											Optional:            true,
+																											Computed:            false,
+																											Validators: []validator.Bool{
+																												boolvalidator.Equals(true),
 																											},
 																										},
 																									},
@@ -10365,21 +10588,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"qos_policy_choice": schema.SingleNestedAttribute{
 																												Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																												MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																												Required:            true,
-																												Optional:            false,
-																												Computed:            false,
+																												MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																												Required:            false,
+																												Optional:            true,
+																												Computed:            true,
 																												Validators: []validator.Object{
-																													exactlyoneofvalidator.RequiredExactlyOneOf(
+																													exactlyoneofvalidator.ExactlyOneOf(
 																														"adaptive_qos_policy",
 																														"no_qos",
 																														"qos_policy",
 																													),
 																												},
+																												PlanModifiers: []planmodifier.Object{
+																													objectplanmodifier.UseNonNullStateForUnknown(),
+																												},
 																												Attributes: map[string]schema.Attribute{
 																													"adaptive_qos_policy": schema.StringAttribute{
 																														Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																														MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																														MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -10389,7 +10615,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													},
 																													"no_qos": schema.BoolAttribute{
 																														Description:         "No QoS No QoS configured",
-																														MarkdownDescription: "No QoS No QoS configured",
+																														MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -10399,7 +10625,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													},
 																													"qos_policy": schema.StringAttribute{
 																														Description:         "QoS Policy Name Enter QoS Policy Name",
-																														MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																														MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -10440,7 +10666,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"space_reserve": schema.StringAttribute{
 																												Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																												MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            true,
@@ -10485,7 +10711,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"storage_driver_name": schema.StringAttribute{
 																							Description:         "Storage Backend Driver Configuration of Backend Name",
-																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`",
+																							MarkdownDescription: "Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`<br>**Allowed Values (choose one):** `['ontap-san', 'ontap-san-economy', 'ontap-nas-flexgroup']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -10558,21 +10784,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"qos_policy_choice": schema.SingleNestedAttribute{
 																									Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																									MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																									Required:            true,
-																									Optional:            false,
-																									Computed:            false,
+																									MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																									Required:            false,
+																									Optional:            true,
+																									Computed:            true,
 																									Validators: []validator.Object{
-																										exactlyoneofvalidator.RequiredExactlyOneOf(
+																										exactlyoneofvalidator.ExactlyOneOf(
 																											"adaptive_qos_policy",
 																											"no_qos",
 																											"qos_policy",
 																										),
 																									},
+																									PlanModifiers: []planmodifier.Object{
+																										objectplanmodifier.UseNonNullStateForUnknown(),
+																									},
 																									Attributes: map[string]schema.Attribute{
 																										"adaptive_qos_policy": schema.StringAttribute{
 																											Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																											MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																											MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -10582,7 +10811,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"no_qos": schema.BoolAttribute{
 																											Description:         "No QoS No QoS configured",
-																											MarkdownDescription: "No QoS No QoS configured",
+																											MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -10592,7 +10821,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"qos_policy": schema.StringAttribute{
 																											Description:         "QoS Policy Name Enter QoS Policy Name",
-																											MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																											MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -10633,7 +10862,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																								},
 																								"space_reserve": schema.StringAttribute{
 																									Description:         "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)",
-																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`",
+																									MarkdownDescription: "Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            true,
@@ -10674,7 +10903,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"pure_service_orchestrator": schema.SingleNestedAttribute{
 																	Description:         "Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator",
-																	MarkdownDescription: "Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator",
+																	MarkdownDescription: "Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator<br>Conflicts with `custom_storage`, `hpe_storage`, and `netapp_trident`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10705,7 +10934,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"default_fs_type": schema.StringAttribute{
 																							Description:         "Default Filesystem Type Block volume default filesystem type. Not recommended to change!",
-																							MarkdownDescription: "Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`",
+																							MarkdownDescription: "Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`<br>**Allowed Values (choose one):** `['xfs', 'ext4']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -10755,7 +10984,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										Attributes: map[string]schema.Attribute{
 																											"secret_info_choice": schema.SingleNestedAttribute{
 																												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																												Required:            true,
 																												Optional:            false,
 																												Computed:            false,
@@ -10763,12 +10992,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													exactlyoneofvalidator.RequiredExactlyOneOf(
 																														"blindfold_secret_info",
 																														"clear_secret_info",
+																														"none",
 																													),
 																												},
 																												Attributes: map[string]schema.Attribute{
 																													"blindfold_secret_info": schema.SingleNestedAttribute{
 																														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -10786,6 +11016,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																Required:            true,
 																																Optional:            false,
 																																Computed:            false,
+																																WriteOnly:           true,
 																																Validators: []validator.String{
 																																	stringvalidator.RegexMatches(
 																																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -10807,7 +11038,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													},
 																													"clear_secret_info": schema.SingleNestedAttribute{
 																														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -10840,6 +11071,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																															},
 																														},
 																													},
+																													"none": schema.BoolAttribute{
+																														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																														Required:            false,
+																														Optional:            true,
+																														Computed:            false,
+																														Validators: []validator.Bool{
+																															boolvalidator.Equals(true),
+																														},
+																													},
 																												},
 																											},
 																										},
@@ -10860,7 +11101,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"mgmt_endpoint_choice": schema.SingleNestedAttribute{
 																										Description:         "Management Endpoint FQDN or IP address of PSO Management endpoint",
-																										MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint",
+																										MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint<br>Exactly one of `mgmt_dns_name` or `mgmt_ip` must be specified.",
 																										Required:            true,
 																										Optional:            false,
 																										Computed:            false,
@@ -10873,7 +11114,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										Attributes: map[string]schema.Attribute{
 																											"mgmt_dns_name": schema.StringAttribute{
 																												Description:         "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																												MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																												MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `mgmt_ip`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -10887,7 +11128,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"mgmt_ip": schema.StringAttribute{
 																												Description:         "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
-																												MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
+																												MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address<br>Conflicts with `mgmt_dns_name`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -10913,7 +11154,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"san_type": schema.StringAttribute{
 																							Description:         "SAN Type Block volume access protocol, either ISCSI or FC",
-																							MarkdownDescription: "SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`",
+																							MarkdownDescription: "SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`<br>**Allowed Values (choose one):** `['ISCSI', 'FC']`",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            true,
@@ -10970,7 +11211,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										Attributes: map[string]schema.Attribute{
 																											"secret_info_choice": schema.SingleNestedAttribute{
 																												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																												Required:            true,
 																												Optional:            false,
 																												Computed:            false,
@@ -10978,12 +11219,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													exactlyoneofvalidator.RequiredExactlyOneOf(
 																														"blindfold_secret_info",
 																														"clear_secret_info",
+																														"none",
 																													),
 																												},
 																												Attributes: map[string]schema.Attribute{
 																													"blindfold_secret_info": schema.SingleNestedAttribute{
 																														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -11001,6 +11243,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																Required:            true,
 																																Optional:            false,
 																																Computed:            false,
+																																WriteOnly:           true,
 																																Validators: []validator.String{
 																																	stringvalidator.RegexMatches(
 																																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -11022,7 +11265,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																													},
 																													"clear_secret_info": schema.SingleNestedAttribute{
 																														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																														Required:            false,
 																														Optional:            true,
 																														Computed:            false,
@@ -11055,6 +11298,16 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																															},
 																														},
 																													},
+																													"none": schema.BoolAttribute{
+																														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																														Required:            false,
+																														Optional:            true,
+																														Computed:            false,
+																														Validators: []validator.Bool{
+																															boolvalidator.Equals(true),
+																														},
+																													},
 																												},
 																											},
 																										},
@@ -11075,7 +11328,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"mgmt_endpoint_choice": schema.SingleNestedAttribute{
 																										Description:         "Management Endpoint FQDN or IP address of PSO Management endpoint",
-																										MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint",
+																										MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint<br>Exactly one of `mgmt_dns_name` or `mgmt_ip` must be specified.",
 																										Required:            true,
 																										Optional:            false,
 																										Computed:            false,
@@ -11088,7 +11341,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										Attributes: map[string]schema.Attribute{
 																											"mgmt_dns_name": schema.StringAttribute{
 																												Description:         "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																												MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																												MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `mgmt_ip`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -11102,7 +11355,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"mgmt_ip": schema.StringAttribute{
 																												Description:         "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
-																												MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
+																												MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address<br>Conflicts with `mgmt_dns_name`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -11117,7 +11370,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"nfs_endpoint_choice": schema.SingleNestedAttribute{
 																										Description:         "NFS Endpoint FQDN or IP address of PSO NFS endpoint",
-																										MarkdownDescription: "NFS Endpoint FQDN or IP address of PSO NFS endpoint",
+																										MarkdownDescription: "NFS Endpoint FQDN or IP address of PSO NFS endpoint<br>Exactly one of `nfs_endpoint_dns_name` or `nfs_endpoint_ip` must be specified.",
 																										Required:            true,
 																										Optional:            false,
 																										Computed:            false,
@@ -11130,7 +11383,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										Attributes: map[string]schema.Attribute{
 																											"nfs_endpoint_dns_name": schema.StringAttribute{
 																												Description:         "NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																												MarkdownDescription: "NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																												MarkdownDescription: "NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `nfs_endpoint_ip`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -11144,7 +11397,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											},
 																											"nfs_endpoint_ip": schema.StringAttribute{
 																												Description:         "NFS IP Address Endpoint is reachable at the given ip address",
-																												MarkdownDescription: "NFS IP Address Endpoint is reachable at the given ip address",
+																												MarkdownDescription: "NFS IP Address Endpoint is reachable at the given ip address<br>Conflicts with `nfs_endpoint_dns_name`.",
 																												Required:            false,
 																												Optional:            true,
 																												Computed:            false,
@@ -11217,20 +11470,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"storage_interface_choice": schema.SingleNestedAttribute{
 								Description:         "Storage Interfaces Select if storage interfaces are configured",
-								MarkdownDescription: "Storage Interfaces Select if storage interfaces are configured",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Storage Interfaces Select if storage interfaces are configured<br>Exactly one of `no_storage_interfaces` or `storage_interface_list` must be specified when `storage_interface_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_storage_interfaces",
 										"storage_interface_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_storage_interfaces": schema.BoolAttribute{
 										Description:         "No Storage Interfaces This site does not have any storage interfaces",
-										MarkdownDescription: "No Storage Interfaces This site does not have any storage interfaces",
+										MarkdownDescription: "No Storage Interfaces This site does not have any storage interfaces<br>Conflicts with `storage_interface_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11240,7 +11496,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 									},
 									"storage_interface_list": schema.SingleNestedAttribute{
 										Description:         "List of Storage Interfaces Add all storage interfaces belonging to this site",
-										MarkdownDescription: "List of Storage Interfaces Add all storage interfaces belonging to this site",
+										MarkdownDescription: "List of Storage Interfaces Add all storage interfaces belonging to this site<br>Conflicts with `no_storage_interfaces`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11284,21 +11540,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"address_choice": schema.SingleNestedAttribute{
 																	Description:         "Interface Addressing Select how ip address will be assigned to Interface",
-																	MarkdownDescription: "Interface Addressing Select how ip address will be assigned to Interface",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "Interface Addressing Select how ip address will be assigned to Interface<br>Exactly one of `dhcp_client`, `dhcp_server`, or `static_ip` must be specified when `address_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"dhcp_client",
 																			"dhcp_server",
 																			"static_ip",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"dhcp_client": schema.BoolAttribute{
 																			Description:         "DHCP Client Interface gets it's IP address from external DHCP server",
-																			MarkdownDescription: "DHCP Client Interface gets it's IP address from external DHCP server",
+																			MarkdownDescription: "DHCP Client Interface gets it's IP address from external DHCP server<br>Conflicts with `dhcp_server` and `static_ip`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11308,7 +11567,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"dhcp_server": schema.SingleNestedAttribute{
 																			Description:         "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.",
-																			MarkdownDescription: "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.",
+																			MarkdownDescription: "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.<br>Conflicts with `dhcp_client` and `static_ip`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11327,20 +11586,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						Attributes: map[string]schema.Attribute{
 																							"dns_choice": schema.SingleNestedAttribute{
 																								Description:         "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.",
-																								MarkdownDescription: "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.",
-																								Required:            true,
-																								Optional:            false,
-																								Computed:            false,
+																								MarkdownDescription: "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dns_address` or `same_as_dgw` must be specified when `dns_choice` is configured.",
+																								Required:            false,
+																								Optional:            true,
+																								Computed:            true,
 																								Validators: []validator.Object{
-																									exactlyoneofvalidator.RequiredExactlyOneOf(
+																									exactlyoneofvalidator.ExactlyOneOf(
 																										"dns_address",
 																										"same_as_dgw",
 																									),
 																								},
+																								PlanModifiers: []planmodifier.Object{
+																									objectplanmodifier.UseNonNullStateForUnknown(),
+																								},
 																								Attributes: map[string]schema.Attribute{
 																									"dns_address": schema.StringAttribute{
 																										Description:         "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
-																										MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
+																										MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.<br>Conflicts with `same_as_dgw`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -11353,7 +11615,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"same_as_dgw": schema.BoolAttribute{
 																										Description:         "Default Gateway Address DNS server address is same as default gateway address",
-																										MarkdownDescription: "Default Gateway Address DNS server address is same as default gateway address",
+																										MarkdownDescription: "Default Gateway Address DNS server address is same as default gateway address<br>Conflicts with `dns_address`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -11365,21 +11627,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							},
 																							"gateway_choice": schema.SingleNestedAttribute{
 																								Description:         "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.",
-																								MarkdownDescription: "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.",
-																								Required:            true,
-																								Optional:            false,
-																								Computed:            false,
+																								MarkdownDescription: "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dgw_address`, `first_address`, or `last_address` must be specified when `gateway_choice` is configured.",
+																								Required:            false,
+																								Optional:            true,
+																								Computed:            true,
 																								Validators: []validator.Object{
-																									exactlyoneofvalidator.RequiredExactlyOneOf(
+																									exactlyoneofvalidator.ExactlyOneOf(
 																										"dgw_address",
 																										"first_address",
 																										"last_address",
 																									),
 																								},
+																								PlanModifiers: []planmodifier.Object{
+																									objectplanmodifier.UseNonNullStateForUnknown(),
+																								},
 																								Attributes: map[string]schema.Attribute{
 																									"dgw_address": schema.StringAttribute{
 																										Description:         "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
-																										MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
+																										MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.<br>Conflicts with `first_address` and `last_address`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -11392,7 +11657,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"first_address": schema.BoolAttribute{
 																										Description:         "First Address First usable address from the network prefix is chosen as default gateway",
-																										MarkdownDescription: "First Address First usable address from the network prefix is chosen as default gateway",
+																										MarkdownDescription: "First Address First usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `last_address`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -11402,7 +11667,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									},
 																									"last_address": schema.BoolAttribute{
 																										Description:         "Last Address Last usable address from the network prefix is chosen as default gateway",
-																										MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as default gateway",
+																										MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `first_address`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -11414,7 +11679,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																							},
 																							"network_prefix_choice": schema.SingleNestedAttribute{
 																								Description:         "Network Prefix choice Select DHCP network prefix for the site",
-																								MarkdownDescription: "Network Prefix choice Select DHCP network prefix for the site",
+																								MarkdownDescription: "Network Prefix choice Select DHCP network prefix for the site<br>`network_prefix` must be specified.",
 																								Required:            true,
 																								Optional:            false,
 																								Computed:            false,
@@ -11520,21 +11785,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																				},
 																				"interfaces_addressing_choice": schema.SingleNestedAttribute{
 																					Description:         "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																					MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																					Required:            true,
-																					Optional:            false,
-																					Computed:            false,
+																					MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured.",
+																					Required:            false,
+																					Optional:            true,
+																					Computed:            true,
 																					Validators: []validator.Object{
-																						exactlyoneofvalidator.RequiredExactlyOneOf(
+																						exactlyoneofvalidator.ExactlyOneOf(
 																							"automatic_from_end",
 																							"automatic_from_start",
 																							"interface_ip_map",
 																						),
 																					},
+																					PlanModifiers: []planmodifier.Object{
+																						objectplanmodifier.UseNonNullStateForUnknown(),
+																					},
 																					Attributes: map[string]schema.Attribute{
 																						"automatic_from_end": schema.BoolAttribute{
 																							Description:         "Automatic End Assign automatically from end of the first network in the DHCP Network list",
-																							MarkdownDescription: "Automatic End Assign automatically from end of the first network in the DHCP Network list",
+																							MarkdownDescription: "Automatic End Assign automatically from end of the first network in the DHCP Network list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -11544,7 +11812,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"automatic_from_start": schema.BoolAttribute{
 																							Description:         "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
-																							MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
+																							MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the DHCP Network list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -11554,7 +11822,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"interface_ip_map": schema.SingleNestedAttribute{
 																							Description:         "Static IPv4 Configuration Statically configure a IPv4 address for every node",
-																							MarkdownDescription: "Static IPv4 Configuration Statically configure a IPv4 address for every node",
+																							MarkdownDescription: "Static IPv4 Configuration Statically configure a IPv4 address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -11584,14 +11852,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"static_ip": schema.SingleNestedAttribute{
 																			Description:         "Static IP Interface IP is configured statically",
-																			MarkdownDescription: "Static IP Interface IP is configured statically",
+																			MarkdownDescription: "Static IP Interface IP is configured statically<br>Conflicts with `dhcp_client` and `dhcp_server`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"network_prefix_choice": schema.SingleNestedAttribute{
 																					Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-																					MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+																					MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -11604,7 +11872,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Attributes: map[string]schema.Attribute{
 																						"cluster_static_ip": schema.SingleNestedAttribute{
 																							Description:         "Node Specific Static IP configuration for a specific node",
-																							MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+																							MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -11644,7 +11912,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												Computed:            false,
 																												Validators: []validator.String{
 																													stringvalidator.RegexMatches(
-																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																														"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																													),
 																												},
@@ -11656,7 +11924,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"node_static_ip": schema.SingleNestedAttribute{
 																							Description:         "Node Static IP configuration for the Node",
-																							MarkdownDescription: "Node Static IP configuration for the Node",
+																							MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -11682,7 +11950,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Computed:            false,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																										),
 																									},
@@ -11707,7 +11975,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"ipv6_address_choice": schema.SingleNestedAttribute{
 																	Description:         "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface",
-																	MarkdownDescription: "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface",
+																	MarkdownDescription: "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
@@ -11719,33 +11987,36 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		),
 																	},
 																	PlanModifiers: []planmodifier.Object{
-																		objectplanmodifier.UseStateForUnknown(),
+																		objectplanmodifier.UseNonNullStateForUnknown(),
 																		oneofbranchplanmodifier.PreserveSelectedBranch(),
 																	},
 																	Attributes: map[string]schema.Attribute{
 																		"ipv6_auto_config": schema.SingleNestedAttribute{
 																			Description:         "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration",
-																			MarkdownDescription: "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration",
+																			MarkdownDescription: "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"autoconfig_choice": schema.SingleNestedAttribute{
 																					Description:         "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration",
-																					MarkdownDescription: "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration",
-																					Required:            true,
-																					Optional:            false,
-																					Computed:            false,
+																					MarkdownDescription: "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured.",
+																					Required:            false,
+																					Optional:            true,
+																					Computed:            true,
 																					Validators: []validator.Object{
-																						exactlyoneofvalidator.RequiredExactlyOneOf(
+																						exactlyoneofvalidator.ExactlyOneOf(
 																							"host",
 																							"router",
 																						),
 																					},
+																					PlanModifiers: []planmodifier.Object{
+																						objectplanmodifier.UseNonNullStateForUnknown(),
+																					},
 																					Attributes: map[string]schema.Attribute{
 																						"host": schema.BoolAttribute{
 																							Description:         "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.",
-																							MarkdownDescription: "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.",
+																							MarkdownDescription: "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -11755,14 +12026,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"router": schema.SingleNestedAttribute{
 																							Description:         "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.",
-																							MarkdownDescription: "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.",
+																							MarkdownDescription: "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
 																							Attributes: map[string]schema.Attribute{
 																								"address_choice": schema.SingleNestedAttribute{
 																									Description:         "address choice Specify how the address need to be obtained for interfaces and clients",
-																									MarkdownDescription: "address choice Specify how the address need to be obtained for interfaces and clients",
+																									MarkdownDescription: "address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -11775,13 +12046,13 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Attributes: map[string]schema.Attribute{
 																										"network_prefix": schema.StringAttribute{
 																											Description:         "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862",
-																											MarkdownDescription: "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862",
+																											MarkdownDescription: "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
 																											Validators: []validator.String{
 																												stringvalidator.RegexMatches(
-																													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																													regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																													"must be a valid IPv6 prefix (CIDR notation)",
 																												),
 																												stringvalidator.RegexMatches(
@@ -11792,7 +12063,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																										},
 																										"stateful": schema.SingleNestedAttribute{
 																											Description:         "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag",
-																											MarkdownDescription: "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag",
+																											MarkdownDescription: "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -11811,7 +12082,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														Attributes: map[string]schema.Attribute{
 																															"network_prefix_choice": schema.SingleNestedAttribute{
 																																Description:         "Network Prefix choice Select DHCP network prefix for a site",
-																																MarkdownDescription: "Network Prefix choice Select DHCP network prefix for a site",
+																																MarkdownDescription: "Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified.",
 																																Required:            true,
 																																Optional:            false,
 																																Computed:            false,
@@ -11829,7 +12100,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																		Computed:            false,
 																																		Validators: []validator.String{
 																																			stringvalidator.RegexMatches(
-																																				regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																																				regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																																				"must be a valid IPv6 prefix (CIDR notation)",
 																																			),
 																																		},
@@ -11914,21 +12185,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												},
 																												"interfaces_addressing_choice": schema.SingleNestedAttribute{
 																													Description:         "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																													MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																													Required:            true,
-																													Optional:            false,
-																													Computed:            false,
+																													MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured.",
+																													Required:            false,
+																													Optional:            true,
+																													Computed:            true,
 																													Validators: []validator.Object{
-																														exactlyoneofvalidator.RequiredExactlyOneOf(
+																														exactlyoneofvalidator.ExactlyOneOf(
 																															"automatic_from_end",
 																															"automatic_from_start",
 																															"interface_ip_map",
 																														),
 																													},
+																													PlanModifiers: []planmodifier.Object{
+																														objectplanmodifier.UseNonNullStateForUnknown(),
+																													},
 																													Attributes: map[string]schema.Attribute{
 																														"automatic_from_end": schema.BoolAttribute{
 																															Description:         "Automatic End Assign automatically from End of the first network in the list",
-																															MarkdownDescription: "Automatic End Assign automatically from End of the first network in the list",
+																															MarkdownDescription: "Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -11938,7 +12212,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														},
 																														"automatic_from_start": schema.BoolAttribute{
 																															Description:         "Automatic Start Assign automatically from start of the first network in the list",
-																															MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the list",
+																															MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -11948,7 +12222,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																														},
 																														"interface_ip_map": schema.SingleNestedAttribute{
 																															Description:         "Configured Address Configured address for every node",
-																															MarkdownDescription: "Configured Address Configured address for every node",
+																															MarkdownDescription: "Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`.",
 																															Required:            false,
 																															Optional:            true,
 																															Computed:            false,
@@ -11987,7 +12261,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Attributes: map[string]schema.Attribute{
 																										"dns_choice": schema.SingleNestedAttribute{
 																											Description:         "DNS server Address Select how DNS server address is determined",
-																											MarkdownDescription: "DNS server Address Select how DNS server address is determined",
+																											MarkdownDescription: "DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified.",
 																											Required:            true,
 																											Optional:            false,
 																											Computed:            false,
@@ -12000,7 +12274,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																											Attributes: map[string]schema.Attribute{
 																												"configured_list": schema.SingleNestedAttribute{
 																													Description:         "Configured Address List Configured address outside network range - external dns server",
-																													MarkdownDescription: "Configured Address List Configured address outside network range - external dns server",
+																													MarkdownDescription: "Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`.",
 																													Required:            false,
 																													Optional:            true,
 																													Computed:            false,
@@ -12025,28 +12299,31 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												},
 																												"local_dns": schema.SingleNestedAttribute{
 																													Description:         "Local Dns Address Choose the address from the network prefix range as dns server",
-																													MarkdownDescription: "Local Dns Address Choose the address from the network prefix range as dns server",
+																													MarkdownDescription: "Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`.",
 																													Required:            false,
 																													Optional:            true,
 																													Computed:            false,
 																													Attributes: map[string]schema.Attribute{
 																														"local_dns_choice": schema.SingleNestedAttribute{
 																															Description:         "Local Dns Address Select address from network prefix range as dns server",
-																															MarkdownDescription: "Local Dns Address Select address from network prefix range as dns server",
-																															Required:            true,
-																															Optional:            false,
-																															Computed:            false,
+																															MarkdownDescription: "Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured.",
+																															Required:            false,
+																															Optional:            true,
+																															Computed:            true,
 																															Validators: []validator.Object{
-																																exactlyoneofvalidator.RequiredExactlyOneOf(
+																																exactlyoneofvalidator.ExactlyOneOf(
 																																	"configured_address",
 																																	"first_address",
 																																	"last_address",
 																																),
 																															},
+																															PlanModifiers: []planmodifier.Object{
+																																objectplanmodifier.UseNonNullStateForUnknown(),
+																															},
 																															Attributes: map[string]schema.Attribute{
 																																"configured_address": schema.StringAttribute{
 																																	Description:         "Configured Address Configured address from the network prefix is chosen as dns server",
-																																	MarkdownDescription: "Configured Address Configured address from the network prefix is chosen as dns server",
+																																	MarkdownDescription: "Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.",
 																																	Required:            false,
 																																	Optional:            true,
 																																	Computed:            false,
@@ -12059,7 +12336,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																},
 																																"first_address": schema.BoolAttribute{
 																																	Description:         "First Address First usable address from the network prefix is chosen as dns server",
-																																	MarkdownDescription: "First Address First usable address from the network prefix is chosen as dns server",
+																																	MarkdownDescription: "First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.",
 																																	Required:            false,
 																																	Optional:            true,
 																																	Computed:            false,
@@ -12069,7 +12346,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																																},
 																																"last_address": schema.BoolAttribute{
 																																	Description:         "Last Address Last usable address from the network prefix is chosen as dns server",
-																																	MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as dns server",
+																																	MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.",
 																																	Required:            false,
 																																	Optional:            true,
 																																	Computed:            false,
@@ -12093,7 +12370,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"no_ipv6_address": schema.BoolAttribute{
 																			Description:         "no_ipv6_address Interface does not have an IPv6 Address.",
-																			MarkdownDescription: "no_ipv6_address Interface does not have an IPv6 Address.",
+																			MarkdownDescription: "no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12103,14 +12380,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"static_ipv6_address": schema.SingleNestedAttribute{
 																			Description:         "Static IP Interface IP is configured statically",
-																			MarkdownDescription: "Static IP Interface IP is configured statically",
+																			MarkdownDescription: "Static IP Interface IP is configured statically<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"network_prefix_choice": schema.SingleNestedAttribute{
 																					Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-																					MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+																					MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -12123,7 +12400,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Attributes: map[string]schema.Attribute{
 																						"cluster_static_ip": schema.SingleNestedAttribute{
 																							Description:         "Node Specific Static IP configuration for a specific node",
-																							MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+																							MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -12163,7 +12440,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																												Computed:            false,
 																												Validators: []validator.String{
 																													stringvalidator.RegexMatches(
-																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																														regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																														"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																													),
 																												},
@@ -12175,7 +12452,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																						},
 																						"node_static_ip": schema.SingleNestedAttribute{
 																							Description:         "Node Static IP configuration for the Node",
-																							MarkdownDescription: "Node Static IP configuration for the Node",
+																							MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -12201,7 +12478,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																									Computed:            false,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																											regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																											"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																										),
 																									},
@@ -12216,7 +12493,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"monitoring_choice": schema.SingleNestedAttribute{
 																	Description:         "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
-																	MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
+																	MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -12229,7 +12506,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"monitor": schema.BoolAttribute{
 																			Description:         "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
-																			MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
+																			MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.<br>Conflicts with `monitor_disabled`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12239,7 +12516,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"monitor_disabled": schema.BoolAttribute{
 																			Description:         "Monitoring disabled Link quality monitoring disabled on the interface.",
-																			MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.",
+																			MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.<br>Conflicts with `monitor`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12250,14 +12527,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																	},
 																},
 																"mtu": schema.Int64Attribute{
-																	Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-																	MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																	Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+																	MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
 																	Validators: []validator.Int64{
 																		int64validator.Any(
-																			int64validator.Between(512, 8000),
+																			int64validator.Between(512, 9000),
 																			int64validator.OneOf(0),
 																		),
 																	},
@@ -12267,22 +12544,25 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"network_choice": schema.SingleNestedAttribute{
 																	Description:         "Network for this Interface Select virtual network of this interface",
-																	MarkdownDescription: "Network for this Interface Select virtual network of this interface",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "Network for this Interface Select virtual network of this interface<br>Exactly one of `segment_network`, `site_local_inside_network`, `site_local_network`, or `storage_network` must be specified when `network_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"segment_network",
 																			"site_local_inside_network",
 																			"site_local_network",
 																			"storage_network",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"segment_network": schema.SingleNestedAttribute{
 																			Description:         "Segment",
-																			MarkdownDescription: "Segment",
+																			MarkdownDescription: "Segment<br>Conflicts with `site_local_inside_network`, `site_local_network`, and `storage_network`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12308,14 +12588,14 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
 																		},
 																		"site_local_inside_network": schema.BoolAttribute{
 																			Description:         "Site Local Network Inside Interface belongs to site local network inside",
-																			MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+																			MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_network`, and `storage_network`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12325,7 +12605,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"site_local_network": schema.BoolAttribute{
 																			Description:         "Site Local Network Interface belongs to site local network (outside)",
-																			MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+																			MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `segment_network`, `site_local_inside_network`, and `storage_network`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12335,7 +12615,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"storage_network": schema.BoolAttribute{
 																			Description:         "Storage Network Interface belongs to site local network inside",
-																			MarkdownDescription: "Storage Network Interface belongs to site local network inside",
+																			MarkdownDescription: "Storage Network Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_inside_network`, and `site_local_network`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12347,20 +12627,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"node_choice": schema.SingleNestedAttribute{
 																	Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.",
-																	MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"cluster",
 																			"node",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"cluster": schema.BoolAttribute{
 																			Description:         "Node Independent Configuration will apply to given device on all nodes of the site.",
-																			MarkdownDescription: "Node Independent Configuration will apply to given device on all nodes of the site.",
+																			MarkdownDescription: "Node Independent Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12370,7 +12653,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"node": schema.StringAttribute{
 																			Description:         "Node Configuration will apply to a device on the given node.",
-																			MarkdownDescription: "Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`",
+																			MarkdownDescription: "Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12382,20 +12665,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"primary_choice": schema.SingleNestedAttribute{
 																	Description:         "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-																	MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet<br>Exactly one of `is_primary` or `not_primary` must be specified when `primary_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"is_primary",
 																			"not_primary",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"is_primary": schema.BoolAttribute{
 																			Description:         "Interface is Primary This interface is primary",
-																			MarkdownDescription: "Interface is Primary This interface is primary",
+																			MarkdownDescription: "Interface is Primary This interface is primary<br>Conflicts with `not_primary`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12405,7 +12691,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"not_primary": schema.BoolAttribute{
 																			Description:         "Interface is Not Primary This interface is not primary",
-																			MarkdownDescription: "Interface is Not Primary This interface is not primary",
+																			MarkdownDescription: "Interface is Not Primary This interface is not primary<br>Conflicts with `is_primary`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12430,20 +12716,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																},
 																"vlan_choice": schema.SingleNestedAttribute{
 																	Description:         "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-																	MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged<br>Exactly one of `untagged` or `vlan_id` must be specified when `vlan_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"untagged",
 																			"vlan_id",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"untagged": schema.BoolAttribute{
 																			Description:         "Untagged Configure a untagged ethernet interface",
-																			MarkdownDescription: "Untagged Configure a untagged ethernet interface",
+																			MarkdownDescription: "Untagged Configure a untagged ethernet interface<br>Conflicts with `vlan_id`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12453,7 +12742,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 																		},
 																		"vlan_id": schema.Int64Attribute{
 																			Description:         "VLAN Id Configure a VLAN tagged ethernet interface",
-																			MarkdownDescription: "VLAN Id Configure a VLAN tagged ethernet interface",
+																			MarkdownDescription: "VLAN Id Configure a VLAN tagged ethernet interface<br>Conflicts with `untagged`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -12476,7 +12765,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"default_storage_config": schema.BoolAttribute{
 						Description:         "Default Storage Configuration Use default storage configuration",
-						MarkdownDescription: "Default Storage Configuration Use default storage configuration",
+						MarkdownDescription: "Default Storage Configuration Use default storage configuration<br>Conflicts with `custom_storage_config`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -12491,24 +12780,30 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				MarkdownDescription: "F5XC Software F5XC Software Details",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"volterra_sw_version_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
-						MarkdownDescription: "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.<br>Exactly one of `default_sw_version` or `volterra_software_version` must be specified when `volterra_sw_version_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_sw_version",
 								"volterra_software_version",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_sw_version": schema.BoolAttribute{
 								Description:         "Default SW Version Will assign latest available F5XC Software Version",
-								MarkdownDescription: "Default SW Version Will assign latest available F5XC Software Version",
+								MarkdownDescription: "Default SW Version Will assign latest available F5XC Software Version<br>Conflicts with `volterra_software_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -12518,7 +12813,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"volterra_software_version": schema.StringAttribute{
 								Description:         "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.",
-								MarkdownDescription: "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`",
+								MarkdownDescription: "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_sw_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -12532,21 +12827,24 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"usb_policy_choice": schema.SingleNestedAttribute{
 				Description:         "USB Device Policy Select USB device policy",
-				MarkdownDescription: "USB Device Policy Select USB device policy",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "USB Device Policy Select USB device policy<br>Exactly one of `allow_all_usb`, `deny_all_usb`, or `usb_policy` must be specified when `usb_policy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"allow_all_usb",
 						"deny_all_usb",
 						"usb_policy",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"allow_all_usb": schema.BoolAttribute{
 						Description:         "Allow All USB Devices All USB devices are allowed",
-						MarkdownDescription: "Allow All USB Devices All USB devices are allowed",
+						MarkdownDescription: "Allow All USB Devices All USB devices are allowed<br>Conflicts with `deny_all_usb` and `usb_policy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -12556,7 +12854,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"deny_all_usb": schema.BoolAttribute{
 						Description:         "Deny All USB Devices All USB devices are denied",
-						MarkdownDescription: "Deny All USB Devices All USB devices are denied",
+						MarkdownDescription: "Deny All USB Devices All USB devices are denied<br>Conflicts with `allow_all_usb` and `usb_policy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -12566,7 +12864,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"usb_policy": schema.SingleNestedAttribute{
 						Description:         "USB Device Policy Allow only specific USB devices",
-						MarkdownDescription: "USB Device Policy Allow only specific USB devices",
+						MarkdownDescription: "USB Device Policy Allow only specific USB devices<br>Conflicts with `allow_all_usb` and `deny_all_usb`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -12592,7 +12890,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 								Optional:            false,
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
+									stringplanmodifier.UseNonNullStateForUnknown(),
 								},
 							},
 						},
@@ -12601,7 +12899,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"vm_choice": schema.SingleNestedAttribute{
 				Description:         "Select VMs support Enable/Disable Enable or Disable VMs support for this Site",
-				MarkdownDescription: "Select VMs support Enable/Disable Enable or Disable VMs support for this Site",
+				MarkdownDescription: "Select VMs support Enable/Disable Enable or Disable VMs support for this Site<br>Exactly one of `disable_vm` or `enable_vm` must be specified when `vm_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -12614,7 +12912,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"disable_vm": schema.BoolAttribute{
 						Description:         "VMs support Disabled VMs support is not enabled for this Site",
-						MarkdownDescription: "VMs support Disabled VMs support is not enabled for this Site",
+						MarkdownDescription: "VMs support Disabled VMs support is not enabled for this Site<br>Conflicts with `enable_vm`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -12624,7 +12922,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 					},
 					"enable_vm": schema.BoolAttribute{
 						Description:         "VMs support Enabled VMs support is enabled for this Site",
-						MarkdownDescription: "VMs support Enabled VMs support is enabled for this Site",
+						MarkdownDescription: "VMs support Enabled VMs support is enabled for this Site<br>Conflicts with `disable_vm`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -12651,10 +12949,11 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 			},
 			"volterra_software_version": schema.StringAttribute{
 				Description:         "Software Version Desired volterra software version that should be installed on the site",
-				MarkdownDescription: "Software Version Desired volterra software version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`",
+				MarkdownDescription: "Software Version Desired volterra software version that should be installed on the site<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
@@ -12668,20 +12967,23 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"signatures_update_mode_choice": schema.SingleNestedAttribute{
 						Description:         "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
+						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.<br>Exactly one of `automatic` or `manual` must be specified when `signatures_update_mode_choice` is configured.",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
 						Validators: []validator.Object{
 							exactlyoneofvalidator.ExactlyOneOf(
 								"automatic",
 								"manual",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"automatic": schema.BoolAttribute{
 								Description:         "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.",
-								MarkdownDescription: "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.",
+								MarkdownDescription: "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.<br>Conflicts with `manual`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -12691,7 +12993,7 @@ func (r *ResourceF5XCAppstackSite) Schema(ctx context.Context, request resource.
 							},
 							"manual": schema.BoolAttribute{
 								Description:         "Manual update mode New WAF signatures will only be applied when an update is triggered manually.",
-								MarkdownDescription: "Manual update mode New WAF signatures will only be applied when an update is triggered manually.",
+								MarkdownDescription: "Manual update mode New WAF signatures will only be applied when an update is triggered manually.<br>Conflicts with `automatic`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -12777,9 +13079,17 @@ func (r *ResourceF5XCAppstackSite) ModifyPlan(ctx context.Context, req resource.
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAppstackSiteModel
 
 	// Read Terraform plan data into the model
@@ -12787,6 +13097,17 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCAppstackSiteModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.StorageCfgChoice.IsNull() && !configData.StorageCfgChoice.IsUnknown() {
+		data.StorageCfgChoice = configData.StorageCfgChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -12865,7 +13186,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		spec.Address = string(data.Address.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource modelToSpecRoot OneOfField --> BlockedServicesChoice
 	if !data.BlockedServicesChoice.IsNull() && !data.BlockedServicesChoice.IsUnknown() {
 		blockedServicesChoiceModel := AppstackSiteBlockedServicesChoice{}
 		response.Diagnostics.Append(data.BlockedServicesChoice.As(ctx, &blockedServicesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -12971,9 +13292,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			spec.BlockedServicesChoice = defaultBlockedServicesSpecBool
 		}
 
+	} else {
+		spec.BlockedServicesChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_DefaultBlockedServices{
+			DefaultBlockedServices: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BondChoice
+	// resource modelToSpecRoot OneOfField --> BondChoice
 	if !data.BondChoice.IsNull() && !data.BondChoice.IsUnknown() {
 		bondChoiceModel := AppstackSiteBondChoice{}
 		response.Diagnostics.Append(data.BondChoice.As(ctx, &bondChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13083,6 +13408,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			spec.BondChoice = noBondDevicesSpecBool
 		}
 
+	} else {
+		spec.BondChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_NoBondDevices{
+			NoBondDevices: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -13149,7 +13478,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> GpuChoice
+	// resource modelToSpecRoot OneOfField --> GpuChoice
 	if !data.GpuChoice.IsNull() && !data.GpuChoice.IsUnknown() {
 		gpuChoiceModel := AppstackSiteGpuChoice{}
 		response.Diagnostics.Append(data.GpuChoice.As(ctx, &gpuChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13220,9 +13549,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 		}
 
+	} else {
+		spec.GpuChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_DisableGpu{
+			DisableGpu: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> K8SClusterChoice
+	// resource modelToSpecRoot OneOfField --> K8SClusterChoice
 	if !data.K8SClusterChoice.IsNull() && !data.K8SClusterChoice.IsUnknown() {
 		k8SClusterChoiceModel := AppstackSiteK8SClusterChoice{}
 		response.Diagnostics.Append(data.K8SClusterChoice.As(ctx, &k8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13260,6 +13593,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			spec.K8SClusterChoice = noK8sClusterSpecBool
 		}
 
+	} else {
+		spec.K8SClusterChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_NoK8SCluster{
+			NoK8SCluster: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -13300,6 +13637,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -13329,7 +13669,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := AppstackSiteLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13367,6 +13707,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -13397,7 +13741,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		spec.MasterNodeConfiguration = masterNodeConfigurationSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> NetworkCfgChoice
+	// resource modelToSpecRoot OneOfField --> NetworkCfgChoice
 	if !data.NetworkCfgChoice.IsNull() && !data.NetworkCfgChoice.IsUnknown() {
 		networkCfgChoiceModel := AppstackSiteNetCfgChoice{}
 		response.Diagnostics.Append(data.NetworkCfgChoice.As(ctx, &networkCfgChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13414,6 +13758,27 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			}
 			customNetworkConfigOneOfSpec := &ves_io_schema_views_voltstack_site.CreateSpecType_CustomNetworkConfig{}
 			customNetworkConfigOneOfSpec.CustomNetworkConfig = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration{}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SliChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultSliConfig{
+				DefaultSliConfig: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.ForwardProxyChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.GlobalNetworkChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.InterfaceChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultInterfaceConfig{
+				DefaultInterfaceConfig: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.NetworkPolicyChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SiteMeshGroupChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_SmConnectionPvtIp{
+				SmConnectionPvtIp: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SloChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultConfig{
+				DefaultConfig: &ves_io_schema.Empty{},
+			}
 			spec.NetworkCfgChoice = customNetworkConfigOneOfSpec
 
 			// resource modelToSpecNested StringField --> BgpPeerAddress
@@ -13431,7 +13796,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.BgpRouterId = string(appstackSiteCustomNetConfigModel.BgpRouterId.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !appstackSiteCustomNetConfigModel.ForwardProxyChoice.IsNull() && !appstackSiteCustomNetConfigModel.ForwardProxyChoice.IsUnknown() {
 				customNetworkConfigForwardProxyChoiceModel := AppstackSiteForwardProxyChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.ForwardProxyChoice.As(ctx, &customNetworkConfigForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13501,7 +13866,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !appstackSiteCustomNetConfigModel.GlobalNetworkChoice.IsNull() && !appstackSiteCustomNetConfigModel.GlobalNetworkChoice.IsUnknown() {
 				customNetworkConfigGlobalNetworkChoiceModel := AppstackSiteGlobalNetChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.GlobalNetworkChoice.As(ctx, &customNetworkConfigGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13537,6 +13902,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -13636,7 +14004,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InterfaceChoice
+			// resource modelToSpecNested OneOfField --> InterfaceChoice
 			if !appstackSiteCustomNetConfigModel.InterfaceChoice.IsNull() && !appstackSiteCustomNetConfigModel.InterfaceChoice.IsUnknown() {
 				customNetworkConfigInterfaceChoiceModel := AppstackSiteIfaceChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.InterfaceChoice.As(ctx, &customNetworkConfigInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13679,10 +14047,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 						for i, interfacesElement := range interfacesElements {
 							// Initialize the spec struct for the current element
 							interfaceListOneOfSpec.InterfaceList.Interfaces[i] = &ves_io_schema_views_voltstack_site.Interface{}
+							interfaceListOneOfSpec.InterfaceList.Interfaces[i].DcClusterGroupConnectivityInterfaceChoice = &ves_io_schema_views_voltstack_site.Interface_DcClusterGroupConnectivityInterfaceDisabled{
+								DcClusterGroupConnectivityInterfaceDisabled: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
+							// resource modelToSpecNested OneOfField --> DcClusterGroupConnectivityInterfaceChoice
 							if !interfacesElement.DcClusterGroupConnectivityInterfaceChoice.IsNull() && !interfacesElement.DcClusterGroupConnectivityInterfaceChoice.IsUnknown() {
 								interfacesDcClusterGroupConnectivityInterfaceChoiceModel := AppstackSiteDcClusterGroupConnectivityIfaceChoice{}
 								response.Diagnostics.Append(interfacesElement.DcClusterGroupConnectivityInterfaceChoice.As(ctx, &interfacesDcClusterGroupConnectivityInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13728,6 +14099,12 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 									}
 									dedicatedInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_DedicatedInterface{}
 									dedicatedInterfaceOneOfSpec.DedicatedInterface = &ves_io_schema_network_interface.DedicatedInterfaceType{}
+									dedicatedInterfaceOneOfSpec.DedicatedInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_Cluster{
+										Cluster: &ves_io_schema.Empty{},
+									}
+									dedicatedInterfaceOneOfSpec.DedicatedInterface.PrimaryChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_NotPrimary{
+										NotPrimary: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = dedicatedInterfaceOneOfSpec
 
 									// resource modelToSpecNested RequiredStringField --> Device
@@ -13764,7 +14141,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 										dedicatedInterfaceOneOfSpec.DedicatedInterface.Mtu = uint32(uint32(appstackSiteDedicatedIfaceModel.Mtu.ValueInt64()))
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+									// resource modelToSpecNested OneOfField --> NodeChoice
 									if !appstackSiteDedicatedIfaceModel.NodeChoice.IsNull() && !appstackSiteDedicatedIfaceModel.NodeChoice.IsUnknown() {
 										dedicatedInterfaceNodeChoiceModel := AppstackSiteNodeChoice{}
 										response.Diagnostics.Append(appstackSiteDedicatedIfaceModel.NodeChoice.As(ctx, &dedicatedInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13788,7 +14165,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+									// resource modelToSpecNested OneOfField --> PrimaryChoice
 									if !appstackSiteDedicatedIfaceModel.PrimaryChoice.IsNull() && !appstackSiteDedicatedIfaceModel.PrimaryChoice.IsUnknown() {
 										dedicatedInterfacePrimaryChoiceModel := AppstackSitePrimaryChoice{}
 										response.Diagnostics.Append(appstackSiteDedicatedIfaceModel.PrimaryChoice.As(ctx, &dedicatedInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13828,6 +14205,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 									}
 									dedicatedManagementInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_DedicatedManagementInterface{}
 									dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface = &ves_io_schema_network_interface.DedicatedManagementInterfaceType{}
+									dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedManagementInterfaceType_Cluster{
+										Cluster: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = dedicatedManagementInterfaceOneOfSpec
 
 									// resource modelToSpecNested RequiredStringField --> Device
@@ -13840,7 +14220,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 										dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.Mtu = uint32(uint32(appstackSiteDedicatedMgmtIfaceModel.Mtu.ValueInt64()))
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+									// resource modelToSpecNested OneOfField --> NodeChoice
 									if !appstackSiteDedicatedMgmtIfaceModel.NodeChoice.IsNull() && !appstackSiteDedicatedMgmtIfaceModel.NodeChoice.IsUnknown() {
 										dedicatedManagementInterfaceNodeChoiceModel := AppstackSiteDedicatedMgmtIfaceTypeNodeChoice{}
 										response.Diagnostics.Append(appstackSiteDedicatedMgmtIfaceModel.NodeChoice.As(ctx, &dedicatedManagementInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13875,9 +14255,24 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 									}
 									ethernetInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_EthernetInterface{}
 									ethernetInterfaceOneOfSpec.EthernetInterface = &ves_io_schema_network_interface.EthernetInterfaceType{}
+									ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = &ves_io_schema_network_interface.EthernetInterfaceType_DhcpClient{
+										DhcpClient: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.NetworkChoice = &ves_io_schema_network_interface.EthernetInterfaceType_SiteLocalNetwork{
+										SiteLocalNetwork: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.NodeChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Cluster{
+										Cluster: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.PrimaryChoice = &ves_io_schema_network_interface.EthernetInterfaceType_NotPrimary{
+										NotPrimary: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.VlanChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Untagged{
+										Untagged: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = ethernetInterfaceOneOfSpec
 
-									// resource modelToSpecNested RequiredOneOfField --> AddressChoice
+									// resource modelToSpecNested OneOfField --> AddressChoice
 									if !appstackSiteEthernetIfaceModel.AddressChoice.IsNull() && !appstackSiteEthernetIfaceModel.AddressChoice.IsUnknown() {
 										ethernetInterfaceAddressChoiceModel := AppstackSiteAddrChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.AddressChoice.As(ctx, &ethernetInterfaceAddressChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13901,6 +14296,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 											}
 											dhcpServerOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_DhcpServer{}
 											dhcpServerOneOfSpec.DhcpServer = &ves_io_schema_network_interface.DHCPServerParametersType{}
+											dhcpServerOneOfSpec.DhcpServer.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart{
+												AutomaticFromStart: &ves_io_schema.Empty{},
+											}
 											ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = dhcpServerOneOfSpec
 
 											// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -13920,10 +14318,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												for ii, dhcpNetworksElement := range dhcpNetworksElements {
 													// Initialize the spec struct for the current element
 													dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii] = &ves_io_schema_network_interface.DHCPNetworkType{}
+													dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].DnsChoice = &ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw{
+														SameAsDgw: &ves_io_schema.Empty{},
+													}
+													dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].GatewayChoice = &ves_io_schema_network_interface.DHCPNetworkType_FirstAddress{
+														FirstAddress: &ves_io_schema.Empty{},
+													}
 
 													// Recursively process nested elements
 
-													// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+													// resource modelToSpecNested OneOfField --> DnsChoice
 													if !dhcpNetworksElement.DnsChoice.IsNull() && !dhcpNetworksElement.DnsChoice.IsUnknown() {
 														dhcpNetworksDnsChoiceModel := AppstackSiteDnsChoice{}
 														response.Diagnostics.Append(dhcpNetworksElement.DnsChoice.As(ctx, &dhcpNetworksDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13947,7 +14351,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
-													// resource modelToSpecNested RequiredOneOfField --> GatewayChoice
+													// resource modelToSpecNested OneOfField --> GatewayChoice
 													if !dhcpNetworksElement.GatewayChoice.IsNull() && !dhcpNetworksElement.GatewayChoice.IsUnknown() {
 														dhcpNetworksGatewayChoiceModel := AppstackSiteGatewayChoice{}
 														response.Diagnostics.Append(dhcpNetworksElement.GatewayChoice.As(ctx, &dhcpNetworksGatewayChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14069,7 +14473,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												dhcpServerOneOfSpec.DhcpServer.FixedIpMap = nil
 											}
 
-											// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+											// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 											if !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsNull() && !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsUnknown() {
 												dhcpServerInterfacesAddressingChoiceModel := AppstackSiteInterfacesAddressingChoice{}
 												response.Diagnostics.Append(appstackSiteDhcpServerModel.InterfacesAddressingChoice.As(ctx, &dhcpServerInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14245,9 +14649,12 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 											}
 											ipv6AutoConfigOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_Ipv6AutoConfig{}
 											ipv6AutoConfigOneOfSpec.Ipv6AutoConfig = &ves_io_schema_network_interface.IPV6AutoConfigType{}
+											ipv6AutoConfigOneOfSpec.Ipv6AutoConfig.AutoconfigChoice = &ves_io_schema_network_interface.IPV6AutoConfigType_Host{
+												Host: &ves_io_schema.Empty{},
+											}
 											ethernetInterfaceOneOfSpec.EthernetInterface.Ipv6AddressChoice = ipv6AutoConfigOneOfSpec
 
-											// resource modelToSpecNested RequiredOneOfField --> AutoconfigChoice
+											// resource modelToSpecNested OneOfField --> AutoconfigChoice
 											if !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsNull() && !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsUnknown() {
 												ipv6AutoConfigAutoconfigChoiceModel := AppstackSiteAutoconfigChoice{}
 												response.Diagnostics.Append(appstackSiteIpv6AutoConfigModel.AutoconfigChoice.As(ctx, &ipv6AutoConfigAutoconfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14297,6 +14704,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															}
 															statefulOneOfSpec := &ves_io_schema_network_interface.IPV6AutoConfigRouterType_Stateful{}
 															statefulOneOfSpec.Stateful = &ves_io_schema_network_interface.DHCPIPV6StatefulServer{}
+															statefulOneOfSpec.Stateful.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPIPV6StatefulServer_AutomaticFromStart{
+																AutomaticFromStart: &ves_io_schema.Empty{},
+															}
 															routerOneOfSpec.Router.AddressChoice = statefulOneOfSpec
 
 															// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -14410,7 +14820,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																statefulOneOfSpec.Stateful.FixedIpMap = nil
 															}
 
-															// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+															// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 															if !appstackSiteStatefulModel.InterfacesAddressingChoice.IsNull() && !appstackSiteStatefulModel.InterfacesAddressingChoice.IsUnknown() {
 																statefulInterfacesAddressingChoiceModel := AppstackSiteDHCPIPV6StatefulServerInterfacesAddressingChoice{}
 																response.Diagnostics.Append(appstackSiteStatefulModel.InterfacesAddressingChoice.As(ctx, &statefulInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14517,9 +14927,12 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																}
 																localDnsOneOfSpec := &ves_io_schema_network_interface.IPV6DnsConfig_LocalDns{}
 																localDnsOneOfSpec.LocalDns = &ves_io_schema_network_interface.IPV6LocalDnsAddress{}
+																localDnsOneOfSpec.LocalDns.LocalDnsChoice = &ves_io_schema_network_interface.IPV6LocalDnsAddress_FirstAddress{
+																	FirstAddress: &ves_io_schema.Empty{},
+																}
 																dnsConfigSpec.DnsChoice = localDnsOneOfSpec
 
-																// resource modelToSpecNested RequiredOneOfField --> LocalDnsChoice
+																// resource modelToSpecNested OneOfField --> LocalDnsChoice
 																if !appstackSiteLocalDnsModel.LocalDnsChoice.IsNull() && !appstackSiteLocalDnsModel.LocalDnsChoice.IsUnknown() {
 																	localDnsLocalDnsChoiceModel := AppstackSiteLocalDnsChoice{}
 																	response.Diagnostics.Append(appstackSiteLocalDnsModel.LocalDnsChoice.As(ctx, &localDnsLocalDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14694,7 +15107,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+									// resource modelToSpecNested OneOfField --> NetworkChoice
 									if !appstackSiteEthernetIfaceModel.NetworkChoice.IsNull() && !appstackSiteEthernetIfaceModel.NetworkChoice.IsUnknown() {
 										ethernetInterfaceNetworkChoiceModel := AppstackSiteNetChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.NetworkChoice.As(ctx, &ethernetInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14748,7 +15161,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+									// resource modelToSpecNested OneOfField --> NodeChoice
 									if !appstackSiteEthernetIfaceModel.NodeChoice.IsNull() && !appstackSiteEthernetIfaceModel.NodeChoice.IsUnknown() {
 										ethernetInterfaceNodeChoiceModel := AppstackSiteEthernetIfaceTypeNodeChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.NodeChoice.As(ctx, &ethernetInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14772,7 +15185,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+									// resource modelToSpecNested OneOfField --> PrimaryChoice
 									if !appstackSiteEthernetIfaceModel.PrimaryChoice.IsNull() && !appstackSiteEthernetIfaceModel.PrimaryChoice.IsUnknown() {
 										ethernetInterfacePrimaryChoiceModel := AppstackSiteEthernetIfaceTypePrimaryChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.PrimaryChoice.As(ctx, &ethernetInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14796,7 +15209,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+									// resource modelToSpecNested OneOfField --> VlanChoice
 									if !appstackSiteEthernetIfaceModel.VlanChoice.IsNull() && !appstackSiteEthernetIfaceModel.VlanChoice.IsUnknown() {
 										ethernetInterfaceVlanChoiceModel := AppstackSiteVlanChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.VlanChoice.As(ctx, &ethernetInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14831,6 +15244,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 									}
 									tunnelInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_TunnelInterface{}
 									tunnelInterfaceOneOfSpec.TunnelInterface = &ves_io_schema_network_interface.TunnelInterfaceType{}
+									tunnelInterfaceOneOfSpec.TunnelInterface.NetworkChoice = &ves_io_schema_network_interface.TunnelInterfaceType_SiteLocalNetwork{
+										SiteLocalNetwork: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = tunnelInterfaceOneOfSpec
 
 									// resource modelToSpecNested UintField --> Mtu
@@ -14838,7 +15254,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 										tunnelInterfaceOneOfSpec.TunnelInterface.Mtu = uint32(uint32(appstackSiteTunnelIfaceModel.Mtu.ValueInt64()))
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+									// resource modelToSpecNested OneOfField --> NetworkChoice
 									if !appstackSiteTunnelIfaceModel.NetworkChoice.IsNull() && !appstackSiteTunnelIfaceModel.NetworkChoice.IsUnknown() {
 										tunnelInterfaceNetworkChoiceModel := AppstackSiteTunnelIfaceTypeNetChoice{}
 										response.Diagnostics.Append(appstackSiteTunnelIfaceModel.NetworkChoice.As(ctx, &tunnelInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15018,6 +15434,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								if response.Diagnostics.HasError() {
 									return
 								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
+								}
 
 								interfacesSpec[i].Labels = mapOfString
 							} else {
@@ -15031,7 +15454,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !appstackSiteCustomNetConfigModel.NetworkPolicyChoice.IsNull() && !appstackSiteCustomNetConfigModel.NetworkPolicyChoice.IsUnknown() {
 				customNetworkConfigNetworkPolicyChoiceModel := AppstackSiteNetPolicyChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.NetworkPolicyChoice.As(ctx, &customNetworkConfigNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15160,7 +15583,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.OutsideVipV6 = string(appstackSiteCustomNetConfigModel.OutsideVipV6.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !appstackSiteCustomNetConfigModel.SiteMeshGroupChoice.IsNull() && !appstackSiteCustomNetConfigModel.SiteMeshGroupChoice.IsUnknown() {
 				customNetworkConfigSiteMeshGroupChoiceModel := AppstackSiteSiteMeshGroupChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.SiteMeshGroupChoice.As(ctx, &customNetworkConfigSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15191,7 +15614,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SloChoice
+			// resource modelToSpecNested OneOfField --> SloChoice
 			if !appstackSiteCustomNetConfigModel.SloChoice.IsNull() && !appstackSiteCustomNetConfigModel.SloChoice.IsUnknown() {
 				customNetworkConfigSloChoiceModel := AppstackSiteSloChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.SloChoice.As(ctx, &customNetworkConfigSloChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15215,9 +15638,18 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					}
 					sloConfigOneOfSpec := &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_SloConfig{}
 					sloConfigOneOfSpec.SloConfig = &ves_io_schema_views_voltstack_site.VnConfiguration{}
+					sloConfigOneOfSpec.SloConfig.DcClusterGroupChoice = &ves_io_schema_views_voltstack_site.VnConfiguration_NoDcClusterGroup{
+						NoDcClusterGroup: &ves_io_schema.Empty{},
+					}
+					sloConfigOneOfSpec.SloConfig.StaticRouteChoice = &ves_io_schema_views_voltstack_site.VnConfiguration_NoStaticRoutes{
+						NoStaticRoutes: &ves_io_schema.Empty{},
+					}
+					sloConfigOneOfSpec.SloConfig.StaticV6RouteChoice = &ves_io_schema_views_voltstack_site.VnConfiguration_NoStaticV6Routes{
+						NoStaticV6Routes: &ves_io_schema.Empty{},
+					}
 					customNetworkConfigOneOfSpec.CustomNetworkConfig.SloChoice = sloConfigOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+					// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 					if !appstackSiteSloConfigModel.DcClusterGroupChoice.IsNull() && !appstackSiteSloConfigModel.DcClusterGroupChoice.IsUnknown() {
 						sloConfigDcClusterGroupChoiceModel := AppstackSiteDcClusterGroupChoice{}
 						response.Diagnostics.Append(appstackSiteSloConfigModel.DcClusterGroupChoice.As(ctx, &sloConfigDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15265,13 +15697,20 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 						if response.Diagnostics.HasError() {
 							return
 						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
+						}
 
 						sloConfigOneOfSpec.SloConfig.Labels = mapOfString
 					} else {
 						sloConfigOneOfSpec.SloConfig.Labels = nil
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> StaticRouteChoice
+					// resource modelToSpecNested OneOfField --> StaticRouteChoice
 					if !appstackSiteSloConfigModel.StaticRouteChoice.IsNull() && !appstackSiteSloConfigModel.StaticRouteChoice.IsUnknown() {
 						sloConfigStaticRouteChoiceModel := AppstackSiteStaticRouteChoice{}
 						response.Diagnostics.Append(appstackSiteSloConfigModel.StaticRouteChoice.As(ctx, &sloConfigStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15458,7 +15897,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> StaticV6RouteChoice
+					// resource modelToSpecNested OneOfField --> StaticV6RouteChoice
 					if !appstackSiteSloConfigModel.StaticV6RouteChoice.IsNull() && !appstackSiteSloConfigModel.StaticV6RouteChoice.IsUnknown() {
 						sloConfigStaticV6RouteChoiceModel := AppstackSiteStaticV6RouteChoice{}
 						response.Diagnostics.Append(appstackSiteSloConfigModel.StaticV6RouteChoice.As(ctx, &sloConfigStaticV6RouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15652,6 +16091,8 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			// resource modelToSpecNested UintField --> TunnelDeadTimeout
 			if !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsNull() && !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsUnknown() {
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(uint32(appstackSiteCustomNetConfigModel.TunnelDeadTimeout.ValueInt64()))
+			} else {
+				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(0)
 			}
 
 			// resource modelToSpecNested EnumField --> VipVrrpMode
@@ -15687,12 +16128,19 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			spec.NetworkCfgChoice = defaultNetworkConfigSpecBool
 		}
 
+	} else {
+		spec.NetworkCfgChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_DefaultNetworkConfig{
+			DefaultNetworkConfig: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
 		// resource modelToSpecRoot PointerField --> OfflineSurvivabilityMode
 		if !data.OfflineSurvivabilityMode.IsNull() && !data.OfflineSurvivabilityMode.IsUnknown() {
 			offlineSurvivabilityModeSpec := &ves_io_schema_views.OfflineSurvivabilityModeType{}
+			offlineSurvivabilityModeSpec.OfflineSurvivabilityModeChoice = &ves_io_schema_views.OfflineSurvivabilityModeType_NoOfflineSurvivabilityMode{
+				NoOfflineSurvivabilityMode: &ves_io_schema.Empty{},
+			}
 			spec.OfflineSurvivabilityMode = offlineSurvivabilityModeSpec
 			var offlineSurvivabilityModeModel AppstackSiteOfflineSurvivabilityModeType
 
@@ -15703,7 +16151,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
+			// resource modelToSpecNested OneOfField --> OfflineSurvivabilityModeChoice
 			if !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsNull() && !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsUnknown() {
 				offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel := AppstackSiteOfflineSurvivabilityModeChoice{}
 				response.Diagnostics.Append(offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.As(ctx, &offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15734,6 +16182,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> Os
 		if !data.Os.IsNull() && !data.Os.IsUnknown() {
 			osSpec := &ves_io_schema_views.OperatingSystemType{}
+			osSpec.OperatingSystemVersionChoice = &ves_io_schema_views.OperatingSystemType_DefaultOsVersion{
+				DefaultOsVersion: &ves_io_schema.Empty{},
+			}
 			spec.Os = osSpec
 			var osModel AppstackSiteOperatingSystemType
 
@@ -15744,7 +16195,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OperatingSystemVersionChoice
+			// resource modelToSpecNested OneOfField --> OperatingSystemVersionChoice
 			if !osModel.OperatingSystemVersionChoice.IsNull() && !osModel.OperatingSystemVersionChoice.IsUnknown() {
 				osOperatingSystemVersionChoiceModel := AppstackSiteOperatingSystemVersionChoice{}
 				response.Diagnostics.Append(osModel.OperatingSystemVersionChoice.As(ctx, &osOperatingSystemVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15771,7 +16222,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource modelToSpecRoot OneOfField --> SriovInterfaceChoice
 	if !data.SriovInterfaceChoice.IsNull() && !data.SriovInterfaceChoice.IsUnknown() {
 		sriovInterfaceChoiceModel := AppstackSiteSriovIfaceChoice{}
 		response.Diagnostics.Append(data.SriovInterfaceChoice.As(ctx, &sriovInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15835,6 +16286,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 		}
 
+	} else {
+		spec.SriovInterfaceChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_DefaultSriovInterface{
+			DefaultSriovInterface: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> StorageCfgChoice
@@ -15854,9 +16309,18 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			}
 			customStorageConfigOneOfSpec := &ves_io_schema_views_voltstack_site.CreateSpecType_CustomStorageConfig{}
 			customStorageConfigOneOfSpec.CustomStorageConfig = &ves_io_schema_views_voltstack_site.VssStorageConfiguration{}
+			customStorageConfigOneOfSpec.CustomStorageConfig.StaticRouteChoice = &ves_io_schema_views_voltstack_site.VssStorageConfiguration_NoStaticRoutes{
+				NoStaticRoutes: &ves_io_schema.Empty{},
+			}
+			customStorageConfigOneOfSpec.CustomStorageConfig.StorageClassChoice = &ves_io_schema_views_voltstack_site.VssStorageConfiguration_DefaultStorageClass{
+				DefaultStorageClass: &ves_io_schema.Empty{},
+			}
+			customStorageConfigOneOfSpec.CustomStorageConfig.StorageInterfaceChoice = &ves_io_schema_views_voltstack_site.VssStorageConfiguration_NoStorageInterfaces{
+				NoStorageInterfaces: &ves_io_schema.Empty{},
+			}
 			spec.StorageCfgChoice = customStorageConfigOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticRouteChoice
+			// resource modelToSpecNested OneOfField --> StaticRouteChoice
 			if !appstackSiteCustomStorageConfigModel.StaticRouteChoice.IsNull() && !appstackSiteCustomStorageConfigModel.StaticRouteChoice.IsUnknown() {
 				customStorageConfigStaticRouteChoiceModel := AppstackSiteVssStorageCfgStaticRouteChoice{}
 				response.Diagnostics.Append(appstackSiteCustomStorageConfigModel.StaticRouteChoice.As(ctx, &customStorageConfigStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16043,7 +16507,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StorageClassChoice
+			// resource modelToSpecNested OneOfField --> StorageClassChoice
 			if !appstackSiteCustomStorageConfigModel.StorageClassChoice.IsNull() && !appstackSiteCustomStorageConfigModel.StorageClassChoice.IsUnknown() {
 				customStorageConfigStorageClassChoiceModel := AppstackSiteStorageClassChoice{}
 				response.Diagnostics.Append(appstackSiteCustomStorageConfigModel.StorageClassChoice.As(ctx, &customStorageConfigStorageClassChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16500,6 +16964,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 											}
 
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !iscsiChapPasswordSecretInfoChoiceModel.None.IsNull() && !iscsiChapPasswordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												iscsiChapPasswordSpec.SecretInfoOneof = noneSpecBool
+											}
+
 										}
 
 									}
@@ -16577,6 +17048,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 													clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 												}
 
+											}
+
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												passwordSpec.SecretInfoOneof = noneSpecBool
 											}
 
 										}
@@ -16756,6 +17234,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -16791,6 +17276,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.Labels = mapOfString
@@ -16907,6 +17399,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -16944,6 +17443,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
+														}
 
 														storageSpec[ii].Labels = mapOfString
 													} else {
@@ -16959,6 +17465,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														}
 
 														volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+														volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+															NoQos: &ves_io_schema.Empty{},
+														}
 														storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 														// resource modelToSpecNested BoolField --> Encryption
@@ -16973,7 +17482,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 														}
 
-														// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+														// resource modelToSpecNested OneOfField --> QosPolicyChoice
 														if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 															volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 															response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17094,6 +17603,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -17108,7 +17620,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17296,6 +17808,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -17368,6 +17887,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																	clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 																}
 
+															}
+
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapTargetInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
 															}
 
 														}
@@ -17463,6 +17989,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -17503,6 +18036,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.Labels = mapOfString
@@ -17614,6 +18154,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -17651,6 +18198,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
+														}
 
 														storageSpec[ii].Labels = mapOfString
 													} else {
@@ -17666,6 +18220,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														}
 
 														volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+														volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+															NoQos: &ves_io_schema.Empty{},
+														}
 														storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 														// resource modelToSpecNested BoolField --> Encryption
@@ -17680,7 +18237,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 														}
 
-														// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+														// resource modelToSpecNested OneOfField --> QosPolicyChoice
 														if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 															volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 															response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17801,6 +18358,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -17815,7 +18375,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18053,6 +18613,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -18064,6 +18631,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														flashArraysSpec[ii].Labels = mapOfString
@@ -18221,6 +18795,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -18329,7 +18910,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StorageInterfaceChoice
+			// resource modelToSpecNested OneOfField --> StorageInterfaceChoice
 			if !appstackSiteCustomStorageConfigModel.StorageInterfaceChoice.IsNull() && !appstackSiteCustomStorageConfigModel.StorageInterfaceChoice.IsUnknown() {
 				customStorageConfigStorageInterfaceChoiceModel := AppstackSiteStorageIfaceChoice{}
 				response.Diagnostics.Append(appstackSiteCustomStorageConfigModel.StorageInterfaceChoice.As(ctx, &customStorageConfigStorageInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18388,6 +18969,13 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								if response.Diagnostics.HasError() {
 									return
 								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
+								}
 
 								storageInterfacesSpec[i].Labels = mapOfString
 							} else {
@@ -18403,9 +18991,24 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								}
 
 								storageInterfaceSpec := &ves_io_schema_network_interface.EthernetInterfaceType{}
+								storageInterfaceSpec.AddressChoice = &ves_io_schema_network_interface.EthernetInterfaceType_DhcpClient{
+									DhcpClient: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.NetworkChoice = &ves_io_schema_network_interface.EthernetInterfaceType_SiteLocalNetwork{
+									SiteLocalNetwork: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.NodeChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Cluster{
+									Cluster: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.PrimaryChoice = &ves_io_schema_network_interface.EthernetInterfaceType_NotPrimary{
+									NotPrimary: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.VlanChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Untagged{
+									Untagged: &ves_io_schema.Empty{},
+								}
 								storageInterfacesSpec[i].StorageInterface = storageInterfaceSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> AddressChoice
+								// resource modelToSpecNested OneOfField --> AddressChoice
 								if !storageInterfaceModel.AddressChoice.IsNull() && !storageInterfaceModel.AddressChoice.IsUnknown() {
 									storageInterfaceAddressChoiceModel := AppstackSiteAddrChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.AddressChoice.As(ctx, &storageInterfaceAddressChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18429,6 +19032,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 										}
 										dhcpServerOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_DhcpServer{}
 										dhcpServerOneOfSpec.DhcpServer = &ves_io_schema_network_interface.DHCPServerParametersType{}
+										dhcpServerOneOfSpec.DhcpServer.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart{
+											AutomaticFromStart: &ves_io_schema.Empty{},
+										}
 										storageInterfaceSpec.AddressChoice = dhcpServerOneOfSpec
 
 										// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -18448,10 +19054,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 											for ii, dhcpNetworksElement := range dhcpNetworksElements {
 												// Initialize the spec struct for the current element
 												dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii] = &ves_io_schema_network_interface.DHCPNetworkType{}
+												dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].DnsChoice = &ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw{
+													SameAsDgw: &ves_io_schema.Empty{},
+												}
+												dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].GatewayChoice = &ves_io_schema_network_interface.DHCPNetworkType_FirstAddress{
+													FirstAddress: &ves_io_schema.Empty{},
+												}
 
 												// Recursively process nested elements
 
-												// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+												// resource modelToSpecNested OneOfField --> DnsChoice
 												if !dhcpNetworksElement.DnsChoice.IsNull() && !dhcpNetworksElement.DnsChoice.IsUnknown() {
 													dhcpNetworksDnsChoiceModel := AppstackSiteDnsChoice{}
 													response.Diagnostics.Append(dhcpNetworksElement.DnsChoice.As(ctx, &dhcpNetworksDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18475,7 +19087,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> GatewayChoice
+												// resource modelToSpecNested OneOfField --> GatewayChoice
 												if !dhcpNetworksElement.GatewayChoice.IsNull() && !dhcpNetworksElement.GatewayChoice.IsUnknown() {
 													dhcpNetworksGatewayChoiceModel := AppstackSiteGatewayChoice{}
 													response.Diagnostics.Append(dhcpNetworksElement.GatewayChoice.As(ctx, &dhcpNetworksGatewayChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18597,7 +19209,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 											dhcpServerOneOfSpec.DhcpServer.FixedIpMap = nil
 										}
 
-										// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+										// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 										if !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsNull() && !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsUnknown() {
 											dhcpServerInterfacesAddressingChoiceModel := AppstackSiteInterfacesAddressingChoice{}
 											response.Diagnostics.Append(appstackSiteDhcpServerModel.InterfacesAddressingChoice.As(ctx, &dhcpServerInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18773,9 +19385,12 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 										}
 										ipv6AutoConfigOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_Ipv6AutoConfig{}
 										ipv6AutoConfigOneOfSpec.Ipv6AutoConfig = &ves_io_schema_network_interface.IPV6AutoConfigType{}
+										ipv6AutoConfigOneOfSpec.Ipv6AutoConfig.AutoconfigChoice = &ves_io_schema_network_interface.IPV6AutoConfigType_Host{
+											Host: &ves_io_schema.Empty{},
+										}
 										storageInterfaceSpec.Ipv6AddressChoice = ipv6AutoConfigOneOfSpec
 
-										// resource modelToSpecNested RequiredOneOfField --> AutoconfigChoice
+										// resource modelToSpecNested OneOfField --> AutoconfigChoice
 										if !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsNull() && !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsUnknown() {
 											ipv6AutoConfigAutoconfigChoiceModel := AppstackSiteAutoconfigChoice{}
 											response.Diagnostics.Append(appstackSiteIpv6AutoConfigModel.AutoconfigChoice.As(ctx, &ipv6AutoConfigAutoconfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18825,6 +19440,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														}
 														statefulOneOfSpec := &ves_io_schema_network_interface.IPV6AutoConfigRouterType_Stateful{}
 														statefulOneOfSpec.Stateful = &ves_io_schema_network_interface.DHCPIPV6StatefulServer{}
+														statefulOneOfSpec.Stateful.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPIPV6StatefulServer_AutomaticFromStart{
+															AutomaticFromStart: &ves_io_schema.Empty{},
+														}
 														routerOneOfSpec.Router.AddressChoice = statefulOneOfSpec
 
 														// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -18938,7 +19556,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															statefulOneOfSpec.Stateful.FixedIpMap = nil
 														}
 
-														// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+														// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 														if !appstackSiteStatefulModel.InterfacesAddressingChoice.IsNull() && !appstackSiteStatefulModel.InterfacesAddressingChoice.IsUnknown() {
 															statefulInterfacesAddressingChoiceModel := AppstackSiteDHCPIPV6StatefulServerInterfacesAddressingChoice{}
 															response.Diagnostics.Append(appstackSiteStatefulModel.InterfacesAddressingChoice.As(ctx, &statefulInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19045,9 +19663,12 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															}
 															localDnsOneOfSpec := &ves_io_schema_network_interface.IPV6DnsConfig_LocalDns{}
 															localDnsOneOfSpec.LocalDns = &ves_io_schema_network_interface.IPV6LocalDnsAddress{}
+															localDnsOneOfSpec.LocalDns.LocalDnsChoice = &ves_io_schema_network_interface.IPV6LocalDnsAddress_FirstAddress{
+																FirstAddress: &ves_io_schema.Empty{},
+															}
 															dnsConfigSpec.DnsChoice = localDnsOneOfSpec
 
-															// resource modelToSpecNested RequiredOneOfField --> LocalDnsChoice
+															// resource modelToSpecNested OneOfField --> LocalDnsChoice
 															if !appstackSiteLocalDnsModel.LocalDnsChoice.IsNull() && !appstackSiteLocalDnsModel.LocalDnsChoice.IsUnknown() {
 																localDnsLocalDnsChoiceModel := AppstackSiteLocalDnsChoice{}
 																response.Diagnostics.Append(appstackSiteLocalDnsModel.LocalDnsChoice.As(ctx, &localDnsLocalDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19222,7 +19843,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+								// resource modelToSpecNested OneOfField --> NetworkChoice
 								if !storageInterfaceModel.NetworkChoice.IsNull() && !storageInterfaceModel.NetworkChoice.IsUnknown() {
 									storageInterfaceNetworkChoiceModel := AppstackSiteNetChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.NetworkChoice.As(ctx, &storageInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19276,7 +19897,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+								// resource modelToSpecNested OneOfField --> NodeChoice
 								if !storageInterfaceModel.NodeChoice.IsNull() && !storageInterfaceModel.NodeChoice.IsUnknown() {
 									storageInterfaceNodeChoiceModel := AppstackSiteEthernetIfaceTypeNodeChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.NodeChoice.As(ctx, &storageInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19300,7 +19921,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+								// resource modelToSpecNested OneOfField --> PrimaryChoice
 								if !storageInterfaceModel.PrimaryChoice.IsNull() && !storageInterfaceModel.PrimaryChoice.IsUnknown() {
 									storageInterfacePrimaryChoiceModel := AppstackSiteEthernetIfaceTypePrimaryChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.PrimaryChoice.As(ctx, &storageInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19324,7 +19945,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+								// resource modelToSpecNested OneOfField --> VlanChoice
 								if !storageInterfaceModel.VlanChoice.IsNull() && !storageInterfaceModel.VlanChoice.IsUnknown() {
 									storageInterfaceVlanChoiceModel := AppstackSiteVlanChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.VlanChoice.As(ctx, &storageInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19372,6 +19993,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> Sw
 		if !data.Sw.IsNull() && !data.Sw.IsUnknown() {
 			swSpec := &ves_io_schema_views.VolterraSoftwareType{}
+			swSpec.VolterraSwVersionChoice = &ves_io_schema_views.VolterraSoftwareType_DefaultSwVersion{
+				DefaultSwVersion: &ves_io_schema.Empty{},
+			}
 			spec.Sw = swSpec
 			var swModel AppstackSiteVolterraSoftwareType
 
@@ -19382,7 +20006,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VolterraSwVersionChoice
+			// resource modelToSpecNested OneOfField --> VolterraSwVersionChoice
 			if !swModel.VolterraSwVersionChoice.IsNull() && !swModel.VolterraSwVersionChoice.IsUnknown() {
 				swVolterraSwVersionChoiceModel := AppstackSiteVolterraSwVersionChoice{}
 				response.Diagnostics.Append(swModel.VolterraSwVersionChoice.As(ctx, &swVolterraSwVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19409,7 +20033,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource modelToSpecRoot OneOfField --> UsbPolicyChoice
 	if !data.UsbPolicyChoice.IsNull() && !data.UsbPolicyChoice.IsUnknown() {
 		usbPolicyChoiceModel := AppstackSiteUsbPolicyChoice{}
 		response.Diagnostics.Append(data.UsbPolicyChoice.As(ctx, &usbPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19454,6 +20078,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 		}
 
+	} else {
+		spec.UsbPolicyChoice = &ves_io_schema_views_voltstack_site.CreateSpecType_DenyAllUsb{
+			DenyAllUsb: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> VmChoice
@@ -19487,6 +20115,9 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> WafSignatures
 		if !data.WafSignatures.IsNull() && !data.WafSignatures.IsUnknown() {
 			wafSignaturesSpec := &ves_io_schema_views_common_waf.LiveSignaturesUpdate{}
+			wafSignaturesSpec.SignaturesUpdateModeChoice = &ves_io_schema_views_common_waf.LiveSignaturesUpdate_Manual{
+				Manual: &ves_io_schema.Empty{},
+			}
 			spec.WafSignatures = wafSignaturesSpec
 			var wafSignaturesModel AppstackSiteLiveSignaturesUpdate
 
@@ -19537,7 +20168,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -19560,7 +20191,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "appstack_site", err),
 		)
 		return
 	}
@@ -19679,14 +20310,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -19844,12 +20471,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockedServicesChoice = types.ObjectNull(AppstackSiteBlockedServicesChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BondChoice
+	// resource SpecToModelRoot OneOfField --> BondChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -20026,8 +20651,6 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BondChoice = types.ObjectNull(AppstackSiteBondChoiceModelAttributeMap)
 	}
 
@@ -20121,7 +20744,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		data.CustomDns = types.ObjectNull(AppstackSiteCustomDnsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> GpuChoice
+	// resource SpecToModelRoot OneOfField --> GpuChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -20217,12 +20840,10 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.GpuChoice = types.ObjectNull(AppstackSiteGpuChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> K8SClusterChoice
+	// resource SpecToModelRoot OneOfField --> K8SClusterChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -20306,8 +20927,6 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.K8SClusterChoice = types.ObjectNull(AppstackSiteK8SClusterChoiceModelAttributeMap)
 	}
 
@@ -20433,10 +21052,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		data.KubernetesUpgradeDrain = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot BoolField --> LaunchIkeInNamespace
-	data.LaunchIkeInNamespace = types.BoolValue(specData.GetLaunchIkeInNamespace())
-
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -20520,8 +21136,6 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogsReceiverChoice = types.ObjectNull(AppstackSiteLogsReceiverChoiceModelAttributeMap)
 	}
 
@@ -20564,7 +21178,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		data.MasterNodeConfiguration = masterNodeConfigurationList
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkCfgChoice
+	// resource SpecToModelRoot OneOfField --> NetworkCfgChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -20611,8 +21225,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["bgp_router_id"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if customNetworkConfigElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20730,8 +21343,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["forward_proxy_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if customNetworkConfigElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20988,8 +21600,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["global_network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InterfaceChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InterfaceChoice
 				if customNetworkConfigElement.GetInterfaceChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfiginterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21027,8 +21638,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								for _, interfacesElement := range interfaceListElement.GetInterfaces() {
 									appstackSiteIfaceModel := AppstackSiteIface{}
 
-									// resource specToModelNested RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> DcClusterGroupConnectivityInterfaceChoice
 									if interfacesElement.GetDcClusterGroupConnectivityInterfaceChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										interfacesdcClusterGroupConnectivityInterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21162,8 +21772,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												dedicatedInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NodeChoice
 												if dedicatedInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21211,8 +21820,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 													dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap)
 												}
 
-												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> PrimaryChoice
 												if dedicatedInterfaceElement.GetPrimaryChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21294,8 +21902,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												dedicatedManagementInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedManagementInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NodeChoice
 												if dedicatedManagementInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedManagementInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21364,8 +21971,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 											if isEthernetInterface && ethernetInterfaceOptionsWrapper != nil && ethernetInterfaceOptionsWrapper.EthernetInterface != nil {
 												ethernetInterfaceElement := ethernetInterfaceOptionsWrapper.EthernetInterface
 
-												// resource specToModelNested RequiredOneOfField --> AddressChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> AddressChoice
 												if ethernetInterfaceElement.GetAddressChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfaceaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21402,8 +22008,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 																	appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
-																	// resource specToModelNested RequiredOneOfField --> DnsChoice
-																	// GlobalSpecType
+																	// resource specToModelNested OneOfField --> DnsChoice
 																	if dhcpNetworksElement.GetDnsChoice() != nil {
 																		// Create a temporary attribute map for the choices within this OneOf
 																		dhcpNetworksdnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21451,8 +22056,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 																	}
 
-																	// resource specToModelNested RequiredOneOfField --> GatewayChoice
-																	// GlobalSpecType
+																	// resource specToModelNested OneOfField --> GatewayChoice
 																	if dhcpNetworksElement.GetGatewayChoice() != nil {
 																		// Create a temporary attribute map for the choices within this OneOf
 																		dhcpNetworksgatewayChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21647,8 +22251,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 															}
 
-															// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 															if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpServerinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21943,8 +22546,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 															ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-															// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> AutoconfigChoice
 															if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																ipv6AutoConfigautoconfigChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22145,8 +22747,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																						statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 																					}
 
-																					// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-																					// GlobalSpecType
+																					// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 																					if statefulElement.GetInterfacesAddressingChoice() != nil {
 																						// Create a temporary attribute map for the choices within this OneOf
 																						statefulinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22325,8 +22926,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																					if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 																						localDnsElement := localDnsOptionsWrapper.LocalDns
 
-																						// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-																						// GlobalSpecType
+																						// resource specToModelNested OneOfField --> LocalDnsChoice
 																						if localDnsElement.GetLocalDnsChoice() != nil {
 																							// Create a temporary attribute map for the choices within this OneOf
 																							localDnslocalDnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22741,8 +23341,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												ethernetInterfaceAttributeMap["mtu"] = types.Int64Value(int64(ethernetInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NetworkChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NetworkChoice
 												if ethernetInterfaceElement.GetNetworkChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22843,8 +23442,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 													ethernetInterfaceAttributeMap["network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap)
 												}
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NodeChoice
 												if ethernetInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22892,8 +23490,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 													ethernetInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap)
 												}
 
-												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> PrimaryChoice
 												if ethernetInterfaceElement.GetPrimaryChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22943,8 +23540,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Priority
 												ethernetInterfaceAttributeMap["priority"] = types.Int64Value(int64(ethernetInterfaceElement.GetPriority()))
 
-												// resource specToModelNested RequiredOneOfField --> VlanChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> VlanChoice
 												if ethernetInterfaceElement.GetVlanChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacevlanChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23016,8 +23612,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												tunnelInterfaceAttributeMap["mtu"] = types.Int64Value(int64(tunnelInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NetworkChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NetworkChoice
 												if tunnelInterfaceElement.GetNetworkChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													tunnelInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23346,15 +23941,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if interfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(interfacesElement.GetLabels()))
 										for k, v := range interfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -23420,8 +24016,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["interface_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if customNetworkConfigElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfignetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23633,8 +24228,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["outside_vip_v6"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if customNetworkConfigElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23691,8 +24285,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SloChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SloChoice
 				if customNetworkConfigElement.GetSloChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigsloChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23721,8 +24314,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 						if isSloConfig && sloConfigOptionsWrapper != nil && sloConfigOptionsWrapper.SloConfig != nil {
 							sloConfigElement := sloConfigOptionsWrapper.SloConfig
 
-							// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> DcClusterGroupChoice
 							if sloConfigElement.GetDcClusterGroupChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23807,15 +24399,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 							// resource specToModelNested MapOfStringField --> Labels
 							if sloConfigElement.GetLabels() != nil {
-								// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-								// They will be picked up during the next Read.
-								filteredMap := make(map[string]string)
+								// Filter out configured omitted map keys across all operations so backend-injected
+								// forbidden keys never enter or vanish from Terraform state.
+								filteredMap := make(map[string]string, len(sloConfigElement.GetLabels()))
 								for k, v := range sloConfigElement.GetLabels() {
-									if !strings.HasPrefix(k, "ves.io/") {
-										filteredMap[k] = v
-									}
+									filteredMap[k] = v
 								}
-
+								delete(filteredMap, "ves.io/config-propagation-destination")
+								delete(filteredMap, "ves.io/app_type")
+								delete(filteredMap, "ves.io/api-scope")
+								delete(filteredMap, "ves.io/provider")
 								if len(filteredMap) > 0 {
 									labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 									response.Diagnostics.Append(labelsDiags...)
@@ -23832,8 +24425,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								sloConfigAttributeMap["labels"] = types.MapNull(types.StringType)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> StaticRouteChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> StaticRouteChoice
 							if sloConfigElement.GetStaticRouteChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigstaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24106,8 +24698,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 								sloConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> StaticV6RouteChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> StaticV6RouteChoice
 							if sloConfigElement.GetStaticV6RouteChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigstaticV6RouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24173,29 +24764,31 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: reconcile backend list order against client representation.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													} else {
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													}
 												}
 
@@ -24488,8 +25081,6 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.NetworkCfgChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceModelAttributeMap)
 	}
 
@@ -24498,8 +25089,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		var appstackSiteOfflineSurvivabilityModeTypeModel = &AppstackSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24561,20 +25151,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// resource SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
 		var appstackSiteOperatingSystemTypeModel = &AppstackSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24636,7 +25221,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		data.Os = types.ObjectNull(AppstackSiteOsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> SriovInterfaceChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -24736,8 +25321,6 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SriovInterfaceChoice = types.ObjectNull(AppstackSiteSriovInterfaceChoiceModelAttributeMap)
 	}
 
@@ -24764,8 +25347,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			if isCustomStorageConfig && customStorageConfigOptionsWrapper != nil && customStorageConfigOptionsWrapper.CustomStorageConfig != nil {
 				customStorageConfigElement := customStorageConfigOptionsWrapper.CustomStorageConfig
 
-				// resource specToModelNested RequiredOneOfField --> StaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StaticRouteChoice
 				if customStorageConfigElement.GetStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25038,8 +25620,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customStorageConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if customStorageConfigElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25628,6 +26209,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															}
 														}
 
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -25772,6 +26362,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 															} else {
 																passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -26051,6 +26650,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -26139,15 +26747,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapNasElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapNasElement.GetLabels()))
 																for k, v := range netappBackendOntapNasElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -26339,6 +26948,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -26394,15 +27012,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -26438,8 +27057,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
-																		// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																		// GlobalSpecType
+																		// resource specToModelNested OneOfField --> QosPolicyChoice
 																		if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																			// Create a temporary attribute map for the choices within this OneOf
 																			volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26649,8 +27267,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
-																// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																// GlobalSpecType
+																// resource specToModelNested OneOfField --> QosPolicyChoice
 																if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																	// Create a temporary attribute map for the choices within this OneOf
 																	volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26926,6 +27543,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																					}
 																				}
 
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																				}
+
 																				// --- End of Choices ---
 
 																				// Create the final ObjectValue for this OneOf field
@@ -27062,6 +27688,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																					} else {
 																						chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																					}
+																				}
+
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																				}
 
 																				// --- End of Choices ---
@@ -27256,6 +27891,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -27352,15 +27996,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapSanElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapSanElement.GetLabels()))
 																for k, v := range netappBackendOntapSanElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -27534,6 +28179,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -27589,15 +28243,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -27633,8 +28288,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
-																		// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																		// GlobalSpecType
+																		// resource specToModelNested OneOfField --> QosPolicyChoice
 																		if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																			// Create a temporary attribute map for the choices within this OneOf
 																			volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27844,8 +28498,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
-																// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																// GlobalSpecType
+																// resource specToModelNested OneOfField --> QosPolicyChoice
 																if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																	// Create a temporary attribute map for the choices within this OneOf
 																	volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28180,6 +28833,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																			}
 																		}
 
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -28219,15 +28881,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 																// resource specToModelNested MapOfStringField --> Labels
 																if flashArraysElement.GetLabels() != nil {
-																	// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																	// They will be picked up during the next Read.
-																	filteredMap := make(map[string]string)
+																	// Filter out configured omitted map keys across all operations so backend-injected
+																	// forbidden keys never enter or vanish from Terraform state.
+																	filteredMap := make(map[string]string, len(flashArraysElement.GetLabels()))
 																	for k, v := range flashArraysElement.GetLabels() {
-																		if !strings.HasPrefix(k, "ves.io/") {
-																			filteredMap[k] = v
-																		}
+																		filteredMap[k] = v
 																	}
-
+																	delete(filteredMap, "ves.io/config-propagation-destination")
+																	delete(filteredMap, "ves.io/app_type")
+																	delete(filteredMap, "ves.io/api-scope")
+																	delete(filteredMap, "ves.io/provider")
 																	if len(filteredMap) > 0 {
 																		labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																		response.Diagnostics.Append(labelsDiags...)
@@ -28469,6 +29132,15 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																			} else {
 																				apiTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 																			}
+																		}
+
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																		}
 
 																		// --- End of Choices ---
@@ -28781,8 +29453,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 					customStorageConfigAttributeMap["storage_device_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageInterfaceChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageInterfaceChoice
 				if customStorageConfigElement.GetStorageInterfaceChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstorageInterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28830,15 +29501,16 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if storageInterfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(storageInterfacesElement.GetLabels()))
 										for k, v := range storageInterfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -28863,8 +29535,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 
 										// Recursively populate the nested struct
 
-										// resource specToModelNested RequiredOneOfField --> AddressChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> AddressChoice
 										if storageInterfaceElement.GetAddressChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfaceaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28901,8 +29572,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 															appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
-															// resource specToModelNested RequiredOneOfField --> DnsChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> DnsChoice
 															if dhcpNetworksElement.GetDnsChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpNetworksdnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28950,8 +29620,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 															}
 
-															// resource specToModelNested RequiredOneOfField --> GatewayChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> GatewayChoice
 															if dhcpNetworksElement.GetGatewayChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpNetworksgatewayChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29146,8 +29815,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 														dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 													}
 
-													// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-													// GlobalSpecType
+													// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 													if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
 														dhcpServerinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29442,8 +30110,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 												if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 													ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-													// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-													// GlobalSpecType
+													// resource specToModelNested OneOfField --> AutoconfigChoice
 													if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
 														ipv6AutoConfigautoconfigChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29644,8 +30311,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																				statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 																			}
 
-																			// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-																			// GlobalSpecType
+																			// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 																			if statefulElement.GetInterfacesAddressingChoice() != nil {
 																				// Create a temporary attribute map for the choices within this OneOf
 																				statefulinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29824,8 +30490,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 																			if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 																				localDnsElement := localDnsOptionsWrapper.LocalDns
 
-																				// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-																				// GlobalSpecType
+																				// resource specToModelNested OneOfField --> LocalDnsChoice
 																				if localDnsElement.GetLocalDnsChoice() != nil {
 																					// Create a temporary attribute map for the choices within this OneOf
 																					localDnslocalDnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30240,8 +30905,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 										// resource specToModelNested UintField --> Mtu
 										appstackSiteEthernetIfaceTypeModel.Mtu = types.Int64Value(int64(storageInterfaceElement.GetMtu()))
 
-										// resource specToModelNested RequiredOneOfField --> NetworkChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> NetworkChoice
 										if storageInterfaceElement.GetNetworkChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30342,8 +31006,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 											appstackSiteEthernetIfaceTypeModel.NetworkChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested RequiredOneOfField --> NodeChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> NodeChoice
 										if storageInterfaceElement.GetNodeChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30391,8 +31054,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 											appstackSiteEthernetIfaceTypeModel.NodeChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> PrimaryChoice
 										if storageInterfaceElement.GetPrimaryChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30442,8 +31104,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 										// resource specToModelNested UintField --> Priority
 										appstackSiteEthernetIfaceTypeModel.Priority = types.Int64Value(int64(storageInterfaceElement.GetPriority()))
 
-										// resource specToModelNested RequiredOneOfField --> VlanChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> VlanChoice
 										if storageInterfaceElement.GetVlanChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacevlanChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30605,8 +31266,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		var appstackSiteVolterraSoftwareTypeModel = &AppstackSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30668,7 +31328,7 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		data.Sw = types.ObjectNull(AppstackSiteSwModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource SpecToModelRoot OneOfField --> UsbPolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -30761,8 +31421,6 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.UsbPolicyChoice = types.ObjectNull(AppstackSiteUsbPolicyChoiceModelAttributeMap)
 	}
 
@@ -30826,12 +31484,8 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// resource SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
@@ -30909,7 +31563,12 @@ func (r *ResourceF5XCAppstackSite) Create(ctx context.Context, request resource.
 			}
 			data.WorkerNodes = listValue
 		} else {
-			data.WorkerNodes = types.ListNull(types.StringType)
+			if !data.WorkerNodes.IsNull() && !data.WorkerNodes.IsUnknown() && len(data.WorkerNodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.WorkerNodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.WorkerNodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -30957,14 +31616,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	defer cancel()
 	priorStorageCfgChoice := data.StorageCfgChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "appstack_site", err),
 		)
 		return
 	}
@@ -31083,14 +31738,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -31248,12 +31899,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.BlockedServicesChoice = types.ObjectNull(AppstackSiteBlockedServicesChoiceModelAttributeMap)
+
+		if data.BlockedServicesChoice.IsNull() || data.BlockedServicesChoice.IsUnknown() || ((data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsUnknown() || (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsUnknown())) && (data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsNull() || data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsUnknown())) {
+			data.BlockedServicesChoice = types.ObjectValueMust(AppstackSiteBlockedServicesChoiceModelAttributeMap, map[string]attr.Value{
+				"blocked_services":         types.ObjectNull(AppstackSiteBlockedServicesChoiceBlockedServicesModelAttributeMap),
+				"default_blocked_services": types.BoolValue(true),
+			})
+		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BondChoice
+	// resource SpecToModelRoot OneOfField --> BondChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -31358,7 +32013,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 							appstackSiteFleetBondDeviceTypeModel.LacpChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							appstackSiteFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
+							appstackSiteFleetBondDeviceTypeModel.LacpChoice = types.ObjectValueMust(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap, map[string]attr.Value{
+								"active_backup": types.BoolNull(),
+								"lacp": types.ObjectValueMust(AppstackSiteBondChoiceBondDeviceListBondDevicesLacpChoiceLacpModelAttributeMap, map[string]attr.Value{
+									"rate": types.Int64Value(30),
+								}),
+							})
 						}
 
 						// resource specToModelNested RequiredUintField --> LinkPollingInterval
@@ -31430,9 +32090,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.BondChoice = types.ObjectNull(AppstackSiteBondChoiceModelAttributeMap)
+
+		if data.BondChoice.IsNull() || data.BondChoice.IsUnknown() || ((data.BondChoice.Attributes()["bond_device_list"].(types.Object).IsNull() || data.BondChoice.Attributes()["bond_device_list"].(types.Object).IsUnknown() || (data.BondChoice.Attributes()["bond_device_list"].(types.Object).Attributes()["bond_devices"].IsNull() || data.BondChoice.Attributes()["bond_device_list"].(types.Object).Attributes()["bond_devices"].IsUnknown())) && (data.BondChoice.Attributes()["no_bond_devices"].IsNull() || data.BondChoice.Attributes()["no_bond_devices"].IsUnknown())) {
+			data.BondChoice = types.ObjectValueMust(AppstackSiteBondChoiceModelAttributeMap, map[string]attr.Value{
+				"bond_device_list": types.ObjectNull(AppstackSiteBondChoiceBondDeviceListModelAttributeMap),
+				"no_bond_devices":  types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> Coordinates
@@ -31525,7 +32189,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		data.CustomDns = types.ObjectNull(AppstackSiteCustomDnsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> GpuChoice
+	// resource SpecToModelRoot OneOfField --> GpuChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -31621,12 +32285,17 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.GpuChoice = types.ObjectNull(AppstackSiteGpuChoiceModelAttributeMap)
+
+		if data.GpuChoice.IsNull() || data.GpuChoice.IsUnknown() || ((data.GpuChoice.Attributes()["disable_gpu"].IsNull() || data.GpuChoice.Attributes()["disable_gpu"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_gpu"].IsNull() || data.GpuChoice.Attributes()["enable_gpu"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).IsUnknown() || ((data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["feature_type"].IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["feature_type"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_address"].IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_address"].IsUnknown()) && (data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_port"].IsNull() || data.GpuChoice.Attributes()["enable_vgpu"].(types.Object).Attributes()["server_port"].IsUnknown())))) {
+			data.GpuChoice = types.ObjectValueMust(AppstackSiteGpuChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_gpu": types.BoolValue(true),
+				"enable_gpu":  types.BoolNull(),
+				"enable_vgpu": types.ObjectNull(AppstackSiteGpuChoiceEnableVgpuModelAttributeMap),
+			})
+		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> K8SClusterChoice
+	// resource SpecToModelRoot OneOfField --> K8SClusterChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -31710,9 +32379,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.K8SClusterChoice = types.ObjectNull(AppstackSiteK8SClusterChoiceModelAttributeMap)
+
+		if data.K8SClusterChoice.IsNull() || data.K8SClusterChoice.IsUnknown() || ((data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).IsUnknown() || ((data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["name"].IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["name"].IsUnknown()) && (data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["namespace"].IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["tenant"].IsNull() || data.K8SClusterChoice.Attributes()["k8s_cluster"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.K8SClusterChoice.Attributes()["no_k8s_cluster"].IsNull() || data.K8SClusterChoice.Attributes()["no_k8s_cluster"].IsUnknown())) {
+			data.K8SClusterChoice = types.ObjectValueMust(AppstackSiteK8SClusterChoiceModelAttributeMap, map[string]attr.Value{
+				"k8s_cluster":    types.ObjectNull(AppstackSiteK8SClusterChoiceK8SClusterModelAttributeMap),
+				"no_k8s_cluster": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> KubernetesUpgradeDrain
@@ -31787,7 +32460,9 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap)
+						enableUpgradeDrainAttributeMap["drain_max_unavailable_choice"] = types.ObjectValueMust(AppstackSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDrainDrainMaxUnavailableChoiceModelAttributeMap, map[string]attr.Value{
+							"drain_max_unavailable_node_count": types.Int64Value(1),
+						})
 					}
 
 					// resource specToModelNested RequiredUintField --> DrainNodeTimeout
@@ -31837,10 +32512,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		data.KubernetesUpgradeDrain = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot BoolField --> LaunchIkeInNamespace
-	data.LaunchIkeInNamespace = types.BoolValue(specData.GetLaunchIkeInNamespace())
-
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -31924,9 +32596,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LogsReceiverChoice = types.ObjectNull(AppstackSiteLogsReceiverChoiceModelAttributeMap)
+
+		if data.LogsReceiverChoice.IsNull() || data.LogsReceiverChoice.IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsNull() || data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsUnknown())) {
+			data.LogsReceiverChoice = types.ObjectValueMust(AppstackSiteLogsReceiverChoiceModelAttributeMap, map[string]attr.Value{
+				"log_receiver":            types.ObjectNull(AppstackSiteLogsReceiverChoiceLogReceiverModelAttributeMap),
+				"logs_streaming_disabled": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> MasterNodeConfiguration
@@ -31968,7 +32644,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		data.MasterNodeConfiguration = masterNodeConfigurationList
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkCfgChoice
+	// resource SpecToModelRoot OneOfField --> NetworkCfgChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -32015,8 +32691,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["bgp_router_id"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if customNetworkConfigElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32131,11 +32806,14 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["forward_proxy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["forward_proxy_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["forward_proxy_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_forward_proxy_policies": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceActiveForwardProxyPoliciesModelAttributeMap),
+						"forward_proxy_allow_all":       types.BoolNull(),
+						"no_forward_proxy":              types.BoolValue(true),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if customNetworkConfigElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32389,11 +33067,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["global_network_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["global_network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["global_network_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"global_network_list": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceGlobalNetworkListModelAttributeMap),
+						"no_global_network":   types.BoolValue(true),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InterfaceChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> InterfaceChoice
 				if customNetworkConfigElement.GetInterfaceChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfiginterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32431,8 +33111,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 								for _, interfacesElement := range interfaceListElement.GetInterfaces() {
 									appstackSiteIfaceModel := AppstackSiteIface{}
 
-									// resource specToModelNested RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> DcClusterGroupConnectivityInterfaceChoice
 									if interfacesElement.GetDcClusterGroupConnectivityInterfaceChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										interfacesdcClusterGroupConnectivityInterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32476,7 +33155,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap)
+										appstackSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+											"dc_cluster_group_connectivity_interface_disabled": types.BoolValue(true),
+											"dc_cluster_group_connectivity_interface_enabled":  types.BoolNull(),
+										})
 									}
 
 									// resource specToModelNested StringField --> Description
@@ -32566,8 +33248,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 												// resource specToModelNested UintField --> Mtu
 												dedicatedInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> NodeChoice
 												if dedicatedInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32612,11 +33293,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													dedicatedInterfaceAttributeMap["node_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap)
+													dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+														"cluster": types.BoolValue(true),
+														"node":    types.StringNull(),
+													})
 												}
 
-												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> PrimaryChoice
 												if dedicatedInterfaceElement.GetPrimaryChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32660,7 +33343,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													dedicatedInterfaceAttributeMap["primary_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap)
+													dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+														"is_primary":  types.BoolNull(),
+														"not_primary": types.BoolValue(true),
+													})
 												}
 
 												// resource specToModelNested UintField --> Priority
@@ -32698,8 +33384,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 												// resource specToModelNested UintField --> Mtu
 												dedicatedManagementInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedManagementInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> NodeChoice
 												if dedicatedManagementInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedManagementInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32744,7 +33429,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													dedicatedManagementInterfaceAttributeMap["node_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap)
+													dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+														"cluster": types.BoolValue(true),
+														"node":    types.StringNull(),
+													})
 												}
 
 												dedicatedManagementInterfaceObj, dedicatedManagementInterfaceObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedManagementInterfaceModelAttributeMap, dedicatedManagementInterfaceAttributeMap)
@@ -32768,8 +33456,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											if isEthernetInterface && ethernetInterfaceOptionsWrapper != nil && ethernetInterfaceOptionsWrapper.EthernetInterface != nil {
 												ethernetInterfaceElement := ethernetInterfaceOptionsWrapper.EthernetInterface
 
-												// resource specToModelNested RequiredOneOfField --> AddressChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> AddressChoice
 												if ethernetInterfaceElement.GetAddressChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfaceaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32806,8 +33493,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 																	appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
-																	// resource specToModelNested RequiredOneOfField --> DnsChoice
-																	// <no value>
+																	// resource specToModelNested OneOfField --> DnsChoice
 																	if dhcpNetworksElement.GetDnsChoice() != nil {
 																		// Create a temporary attribute map for the choices within this OneOf
 																		dhcpNetworksdnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32852,11 +33538,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		appstackSiteDHCPNetTypeModel.DnsChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+																		appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap, map[string]attr.Value{
+																			"dns_address": types.StringNull(),
+																			"same_as_dgw": types.BoolValue(true),
+																		})
 																	}
 
-																	// resource specToModelNested RequiredOneOfField --> GatewayChoice
-																	// <no value>
+																	// resource specToModelNested OneOfField --> GatewayChoice
 																	if dhcpNetworksElement.GetGatewayChoice() != nil {
 																		// Create a temporary attribute map for the choices within this OneOf
 																		dhcpNetworksgatewayChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32910,7 +33598,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		appstackSiteDHCPNetTypeModel.GatewayChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+																		appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap, map[string]attr.Value{
+																			"dgw_address":   types.StringNull(),
+																			"first_address": types.BoolValue(true),
+																			"last_address":  types.BoolNull(),
+																		})
 																	}
 
 																	// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -33051,8 +33743,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 															}
 
-															// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-															// <no value>
+															// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 															if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpServerinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33134,7 +33825,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																dhcpServerAttributeMap["interfaces_addressing_choice"] = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap)
+																dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+																	"automatic_from_end":   types.BoolNull(),
+																	"automatic_from_start": types.BoolValue(true),
+																	"interface_ip_map":     types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+																})
 															}
 
 															dhcpServerObj, dhcpServerObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerModelAttributeMap, dhcpServerAttributeMap)
@@ -33316,7 +34011,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["address_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["address_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["address_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap, map[string]attr.Value{
+														"dhcp_client": types.BoolValue(true),
+														"dhcp_server": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerModelAttributeMap),
+														"static_ip":   types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceStaticIpModelAttributeMap),
+													})
 												}
 
 												// resource specToModelNested RequiredStringField --> Device
@@ -33347,8 +34046,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 															ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-															// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-															// <no value>
+															// resource specToModelNested OneOfField --> AutoconfigChoice
 															if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																ipv6AutoConfigautoconfigChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33549,8 +34247,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																						statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 																					}
 
-																					// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-																					// <no value>
+																					// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 																					if statefulElement.GetInterfacesAddressingChoice() != nil {
 																						// Create a temporary attribute map for the choices within this OneOf
 																						statefulinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33632,7 +34329,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																						statefulAttributeMap["interfaces_addressing_choice"] = finalObj
 																					} else {
 																						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																						statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap)
+																						statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+																							"automatic_from_end":   types.BoolNull(),
+																							"automatic_from_start": types.BoolValue(true),
+																							"interface_ip_map":     types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+																						})
 																					}
 
 																					statefulObj, statefulObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulModelAttributeMap, statefulAttributeMap)
@@ -33729,8 +34430,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																					if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 																						localDnsElement := localDnsOptionsWrapper.LocalDns
 
-																						// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-																						// <no value>
+																						// resource specToModelNested OneOfField --> LocalDnsChoice
 																						if localDnsElement.GetLocalDnsChoice() != nil {
 																							// Create a temporary attribute map for the choices within this OneOf
 																							localDnslocalDnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33784,7 +34484,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																							localDnsAttributeMap["local_dns_choice"] = finalObj
 																						} else {
 																							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																							localDnsAttributeMap["local_dns_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap)
+																							localDnsAttributeMap["local_dns_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																								"configured_address": types.StringNull(),
+																								"first_address":      types.BoolValue(true),
+																								"last_address":       types.BoolNull(),
+																							})
 																						}
 
 																						localDnsObj, localDnsObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, localDnsAttributeMap)
@@ -33814,7 +34518,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																				appstackSiteIPV6DnsConfigModel.DnsChoice = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+																				appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap, map[string]attr.Value{
+																					"configured_list": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceConfiguredListModelAttributeMap),
+																					"local_dns": types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, map[string]attr.Value{
+																						"local_dns_choice": types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																							"configured_address": types.StringNull(),
+																							"first_address":      types.BoolValue(true),
+																							"last_address":       types.BoolNull(),
+																						}),
+																					}),
+																				})
 																			}
 
 																			// This field needs to be converted to a types.ObjectValue before assignment.
@@ -33862,7 +34575,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																ipv6AutoConfigAttributeMap["autoconfig_choice"] = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap)
+																ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap, map[string]attr.Value{
+																	"host":   types.BoolValue(true),
+																	"router": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterModelAttributeMap),
+																})
 															}
 
 															ipv6AutoConfigObj, ipv6AutoConfigObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigModelAttributeMap, ipv6AutoConfigAttributeMap)
@@ -34145,8 +34861,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 												// resource specToModelNested UintField --> Mtu
 												ethernetInterfaceAttributeMap["mtu"] = types.Int64Value(int64(ethernetInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NetworkChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> NetworkChoice
 												if ethernetInterfaceElement.GetNetworkChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34244,11 +34959,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["network_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["network_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+														"segment_network":           types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceSegmentNetworkModelAttributeMap),
+														"site_local_inside_network": types.BoolNull(),
+														"site_local_network":        types.BoolValue(true),
+														"storage_network":           types.BoolNull(),
+													})
 												}
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> NodeChoice
 												if ethernetInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34293,11 +35012,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["node_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+														"cluster": types.BoolValue(true),
+														"node":    types.StringNull(),
+													})
 												}
 
-												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> PrimaryChoice
 												if ethernetInterfaceElement.GetPrimaryChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34341,14 +35062,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["primary_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+														"is_primary":  types.BoolNull(),
+														"not_primary": types.BoolValue(true),
+													})
 												}
 
 												// resource specToModelNested UintField --> Priority
 												ethernetInterfaceAttributeMap["priority"] = types.Int64Value(int64(ethernetInterfaceElement.GetPriority()))
 
-												// resource specToModelNested RequiredOneOfField --> VlanChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> VlanChoice
 												if ethernetInterfaceElement.GetVlanChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacevlanChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34393,7 +35116,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													ethernetInterfaceAttributeMap["vlan_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap)
+													ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap, map[string]attr.Value{
+														"untagged": types.BoolValue(true),
+														"vlan_id":  types.Int64Null(),
+													})
 												}
 
 												ethernetInterfaceObj, ethernetInterfaceObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceModelAttributeMap, ethernetInterfaceAttributeMap)
@@ -34420,8 +35146,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 												// resource specToModelNested UintField --> Mtu
 												tunnelInterfaceAttributeMap["mtu"] = types.Int64Value(int64(tunnelInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NetworkChoice
-												// <no value>
+												// resource specToModelNested OneOfField --> NetworkChoice
 												if tunnelInterfaceElement.GetNetworkChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													tunnelInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34465,7 +35190,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 													tunnelInterfaceAttributeMap["network_choice"] = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													tunnelInterfaceAttributeMap["network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap)
+													tunnelInterfaceAttributeMap["network_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+														"site_local_inside_network": types.BoolNull(),
+														"site_local_network":        types.BoolValue(true),
+													})
 												}
 
 												// resource specToModelNested RequiredOneOfField --> NodeChoice
@@ -34750,13 +35478,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if interfacesElement.GetLabels() != nil {
-										// READ operation: keep backend-injected keys so they enter the state.
-										labelsMap, labelsDiags := utils.StringMapToTerraformMap(interfacesElement.GetLabels())
-										response.Diagnostics.Append(labelsDiags...)
-										if response.Diagnostics.HasError() {
-											return
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(interfacesElement.GetLabels()))
+										for k, v := range interfacesElement.GetLabels() {
+											filteredMap[k] = v
 										}
-										appstackSiteIfaceModel.Labels = labelsMap
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
+										if len(filteredMap) > 0 {
+											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+											response.Diagnostics.Append(labelsDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											appstackSiteIfaceModel.Labels = labelsMap
+										} else {
+											appstackSiteIfaceModel.Labels = types.MapNull(types.StringType)
+										}
 									} else {
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -34809,11 +35550,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["interface_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["interface_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["interface_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+						"default_interface_config": types.BoolValue(true),
+						"interface_list":           types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListModelAttributeMap),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if customNetworkConfigElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfignetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34990,7 +35733,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["network_policy_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["network_policy_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["network_policy_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceModelAttributeMap, map[string]attr.Value{
+						"active_enhanced_firewall_policies": types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceActiveEnhancedFirewallPoliciesModelAttributeMap),
+						"active_network_policies":           types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigNetworkPolicyChoiceActiveNetworkPoliciesModelAttributeMap),
+						"no_network_policy":                 types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested StringField --> OutsideNameserver
@@ -35025,8 +35772,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["outside_vip_v6"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if customNetworkConfigElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35080,11 +35826,14 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["site_mesh_group_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["site_mesh_group_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttributeMap, map[string]attr.Value{
+						"site_to_site_tunnel_ip":  types.StringNull(),
+						"sm_connection_public_ip": types.BoolNull(),
+						"sm_connection_pvt_ip":    types.BoolValue(true),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SloChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SloChoice
 				if customNetworkConfigElement.GetSloChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigsloChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35113,8 +35862,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 						if isSloConfig && sloConfigOptionsWrapper != nil && sloConfigOptionsWrapper.SloConfig != nil {
 							sloConfigElement := sloConfigOptionsWrapper.SloConfig
 
-							// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> DcClusterGroupChoice
 							if sloConfigElement.GetDcClusterGroupChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35194,26 +35942,41 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 								sloConfigAttributeMap["dc_cluster_group_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								sloConfigAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGroupChoiceModelAttributeMap)
+								sloConfigAttributeMap["dc_cluster_group_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGroupChoiceModelAttributeMap, map[string]attr.Value{
+									"dc_cluster_group":    types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigDcClusterGroupChoiceDcClusterGroupModelAttributeMap),
+									"no_dc_cluster_group": types.BoolValue(true),
+								})
 							}
 
 							// resource specToModelNested MapOfStringField --> Labels
 							if sloConfigElement.GetLabels() != nil {
-								// READ operation: keep backend-injected keys so they enter the state.
-								labelsMap, labelsDiags := utils.StringMapToTerraformMap(sloConfigElement.GetLabels())
-								response.Diagnostics.Append(labelsDiags...)
-								if response.Diagnostics.HasError() {
-									return
+								// Filter out configured omitted map keys across all operations so backend-injected
+								// forbidden keys never enter or vanish from Terraform state.
+								filteredMap := make(map[string]string, len(sloConfigElement.GetLabels()))
+								for k, v := range sloConfigElement.GetLabels() {
+									filteredMap[k] = v
 								}
-								sloConfigAttributeMap["labels"] = labelsMap
+								delete(filteredMap, "ves.io/config-propagation-destination")
+								delete(filteredMap, "ves.io/app_type")
+								delete(filteredMap, "ves.io/api-scope")
+								delete(filteredMap, "ves.io/provider")
+								if len(filteredMap) > 0 {
+									labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+									response.Diagnostics.Append(labelsDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									sloConfigAttributeMap["labels"] = labelsMap
+								} else {
+									sloConfigAttributeMap["labels"] = types.MapNull(types.StringType)
+								}
 							} else {
 								// API returned nil (Protobuf omits empty maps). Set to null.
 								// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
 								sloConfigAttributeMap["labels"] = types.MapNull(types.StringType)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> StaticRouteChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> StaticRouteChoice
 							if sloConfigElement.GetStaticRouteChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigstaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35483,11 +36246,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 								sloConfigAttributeMap["static_route_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								sloConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceModelAttributeMap)
+								sloConfigAttributeMap["static_route_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+									"no_static_routes": types.BoolValue(true),
+									"static_routes":    types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceStaticRoutesModelAttributeMap),
+								})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> StaticV6RouteChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> StaticV6RouteChoice
 							if sloConfigElement.GetStaticV6RouteChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigstaticV6RouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35553,29 +36318,31 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														if response.Diagnostics.HasError() {
 															return
 														}
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: reconcile backend list order against client representation.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, listValue)
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													} else {
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													}
 												}
 
@@ -35779,7 +36546,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 								sloConfigAttributeMap["static_v6_route_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								sloConfigAttributeMap["static_v6_route_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceModelAttributeMap)
+								sloConfigAttributeMap["static_v6_route_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceModelAttributeMap, map[string]attr.Value{
+									"no_static_v6_routes": types.BoolValue(true),
+									"static_v6_routes":    types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceStaticV6RoutesModelAttributeMap),
+								})
 							}
 
 							sloConfigObj, sloConfigObjDiags := types.ObjectValue(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigModelAttributeMap, sloConfigAttributeMap)
@@ -35809,7 +36579,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customNetworkConfigAttributeMap["slo_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customNetworkConfigAttributeMap["slo_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceModelAttributeMap)
+					customNetworkConfigAttributeMap["slo_choice"] = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceModelAttributeMap, map[string]attr.Value{
+						"default_config": types.BoolValue(true),
+						"slo_config":     types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested UintField --> TunnelDeadTimeout
@@ -35868,9 +36641,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.NetworkCfgChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceModelAttributeMap)
+
+		if data.NetworkCfgChoice.IsNull() || data.NetworkCfgChoice.IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address_v6"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_peer_address_v6"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_router_id"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["bgp_router_id"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).Attributes()["forward_proxy_policies"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["active_forward_proxy_policies"].(types.Object).Attributes()["forward_proxy_policies"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["forward_proxy_allow_all"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["forward_proxy_allow_all"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["no_forward_proxy"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["forward_proxy_choice"].(types.Object).Attributes()["no_forward_proxy"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).Attributes()["global_network_connections"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["global_network_list"].(types.Object).Attributes()["global_network_connections"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["no_global_network"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["global_network_choice"].(types.Object).Attributes()["no_global_network"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["default_interface_config"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["default_interface_config"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).Attributes()["interfaces"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["interface_choice"].(types.Object).Attributes()["interface_list"].(types.Object).Attributes()["interfaces"].IsUnknown())))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).Attributes()["enhanced_firewall_policies"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_enhanced_firewall_policies"].(types.Object).Attributes()["enhanced_firewall_policies"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).Attributes()["network_policies"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["active_network_policies"].(types.Object).Attributes()["network_policies"].IsUnknown())) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["no_network_policy"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["network_policy_choice"].(types.Object).Attributes()["no_network_policy"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver_v6"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_nameserver_v6"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip_v6"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["outside_vip_v6"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["site_to_site_tunnel_ip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["site_to_site_tunnel_ip"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_public_ip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_public_ip"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_pvt_ip"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["site_mesh_group_choice"].(types.Object).Attributes()["sm_connection_pvt_ip"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["default_config"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["default_config"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["name"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["name"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["namespace"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["tenant"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["dc_cluster_group"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["no_dc_cluster_group"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["dc_cluster_group_choice"].(types.Object).Attributes()["no_dc_cluster_group"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["labels"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["labels"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsUnknown())))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).IsUnknown() || ((data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["no_static_v6_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["no_static_v6_routes"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).IsUnknown() || (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).Attributes()["static_routes"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["slo_choice"].(types.Object).Attributes()["slo_config"].(types.Object).Attributes()["static_v6_route_choice"].(types.Object).Attributes()["static_v6_routes"].(types.Object).Attributes()["static_routes"].IsUnknown())))))))) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["tunnel_dead_timeout"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["tunnel_dead_timeout"].IsUnknown()) && (data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["vip_vrrp_mode"].IsNull() || data.NetworkCfgChoice.Attributes()["custom_network_config"].(types.Object).Attributes()["vip_vrrp_mode"].IsUnknown()))) && (data.NetworkCfgChoice.Attributes()["default_network_config"].IsNull() || data.NetworkCfgChoice.Attributes()["default_network_config"].IsUnknown())) {
+			data.NetworkCfgChoice = types.ObjectValueMust(AppstackSiteNetworkCfgChoiceModelAttributeMap, map[string]attr.Value{
+				"custom_network_config":  types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigModelAttributeMap),
+				"default_network_config": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> OfflineSurvivabilityMode
@@ -35878,8 +36655,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		var appstackSiteOfflineSurvivabilityModeTypeModel = &AppstackSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35923,7 +36699,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AppstackSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			appstackSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectValueMust(AppstackSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap, map[string]attr.Value{
+				"enable_offline_survivability_mode": types.BoolNull(),
+				"no_offline_survivability_mode":     types.BoolValue(true),
+			})
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
@@ -35941,20 +36720,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	}
 
 	// resource SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// resource SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
 		var appstackSiteOperatingSystemTypeModel = &AppstackSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35999,7 +36773,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AppstackSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			appstackSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectValueMust(AppstackSiteOsOperatingSystemVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_os_version":       types.BoolValue(true),
+				"operating_system_version": types.StringNull(),
+			})
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
@@ -36016,7 +36793,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		data.Os = types.ObjectNull(AppstackSiteOsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> SriovInterfaceChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -36116,9 +36893,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.SriovInterfaceChoice = types.ObjectNull(AppstackSiteSriovInterfaceChoiceModelAttributeMap)
+
+		if data.SriovInterfaceChoice.IsNull() || data.SriovInterfaceChoice.IsUnknown() || ((data.SriovInterfaceChoice.Attributes()["default_sriov_interface"].IsNull() || data.SriovInterfaceChoice.Attributes()["default_sriov_interface"].IsUnknown()) && (data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).IsNull() || data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).IsUnknown() || (data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).Attributes()["sriov_interface"].IsNull() || data.SriovInterfaceChoice.Attributes()["sriov_interfaces"].(types.Object).Attributes()["sriov_interface"].IsUnknown()))) {
+			data.SriovInterfaceChoice = types.ObjectValueMust(AppstackSiteSriovInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+				"default_sriov_interface": types.BoolValue(true),
+				"sriov_interfaces":        types.ObjectNull(AppstackSiteSriovInterfaceChoiceSriovInterfacesModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> StorageCfgChoice
@@ -36144,8 +36925,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			if isCustomStorageConfig && customStorageConfigOptionsWrapper != nil && customStorageConfigOptionsWrapper.CustomStorageConfig != nil {
 				customStorageConfigElement := customStorageConfigOptionsWrapper.CustomStorageConfig
 
-				// resource specToModelNested RequiredOneOfField --> StaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> StaticRouteChoice
 				if customStorageConfigElement.GetStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -36415,11 +37195,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["static_route_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["static_route_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceModelAttributeMap, map[string]attr.Value{
+						"no_static_routes": types.BoolValue(true),
+						"static_routes":    types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceStaticRoutesModelAttributeMap),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if customStorageConfigElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -36815,7 +37597,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["storage_class_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["storage_class_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["storage_class_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceModelAttributeMap, map[string]attr.Value{
+						"default_storage_class": types.BoolValue(true),
+						"storage_class_list":    types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageClassChoiceStorageClassListModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> StorageDeviceChoice
@@ -37008,6 +37793,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 															}
 														}
 
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -37164,6 +37958,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 															} else {
 																passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -37455,6 +38258,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -37555,13 +38367,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapNasElement.GetLabels() != nil {
-																// READ operation: keep backend-injected keys so they enter the state.
-																labelsMap, labelsDiags := utils.StringMapToTerraformMap(netappBackendOntapNasElement.GetLabels())
-																response.Diagnostics.Append(labelsDiags...)
-																if response.Diagnostics.HasError() {
-																	return
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapNasElement.GetLabels()))
+																for k, v := range netappBackendOntapNasElement.GetLabels() {
+																	filteredMap[k] = v
 																}
-																netappBackendOntapNasAttributeMap["labels"] = labelsMap
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
+																if len(filteredMap) > 0 {
+																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																	response.Diagnostics.Append(labelsDiags...)
+																	if response.Diagnostics.HasError() {
+																		return
+																	}
+																	netappBackendOntapNasAttributeMap["labels"] = labelsMap
+																} else {
+																	netappBackendOntapNasAttributeMap["labels"] = types.MapNull(types.StringType)
+																}
 															} else {
 																// API returned nil (Protobuf omits empty maps). Set to null.
 																// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -37743,6 +38568,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -37810,13 +38644,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// READ operation: keep backend-injected keys so they enter the state.
-																		labelsMap, labelsDiags := utils.StringMapToTerraformMap(storageElement.GetLabels())
-																		response.Diagnostics.Append(labelsDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
+																		for k, v := range storageElement.GetLabels() {
+																			filteredMap[k] = v
 																		}
-																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
+																		if len(filteredMap) > 0 {
+																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																			response.Diagnostics.Append(labelsDiags...)
+																			if response.Diagnostics.HasError() {
+																				return
+																			}
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		} else {
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+																		}
 																	} else {
 																		// API returned nil (Protobuf omits empty maps). Set to null.
 																		// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -37842,8 +38689,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
-																		// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																		// <no value>
+																		// resource specToModelNested OneOfField --> QosPolicyChoice
 																		if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																			// Create a temporary attribute map for the choices within this OneOf
 																			volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37898,7 +38744,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																				"adaptive_qos_policy": types.StringNull(),
+																				"no_qos":              types.BoolValue(true),
+																				"qos_policy":          types.StringNull(),
+																			})
 																		}
 
 																		// resource specToModelNested StringField --> SecurityStyle
@@ -38053,8 +38903,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
-																// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																// <no value>
+																// resource specToModelNested OneOfField --> QosPolicyChoice
 																if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																	// Create a temporary attribute map for the choices within this OneOf
 																	volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -38109,7 +38958,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																		"adaptive_qos_policy": types.StringNull(),
+																		"no_qos":              types.BoolValue(true),
+																		"qos_policy":          types.StringNull(),
+																	})
 																}
 
 																// resource specToModelNested StringField --> SecurityStyle
@@ -38330,6 +39183,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																					}
 																				}
 
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																				}
+
 																				// --- End of Choices ---
 
 																				// Create the final ObjectValue for this OneOf field
@@ -38478,6 +39340,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																					} else {
 																						chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																					}
+																				}
+
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																				}
 
 																				// --- End of Choices ---
@@ -38684,6 +39555,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -38792,13 +39672,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapSanElement.GetLabels() != nil {
-																// READ operation: keep backend-injected keys so they enter the state.
-																labelsMap, labelsDiags := utils.StringMapToTerraformMap(netappBackendOntapSanElement.GetLabels())
-																response.Diagnostics.Append(labelsDiags...)
-																if response.Diagnostics.HasError() {
-																	return
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapSanElement.GetLabels()))
+																for k, v := range netappBackendOntapSanElement.GetLabels() {
+																	filteredMap[k] = v
 																}
-																netappBackendOntapSanAttributeMap["labels"] = labelsMap
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
+																if len(filteredMap) > 0 {
+																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																	response.Diagnostics.Append(labelsDiags...)
+																	if response.Diagnostics.HasError() {
+																		return
+																	}
+																	netappBackendOntapSanAttributeMap["labels"] = labelsMap
+																} else {
+																	netappBackendOntapSanAttributeMap["labels"] = types.MapNull(types.StringType)
+																}
 															} else {
 																// API returned nil (Protobuf omits empty maps). Set to null.
 																// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -38962,6 +39855,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -39029,13 +39931,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// READ operation: keep backend-injected keys so they enter the state.
-																		labelsMap, labelsDiags := utils.StringMapToTerraformMap(storageElement.GetLabels())
-																		response.Diagnostics.Append(labelsDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
+																		for k, v := range storageElement.GetLabels() {
+																			filteredMap[k] = v
 																		}
-																		appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
+																		if len(filteredMap) > 0 {
+																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																			response.Diagnostics.Append(labelsDiags...)
+																			if response.Diagnostics.HasError() {
+																				return
+																			}
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = labelsMap
+																		} else {
+																			appstackSiteOntapVirtualStoragePoolTypeModel.Labels = types.MapNull(types.StringType)
+																		}
 																	} else {
 																		// API returned nil (Protobuf omits empty maps). Set to null.
 																		// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -39061,8 +39976,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
-																		// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																		// <no value>
+																		// resource specToModelNested OneOfField --> QosPolicyChoice
 																		if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																			// Create a temporary attribute map for the choices within this OneOf
 																			volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39117,7 +40031,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																		} else {
 																			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																			appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																				"adaptive_qos_policy": types.StringNull(),
+																				"no_qos":              types.BoolValue(true),
+																				"qos_policy":          types.StringNull(),
+																			})
 																		}
 
 																		// resource specToModelNested StringField --> SecurityStyle
@@ -39272,8 +40190,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
-																// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																// <no value>
+																// resource specToModelNested OneOfField --> QosPolicyChoice
 																if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																	// Create a temporary attribute map for the choices within this OneOf
 																	volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39328,7 +40245,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = finalObj
 																} else {
 																	// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap)
+																	appstackSiteOntapVolumeDefaultsModel.QosPolicyChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap, map[string]attr.Value{
+																		"adaptive_qos_policy": types.StringNull(),
+																		"no_qos":              types.BoolValue(true),
+																		"qos_policy":          types.StringNull(),
+																	})
 																}
 
 																// resource specToModelNested StringField --> SecurityStyle
@@ -39608,6 +40529,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			}
 																		}
 
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -39659,13 +40589,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 																// resource specToModelNested MapOfStringField --> Labels
 																if flashArraysElement.GetLabels() != nil {
-																	// READ operation: keep backend-injected keys so they enter the state.
-																	labelsMap, labelsDiags := utils.StringMapToTerraformMap(flashArraysElement.GetLabels())
-																	response.Diagnostics.Append(labelsDiags...)
-																	if response.Diagnostics.HasError() {
-																		return
+																	// Filter out configured omitted map keys across all operations so backend-injected
+																	// forbidden keys never enter or vanish from Terraform state.
+																	filteredMap := make(map[string]string, len(flashArraysElement.GetLabels()))
+																	for k, v := range flashArraysElement.GetLabels() {
+																		filteredMap[k] = v
 																	}
-																	appstackSiteFlashArrayEndpointModel.Labels = labelsMap
+																	delete(filteredMap, "ves.io/config-propagation-destination")
+																	delete(filteredMap, "ves.io/app_type")
+																	delete(filteredMap, "ves.io/api-scope")
+																	delete(filteredMap, "ves.io/provider")
+																	if len(filteredMap) > 0 {
+																		labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+																		response.Diagnostics.Append(labelsDiags...)
+																		if response.Diagnostics.HasError() {
+																			return
+																		}
+																		appstackSiteFlashArrayEndpointModel.Labels = labelsMap
+																	} else {
+																		appstackSiteFlashArrayEndpointModel.Labels = types.MapNull(types.StringType)
+																	}
 																} else {
 																	// API returned nil (Protobuf omits empty maps). Set to null.
 																	// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -39897,6 +40840,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			} else {
 																				apiTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 																			}
+																		}
+
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																		}
 
 																		// --- End of Choices ---
@@ -40218,11 +41170,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["storage_device_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["storage_device_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["storage_device_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceModelAttributeMap, map[string]attr.Value{
+						"no_storage_device":   types.BoolValue(true),
+						"storage_device_list": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListModelAttributeMap),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageInterfaceChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> StorageInterfaceChoice
 				if customStorageConfigElement.GetStorageInterfaceChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstorageInterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40270,13 +41224,26 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if storageInterfacesElement.GetLabels() != nil {
-										// READ operation: keep backend-injected keys so they enter the state.
-										labelsMap, labelsDiags := utils.StringMapToTerraformMap(storageInterfacesElement.GetLabels())
-										response.Diagnostics.Append(labelsDiags...)
-										if response.Diagnostics.HasError() {
-											return
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(storageInterfacesElement.GetLabels()))
+										for k, v := range storageInterfacesElement.GetLabels() {
+											filteredMap[k] = v
 										}
-										appstackSiteStorageIfaceTypeModel.Labels = labelsMap
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
+										if len(filteredMap) > 0 {
+											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+											response.Diagnostics.Append(labelsDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											appstackSiteStorageIfaceTypeModel.Labels = labelsMap
+										} else {
+											appstackSiteStorageIfaceTypeModel.Labels = types.MapNull(types.StringType)
+										}
 									} else {
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
@@ -40291,8 +41258,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 
 										// Recursively populate the nested struct
 
-										// resource specToModelNested RequiredOneOfField --> AddressChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> AddressChoice
 										if storageInterfaceElement.GetAddressChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfaceaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40329,8 +41295,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 															appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
-															// resource specToModelNested RequiredOneOfField --> DnsChoice
-															// <no value>
+															// resource specToModelNested OneOfField --> DnsChoice
 															if dhcpNetworksElement.GetDnsChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpNetworksdnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40375,11 +41340,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																appstackSiteDHCPNetTypeModel.DnsChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+																appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap, map[string]attr.Value{
+																	"dns_address": types.StringNull(),
+																	"same_as_dgw": types.BoolValue(true),
+																})
 															}
 
-															// resource specToModelNested RequiredOneOfField --> GatewayChoice
-															// <no value>
+															// resource specToModelNested OneOfField --> GatewayChoice
 															if dhcpNetworksElement.GetGatewayChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpNetworksgatewayChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40433,7 +41400,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																appstackSiteDHCPNetTypeModel.GatewayChoice = finalObj
 															} else {
 																// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+																appstackSiteDHCPNetTypeModel.GatewayChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap, map[string]attr.Value{
+																	"dgw_address":   types.StringNull(),
+																	"first_address": types.BoolValue(true),
+																	"last_address":  types.BoolNull(),
+																})
 															}
 
 															// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -40574,8 +41545,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 													}
 
-													// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-													// <no value>
+													// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 													if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
 														dhcpServerinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40657,7 +41627,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														dhcpServerAttributeMap["interfaces_addressing_choice"] = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap)
+														dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+															"automatic_from_end":   types.BoolNull(),
+															"automatic_from_start": types.BoolValue(true),
+															"interface_ip_map":     types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+														})
 													}
 
 													dhcpServerObj, dhcpServerObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerModelAttributeMap, dhcpServerAttributeMap)
@@ -40839,7 +41813,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.AddressChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.AddressChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.AddressChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceModelAttributeMap, map[string]attr.Value{
+												"dhcp_client": types.BoolValue(true),
+												"dhcp_server": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerModelAttributeMap),
+												"static_ip":   types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceStaticIpModelAttributeMap),
+											})
 										}
 
 										// resource specToModelNested RequiredStringField --> Device
@@ -40870,8 +41848,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 												if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 													ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-													// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-													// <no value>
+													// resource specToModelNested OneOfField --> AutoconfigChoice
 													if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
 														ipv6AutoConfigautoconfigChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41072,8 +42049,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																				statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 																			}
 
-																			// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-																			// <no value>
+																			// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 																			if statefulElement.GetInterfacesAddressingChoice() != nil {
 																				// Create a temporary attribute map for the choices within this OneOf
 																				statefulinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41155,7 +42131,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																				statefulAttributeMap["interfaces_addressing_choice"] = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap)
+																				statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+																					"automatic_from_end":   types.BoolNull(),
+																					"automatic_from_start": types.BoolValue(true),
+																					"interface_ip_map":     types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+																				})
 																			}
 
 																			statefulObj, statefulObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulModelAttributeMap, statefulAttributeMap)
@@ -41252,8 +42232,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																			if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 																				localDnsElement := localDnsOptionsWrapper.LocalDns
 
-																				// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-																				// <no value>
+																				// resource specToModelNested OneOfField --> LocalDnsChoice
 																				if localDnsElement.GetLocalDnsChoice() != nil {
 																					// Create a temporary attribute map for the choices within this OneOf
 																					localDnslocalDnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41307,7 +42286,11 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																					localDnsAttributeMap["local_dns_choice"] = finalObj
 																				} else {
 																					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																					localDnsAttributeMap["local_dns_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap)
+																					localDnsAttributeMap["local_dns_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																						"configured_address": types.StringNull(),
+																						"first_address":      types.BoolValue(true),
+																						"last_address":       types.BoolNull(),
+																					})
 																				}
 
 																				localDnsObj, localDnsObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, localDnsAttributeMap)
@@ -41337,7 +42320,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 																		appstackSiteIPV6DnsConfigModel.DnsChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+																		appstackSiteIPV6DnsConfigModel.DnsChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap, map[string]attr.Value{
+																			"configured_list": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceConfiguredListModelAttributeMap),
+																			"local_dns": types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, map[string]attr.Value{
+																				"local_dns_choice": types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																					"configured_address": types.StringNull(),
+																					"first_address":      types.BoolValue(true),
+																					"last_address":       types.BoolNull(),
+																				}),
+																			}),
+																		})
 																	}
 
 																	// This field needs to be converted to a types.ObjectValue before assignment.
@@ -41385,7 +42377,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 														ipv6AutoConfigAttributeMap["autoconfig_choice"] = finalObj
 													} else {
 														// The OneOf field is nil in the source spec, so set the Terraform object to null.
-														ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap)
+														ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap, map[string]attr.Value{
+															"host":   types.BoolValue(true),
+															"router": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterModelAttributeMap),
+														})
 													}
 
 													ipv6AutoConfigObj, ipv6AutoConfigObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceIpv6AddressChoiceIpv6AutoConfigModelAttributeMap, ipv6AutoConfigAttributeMap)
@@ -41668,8 +42663,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 										// resource specToModelNested UintField --> Mtu
 										appstackSiteEthernetIfaceTypeModel.Mtu = types.Int64Value(int64(storageInterfaceElement.GetMtu()))
 
-										// resource specToModelNested RequiredOneOfField --> NetworkChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> NetworkChoice
 										if storageInterfaceElement.GetNetworkChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41767,11 +42761,15 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.NetworkChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.NetworkChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.NetworkChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+												"segment_network":           types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceSegmentNetworkModelAttributeMap),
+												"site_local_inside_network": types.BoolNull(),
+												"site_local_network":        types.BoolValue(true),
+												"storage_network":           types.BoolNull(),
+											})
 										}
 
-										// resource specToModelNested RequiredOneOfField --> NodeChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> NodeChoice
 										if storageInterfaceElement.GetNodeChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41816,11 +42814,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.NodeChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.NodeChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.NodeChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+												"cluster": types.BoolValue(true),
+												"node":    types.StringNull(),
+											})
 										}
 
-										// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> PrimaryChoice
 										if storageInterfaceElement.GetPrimaryChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41864,14 +42864,16 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfacePrimaryChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.PrimaryChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+												"is_primary":  types.BoolNull(),
+												"not_primary": types.BoolValue(true),
+											})
 										}
 
 										// resource specToModelNested UintField --> Priority
 										appstackSiteEthernetIfaceTypeModel.Priority = types.Int64Value(int64(storageInterfaceElement.GetPriority()))
 
-										// resource specToModelNested RequiredOneOfField --> VlanChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> VlanChoice
 										if storageInterfaceElement.GetVlanChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacevlanChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41916,7 +42918,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 											appstackSiteEthernetIfaceTypeModel.VlanChoice = finalObj
 										} else {
 											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											appstackSiteEthernetIfaceTypeModel.VlanChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceVlanChoiceModelAttributeMap)
+											appstackSiteEthernetIfaceTypeModel.VlanChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceVlanChoiceModelAttributeMap, map[string]attr.Value{
+												"untagged": types.BoolValue(true),
+												"vlan_id":  types.Int64Null(),
+											})
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
@@ -41983,7 +42988,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 					customStorageConfigAttributeMap["storage_interface_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					customStorageConfigAttributeMap["storage_interface_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceModelAttributeMap)
+					customStorageConfigAttributeMap["storage_interface_choice"] = types.ObjectValueMust(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceModelAttributeMap, map[string]attr.Value{
+						"no_storage_interfaces":  types.BoolValue(true),
+						"storage_interface_list": types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListModelAttributeMap),
+					})
 				}
 
 				customStorageConfigObj, customStorageConfigObjDiags := types.ObjectValue(AppstackSiteStorageCfgChoiceCustomStorageConfigModelAttributeMap, customStorageConfigAttributeMap)
@@ -42025,7 +43033,13 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.StorageCfgChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceModelAttributeMap)
+
+		if data.StorageCfgChoice.IsNull() || data.StorageCfgChoice.IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["no_static_routes"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["static_route_choice"].(types.Object).Attributes()["static_routes"].(types.Object).Attributes()["static_routes"].IsUnknown())))) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["default_storage_class"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["default_storage_class"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).Attributes()["storage_classes"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_class_choice"].(types.Object).Attributes()["storage_class_list"].(types.Object).Attributes()["storage_classes"].IsUnknown())))) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["no_storage_device"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["no_storage_device"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).Attributes()["storage_devices"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_device_choice"].(types.Object).Attributes()["storage_device_list"].(types.Object).Attributes()["storage_devices"].IsUnknown())))) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).IsUnknown() || ((data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["no_storage_interfaces"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["no_storage_interfaces"].IsUnknown()) && (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).IsUnknown() || (data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).Attributes()["storage_interfaces"].IsNull() || data.StorageCfgChoice.Attributes()["custom_storage_config"].(types.Object).Attributes()["storage_interface_choice"].(types.Object).Attributes()["storage_interface_list"].(types.Object).Attributes()["storage_interfaces"].IsUnknown())))))) && (data.StorageCfgChoice.Attributes()["default_storage_config"].IsNull() || data.StorageCfgChoice.Attributes()["default_storage_config"].IsUnknown())) {
+			data.StorageCfgChoice = types.ObjectValueMust(AppstackSiteStorageCfgChoiceModelAttributeMap, map[string]attr.Value{
+				"custom_storage_config":  types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigModelAttributeMap),
+				"default_storage_config": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> Sw
@@ -42033,8 +43047,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		var appstackSiteVolterraSoftwareTypeModel = &AppstackSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42079,7 +43092,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AppstackSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			appstackSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectValueMust(AppstackSiteSwVolterraSwVersionChoiceModelAttributeMap, map[string]attr.Value{
+				"default_sw_version":        types.BoolValue(true),
+				"volterra_software_version": types.StringNull(),
+			})
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
@@ -42096,7 +43112,7 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		data.Sw = types.ObjectNull(AppstackSiteSwModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource SpecToModelRoot OneOfField --> UsbPolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -42189,9 +43205,14 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.UsbPolicyChoice = types.ObjectNull(AppstackSiteUsbPolicyChoiceModelAttributeMap)
+
+		if data.UsbPolicyChoice.IsNull() || data.UsbPolicyChoice.IsUnknown() || ((data.UsbPolicyChoice.Attributes()["allow_all_usb"].IsNull() || data.UsbPolicyChoice.Attributes()["allow_all_usb"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["deny_all_usb"].IsNull() || data.UsbPolicyChoice.Attributes()["deny_all_usb"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).IsUnknown() || ((data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["name"].IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["name"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["namespace"].IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["tenant"].IsNull() || data.UsbPolicyChoice.Attributes()["usb_policy"].(types.Object).Attributes()["tenant"].IsUnknown())))) {
+			data.UsbPolicyChoice = types.ObjectValueMust(AppstackSiteUsbPolicyChoiceModelAttributeMap, map[string]attr.Value{
+				"allow_all_usb": types.BoolNull(),
+				"deny_all_usb":  types.BoolValue(true),
+				"usb_policy":    types.ObjectNull(AppstackSiteUsbPolicyChoiceUsbPolicyModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot OneOfField --> VmChoice
@@ -42254,12 +43275,8 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 	}
 
 	// resource SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// resource SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
@@ -42310,7 +43327,10 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			appstackSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectValueMust(AppstackSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap, map[string]attr.Value{
+				"automatic": types.BoolNull(),
+				"manual":    types.BoolValue(true),
+			})
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
@@ -42337,7 +43357,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 			}
 			data.WorkerNodes = listValue
 		} else {
-			data.WorkerNodes = types.ListNull(types.StringType)
+			if !data.WorkerNodes.IsNull() && !data.WorkerNodes.IsUnknown() && len(data.WorkerNodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.WorkerNodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.WorkerNodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -42356,6 +43381,12 @@ func (r *ResourceF5XCAppstackSite) Read(ctx context.Context, request resource.Re
 }
 
 func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAppstackSiteModel
@@ -42365,6 +43396,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planStorageCfgChoice := data.StorageCfgChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -42384,7 +43416,11 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planStorageCfgChoice := data.StorageCfgChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.StorageCfgChoice.IsNull() && !configData.StorageCfgChoice.IsUnknown() {
+		data.StorageCfgChoice = configData.StorageCfgChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -42462,7 +43498,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		spec.Address = string(data.Address.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource modelToSpecRoot OneOfField --> BlockedServicesChoice
 	if !data.BlockedServicesChoice.IsNull() && !data.BlockedServicesChoice.IsUnknown() {
 		blockedServicesChoiceModel := AppstackSiteBlockedServicesChoice{}
 		response.Diagnostics.Append(data.BlockedServicesChoice.As(ctx, &blockedServicesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -42568,9 +43604,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			spec.BlockedServicesChoice = defaultBlockedServicesSpecBool
 		}
 
+	} else {
+		spec.BlockedServicesChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_DefaultBlockedServices{
+			DefaultBlockedServices: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BondChoice
+	// resource modelToSpecRoot OneOfField --> BondChoice
 	if !data.BondChoice.IsNull() && !data.BondChoice.IsUnknown() {
 		bondChoiceModel := AppstackSiteBondChoice{}
 		response.Diagnostics.Append(data.BondChoice.As(ctx, &bondChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -42680,6 +43720,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			spec.BondChoice = noBondDevicesSpecBool
 		}
 
+	} else {
+		spec.BondChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_NoBondDevices{
+			NoBondDevices: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -42746,7 +43790,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> GpuChoice
+	// resource modelToSpecRoot OneOfField --> GpuChoice
 	if !data.GpuChoice.IsNull() && !data.GpuChoice.IsUnknown() {
 		gpuChoiceModel := AppstackSiteGpuChoice{}
 		response.Diagnostics.Append(data.GpuChoice.As(ctx, &gpuChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -42817,9 +43861,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 		}
 
+	} else {
+		spec.GpuChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_DisableGpu{
+			DisableGpu: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> K8SClusterChoice
+	// resource modelToSpecRoot OneOfField --> K8SClusterChoice
 	if !data.K8SClusterChoice.IsNull() && !data.K8SClusterChoice.IsUnknown() {
 		k8SClusterChoiceModel := AppstackSiteK8SClusterChoice{}
 		response.Diagnostics.Append(data.K8SClusterChoice.As(ctx, &k8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -42857,6 +43905,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			spec.K8SClusterChoice = noK8sClusterSpecBool
 		}
 
+	} else {
+		spec.K8SClusterChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_NoK8SCluster{
+			NoK8SCluster: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -42897,6 +43949,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					}
 					enableUpgradeDrainOneOfSpec := &ves_io_schema_views.KubernetesUpgradeDrain_EnableUpgradeDrain{}
 					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain = &ves_io_schema_views.KubernetesUpgradeDrainConfig{}
+					enableUpgradeDrainOneOfSpec.EnableUpgradeDrain.VegaUpgradeModeToggleChoice = &ves_io_schema_views.KubernetesUpgradeDrainConfig_DisableVegaUpgradeMode{
+						DisableVegaUpgradeMode: &ves_io_schema.Empty{},
+					}
 					kubernetesUpgradeDrainSpec.KubernetesUpgradeDrainEnableChoice = enableUpgradeDrainOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> DrainMaxUnavailableChoice
@@ -42926,7 +43981,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := AppstackSiteLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -42964,6 +44019,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -42994,7 +44053,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		spec.MasterNodeConfiguration = masterNodeConfigurationSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> NetworkCfgChoice
+	// resource modelToSpecRoot OneOfField --> NetworkCfgChoice
 	if !data.NetworkCfgChoice.IsNull() && !data.NetworkCfgChoice.IsUnknown() {
 		networkCfgChoiceModel := AppstackSiteNetCfgChoice{}
 		response.Diagnostics.Append(data.NetworkCfgChoice.As(ctx, &networkCfgChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43011,6 +44070,27 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			}
 			customNetworkConfigOneOfSpec := &ves_io_schema_views_voltstack_site.ReplaceSpecType_CustomNetworkConfig{}
 			customNetworkConfigOneOfSpec.CustomNetworkConfig = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration{}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SliChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultSliConfig{
+				DefaultSliConfig: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.ForwardProxyChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.GlobalNetworkChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.InterfaceChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultInterfaceConfig{
+				DefaultInterfaceConfig: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.NetworkPolicyChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SiteMeshGroupChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_SmConnectionPvtIp{
+				SmConnectionPvtIp: &ves_io_schema.Empty{},
+			}
+			customNetworkConfigOneOfSpec.CustomNetworkConfig.SloChoice = &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_DefaultConfig{
+				DefaultConfig: &ves_io_schema.Empty{},
+			}
 			spec.NetworkCfgChoice = customNetworkConfigOneOfSpec
 
 			// resource modelToSpecNested StringField --> BgpPeerAddress
@@ -43028,7 +44108,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.BgpRouterId = string(appstackSiteCustomNetConfigModel.BgpRouterId.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !appstackSiteCustomNetConfigModel.ForwardProxyChoice.IsNull() && !appstackSiteCustomNetConfigModel.ForwardProxyChoice.IsUnknown() {
 				customNetworkConfigForwardProxyChoiceModel := AppstackSiteForwardProxyChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.ForwardProxyChoice.As(ctx, &customNetworkConfigForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43098,7 +44178,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !appstackSiteCustomNetConfigModel.GlobalNetworkChoice.IsNull() && !appstackSiteCustomNetConfigModel.GlobalNetworkChoice.IsUnknown() {
 				customNetworkConfigGlobalNetworkChoiceModel := AppstackSiteGlobalNetChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.GlobalNetworkChoice.As(ctx, &customNetworkConfigGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43134,6 +44214,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 						for i, globalNetworkConnectionsElement := range globalNetworkConnectionsElements {
 							// Initialize the spec struct for the current element
 							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i] = &ves_io_schema_views.GlobalNetworkConnectionType{}
+							globalNetworkListOneOfSpec.GlobalNetworkList.GlobalNetworkConnections[i].ForwardProxyChoice = &ves_io_schema_views.GlobalNetworkConnectionType_DisableForwardProxy{
+								DisableForwardProxy: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -43233,7 +44316,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InterfaceChoice
+			// resource modelToSpecNested OneOfField --> InterfaceChoice
 			if !appstackSiteCustomNetConfigModel.InterfaceChoice.IsNull() && !appstackSiteCustomNetConfigModel.InterfaceChoice.IsUnknown() {
 				customNetworkConfigInterfaceChoiceModel := AppstackSiteIfaceChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.InterfaceChoice.As(ctx, &customNetworkConfigInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43276,10 +44359,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 						for i, interfacesElement := range interfacesElements {
 							// Initialize the spec struct for the current element
 							interfaceListOneOfSpec.InterfaceList.Interfaces[i] = &ves_io_schema_views_voltstack_site.Interface{}
+							interfaceListOneOfSpec.InterfaceList.Interfaces[i].DcClusterGroupConnectivityInterfaceChoice = &ves_io_schema_views_voltstack_site.Interface_DcClusterGroupConnectivityInterfaceDisabled{
+								DcClusterGroupConnectivityInterfaceDisabled: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
+							// resource modelToSpecNested OneOfField --> DcClusterGroupConnectivityInterfaceChoice
 							if !interfacesElement.DcClusterGroupConnectivityInterfaceChoice.IsNull() && !interfacesElement.DcClusterGroupConnectivityInterfaceChoice.IsUnknown() {
 								interfacesDcClusterGroupConnectivityInterfaceChoiceModel := AppstackSiteDcClusterGroupConnectivityIfaceChoice{}
 								response.Diagnostics.Append(interfacesElement.DcClusterGroupConnectivityInterfaceChoice.As(ctx, &interfacesDcClusterGroupConnectivityInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43325,6 +44411,12 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 									}
 									dedicatedInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_DedicatedInterface{}
 									dedicatedInterfaceOneOfSpec.DedicatedInterface = &ves_io_schema_network_interface.DedicatedInterfaceType{}
+									dedicatedInterfaceOneOfSpec.DedicatedInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_Cluster{
+										Cluster: &ves_io_schema.Empty{},
+									}
+									dedicatedInterfaceOneOfSpec.DedicatedInterface.PrimaryChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_NotPrimary{
+										NotPrimary: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = dedicatedInterfaceOneOfSpec
 
 									// resource modelToSpecNested RequiredStringField --> Device
@@ -43361,7 +44453,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 										dedicatedInterfaceOneOfSpec.DedicatedInterface.Mtu = uint32(uint32(appstackSiteDedicatedIfaceModel.Mtu.ValueInt64()))
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+									// resource modelToSpecNested OneOfField --> NodeChoice
 									if !appstackSiteDedicatedIfaceModel.NodeChoice.IsNull() && !appstackSiteDedicatedIfaceModel.NodeChoice.IsUnknown() {
 										dedicatedInterfaceNodeChoiceModel := AppstackSiteNodeChoice{}
 										response.Diagnostics.Append(appstackSiteDedicatedIfaceModel.NodeChoice.As(ctx, &dedicatedInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43385,7 +44477,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+									// resource modelToSpecNested OneOfField --> PrimaryChoice
 									if !appstackSiteDedicatedIfaceModel.PrimaryChoice.IsNull() && !appstackSiteDedicatedIfaceModel.PrimaryChoice.IsUnknown() {
 										dedicatedInterfacePrimaryChoiceModel := AppstackSitePrimaryChoice{}
 										response.Diagnostics.Append(appstackSiteDedicatedIfaceModel.PrimaryChoice.As(ctx, &dedicatedInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43425,6 +44517,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 									}
 									dedicatedManagementInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_DedicatedManagementInterface{}
 									dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface = &ves_io_schema_network_interface.DedicatedManagementInterfaceType{}
+									dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedManagementInterfaceType_Cluster{
+										Cluster: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = dedicatedManagementInterfaceOneOfSpec
 
 									// resource modelToSpecNested RequiredStringField --> Device
@@ -43437,7 +44532,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 										dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.Mtu = uint32(uint32(appstackSiteDedicatedMgmtIfaceModel.Mtu.ValueInt64()))
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+									// resource modelToSpecNested OneOfField --> NodeChoice
 									if !appstackSiteDedicatedMgmtIfaceModel.NodeChoice.IsNull() && !appstackSiteDedicatedMgmtIfaceModel.NodeChoice.IsUnknown() {
 										dedicatedManagementInterfaceNodeChoiceModel := AppstackSiteDedicatedMgmtIfaceTypeNodeChoice{}
 										response.Diagnostics.Append(appstackSiteDedicatedMgmtIfaceModel.NodeChoice.As(ctx, &dedicatedManagementInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43472,9 +44567,24 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 									}
 									ethernetInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_EthernetInterface{}
 									ethernetInterfaceOneOfSpec.EthernetInterface = &ves_io_schema_network_interface.EthernetInterfaceType{}
+									ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = &ves_io_schema_network_interface.EthernetInterfaceType_DhcpClient{
+										DhcpClient: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.NetworkChoice = &ves_io_schema_network_interface.EthernetInterfaceType_SiteLocalNetwork{
+										SiteLocalNetwork: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.NodeChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Cluster{
+										Cluster: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.PrimaryChoice = &ves_io_schema_network_interface.EthernetInterfaceType_NotPrimary{
+										NotPrimary: &ves_io_schema.Empty{},
+									}
+									ethernetInterfaceOneOfSpec.EthernetInterface.VlanChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Untagged{
+										Untagged: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = ethernetInterfaceOneOfSpec
 
-									// resource modelToSpecNested RequiredOneOfField --> AddressChoice
+									// resource modelToSpecNested OneOfField --> AddressChoice
 									if !appstackSiteEthernetIfaceModel.AddressChoice.IsNull() && !appstackSiteEthernetIfaceModel.AddressChoice.IsUnknown() {
 										ethernetInterfaceAddressChoiceModel := AppstackSiteAddrChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.AddressChoice.As(ctx, &ethernetInterfaceAddressChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43498,6 +44608,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 											}
 											dhcpServerOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_DhcpServer{}
 											dhcpServerOneOfSpec.DhcpServer = &ves_io_schema_network_interface.DHCPServerParametersType{}
+											dhcpServerOneOfSpec.DhcpServer.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart{
+												AutomaticFromStart: &ves_io_schema.Empty{},
+											}
 											ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = dhcpServerOneOfSpec
 
 											// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -43517,10 +44630,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												for ii, dhcpNetworksElement := range dhcpNetworksElements {
 													// Initialize the spec struct for the current element
 													dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii] = &ves_io_schema_network_interface.DHCPNetworkType{}
+													dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].DnsChoice = &ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw{
+														SameAsDgw: &ves_io_schema.Empty{},
+													}
+													dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].GatewayChoice = &ves_io_schema_network_interface.DHCPNetworkType_FirstAddress{
+														FirstAddress: &ves_io_schema.Empty{},
+													}
 
 													// Recursively process nested elements
 
-													// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+													// resource modelToSpecNested OneOfField --> DnsChoice
 													if !dhcpNetworksElement.DnsChoice.IsNull() && !dhcpNetworksElement.DnsChoice.IsUnknown() {
 														dhcpNetworksDnsChoiceModel := AppstackSiteDnsChoice{}
 														response.Diagnostics.Append(dhcpNetworksElement.DnsChoice.As(ctx, &dhcpNetworksDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43544,7 +44663,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
-													// resource modelToSpecNested RequiredOneOfField --> GatewayChoice
+													// resource modelToSpecNested OneOfField --> GatewayChoice
 													if !dhcpNetworksElement.GatewayChoice.IsNull() && !dhcpNetworksElement.GatewayChoice.IsUnknown() {
 														dhcpNetworksGatewayChoiceModel := AppstackSiteGatewayChoice{}
 														response.Diagnostics.Append(dhcpNetworksElement.GatewayChoice.As(ctx, &dhcpNetworksGatewayChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43666,7 +44785,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												dhcpServerOneOfSpec.DhcpServer.FixedIpMap = nil
 											}
 
-											// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+											// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 											if !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsNull() && !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsUnknown() {
 												dhcpServerInterfacesAddressingChoiceModel := AppstackSiteInterfacesAddressingChoice{}
 												response.Diagnostics.Append(appstackSiteDhcpServerModel.InterfacesAddressingChoice.As(ctx, &dhcpServerInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43842,9 +44961,12 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 											}
 											ipv6AutoConfigOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_Ipv6AutoConfig{}
 											ipv6AutoConfigOneOfSpec.Ipv6AutoConfig = &ves_io_schema_network_interface.IPV6AutoConfigType{}
+											ipv6AutoConfigOneOfSpec.Ipv6AutoConfig.AutoconfigChoice = &ves_io_schema_network_interface.IPV6AutoConfigType_Host{
+												Host: &ves_io_schema.Empty{},
+											}
 											ethernetInterfaceOneOfSpec.EthernetInterface.Ipv6AddressChoice = ipv6AutoConfigOneOfSpec
 
-											// resource modelToSpecNested RequiredOneOfField --> AutoconfigChoice
+											// resource modelToSpecNested OneOfField --> AutoconfigChoice
 											if !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsNull() && !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsUnknown() {
 												ipv6AutoConfigAutoconfigChoiceModel := AppstackSiteAutoconfigChoice{}
 												response.Diagnostics.Append(appstackSiteIpv6AutoConfigModel.AutoconfigChoice.As(ctx, &ipv6AutoConfigAutoconfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -43894,6 +45016,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															}
 															statefulOneOfSpec := &ves_io_schema_network_interface.IPV6AutoConfigRouterType_Stateful{}
 															statefulOneOfSpec.Stateful = &ves_io_schema_network_interface.DHCPIPV6StatefulServer{}
+															statefulOneOfSpec.Stateful.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPIPV6StatefulServer_AutomaticFromStart{
+																AutomaticFromStart: &ves_io_schema.Empty{},
+															}
 															routerOneOfSpec.Router.AddressChoice = statefulOneOfSpec
 
 															// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -44007,7 +45132,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																statefulOneOfSpec.Stateful.FixedIpMap = nil
 															}
 
-															// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+															// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 															if !appstackSiteStatefulModel.InterfacesAddressingChoice.IsNull() && !appstackSiteStatefulModel.InterfacesAddressingChoice.IsUnknown() {
 																statefulInterfacesAddressingChoiceModel := AppstackSiteDHCPIPV6StatefulServerInterfacesAddressingChoice{}
 																response.Diagnostics.Append(appstackSiteStatefulModel.InterfacesAddressingChoice.As(ctx, &statefulInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44114,9 +45239,12 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																}
 																localDnsOneOfSpec := &ves_io_schema_network_interface.IPV6DnsConfig_LocalDns{}
 																localDnsOneOfSpec.LocalDns = &ves_io_schema_network_interface.IPV6LocalDnsAddress{}
+																localDnsOneOfSpec.LocalDns.LocalDnsChoice = &ves_io_schema_network_interface.IPV6LocalDnsAddress_FirstAddress{
+																	FirstAddress: &ves_io_schema.Empty{},
+																}
 																dnsConfigSpec.DnsChoice = localDnsOneOfSpec
 
-																// resource modelToSpecNested RequiredOneOfField --> LocalDnsChoice
+																// resource modelToSpecNested OneOfField --> LocalDnsChoice
 																if !appstackSiteLocalDnsModel.LocalDnsChoice.IsNull() && !appstackSiteLocalDnsModel.LocalDnsChoice.IsUnknown() {
 																	localDnsLocalDnsChoiceModel := AppstackSiteLocalDnsChoice{}
 																	response.Diagnostics.Append(appstackSiteLocalDnsModel.LocalDnsChoice.As(ctx, &localDnsLocalDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44291,7 +45419,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+									// resource modelToSpecNested OneOfField --> NetworkChoice
 									if !appstackSiteEthernetIfaceModel.NetworkChoice.IsNull() && !appstackSiteEthernetIfaceModel.NetworkChoice.IsUnknown() {
 										ethernetInterfaceNetworkChoiceModel := AppstackSiteNetChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.NetworkChoice.As(ctx, &ethernetInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44345,7 +45473,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+									// resource modelToSpecNested OneOfField --> NodeChoice
 									if !appstackSiteEthernetIfaceModel.NodeChoice.IsNull() && !appstackSiteEthernetIfaceModel.NodeChoice.IsUnknown() {
 										ethernetInterfaceNodeChoiceModel := AppstackSiteEthernetIfaceTypeNodeChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.NodeChoice.As(ctx, &ethernetInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44369,7 +45497,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+									// resource modelToSpecNested OneOfField --> PrimaryChoice
 									if !appstackSiteEthernetIfaceModel.PrimaryChoice.IsNull() && !appstackSiteEthernetIfaceModel.PrimaryChoice.IsUnknown() {
 										ethernetInterfacePrimaryChoiceModel := AppstackSiteEthernetIfaceTypePrimaryChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.PrimaryChoice.As(ctx, &ethernetInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44393,7 +45521,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+									// resource modelToSpecNested OneOfField --> VlanChoice
 									if !appstackSiteEthernetIfaceModel.VlanChoice.IsNull() && !appstackSiteEthernetIfaceModel.VlanChoice.IsUnknown() {
 										ethernetInterfaceVlanChoiceModel := AppstackSiteVlanChoice{}
 										response.Diagnostics.Append(appstackSiteEthernetIfaceModel.VlanChoice.As(ctx, &ethernetInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44428,6 +45556,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 									}
 									tunnelInterfaceOneOfSpec := &ves_io_schema_views_voltstack_site.Interface_TunnelInterface{}
 									tunnelInterfaceOneOfSpec.TunnelInterface = &ves_io_schema_network_interface.TunnelInterfaceType{}
+									tunnelInterfaceOneOfSpec.TunnelInterface.NetworkChoice = &ves_io_schema_network_interface.TunnelInterfaceType_SiteLocalNetwork{
+										SiteLocalNetwork: &ves_io_schema.Empty{},
+									}
 									interfaceListOneOfSpec.InterfaceList.Interfaces[i].InterfaceChoice = tunnelInterfaceOneOfSpec
 
 									// resource modelToSpecNested UintField --> Mtu
@@ -44435,7 +45566,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 										tunnelInterfaceOneOfSpec.TunnelInterface.Mtu = uint32(uint32(appstackSiteTunnelIfaceModel.Mtu.ValueInt64()))
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+									// resource modelToSpecNested OneOfField --> NetworkChoice
 									if !appstackSiteTunnelIfaceModel.NetworkChoice.IsNull() && !appstackSiteTunnelIfaceModel.NetworkChoice.IsUnknown() {
 										tunnelInterfaceNetworkChoiceModel := AppstackSiteTunnelIfaceTypeNetChoice{}
 										response.Diagnostics.Append(appstackSiteTunnelIfaceModel.NetworkChoice.As(ctx, &tunnelInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44615,6 +45746,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								if response.Diagnostics.HasError() {
 									return
 								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
+								}
 
 								interfacesSpec[i].Labels = mapOfString
 							} else {
@@ -44628,7 +45766,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !appstackSiteCustomNetConfigModel.NetworkPolicyChoice.IsNull() && !appstackSiteCustomNetConfigModel.NetworkPolicyChoice.IsUnknown() {
 				customNetworkConfigNetworkPolicyChoiceModel := AppstackSiteNetPolicyChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.NetworkPolicyChoice.As(ctx, &customNetworkConfigNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44757,7 +45895,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.OutsideVipV6 = string(appstackSiteCustomNetConfigModel.OutsideVipV6.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !appstackSiteCustomNetConfigModel.SiteMeshGroupChoice.IsNull() && !appstackSiteCustomNetConfigModel.SiteMeshGroupChoice.IsUnknown() {
 				customNetworkConfigSiteMeshGroupChoiceModel := AppstackSiteSiteMeshGroupChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.SiteMeshGroupChoice.As(ctx, &customNetworkConfigSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44788,7 +45926,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SloChoice
+			// resource modelToSpecNested OneOfField --> SloChoice
 			if !appstackSiteCustomNetConfigModel.SloChoice.IsNull() && !appstackSiteCustomNetConfigModel.SloChoice.IsUnknown() {
 				customNetworkConfigSloChoiceModel := AppstackSiteSloChoice{}
 				response.Diagnostics.Append(appstackSiteCustomNetConfigModel.SloChoice.As(ctx, &customNetworkConfigSloChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44812,9 +45950,18 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					}
 					sloConfigOneOfSpec := &ves_io_schema_views_voltstack_site.VssNetworkConfiguration_SloConfig{}
 					sloConfigOneOfSpec.SloConfig = &ves_io_schema_views_voltstack_site.VnConfiguration{}
+					sloConfigOneOfSpec.SloConfig.DcClusterGroupChoice = &ves_io_schema_views_voltstack_site.VnConfiguration_NoDcClusterGroup{
+						NoDcClusterGroup: &ves_io_schema.Empty{},
+					}
+					sloConfigOneOfSpec.SloConfig.StaticRouteChoice = &ves_io_schema_views_voltstack_site.VnConfiguration_NoStaticRoutes{
+						NoStaticRoutes: &ves_io_schema.Empty{},
+					}
+					sloConfigOneOfSpec.SloConfig.StaticV6RouteChoice = &ves_io_schema_views_voltstack_site.VnConfiguration_NoStaticV6Routes{
+						NoStaticV6Routes: &ves_io_schema.Empty{},
+					}
 					customNetworkConfigOneOfSpec.CustomNetworkConfig.SloChoice = sloConfigOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+					// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 					if !appstackSiteSloConfigModel.DcClusterGroupChoice.IsNull() && !appstackSiteSloConfigModel.DcClusterGroupChoice.IsUnknown() {
 						sloConfigDcClusterGroupChoiceModel := AppstackSiteDcClusterGroupChoice{}
 						response.Diagnostics.Append(appstackSiteSloConfigModel.DcClusterGroupChoice.As(ctx, &sloConfigDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -44862,13 +46009,20 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 						if response.Diagnostics.HasError() {
 							return
 						}
+						delete(mapOfString, "ves.io/config-propagation-destination")
+						delete(mapOfString, "ves.io/app_type")
+						delete(mapOfString, "ves.io/api-scope")
+						delete(mapOfString, "ves.io/provider")
+						if len(mapOfString) == 0 {
+							mapOfString = nil
+						}
 
 						sloConfigOneOfSpec.SloConfig.Labels = mapOfString
 					} else {
 						sloConfigOneOfSpec.SloConfig.Labels = nil
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> StaticRouteChoice
+					// resource modelToSpecNested OneOfField --> StaticRouteChoice
 					if !appstackSiteSloConfigModel.StaticRouteChoice.IsNull() && !appstackSiteSloConfigModel.StaticRouteChoice.IsUnknown() {
 						sloConfigStaticRouteChoiceModel := AppstackSiteStaticRouteChoice{}
 						response.Diagnostics.Append(appstackSiteSloConfigModel.StaticRouteChoice.As(ctx, &sloConfigStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -45055,7 +46209,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> StaticV6RouteChoice
+					// resource modelToSpecNested OneOfField --> StaticV6RouteChoice
 					if !appstackSiteSloConfigModel.StaticV6RouteChoice.IsNull() && !appstackSiteSloConfigModel.StaticV6RouteChoice.IsUnknown() {
 						sloConfigStaticV6RouteChoiceModel := AppstackSiteStaticV6RouteChoice{}
 						response.Diagnostics.Append(appstackSiteSloConfigModel.StaticV6RouteChoice.As(ctx, &sloConfigStaticV6RouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -45249,6 +46403,8 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			// resource modelToSpecNested UintField --> TunnelDeadTimeout
 			if !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsNull() && !appstackSiteCustomNetConfigModel.TunnelDeadTimeout.IsUnknown() {
 				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(uint32(appstackSiteCustomNetConfigModel.TunnelDeadTimeout.ValueInt64()))
+			} else {
+				customNetworkConfigOneOfSpec.CustomNetworkConfig.TunnelDeadTimeout = uint32(0)
 			}
 
 			// resource modelToSpecNested EnumField --> VipVrrpMode
@@ -45284,12 +46440,19 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			spec.NetworkCfgChoice = defaultNetworkConfigSpecBool
 		}
 
+	} else {
+		spec.NetworkCfgChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_DefaultNetworkConfig{
+			DefaultNetworkConfig: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
 		// resource modelToSpecRoot PointerField --> OfflineSurvivabilityMode
 		if !data.OfflineSurvivabilityMode.IsNull() && !data.OfflineSurvivabilityMode.IsUnknown() {
 			offlineSurvivabilityModeSpec := &ves_io_schema_views.OfflineSurvivabilityModeType{}
+			offlineSurvivabilityModeSpec.OfflineSurvivabilityModeChoice = &ves_io_schema_views.OfflineSurvivabilityModeType_NoOfflineSurvivabilityMode{
+				NoOfflineSurvivabilityMode: &ves_io_schema.Empty{},
+			}
 			spec.OfflineSurvivabilityMode = offlineSurvivabilityModeSpec
 			var offlineSurvivabilityModeModel AppstackSiteOfflineSurvivabilityModeType
 
@@ -45300,7 +46463,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
+			// resource modelToSpecNested OneOfField --> OfflineSurvivabilityModeChoice
 			if !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsNull() && !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsUnknown() {
 				offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel := AppstackSiteOfflineSurvivabilityModeChoice{}
 				response.Diagnostics.Append(offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.As(ctx, &offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -45331,6 +46494,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> Os
 		if !data.Os.IsNull() && !data.Os.IsUnknown() {
 			osSpec := &ves_io_schema_views.OperatingSystemType{}
+			osSpec.OperatingSystemVersionChoice = &ves_io_schema_views.OperatingSystemType_DefaultOsVersion{
+				DefaultOsVersion: &ves_io_schema.Empty{},
+			}
 			spec.Os = osSpec
 			var osModel AppstackSiteOperatingSystemType
 
@@ -45341,7 +46507,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OperatingSystemVersionChoice
+			// resource modelToSpecNested OneOfField --> OperatingSystemVersionChoice
 			if !osModel.OperatingSystemVersionChoice.IsNull() && !osModel.OperatingSystemVersionChoice.IsUnknown() {
 				osOperatingSystemVersionChoiceModel := AppstackSiteOperatingSystemVersionChoice{}
 				response.Diagnostics.Append(osModel.OperatingSystemVersionChoice.As(ctx, &osOperatingSystemVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -45368,7 +46534,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource modelToSpecRoot OneOfField --> SriovInterfaceChoice
 	if !data.SriovInterfaceChoice.IsNull() && !data.SriovInterfaceChoice.IsUnknown() {
 		sriovInterfaceChoiceModel := AppstackSiteSriovIfaceChoice{}
 		response.Diagnostics.Append(data.SriovInterfaceChoice.As(ctx, &sriovInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -45432,6 +46598,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 		}
 
+	} else {
+		spec.SriovInterfaceChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_DefaultSriovInterface{
+			DefaultSriovInterface: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> StorageCfgChoice
@@ -45451,9 +46621,18 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			}
 			customStorageConfigOneOfSpec := &ves_io_schema_views_voltstack_site.ReplaceSpecType_CustomStorageConfig{}
 			customStorageConfigOneOfSpec.CustomStorageConfig = &ves_io_schema_views_voltstack_site.VssStorageConfiguration{}
+			customStorageConfigOneOfSpec.CustomStorageConfig.StaticRouteChoice = &ves_io_schema_views_voltstack_site.VssStorageConfiguration_NoStaticRoutes{
+				NoStaticRoutes: &ves_io_schema.Empty{},
+			}
+			customStorageConfigOneOfSpec.CustomStorageConfig.StorageClassChoice = &ves_io_schema_views_voltstack_site.VssStorageConfiguration_DefaultStorageClass{
+				DefaultStorageClass: &ves_io_schema.Empty{},
+			}
+			customStorageConfigOneOfSpec.CustomStorageConfig.StorageInterfaceChoice = &ves_io_schema_views_voltstack_site.VssStorageConfiguration_NoStorageInterfaces{
+				NoStorageInterfaces: &ves_io_schema.Empty{},
+			}
 			spec.StorageCfgChoice = customStorageConfigOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticRouteChoice
+			// resource modelToSpecNested OneOfField --> StaticRouteChoice
 			if !appstackSiteCustomStorageConfigModel.StaticRouteChoice.IsNull() && !appstackSiteCustomStorageConfigModel.StaticRouteChoice.IsUnknown() {
 				customStorageConfigStaticRouteChoiceModel := AppstackSiteVssStorageCfgStaticRouteChoice{}
 				response.Diagnostics.Append(appstackSiteCustomStorageConfigModel.StaticRouteChoice.As(ctx, &customStorageConfigStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -45640,7 +46819,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StorageClassChoice
+			// resource modelToSpecNested OneOfField --> StorageClassChoice
 			if !appstackSiteCustomStorageConfigModel.StorageClassChoice.IsNull() && !appstackSiteCustomStorageConfigModel.StorageClassChoice.IsUnknown() {
 				customStorageConfigStorageClassChoiceModel := AppstackSiteStorageClassChoice{}
 				response.Diagnostics.Append(appstackSiteCustomStorageConfigModel.StorageClassChoice.As(ctx, &customStorageConfigStorageClassChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -46097,6 +47276,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 											}
 
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !iscsiChapPasswordSecretInfoChoiceModel.None.IsNull() && !iscsiChapPasswordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												iscsiChapPasswordSpec.SecretInfoOneof = noneSpecBool
+											}
+
 										}
 
 									}
@@ -46174,6 +47360,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 													clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 												}
 
+											}
+
+											// resource modelToSpecNested BoolOfOneOfPointerField --> None
+											if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+												noneSpecBool := &ves_io_schema.SecretType_None{}
+												noneSpecBool.None = &ves_io_schema.Empty{}
+												passwordSpec.SecretInfoOneof = noneSpecBool
 											}
 
 										}
@@ -46353,6 +47546,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -46388,6 +47588,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.Labels = mapOfString
@@ -46504,6 +47711,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -46541,6 +47755,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
+														}
 
 														storageSpec[ii].Labels = mapOfString
 													} else {
@@ -46556,6 +47777,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														}
 
 														volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+														volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+															NoQos: &ves_io_schema.Empty{},
+														}
 														storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 														// resource modelToSpecNested BoolField --> Encryption
@@ -46570,7 +47794,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 														}
 
-														// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+														// resource modelToSpecNested OneOfField --> QosPolicyChoice
 														if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 															volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 															response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -46691,6 +47915,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -46705,7 +47932,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -46893,6 +48120,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -46965,6 +48199,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																	clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(appstackSiteClearSecretInfoModel.Url.ValueString())
 																}
 
+															}
+
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsNull() && !chapTargetInitiatorSecretSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																chapTargetInitiatorSecretSpec.SecretInfoOneof = noneSpecBool
 															}
 
 														}
@@ -47060,6 +48301,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !clientPrivateKeySecretInfoChoiceModel.None.IsNull() && !clientPrivateKeySecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														clientPrivateKeySpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -47100,6 +48348,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												response.Diagnostics.Append(diags...)
 												if response.Diagnostics.HasError() {
 													return
+												}
+												delete(mapOfString, "ves.io/config-propagation-destination")
+												delete(mapOfString, "ves.io/app_type")
+												delete(mapOfString, "ves.io/api-scope")
+												delete(mapOfString, "ves.io/provider")
+												if len(mapOfString) == 0 {
+													mapOfString = nil
 												}
 
 												netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.Labels = mapOfString
@@ -47211,6 +48466,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 													}
 
+													// resource modelToSpecNested BoolOfOneOfPointerField --> None
+													if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+														noneSpecBool := &ves_io_schema.SecretType_None{}
+														noneSpecBool.None = &ves_io_schema.Empty{}
+														passwordSpec.SecretInfoOneof = noneSpecBool
+													}
+
 												}
 
 											}
@@ -47248,6 +48510,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
+														}
 
 														storageSpec[ii].Labels = mapOfString
 													} else {
@@ -47263,6 +48532,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														}
 
 														volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+														volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+															NoQos: &ves_io_schema.Empty{},
+														}
 														storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 														// resource modelToSpecNested BoolField --> Encryption
@@ -47277,7 +48549,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 														}
 
-														// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+														// resource modelToSpecNested OneOfField --> QosPolicyChoice
 														if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 															volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 															response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -47398,6 +48670,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -47412,7 +48687,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := AppstackSiteQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -47650,6 +48925,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -47661,6 +48943,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														response.Diagnostics.Append(diags...)
 														if response.Diagnostics.HasError() {
 															return
+														}
+														delete(mapOfString, "ves.io/config-propagation-destination")
+														delete(mapOfString, "ves.io/app_type")
+														delete(mapOfString, "ves.io/api-scope")
+														delete(mapOfString, "ves.io/provider")
+														if len(mapOfString) == 0 {
+															mapOfString = nil
 														}
 
 														flashArraysSpec[ii].Labels = mapOfString
@@ -47818,6 +49107,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															}
 
+															// resource modelToSpecNested BoolOfOneOfPointerField --> None
+															if !apiTokenSecretInfoChoiceModel.None.IsNull() && !apiTokenSecretInfoChoiceModel.None.IsUnknown() {
+																noneSpecBool := &ves_io_schema.SecretType_None{}
+																noneSpecBool.None = &ves_io_schema.Empty{}
+																apiTokenSpec.SecretInfoOneof = noneSpecBool
+															}
+
 														}
 
 													}
@@ -47926,7 +49222,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StorageInterfaceChoice
+			// resource modelToSpecNested OneOfField --> StorageInterfaceChoice
 			if !appstackSiteCustomStorageConfigModel.StorageInterfaceChoice.IsNull() && !appstackSiteCustomStorageConfigModel.StorageInterfaceChoice.IsUnknown() {
 				customStorageConfigStorageInterfaceChoiceModel := AppstackSiteStorageIfaceChoice{}
 				response.Diagnostics.Append(appstackSiteCustomStorageConfigModel.StorageInterfaceChoice.As(ctx, &customStorageConfigStorageInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -47985,6 +49281,13 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								if response.Diagnostics.HasError() {
 									return
 								}
+								delete(mapOfString, "ves.io/config-propagation-destination")
+								delete(mapOfString, "ves.io/app_type")
+								delete(mapOfString, "ves.io/api-scope")
+								delete(mapOfString, "ves.io/provider")
+								if len(mapOfString) == 0 {
+									mapOfString = nil
+								}
 
 								storageInterfacesSpec[i].Labels = mapOfString
 							} else {
@@ -48000,9 +49303,24 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								}
 
 								storageInterfaceSpec := &ves_io_schema_network_interface.EthernetInterfaceType{}
+								storageInterfaceSpec.AddressChoice = &ves_io_schema_network_interface.EthernetInterfaceType_DhcpClient{
+									DhcpClient: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.NetworkChoice = &ves_io_schema_network_interface.EthernetInterfaceType_SiteLocalNetwork{
+									SiteLocalNetwork: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.NodeChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Cluster{
+									Cluster: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.PrimaryChoice = &ves_io_schema_network_interface.EthernetInterfaceType_NotPrimary{
+									NotPrimary: &ves_io_schema.Empty{},
+								}
+								storageInterfaceSpec.VlanChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Untagged{
+									Untagged: &ves_io_schema.Empty{},
+								}
 								storageInterfacesSpec[i].StorageInterface = storageInterfaceSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> AddressChoice
+								// resource modelToSpecNested OneOfField --> AddressChoice
 								if !storageInterfaceModel.AddressChoice.IsNull() && !storageInterfaceModel.AddressChoice.IsUnknown() {
 									storageInterfaceAddressChoiceModel := AppstackSiteAddrChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.AddressChoice.As(ctx, &storageInterfaceAddressChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48026,6 +49344,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 										}
 										dhcpServerOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_DhcpServer{}
 										dhcpServerOneOfSpec.DhcpServer = &ves_io_schema_network_interface.DHCPServerParametersType{}
+										dhcpServerOneOfSpec.DhcpServer.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart{
+											AutomaticFromStart: &ves_io_schema.Empty{},
+										}
 										storageInterfaceSpec.AddressChoice = dhcpServerOneOfSpec
 
 										// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -48045,10 +49366,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 											for ii, dhcpNetworksElement := range dhcpNetworksElements {
 												// Initialize the spec struct for the current element
 												dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii] = &ves_io_schema_network_interface.DHCPNetworkType{}
+												dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].DnsChoice = &ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw{
+													SameAsDgw: &ves_io_schema.Empty{},
+												}
+												dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[ii].GatewayChoice = &ves_io_schema_network_interface.DHCPNetworkType_FirstAddress{
+													FirstAddress: &ves_io_schema.Empty{},
+												}
 
 												// Recursively process nested elements
 
-												// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+												// resource modelToSpecNested OneOfField --> DnsChoice
 												if !dhcpNetworksElement.DnsChoice.IsNull() && !dhcpNetworksElement.DnsChoice.IsUnknown() {
 													dhcpNetworksDnsChoiceModel := AppstackSiteDnsChoice{}
 													response.Diagnostics.Append(dhcpNetworksElement.DnsChoice.As(ctx, &dhcpNetworksDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48072,7 +49399,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> GatewayChoice
+												// resource modelToSpecNested OneOfField --> GatewayChoice
 												if !dhcpNetworksElement.GatewayChoice.IsNull() && !dhcpNetworksElement.GatewayChoice.IsUnknown() {
 													dhcpNetworksGatewayChoiceModel := AppstackSiteGatewayChoice{}
 													response.Diagnostics.Append(dhcpNetworksElement.GatewayChoice.As(ctx, &dhcpNetworksGatewayChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48194,7 +49521,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 											dhcpServerOneOfSpec.DhcpServer.FixedIpMap = nil
 										}
 
-										// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+										// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 										if !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsNull() && !appstackSiteDhcpServerModel.InterfacesAddressingChoice.IsUnknown() {
 											dhcpServerInterfacesAddressingChoiceModel := AppstackSiteInterfacesAddressingChoice{}
 											response.Diagnostics.Append(appstackSiteDhcpServerModel.InterfacesAddressingChoice.As(ctx, &dhcpServerInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48370,9 +49697,12 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 										}
 										ipv6AutoConfigOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_Ipv6AutoConfig{}
 										ipv6AutoConfigOneOfSpec.Ipv6AutoConfig = &ves_io_schema_network_interface.IPV6AutoConfigType{}
+										ipv6AutoConfigOneOfSpec.Ipv6AutoConfig.AutoconfigChoice = &ves_io_schema_network_interface.IPV6AutoConfigType_Host{
+											Host: &ves_io_schema.Empty{},
+										}
 										storageInterfaceSpec.Ipv6AddressChoice = ipv6AutoConfigOneOfSpec
 
-										// resource modelToSpecNested RequiredOneOfField --> AutoconfigChoice
+										// resource modelToSpecNested OneOfField --> AutoconfigChoice
 										if !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsNull() && !appstackSiteIpv6AutoConfigModel.AutoconfigChoice.IsUnknown() {
 											ipv6AutoConfigAutoconfigChoiceModel := AppstackSiteAutoconfigChoice{}
 											response.Diagnostics.Append(appstackSiteIpv6AutoConfigModel.AutoconfigChoice.As(ctx, &ipv6AutoConfigAutoconfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48422,6 +49752,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														}
 														statefulOneOfSpec := &ves_io_schema_network_interface.IPV6AutoConfigRouterType_Stateful{}
 														statefulOneOfSpec.Stateful = &ves_io_schema_network_interface.DHCPIPV6StatefulServer{}
+														statefulOneOfSpec.Stateful.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPIPV6StatefulServer_AutomaticFromStart{
+															AutomaticFromStart: &ves_io_schema.Empty{},
+														}
 														routerOneOfSpec.Router.AddressChoice = statefulOneOfSpec
 
 														// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -48535,7 +49868,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															statefulOneOfSpec.Stateful.FixedIpMap = nil
 														}
 
-														// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+														// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 														if !appstackSiteStatefulModel.InterfacesAddressingChoice.IsNull() && !appstackSiteStatefulModel.InterfacesAddressingChoice.IsUnknown() {
 															statefulInterfacesAddressingChoiceModel := AppstackSiteDHCPIPV6StatefulServerInterfacesAddressingChoice{}
 															response.Diagnostics.Append(appstackSiteStatefulModel.InterfacesAddressingChoice.As(ctx, &statefulInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48642,9 +49975,12 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															}
 															localDnsOneOfSpec := &ves_io_schema_network_interface.IPV6DnsConfig_LocalDns{}
 															localDnsOneOfSpec.LocalDns = &ves_io_schema_network_interface.IPV6LocalDnsAddress{}
+															localDnsOneOfSpec.LocalDns.LocalDnsChoice = &ves_io_schema_network_interface.IPV6LocalDnsAddress_FirstAddress{
+																FirstAddress: &ves_io_schema.Empty{},
+															}
 															dnsConfigSpec.DnsChoice = localDnsOneOfSpec
 
-															// resource modelToSpecNested RequiredOneOfField --> LocalDnsChoice
+															// resource modelToSpecNested OneOfField --> LocalDnsChoice
 															if !appstackSiteLocalDnsModel.LocalDnsChoice.IsNull() && !appstackSiteLocalDnsModel.LocalDnsChoice.IsUnknown() {
 																localDnsLocalDnsChoiceModel := AppstackSiteLocalDnsChoice{}
 																response.Diagnostics.Append(appstackSiteLocalDnsModel.LocalDnsChoice.As(ctx, &localDnsLocalDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48819,7 +50155,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+								// resource modelToSpecNested OneOfField --> NetworkChoice
 								if !storageInterfaceModel.NetworkChoice.IsNull() && !storageInterfaceModel.NetworkChoice.IsUnknown() {
 									storageInterfaceNetworkChoiceModel := AppstackSiteNetChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.NetworkChoice.As(ctx, &storageInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48873,7 +50209,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+								// resource modelToSpecNested OneOfField --> NodeChoice
 								if !storageInterfaceModel.NodeChoice.IsNull() && !storageInterfaceModel.NodeChoice.IsUnknown() {
 									storageInterfaceNodeChoiceModel := AppstackSiteEthernetIfaceTypeNodeChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.NodeChoice.As(ctx, &storageInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48897,7 +50233,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+								// resource modelToSpecNested OneOfField --> PrimaryChoice
 								if !storageInterfaceModel.PrimaryChoice.IsNull() && !storageInterfaceModel.PrimaryChoice.IsUnknown() {
 									storageInterfacePrimaryChoiceModel := AppstackSiteEthernetIfaceTypePrimaryChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.PrimaryChoice.As(ctx, &storageInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48921,7 +50257,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+								// resource modelToSpecNested OneOfField --> VlanChoice
 								if !storageInterfaceModel.VlanChoice.IsNull() && !storageInterfaceModel.VlanChoice.IsUnknown() {
 									storageInterfaceVlanChoiceModel := AppstackSiteVlanChoice{}
 									response.Diagnostics.Append(storageInterfaceModel.VlanChoice.As(ctx, &storageInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48969,6 +50305,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> Sw
 		if !data.Sw.IsNull() && !data.Sw.IsUnknown() {
 			swSpec := &ves_io_schema_views.VolterraSoftwareType{}
+			swSpec.VolterraSwVersionChoice = &ves_io_schema_views.VolterraSoftwareType_DefaultSwVersion{
+				DefaultSwVersion: &ves_io_schema.Empty{},
+			}
 			spec.Sw = swSpec
 			var swModel AppstackSiteVolterraSoftwareType
 
@@ -48979,7 +50318,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VolterraSwVersionChoice
+			// resource modelToSpecNested OneOfField --> VolterraSwVersionChoice
 			if !swModel.VolterraSwVersionChoice.IsNull() && !swModel.VolterraSwVersionChoice.IsUnknown() {
 				swVolterraSwVersionChoiceModel := AppstackSiteVolterraSwVersionChoice{}
 				response.Diagnostics.Append(swModel.VolterraSwVersionChoice.As(ctx, &swVolterraSwVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49006,7 +50345,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource modelToSpecRoot OneOfField --> UsbPolicyChoice
 	if !data.UsbPolicyChoice.IsNull() && !data.UsbPolicyChoice.IsUnknown() {
 		usbPolicyChoiceModel := AppstackSiteUsbPolicyChoice{}
 		response.Diagnostics.Append(data.UsbPolicyChoice.As(ctx, &usbPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49051,6 +50390,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 		}
 
+	} else {
+		spec.UsbPolicyChoice = &ves_io_schema_views_voltstack_site.ReplaceSpecType_DenyAllUsb{
+			DenyAllUsb: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> VmChoice
@@ -49084,6 +50427,9 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> WafSignatures
 		if !data.WafSignatures.IsNull() && !data.WafSignatures.IsUnknown() {
 			wafSignaturesSpec := &ves_io_schema_views_common_waf.LiveSignaturesUpdate{}
+			wafSignaturesSpec.SignaturesUpdateModeChoice = &ves_io_schema_views_common_waf.LiveSignaturesUpdate_Manual{
+				Manual: &ves_io_schema.Empty{},
+			}
 			spec.WafSignatures = wafSignaturesSpec
 			var wafSignaturesModel AppstackSiteLiveSignaturesUpdate
 
@@ -49134,7 +50480,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -49142,24 +50488,20 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "appstack_site", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_voltstack_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "appstack_site", err),
 		)
 		return
 	}
@@ -49277,14 +50619,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Address = types.StringValue(specData.GetAddress())
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -49442,12 +50780,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockedServicesChoice = types.ObjectNull(AppstackSiteBlockedServicesChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BondChoice
+	// resource SpecToModelRoot OneOfField --> BondChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -49624,8 +50960,6 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BondChoice = types.ObjectNull(AppstackSiteBondChoiceModelAttributeMap)
 	}
 
@@ -49719,7 +51053,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		data.CustomDns = types.ObjectNull(AppstackSiteCustomDnsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> GpuChoice
+	// resource SpecToModelRoot OneOfField --> GpuChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -49815,12 +51149,10 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.GpuChoice = types.ObjectNull(AppstackSiteGpuChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> K8SClusterChoice
+	// resource SpecToModelRoot OneOfField --> K8SClusterChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -49904,8 +51236,6 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.K8SClusterChoice = types.ObjectNull(AppstackSiteK8SClusterChoiceModelAttributeMap)
 	}
 
@@ -50031,10 +51361,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		data.KubernetesUpgradeDrain = types.ObjectNull(AppstackSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot BoolField --> LaunchIkeInNamespace
-	data.LaunchIkeInNamespace = types.BoolValue(specData.GetLaunchIkeInNamespace())
-
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -50118,8 +51445,6 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogsReceiverChoice = types.ObjectNull(AppstackSiteLogsReceiverChoiceModelAttributeMap)
 	}
 
@@ -50162,7 +51487,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		data.MasterNodeConfiguration = masterNodeConfigurationList
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkCfgChoice
+	// resource SpecToModelRoot OneOfField --> NetworkCfgChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -50209,8 +51534,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["bgp_router_id"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if customNetworkConfigElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -50328,8 +51652,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["forward_proxy_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if customNetworkConfigElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -50586,8 +51909,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["global_network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InterfaceChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InterfaceChoice
 				if customNetworkConfigElement.GetInterfaceChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfiginterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -50625,8 +51947,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								for _, interfacesElement := range interfaceListElement.GetInterfaces() {
 									appstackSiteIfaceModel := AppstackSiteIface{}
 
-									// resource specToModelNested RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> DcClusterGroupConnectivityInterfaceChoice
 									if interfacesElement.GetDcClusterGroupConnectivityInterfaceChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										interfacesdcClusterGroupConnectivityInterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -50760,8 +52081,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												dedicatedInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NodeChoice
 												if dedicatedInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -50809,8 +52129,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 													dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap)
 												}
 
-												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> PrimaryChoice
 												if dedicatedInterfaceElement.GetPrimaryChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -50892,8 +52211,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												dedicatedManagementInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedManagementInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NodeChoice
 												if dedicatedManagementInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													dedicatedManagementInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -50962,8 +52280,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 											if isEthernetInterface && ethernetInterfaceOptionsWrapper != nil && ethernetInterfaceOptionsWrapper.EthernetInterface != nil {
 												ethernetInterfaceElement := ethernetInterfaceOptionsWrapper.EthernetInterface
 
-												// resource specToModelNested RequiredOneOfField --> AddressChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> AddressChoice
 												if ethernetInterfaceElement.GetAddressChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfaceaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -51000,8 +52317,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 																	appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
-																	// resource specToModelNested RequiredOneOfField --> DnsChoice
-																	// GlobalSpecType
+																	// resource specToModelNested OneOfField --> DnsChoice
 																	if dhcpNetworksElement.GetDnsChoice() != nil {
 																		// Create a temporary attribute map for the choices within this OneOf
 																		dhcpNetworksdnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -51049,8 +52365,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 																	}
 
-																	// resource specToModelNested RequiredOneOfField --> GatewayChoice
-																	// GlobalSpecType
+																	// resource specToModelNested OneOfField --> GatewayChoice
 																	if dhcpNetworksElement.GetGatewayChoice() != nil {
 																		// Create a temporary attribute map for the choices within this OneOf
 																		dhcpNetworksgatewayChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -51245,8 +52560,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 															}
 
-															// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 															if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpServerinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -51541,8 +52855,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 															ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-															// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> AutoconfigChoice
 															if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																ipv6AutoConfigautoconfigChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -51743,8 +53056,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																						statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 																					}
 
-																					// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-																					// GlobalSpecType
+																					// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 																					if statefulElement.GetInterfacesAddressingChoice() != nil {
 																						// Create a temporary attribute map for the choices within this OneOf
 																						statefulinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -51923,8 +53235,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																					if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 																						localDnsElement := localDnsOptionsWrapper.LocalDns
 
-																						// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-																						// GlobalSpecType
+																						// resource specToModelNested OneOfField --> LocalDnsChoice
 																						if localDnsElement.GetLocalDnsChoice() != nil {
 																							// Create a temporary attribute map for the choices within this OneOf
 																							localDnslocalDnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -52339,8 +53650,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												ethernetInterfaceAttributeMap["mtu"] = types.Int64Value(int64(ethernetInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NetworkChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NetworkChoice
 												if ethernetInterfaceElement.GetNetworkChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -52441,8 +53751,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 													ethernetInterfaceAttributeMap["network_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap)
 												}
 
-												// resource specToModelNested RequiredOneOfField --> NodeChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NodeChoice
 												if ethernetInterfaceElement.GetNodeChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -52490,8 +53799,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 													ethernetInterfaceAttributeMap["node_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap)
 												}
 
-												// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> PrimaryChoice
 												if ethernetInterfaceElement.GetPrimaryChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -52541,8 +53849,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Priority
 												ethernetInterfaceAttributeMap["priority"] = types.Int64Value(int64(ethernetInterfaceElement.GetPriority()))
 
-												// resource specToModelNested RequiredOneOfField --> VlanChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> VlanChoice
 												if ethernetInterfaceElement.GetVlanChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													ethernetInterfacevlanChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -52614,8 +53921,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												// resource specToModelNested UintField --> Mtu
 												tunnelInterfaceAttributeMap["mtu"] = types.Int64Value(int64(tunnelInterfaceElement.GetMtu()))
 
-												// resource specToModelNested RequiredOneOfField --> NetworkChoice
-												// GlobalSpecType
+												// resource specToModelNested OneOfField --> NetworkChoice
 												if tunnelInterfaceElement.GetNetworkChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
 													tunnelInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -52944,15 +54250,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if interfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(interfacesElement.GetLabels()))
 										for k, v := range interfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -53018,8 +54325,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["interface_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if customNetworkConfigElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfignetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -53231,8 +54537,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["outside_vip_v6"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if customNetworkConfigElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -53289,8 +54594,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customNetworkConfigAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SloChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SloChoice
 				if customNetworkConfigElement.GetSloChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customNetworkConfigsloChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -53319,8 +54623,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 						if isSloConfig && sloConfigOptionsWrapper != nil && sloConfigOptionsWrapper.SloConfig != nil {
 							sloConfigElement := sloConfigOptionsWrapper.SloConfig
 
-							// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> DcClusterGroupChoice
 							if sloConfigElement.GetDcClusterGroupChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -53405,15 +54708,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 							// resource specToModelNested MapOfStringField --> Labels
 							if sloConfigElement.GetLabels() != nil {
-								// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-								// They will be picked up during the next Read.
-								filteredMap := make(map[string]string)
+								// Filter out configured omitted map keys across all operations so backend-injected
+								// forbidden keys never enter or vanish from Terraform state.
+								filteredMap := make(map[string]string, len(sloConfigElement.GetLabels()))
 								for k, v := range sloConfigElement.GetLabels() {
-									if !strings.HasPrefix(k, "ves.io/") {
-										filteredMap[k] = v
-									}
+									filteredMap[k] = v
 								}
-
+								delete(filteredMap, "ves.io/config-propagation-destination")
+								delete(filteredMap, "ves.io/app_type")
+								delete(filteredMap, "ves.io/api-scope")
+								delete(filteredMap, "ves.io/provider")
 								if len(filteredMap) > 0 {
 									labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 									response.Diagnostics.Append(labelsDiags...)
@@ -53430,8 +54734,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								sloConfigAttributeMap["labels"] = types.MapNull(types.StringType)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> StaticRouteChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> StaticRouteChoice
 							if sloConfigElement.GetStaticRouteChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigstaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -53704,8 +55007,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 								sloConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> StaticV6RouteChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> StaticV6RouteChoice
 							if sloConfigElement.GetStaticV6RouteChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								sloConfigstaticV6RouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -53771,29 +55073,31 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														if response.Diagnostics.HasError() {
 															return
 														}
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: reconcile backend list order against client representation.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													} else {
-														// State Healing: preserve prior list representation for marked fields.
+														// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 														var priorValIpPrefixes types.List
 														response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("network_cfg_choice").AtName("custom_network_config").AtName("slo_choice").AtName("slo_config").AtName("static_v6_route_choice").AtName("static_v6_routes").AtName("static_routes").AtListIndex(i).AtName("ip_prefixes"), &priorValIpPrefixes)...)
 														if response.Diagnostics.HasError() {
 															return
 														}
-														if !priorValIpPrefixes.IsNull() && !priorValIpPrefixes.IsUnknown() {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = priorValIpPrefixes
-														} else {
-															appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+														reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+														response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+														if response.Diagnostics.HasError() {
+															return
 														}
+														appstackSiteStaticV6RouteViewTypeModel.IpPrefixes = reconciledListIpPrefixes
 													}
 												}
 
@@ -54086,8 +55390,6 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.NetworkCfgChoice = types.ObjectNull(AppstackSiteNetworkCfgChoiceModelAttributeMap)
 	}
 
@@ -54096,8 +55398,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		var appstackSiteOfflineSurvivabilityModeTypeModel = &AppstackSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -54159,20 +55460,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// resource SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
 		var appstackSiteOperatingSystemTypeModel = &AppstackSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -54234,7 +55530,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		data.Os = types.ObjectNull(AppstackSiteOsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> SriovInterfaceChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -54334,8 +55630,6 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SriovInterfaceChoice = types.ObjectNull(AppstackSiteSriovInterfaceChoiceModelAttributeMap)
 	}
 
@@ -54362,8 +55656,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			if isCustomStorageConfig && customStorageConfigOptionsWrapper != nil && customStorageConfigOptionsWrapper.CustomStorageConfig != nil {
 				customStorageConfigElement := customStorageConfigOptionsWrapper.CustomStorageConfig
 
-				// resource specToModelNested RequiredOneOfField --> StaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StaticRouteChoice
 				if customStorageConfigElement.GetStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -54636,8 +55929,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customStorageConfigAttributeMap["static_route_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if customStorageConfigElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -55226,6 +56518,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															}
 														}
 
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := iscsiChapPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															iscsiChapPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+														}
+
 														// --- End of Choices ---
 
 														// Create the final ObjectValue for this OneOf field
@@ -55370,6 +56671,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 															} else {
 																passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceHpeStoragePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 															}
+														}
+
+														// resource specToModelNested BoolOfOneOfPointerField --> None
+														_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+														if isNone {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+														} else {
+															passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 														}
 
 														// --- End of Choices ---
@@ -55649,6 +56959,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -55737,15 +57056,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapNasElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapNasElement.GetLabels()))
 																for k, v := range netappBackendOntapNasElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -55937,6 +57257,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -55992,15 +57321,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -56036,8 +57366,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
-																		// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																		// GlobalSpecType
+																		// resource specToModelNested OneOfField --> QosPolicyChoice
 																		if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																			// Create a temporary attribute map for the choices within this OneOf
 																			volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -56247,8 +57576,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
-																// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																// GlobalSpecType
+																// resource specToModelNested OneOfField --> QosPolicyChoice
 																if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																	// Create a temporary attribute map for the choices within this OneOf
 																	volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -56524,6 +57852,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																					}
 																				}
 
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																				}
+
 																				// --- End of Choices ---
 
 																				// Create the final ObjectValue for this OneOf field
@@ -56660,6 +57997,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																					} else {
 																						chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanChapChoiceUseChapChapTargetInitiatorSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
 																					}
+																				}
+
+																				// resource specToModelNested BoolOfOneOfPointerField --> None
+																				_, isNone := chapTargetInitiatorSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																				if isNone {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																				} else {
+																					chapTargetInitiatorSecretsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																				}
 
 																				// --- End of Choices ---
@@ -56854,6 +58200,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := clientPrivateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		clientPrivateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -56950,15 +58305,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 															// resource specToModelNested MapOfStringField --> Labels
 															if netappBackendOntapSanElement.GetLabels() != nil {
-																// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																// They will be picked up during the next Read.
-																filteredMap := make(map[string]string)
+																// Filter out configured omitted map keys across all operations so backend-injected
+																// forbidden keys never enter or vanish from Terraform state.
+																filteredMap := make(map[string]string, len(netappBackendOntapSanElement.GetLabels()))
 																for k, v := range netappBackendOntapSanElement.GetLabels() {
-																	if !strings.HasPrefix(k, "ves.io/") {
-																		filteredMap[k] = v
-																	}
+																	filteredMap[k] = v
 																}
-
+																delete(filteredMap, "ves.io/config-propagation-destination")
+																delete(filteredMap, "ves.io/app_type")
+																delete(filteredMap, "ves.io/api-scope")
+																delete(filteredMap, "ves.io/provider")
 																if len(filteredMap) > 0 {
 																	labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																	response.Diagnostics.Append(labelsDiags...)
@@ -57132,6 +58488,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																		}
 																	}
 
+																	// resource specToModelNested BoolOfOneOfPointerField --> None
+																	_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																	if isNone {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																	} else {
+																		passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																	}
+
 																	// --- End of Choices ---
 
 																	// Create the final ObjectValue for this OneOf field
@@ -57187,15 +58552,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 																	// resource specToModelNested MapOfStringField --> Labels
 																	if storageElement.GetLabels() != nil {
-																		// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																		// They will be picked up during the next Read.
-																		filteredMap := make(map[string]string)
+																		// Filter out configured omitted map keys across all operations so backend-injected
+																		// forbidden keys never enter or vanish from Terraform state.
+																		filteredMap := make(map[string]string, len(storageElement.GetLabels()))
 																		for k, v := range storageElement.GetLabels() {
-																			if !strings.HasPrefix(k, "ves.io/") {
-																				filteredMap[k] = v
-																			}
+																			filteredMap[k] = v
 																		}
-
+																		delete(filteredMap, "ves.io/config-propagation-destination")
+																		delete(filteredMap, "ves.io/app_type")
+																		delete(filteredMap, "ves.io/api-scope")
+																		delete(filteredMap, "ves.io/provider")
 																		if len(filteredMap) > 0 {
 																			labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																			response.Diagnostics.Append(labelsDiags...)
@@ -57231,8 +58597,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																			appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																		}
 
-																		// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																		// GlobalSpecType
+																		// resource specToModelNested OneOfField --> QosPolicyChoice
 																		if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																			// Create a temporary attribute map for the choices within this OneOf
 																			volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -57442,8 +58807,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																	appstackSiteOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 																}
 
-																// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-																// GlobalSpecType
+																// resource specToModelNested OneOfField --> QosPolicyChoice
 																if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																	// Create a temporary attribute map for the choices within this OneOf
 																	volumeDefaultsqosPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -57778,6 +59142,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																			}
 																		}
 
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+																		}
+
 																		// --- End of Choices ---
 
 																		// Create the final ObjectValue for this OneOf field
@@ -57817,15 +59190,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 																// resource specToModelNested MapOfStringField --> Labels
 																if flashArraysElement.GetLabels() != nil {
-																	// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-																	// They will be picked up during the next Read.
-																	filteredMap := make(map[string]string)
+																	// Filter out configured omitted map keys across all operations so backend-injected
+																	// forbidden keys never enter or vanish from Terraform state.
+																	filteredMap := make(map[string]string, len(flashArraysElement.GetLabels()))
 																	for k, v := range flashArraysElement.GetLabels() {
-																		if !strings.HasPrefix(k, "ves.io/") {
-																			filteredMap[k] = v
-																		}
+																		filteredMap[k] = v
 																	}
-
+																	delete(filteredMap, "ves.io/config-propagation-destination")
+																	delete(filteredMap, "ves.io/app_type")
+																	delete(filteredMap, "ves.io/api-scope")
+																	delete(filteredMap, "ves.io/provider")
 																	if len(filteredMap) > 0 {
 																		labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 																		response.Diagnostics.Append(labelsDiags...)
@@ -58067,6 +59441,15 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																			} else {
 																				apiTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServiceOrchestratorArraysFlashBladeFlashBladesApiTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 																			}
+																		}
+
+																		// resource specToModelNested BoolOfOneOfPointerField --> None
+																		_, isNone := apiTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+																		if isNone {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+																		} else {
+																			apiTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 																		}
 
 																		// --- End of Choices ---
@@ -58379,8 +59762,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 					customStorageConfigAttributeMap["storage_device_choice"] = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageDeviceChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageInterfaceChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageInterfaceChoice
 				if customStorageConfigElement.GetStorageInterfaceChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					customStorageConfigstorageInterfaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58428,15 +59810,16 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 									// resource specToModelNested MapOfStringField --> Labels
 									if storageInterfacesElement.GetLabels() != nil {
-										// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-										// They will be picked up during the next Read.
-										filteredMap := make(map[string]string)
+										// Filter out configured omitted map keys across all operations so backend-injected
+										// forbidden keys never enter or vanish from Terraform state.
+										filteredMap := make(map[string]string, len(storageInterfacesElement.GetLabels()))
 										for k, v := range storageInterfacesElement.GetLabels() {
-											if !strings.HasPrefix(k, "ves.io/") {
-												filteredMap[k] = v
-											}
+											filteredMap[k] = v
 										}
-
+										delete(filteredMap, "ves.io/config-propagation-destination")
+										delete(filteredMap, "ves.io/app_type")
+										delete(filteredMap, "ves.io/api-scope")
+										delete(filteredMap, "ves.io/provider")
 										if len(filteredMap) > 0 {
 											labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 											response.Diagnostics.Append(labelsDiags...)
@@ -58461,8 +59844,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 
 										// Recursively populate the nested struct
 
-										// resource specToModelNested RequiredOneOfField --> AddressChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> AddressChoice
 										if storageInterfaceElement.GetAddressChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfaceaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58499,8 +59881,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 															appstackSiteDHCPNetTypeModel := AppstackSiteDHCPNetType{}
 
-															// resource specToModelNested RequiredOneOfField --> DnsChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> DnsChoice
 															if dhcpNetworksElement.GetDnsChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpNetworksdnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58548,8 +59929,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																appstackSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 															}
 
-															// resource specToModelNested RequiredOneOfField --> GatewayChoice
-															// GlobalSpecType
+															// resource specToModelNested OneOfField --> GatewayChoice
 															if dhcpNetworksElement.GetGatewayChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
 																dhcpNetworksgatewayChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58744,8 +60124,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 														dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 													}
 
-													// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-													// GlobalSpecType
+													// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 													if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
 														dhcpServerinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59040,8 +60419,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 												if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 													ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-													// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-													// GlobalSpecType
+													// resource specToModelNested OneOfField --> AutoconfigChoice
 													if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
 														ipv6AutoConfigautoconfigChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59242,8 +60620,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																				statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 																			}
 
-																			// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-																			// GlobalSpecType
+																			// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 																			if statefulElement.GetInterfacesAddressingChoice() != nil {
 																				// Create a temporary attribute map for the choices within this OneOf
 																				statefulinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59422,8 +60799,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 																			if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 																				localDnsElement := localDnsOptionsWrapper.LocalDns
 
-																				// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-																				// GlobalSpecType
+																				// resource specToModelNested OneOfField --> LocalDnsChoice
 																				if localDnsElement.GetLocalDnsChoice() != nil {
 																					// Create a temporary attribute map for the choices within this OneOf
 																					localDnslocalDnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59838,8 +61214,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 										// resource specToModelNested UintField --> Mtu
 										appstackSiteEthernetIfaceTypeModel.Mtu = types.Int64Value(int64(storageInterfaceElement.GetMtu()))
 
-										// resource specToModelNested RequiredOneOfField --> NetworkChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> NetworkChoice
 										if storageInterfaceElement.GetNetworkChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59940,8 +61315,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 											appstackSiteEthernetIfaceTypeModel.NetworkChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNetworkChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested RequiredOneOfField --> NodeChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> NodeChoice
 										if storageInterfaceElement.GetNodeChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacenodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59989,8 +61363,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 											appstackSiteEthernetIfaceTypeModel.NodeChoice = types.ObjectNull(AppstackSiteStorageCfgChoiceCustomStorageConfigStorageInterfaceChoiceStorageInterfaceListStorageInterfacesStorageInterfaceNodeChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> PrimaryChoice
 										if storageInterfaceElement.GetPrimaryChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfaceprimaryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60040,8 +61413,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 										// resource specToModelNested UintField --> Priority
 										appstackSiteEthernetIfaceTypeModel.Priority = types.Int64Value(int64(storageInterfaceElement.GetPriority()))
 
-										// resource specToModelNested RequiredOneOfField --> VlanChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> VlanChoice
 										if storageInterfaceElement.GetVlanChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											storageInterfacevlanChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60203,8 +61575,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		var appstackSiteVolterraSoftwareTypeModel = &AppstackSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60266,7 +61637,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		data.Sw = types.ObjectNull(AppstackSiteSwModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource SpecToModelRoot OneOfField --> UsbPolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -60359,8 +61730,6 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.UsbPolicyChoice = types.ObjectNull(AppstackSiteUsbPolicyChoiceModelAttributeMap)
 	}
 
@@ -60424,12 +61793,8 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> VolterraSoftwareVersion
-	if specData.GetVolterraSoftwareVersion() != "" {
-		data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.VolterraSoftwareVersion = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.VolterraSoftwareVersion = types.StringValue(specData.GetVolterraSoftwareVersion())
 
 	// resource SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
@@ -60507,7 +61872,12 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 			}
 			data.WorkerNodes = listValue
 		} else {
-			data.WorkerNodes = types.ListNull(types.StringType)
+			if !data.WorkerNodes.IsNull() && !data.WorkerNodes.IsUnknown() && len(data.WorkerNodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.WorkerNodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.WorkerNodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -60538,7 +61908,7 @@ func (r *ResourceF5XCAppstackSite) Update(ctx context.Context, request resource.
 	}
 	// Restore plan value for StorageCfgChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.StorageCfgChoice = planStorageCfgChoice
+	data.StorageCfgChoice = utils.ResolveUnknowns(planStorageCfgChoice, data.StorageCfgChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -60586,7 +61956,7 @@ func (r *ResourceF5XCAppstackSite) Delete(ctx context.Context, request resource.
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "appstack_site", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "appstack_site", err),
 		)
 		return
 	}

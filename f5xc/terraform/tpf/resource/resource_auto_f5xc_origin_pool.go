@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -39,6 +40,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -50,6 +52,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_cluster "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/cluster"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -292,8 +295,7 @@ type OriginPoolPublicIp struct {
 }
 
 type OriginPoolPublicIpChoice struct {
-	Ip   types.String `tfsdk:"ip"`
-	Ipv6 types.String `tfsdk:"ipv6"`
+	Ip types.String `tfsdk:"ip"`
 }
 
 type OriginPoolPublicName struct {
@@ -375,6 +377,7 @@ type OriginPoolSecretType struct {
 type OriginPoolSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type OriginPoolBlindfoldSecretInfo struct {
@@ -496,7 +499,7 @@ var OriginPoolAdvancedOptionsModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CircuitBreakerChoice
+// Attribute map for OneOfField --> CircuitBreakerChoice
 var OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap = map[string]attr.Type{
 
 	"circuit_breaker": types.ObjectType{
@@ -518,7 +521,7 @@ var OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap
 	"retries": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> HttpProtocolType
+// Attribute map for OneOfField --> HttpProtocolType
 var OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap = map[string]attr.Type{
 
 	"auto_http_config": types.BoolType,
@@ -548,7 +551,7 @@ var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationMode
 	},
 }
 
-// Attribute map for RequiredOneOfField --> HeaderTransformationChoice
+// Attribute map for OneOfField --> HeaderTransformationChoice
 var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_header_transformation":       types.BoolType,
@@ -570,14 +573,14 @@ var OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap = map[
 	"enable_lb_source_ip_persistance":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxRequestsPerConnectionChoice
+// Attribute map for OneOfField --> MaxRequestsPerConnectionChoice
 var OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_requests_per_connection":     types.Int64Type,
 	"no_request_limit_per_connection": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> OutlierDetectionChoice
+// Attribute map for OneOfField --> OutlierDetectionChoice
 var OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_outlier_detection": types.BoolType,
@@ -596,7 +599,7 @@ var OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttribut
 	"max_ejection_percent":        types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> PanicThresholdType
+// Attribute map for OneOfField --> PanicThresholdType
 var OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap = map[string]attr.Type{
 
 	"no_panic_threshold": types.BoolType,
@@ -611,7 +614,7 @@ var OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap = map[string]a
 	"proxy_protocol_v2":      types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> SubsetChoice
+// Attribute map for OneOfField --> SubsetChoice
 var OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_subsets": types.BoolType,
@@ -646,7 +649,7 @@ var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttrib
 	},
 }
 
-// Attribute map for RequiredOneOfField --> FallbackPolicyChoice
+// Attribute map for OneOfField --> FallbackPolicyChoice
 var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_endpoint": types.BoolType,
@@ -750,7 +753,7 @@ var OriginPoolOriginServersChoiceConsulServiceModelAttributeMap = map[string]att
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var OriginPoolOriginServersChoiceConsulServiceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_network":  types.BoolType,
@@ -862,7 +865,7 @@ var OriginPoolOriginServersChoiceK8SServiceModelAttributeMap = map[string]attr.T
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var OriginPoolOriginServersChoiceK8SServiceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_network":  types.BoolType,
@@ -960,7 +963,7 @@ var OriginPoolOriginServersChoicePrivateIpModelAttributeMap = map[string]attr.Ty
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_network":  types.BoolType,
@@ -1068,7 +1071,7 @@ var OriginPoolOriginServersChoicePrivateNameModelAttributeMap = map[string]attr.
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_network":  types.BoolType,
@@ -1160,8 +1163,7 @@ var OriginPoolOriginServersChoicePublicIpModelAttributeMap = map[string]attr.Typ
 // Attribute map for RequiredOneOfField --> PublicIpChoice
 var OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap = map[string]attr.Type{
 
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
+	"ip": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> PublicName
@@ -1257,7 +1259,7 @@ var OriginPoolTlsChoiceUseTlsModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MaxSessionKeysType
+// Attribute map for OneOfField --> MaxSessionKeysType
 var OriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap = map[string]attr.Type{
 
 	"default_session_key_caching": types.BoolType,
@@ -1349,6 +1351,7 @@ var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInf
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1374,7 +1377,7 @@ var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap = map[string]
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ServerValidationChoice
+// Attribute map for OneOfField --> ServerValidationChoice
 var OriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"skip_server_verification": types.BoolType,
@@ -1409,7 +1412,7 @@ var OriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationTrustedC
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SniChoice
+// Attribute map for OneOfField --> SniChoice
 var OriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_sni":            types.BoolType,
@@ -1425,7 +1428,7 @@ var OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_security": types.ObjectType{
@@ -1458,7 +1461,7 @@ var OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+// Attribute map for OneOfField --> MapDownstreamToUpstreamConnPoolType
 var OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap = map[string]attr.Type{
 
 	"disable_conn_pool_reuse": types.BoolType,
@@ -1476,8 +1479,8 @@ func (r *ResourceF5XCOriginPool) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a origin_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of origin_pool) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a origin_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of origin_pool) etc. can be fetched",
+		MarkdownDescription: "Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer<br><br>It will create following child objects<br><br>* cluster<br>* endpoints<br>* healthcheck",
+		Description:         "Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer It will create following child objects cluster endpoints healthcheck",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1552,21 +1555,24 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"circuit_breaker_choice": schema.SingleNestedAttribute{
 						Description:         "Enable Circuit Breaker Select to enable or disable circuit breaker configuration",
-						MarkdownDescription: "Enable Circuit Breaker Select to enable or disable circuit breaker configuration",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Enable Circuit Breaker Select to enable or disable circuit breaker configuration<br>Exactly one of `circuit_breaker`, `default_circuit_breaker`, or `disable_circuit_breaker` must be specified when `circuit_breaker_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"circuit_breaker",
 								"default_circuit_breaker",
 								"disable_circuit_breaker",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"circuit_breaker": schema.SingleNestedAttribute{
 								Description:         "circuit_breaker CircuitBreaker provides a mechanism for watching failures in upstream connections or requests and if the failures reach a certain threshold, automatically fail subsequent requests which allows to apply back pressure on downstream quickly.",
-								MarkdownDescription: "circuit_breaker CircuitBreaker provides a mechanism for watching failures in upstream connections or requests and if the failures reach a certain threshold, automatically fail subsequent requests which allows to apply back pressure on downstream quickly.",
+								MarkdownDescription: "circuit_breaker CircuitBreaker provides a mechanism for watching failures in upstream connections or requests and if the failures reach a certain threshold, automatically fail subsequent requests which allows to apply back pressure on downstream quickly.<br>Conflicts with `default_circuit_breaker` and `disable_circuit_breaker`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1632,7 +1638,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"default_circuit_breaker": schema.BoolAttribute{
 								Description:         "Default Circuit Breaker Circuit Breaker is enabled with default values The default values used for connections and requests are 1024 and the default value for retries is 3",
-								MarkdownDescription: "Default Circuit Breaker Circuit Breaker is enabled with default values The default values used for connections and requests are 1024 and the default value for retries is 3",
+								MarkdownDescription: "Default Circuit Breaker Circuit Breaker is enabled with default values The default values used for connections and requests are 1024 and the default value for retries is 3<br>Conflicts with `circuit_breaker` and `disable_circuit_breaker`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1642,7 +1648,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"disable_circuit_breaker": schema.BoolAttribute{
 								Description:         "Disable Circuit Breaker Circuit Breaker is disabled",
-								MarkdownDescription: "Disable Circuit Breaker Circuit Breaker is disabled",
+								MarkdownDescription: "Disable Circuit Breaker Circuit Breaker is disabled<br>Conflicts with `circuit_breaker` and `default_circuit_breaker`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1676,21 +1682,24 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"http_protocol_type_choice": schema.SingleNestedAttribute{
 						Description:         "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections",
-						MarkdownDescription: "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections<br>Exactly one of `auto_http_config`, `http1_config`, or `http2_options` must be specified when `http_protocol_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"auto_http_config",
 								"http1_config",
 								"http2_options",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"auto_http_config": schema.BoolAttribute{
 								Description:         "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.",
-								MarkdownDescription: "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.",
+								MarkdownDescription: "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.<br>Conflicts with `http1_config` and `http2_options`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1700,7 +1709,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"http1_config": schema.SingleNestedAttribute{
 								Description:         "http1_config Enable HTTP/1.1 for upstream connections",
-								MarkdownDescription: "http1_config Enable HTTP/1.1 for upstream connections",
+								MarkdownDescription: "http1_config Enable HTTP/1.1 for upstream connections<br>Conflicts with `auto_http_config` and `http2_options`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1714,22 +1723,25 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"header_transformation_choice": schema.SingleNestedAttribute{
 												Description:         "Header transformation Select header transformation options for HTTP/1.1",
-												MarkdownDescription: "Header transformation Select header transformation options for HTTP/1.1",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Header transformation Select header transformation options for HTTP/1.1<br>Exactly one of `default_header_transformation`, `legacy_header_transformation`, `preserve_case_header_transformation`, or `proper_case_header_transformation` must be specified when `header_transformation_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"default_header_transformation",
 														"legacy_header_transformation",
 														"preserve_case_header_transformation",
 														"proper_case_header_transformation",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"default_header_transformation": schema.BoolAttribute{
 														Description:         "Default header transformation Normalize the headers to lower case",
-														MarkdownDescription: "Default header transformation Normalize the headers to lower case",
+														MarkdownDescription: "Default header transformation Normalize the headers to lower case<br>Conflicts with `legacy_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1739,7 +1751,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													},
 													"legacy_header_transformation": schema.BoolAttribute{
 														Description:         "Legacy header transformations Use old header transformation if configured earlier",
-														MarkdownDescription: "Legacy header transformations Use old header transformation if configured earlier",
+														MarkdownDescription: "Legacy header transformations Use old header transformation if configured earlier<br>Conflicts with `default_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1749,7 +1761,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													},
 													"preserve_case_header_transformation": schema.BoolAttribute{
 														Description:         "Preserve case header transformation Preserves the original case of headers without any modifications.",
-														MarkdownDescription: "Preserve case header transformation Preserves the original case of headers without any modifications.",
+														MarkdownDescription: "Preserve case header transformation Preserves the original case of headers without any modifications.<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `proper_case_header_transformation`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1759,7 +1771,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													},
 													"proper_case_header_transformation": schema.BoolAttribute{
 														Description:         "Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
-														MarkdownDescription: "Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
+														MarkdownDescription: "Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `preserve_case_header_transformation`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1775,7 +1787,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"http2_options": schema.SingleNestedAttribute{
 								Description:         "http2_options Enable HTTP/2 for upstream connections.",
-								MarkdownDescription: "http2_options Enable HTTP/2 for upstream connections.",
+								MarkdownDescription: "http2_options Enable HTTP/2 for upstream connections.<br>Conflicts with `auto_http_config` and `http1_config`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1794,7 +1806,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"lb_source_ip_persistance_choice": schema.SingleNestedAttribute{
 						Description:         "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
-						MarkdownDescription: "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
+						MarkdownDescription: "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server<br>Exactly one of `disable_lb_source_ip_persistance` or `enable_lb_source_ip_persistance` must be specified when `lb_source_ip_persistance_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1807,7 +1819,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 						Attributes: map[string]schema.Attribute{
 							"disable_lb_source_ip_persistance": schema.BoolAttribute{
 								Description:         "disable_lb_source_ip_persistence Disable LB source IP persistence",
-								MarkdownDescription: "disable_lb_source_ip_persistence Disable LB source IP persistence",
+								MarkdownDescription: "disable_lb_source_ip_persistence Disable LB source IP persistence<br>Conflicts with `enable_lb_source_ip_persistance`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1817,7 +1829,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"enable_lb_source_ip_persistance": schema.BoolAttribute{
 								Description:         "enable_lb_source_ip_persistence Enable LB source IP persistence",
-								MarkdownDescription: "enable_lb_source_ip_persistence Enable LB source IP persistence",
+								MarkdownDescription: "enable_lb_source_ip_persistence Enable LB source IP persistence<br>Conflicts with `disable_lb_source_ip_persistance`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1829,20 +1841,23 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"max_requests_per_connection_choice": schema.SingleNestedAttribute{
 						Description:         "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.",
-						MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.<br>Exactly one of `max_requests_per_connection` or `no_request_limit_per_connection` must be specified when `max_requests_per_connection_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_requests_per_connection",
 								"no_request_limit_per_connection",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_requests_per_connection": schema.Int64Attribute{
 								Description:         "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.",
-								MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.",
+								MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.<br>Conflicts with `no_request_limit_per_connection`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1852,7 +1867,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"no_request_limit_per_connection": schema.BoolAttribute{
 								Description:         "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
-								MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
+								MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.<br>Conflicts with `max_requests_per_connection`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1864,20 +1879,23 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"outlier_detection_choice": schema.SingleNestedAttribute{
 						Description:         "Enable Outlier Detection Select to enable or disable circuit breaker configuration",
-						MarkdownDescription: "Enable Outlier Detection Select to enable or disable circuit breaker configuration",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Enable Outlier Detection Select to enable or disable circuit breaker configuration<br>Exactly one of `disable_outlier_detection` or `outlier_detection` must be specified when `outlier_detection_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"disable_outlier_detection",
 								"outlier_detection",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"disable_outlier_detection": schema.BoolAttribute{
 								Description:         "Disable Outlier Detection Outlier detection is disabled",
-								MarkdownDescription: "Disable Outlier Detection Outlier detection is disabled",
+								MarkdownDescription: "Disable Outlier Detection Outlier detection is disabled<br>Conflicts with `outlier_detection`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1887,57 +1905,62 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"outlier_detection": schema.SingleNestedAttribute{
 								Description:         "Enable Outlier Detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking.",
-								MarkdownDescription: "Enable Outlier Detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking.",
+								MarkdownDescription: "Enable Outlier Detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking.<br>Conflicts with `disable_outlier_detection`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"base_ejection_time": schema.Int64Attribute{
 										Description:         "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
-										MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
+										MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(1800000),
 										},
 									},
 									"consecutive_5xx": schema.Int64Attribute{
 										Description:         "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
-										MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
+										MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(1024),
 										},
 									},
 									"consecutive_gateway_failure": schema.Int64Attribute{
 										Description:         "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
-										MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
+										MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(1024),
 										},
 									},
 									"interval": schema.Int64Attribute{
 										Description:         "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
-										MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
+										MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(600000),
 										},
 									},
 									"max_ejection_percent": schema.Int64Attribute{
 										Description:         "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
-										MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
+										MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.<br>**Default:** `0`",
 										Required:            false,
 										Optional:            true,
-										Computed:            false,
+										Computed:            true,
+										Default:             int64default.StaticInt64(0),
 										Validators: []validator.Int64{
 											int64validator.AtMost(100),
 										},
@@ -1948,20 +1971,23 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"panic_threshold_type_choice": schema.SingleNestedAttribute{
 						Description:         "Panic threshold During load balancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and load balance either amongst all endpoints or no endpoints. This is known as the panic threshold.",
-						MarkdownDescription: "Panic threshold During load balancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and load balance either amongst all endpoints or no endpoints. This is known as the panic threshold.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Panic threshold During load balancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and load balance either amongst all endpoints or no endpoints. This is known as the panic threshold.<br>Exactly one of `no_panic_threshold` or `panic_threshold` must be specified when `panic_threshold_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"no_panic_threshold",
 								"panic_threshold",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"no_panic_threshold": schema.BoolAttribute{
 								Description:         "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.",
-								MarkdownDescription: "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.",
+								MarkdownDescription: "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.<br>Conflicts with `panic_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1971,7 +1997,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"panic_threshold": schema.Int64Attribute{
 								Description:         "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.",
-								MarkdownDescription: "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.",
+								MarkdownDescription: "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.<br>Conflicts with `no_panic_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1983,7 +2009,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"proxy_protocol_choice": schema.SingleNestedAttribute{
 						Description:         "Proxy Protocol Configuration Choose Proxy Protocol configuration options for upstream connections",
-						MarkdownDescription: "Proxy Protocol Configuration Choose Proxy Protocol configuration options for upstream connections",
+						MarkdownDescription: "Proxy Protocol Configuration Choose Proxy Protocol configuration options for upstream connections<br>Exactly one of `disable_proxy_protocol`, `proxy_protocol_v1`, or `proxy_protocol_v2` must be specified when `proxy_protocol_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1997,7 +2023,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 						Attributes: map[string]schema.Attribute{
 							"disable_proxy_protocol": schema.BoolAttribute{
 								Description:         "Disable Proxy Protocol Disable Proxy Protocol for upstream connections",
-								MarkdownDescription: "Disable Proxy Protocol Disable Proxy Protocol for upstream connections",
+								MarkdownDescription: "Disable Proxy Protocol Disable Proxy Protocol for upstream connections<br>Conflicts with `proxy_protocol_v1` and `proxy_protocol_v2`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2007,7 +2033,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"proxy_protocol_v1": schema.BoolAttribute{
 								Description:         "Proxy Protocol V1 Enable Proxy Protocol Version 1 for upstream connections",
-								MarkdownDescription: "Proxy Protocol V1 Enable Proxy Protocol Version 1 for upstream connections",
+								MarkdownDescription: "Proxy Protocol V1 Enable Proxy Protocol Version 1 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v2`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2017,7 +2043,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"proxy_protocol_v2": schema.BoolAttribute{
 								Description:         "Proxy Protocol V2 Enable Proxy Protocol Version 2 for upstream connections",
-								MarkdownDescription: "Proxy Protocol V2 Enable Proxy Protocol Version 2 for upstream connections",
+								MarkdownDescription: "Proxy Protocol V2 Enable Proxy Protocol Version 2 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v1`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2029,20 +2055,23 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"subset_choice": schema.SingleNestedAttribute{
 						Description:         "Enable Subset Load Balancing Select enable or disable subset load balancing. origin servers could be divided into subsets and chosen from routes.",
-						MarkdownDescription: "Enable Subset Load Balancing Select enable or disable subset load balancing. origin servers could be divided into subsets and chosen from routes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Enable Subset Load Balancing Select enable or disable subset load balancing. origin servers could be divided into subsets and chosen from routes.<br>Exactly one of `disable_subsets` or `enable_subsets` must be specified when `subset_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"disable_subsets",
 								"enable_subsets",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"disable_subsets": schema.BoolAttribute{
 								Description:         "Subset Load Balancing is Disabled Subset load balancing is disabled. All eligible origin servers will be considered for load balancing.",
-								MarkdownDescription: "Subset Load Balancing is Disabled Subset load balancing is disabled. All eligible origin servers will be considered for load balancing.",
+								MarkdownDescription: "Subset Load Balancing is Disabled Subset load balancing is disabled. All eligible origin servers will be considered for load balancing.<br>Conflicts with `enable_subsets`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2052,7 +2081,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"enable_subsets": schema.SingleNestedAttribute{
 								Description:         "Subset Load Balancing is Enable Subset load balancing is enabled. Based on route, subset of origin servers will be considered for load balancing.",
-								MarkdownDescription: "Subset Load Balancing is Enable Subset load balancing is enabled. Based on route, subset of origin servers will be considered for load balancing.",
+								MarkdownDescription: "Subset Load Balancing is Enable Subset load balancing is enabled. Based on route, subset of origin servers will be considered for load balancing.<br>Conflicts with `disable_subsets`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2085,21 +2114,24 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"fallback_policy_choice": schema.SingleNestedAttribute{
 										Description:         "Fallback Policy Choice Select subset fallback policy if no subset could be determined based on route.",
-										MarkdownDescription: "Fallback Policy Choice Select subset fallback policy if no subset could be determined based on route.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Fallback Policy Choice Select subset fallback policy if no subset could be determined based on route.<br>Exactly one of `any_endpoint`, `default_subset`, or `fail_request` must be specified when `fallback_policy_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"any_endpoint",
 												"default_subset",
 												"fail_request",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"any_endpoint": schema.BoolAttribute{
 												Description:         "Select Any Origin Server Select any origin server from available healthy origin servers in this pool",
-												MarkdownDescription: "Select Any Origin Server Select any origin server from available healthy origin servers in this pool",
+												MarkdownDescription: "Select Any Origin Server Select any origin server from available healthy origin servers in this pool<br>Conflicts with `default_subset` and `fail_request`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2109,7 +2141,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											},
 											"default_subset": schema.SingleNestedAttribute{
 												Description:         "Use Default Subset Use the default subset provided here. Select endpoints matching default subset.",
-												MarkdownDescription: "Use Default Subset Use the default subset provided here. Select endpoints matching default subset.",
+												MarkdownDescription: "Use Default Subset Use the default subset provided here. Select endpoints matching default subset.<br>Conflicts with `any_endpoint` and `fail_request`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2130,7 +2162,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											},
 											"fail_request": schema.BoolAttribute{
 												Description:         "Fail the Request Request will be failed and error returned, as if cluster has no origin servers.",
-												MarkdownDescription: "Fail the Request Request will be failed and error returned, as if cluster has no origin servers.",
+												MarkdownDescription: "Fail the Request Request will be failed and error returned, as if cluster has no origin servers.<br>Conflicts with `any_endpoint` and `default_subset`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2160,7 +2192,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 			},
 			"health_check_port_choice": schema.SingleNestedAttribute{
 				Description:         "Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port.",
-				MarkdownDescription: "Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port.",
+				MarkdownDescription: "Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port.<br>Exactly one of `health_check_port` or `same_as_endpoint_port` must be specified when `health_check_port_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -2173,7 +2205,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"health_check_port": schema.Int64Attribute{
 						Description:         "Health check port Port used for performing health check",
-						MarkdownDescription: "Health check port Port used for performing health check",
+						MarkdownDescription: "Health check port Port used for performing health check<br>Conflicts with `same_as_endpoint_port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2183,7 +2215,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"same_as_endpoint_port": schema.BoolAttribute{
 						Description:         "Same as endpoint port Health check is performed on endpoint port itself",
-						MarkdownDescription: "Same as endpoint port Health check is performed on endpoint port itself",
+						MarkdownDescription: "Same as endpoint port Health check is performed on endpoint port itself<br>Conflicts with `health_check_port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2225,7 +2257,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -2257,7 +2289,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					Attributes: map[string]schema.Attribute{
 						"choice": schema.SingleNestedAttribute{
 							Description:         "Origin Server Type Various options to specify origin server",
-							MarkdownDescription: "Origin Server Type Various options to specify origin server",
+							MarkdownDescription: "Origin Server Type Various options to specify origin server<br>Exactly one of `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, or `vn_private_name` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -2278,7 +2310,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							Attributes: map[string]schema.Attribute{
 								"cbip_service": schema.SingleNestedAttribute{
 									Description:         "OriginServerCBIPService Specify origin server with BIG-IP service name",
-									MarkdownDescription: "OriginServerCBIPService Specify origin server with BIG-IP service name",
+									MarkdownDescription: "OriginServerCBIPService Specify origin server with BIG-IP service name<br>Conflicts with `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2294,27 +2326,30 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"consul_service": schema.SingleNestedAttribute{
 									Description:         "OriginServerConsulService Specify origin server with Hashi Corp Consul service name and site information",
-									MarkdownDescription: "OriginServerConsulService Specify origin server with Hashi Corp Consul service name and site information",
+									MarkdownDescription: "OriginServerConsulService Specify origin server with Hashi Corp Consul service name and site information<br>Conflicts with `cbip_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"network_choice": schema.SingleNestedAttribute{
 											Description:         "Site Network Inside or Outside Network",
-											MarkdownDescription: "Site Network Inside or Outside Network",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Site Network Inside or Outside Network<br>Exactly one of `inside_network` or `outside_network` must be specified when `network_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"inside_network",
 													"outside_network",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"inside_network": schema.BoolAttribute{
 													Description:         "Inside Network Inside network on the site",
-													MarkdownDescription: "Inside Network Inside network on the site",
+													MarkdownDescription: "Inside Network Inside network on the site<br>Conflicts with `outside_network`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2324,7 +2359,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"outside_network": schema.BoolAttribute{
 													Description:         "Outside Network Outside network on the site",
-													MarkdownDescription: "Outside Network Outside network on the site",
+													MarkdownDescription: "Outside Network Outside network on the site<br>Conflicts with `inside_network`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2350,7 +2385,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "SiteLocator",
-													MarkdownDescription: "SiteLocator",
+													MarkdownDescription: "SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -2363,7 +2398,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"site": schema.SingleNestedAttribute{
 															Description:         "site Reference to site object",
-															MarkdownDescription: "site Reference to site object",
+															MarkdownDescription: "site Reference to site object<br>Conflicts with `virtual_site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2389,14 +2424,14 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
 														},
 														"virtual_site": schema.SingleNestedAttribute{
 															Description:         "Virtual Site Reference to virtual site object",
-															MarkdownDescription: "Virtual Site Reference to virtual site object",
+															MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2422,7 +2457,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2440,7 +2475,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"snat_pool_choice": schema.SingleNestedAttribute{
 													Description:         "Snat Pool Choice Snat Pool for the origin server",
-													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server",
+													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2453,7 +2488,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"no_snat_pool": schema.BoolAttribute{
 															Description:         "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2463,7 +2498,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 														},
 														"snat_pool": schema.SingleNestedAttribute{
 															Description:         "SNAT Pool Configure SNAT Pool to reach Origin Server",
-															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server",
+															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2478,7 +2513,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -2510,7 +2545,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"custom_endpoint_object": schema.SingleNestedAttribute{
 									Description:         "OriginServerCustomEndpoint Specify origin server with a reference to endpoint object",
-									MarkdownDescription: "OriginServerCustomEndpoint Specify origin server with a reference to endpoint object",
+									MarkdownDescription: "OriginServerCustomEndpoint Specify origin server with a reference to endpoint object<br>Conflicts with `cbip_service`, `consul_service`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2543,7 +2578,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2552,28 +2587,31 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"k8s_service": schema.SingleNestedAttribute{
 									Description:         "OriginServerK8SService Specify origin server with K8s service name and site information",
-									MarkdownDescription: "OriginServerK8SService Specify origin server with K8s service name and site information",
+									MarkdownDescription: "OriginServerK8SService Specify origin server with K8s service name and site information<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"network_choice": schema.SingleNestedAttribute{
 											Description:         "Site Network Inside or Outside Network",
-											MarkdownDescription: "Site Network Inside or Outside Network",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `vk8s_networks` must be specified when `network_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"inside_network",
 													"outside_network",
 													"vk8s_networks",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"inside_network": schema.BoolAttribute{
 													Description:         "Inside Network Inside network on the site",
-													MarkdownDescription: "Inside Network Inside network on the site",
+													MarkdownDescription: "Inside Network Inside network on the site<br>Conflicts with `outside_network` and `vk8s_networks`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2583,7 +2621,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"outside_network": schema.BoolAttribute{
 													Description:         "Outside Network Outside network on the site",
-													MarkdownDescription: "Outside Network Outside network on the site",
+													MarkdownDescription: "Outside Network Outside network on the site<br>Conflicts with `inside_network` and `vk8s_networks`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2593,7 +2631,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"vk8s_networks": schema.BoolAttribute{
 													Description:         "vK8s Networks on site origin server are on vK8s network on the site",
-													MarkdownDescription: "vK8s Networks on site origin server are on vK8s network on the site",
+													MarkdownDescription: "vK8s Networks on site origin server are on vK8s network on the site<br>Conflicts with `inside_network` and `outside_network`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2618,7 +2656,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 										},
 										"service_info_choice": schema.SingleNestedAttribute{
 											Description:         "service_info Specifies whether service discovery has to be done using service name or labels",
-											MarkdownDescription: "service_info Specifies whether service discovery has to be done using service name or labels",
+											MarkdownDescription: "service_info Specifies whether service discovery has to be done using service name or labels<br>`service_name` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -2636,8 +2674,8 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Computed:            false,
 													Validators: []validator.String{
 														stringvalidator.RegexMatches(
-															regexp.MustCompile(`^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?/[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?$`),
-															"must be a valid F5XC service namespace name (namespace/name)",
+															regexp.MustCompile(`^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)?(:[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?)?$`),
+															"must be a valid F5XC service name (servicename[.namespace][:cluster-id])",
 														),
 													},
 												},
@@ -2652,7 +2690,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "SiteLocator",
-													MarkdownDescription: "SiteLocator",
+													MarkdownDescription: "SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -2665,7 +2703,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"site": schema.SingleNestedAttribute{
 															Description:         "site Reference to site object",
-															MarkdownDescription: "site Reference to site object",
+															MarkdownDescription: "site Reference to site object<br>Conflicts with `virtual_site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2691,14 +2729,14 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
 														},
 														"virtual_site": schema.SingleNestedAttribute{
 															Description:         "Virtual Site Reference to virtual site object",
-															MarkdownDescription: "Virtual Site Reference to virtual site object",
+															MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2724,7 +2762,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -2742,7 +2780,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"snat_pool_choice": schema.SingleNestedAttribute{
 													Description:         "Snat Pool Choice Snat Pool for the origin server",
-													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server",
+													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2755,7 +2793,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"no_snat_pool": schema.BoolAttribute{
 															Description:         "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2765,7 +2803,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 														},
 														"snat_pool": schema.SingleNestedAttribute{
 															Description:         "SNAT Pool Configure SNAT Pool to reach Origin Server",
-															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server",
+															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2780,7 +2818,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -2812,28 +2850,31 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"private_ip": schema.SingleNestedAttribute{
 									Description:         "OriginServerPrivateIP Specify origin server with private or public IP address and site information",
-									MarkdownDescription: "OriginServerPrivateIP Specify origin server with private or public IP address and site information",
+									MarkdownDescription: "OriginServerPrivateIP Specify origin server with private or public IP address and site information<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"network_choice": schema.SingleNestedAttribute{
 											Description:         "Site Network Inside or Outside Network",
-											MarkdownDescription: "Site Network Inside or Outside Network",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `segment` must be specified when `network_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"inside_network",
 													"outside_network",
 													"segment",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"inside_network": schema.BoolAttribute{
 													Description:         "Inside Network Inside network on the site",
-													MarkdownDescription: "Inside Network Inside network on the site",
+													MarkdownDescription: "Inside Network Inside network on the site<br>Conflicts with `outside_network` and `segment`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2843,7 +2884,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"outside_network": schema.BoolAttribute{
 													Description:         "Outside Network Outside network on the site",
-													MarkdownDescription: "Outside Network Outside network on the site",
+													MarkdownDescription: "Outside Network Outside network on the site<br>Conflicts with `inside_network` and `segment`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2853,7 +2894,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"segment": schema.SingleNestedAttribute{
 													Description:         "Segment Segment where this origin server is located",
-													MarkdownDescription: "Segment Segment where this origin server is located",
+													MarkdownDescription: "Segment Segment where this origin server is located<br>Conflicts with `inside_network` and `outside_network`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2879,7 +2920,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -2888,7 +2929,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 										},
 										"private_ip_choice": schema.SingleNestedAttribute{
 											Description:         "Private IP Choice Origin server Private IP - either V4 or V6",
-											MarkdownDescription: "Private IP Choice Origin server Private IP - either V4 or V6",
+											MarkdownDescription: "Private IP Choice Origin server Private IP - either V4 or V6<br>Exactly one of `ip` or `ipv6` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -2901,7 +2942,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"ip": schema.StringAttribute{
 													Description:         "IP Private IPV4 address",
-													MarkdownDescription: "IP Private IPV4 address",
+													MarkdownDescription: "IP Private IPV4 address<br>Conflicts with `ipv6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2914,7 +2955,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"ipv6": schema.StringAttribute{
 													Description:         "IP6 Private IPV6 address",
-													MarkdownDescription: "IP6 Private IPV6 address",
+													MarkdownDescription: "IP6 Private IPV6 address<br>Conflicts with `ip`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2936,7 +2977,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "SiteLocator",
-													MarkdownDescription: "SiteLocator",
+													MarkdownDescription: "SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -2949,7 +2990,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"site": schema.SingleNestedAttribute{
 															Description:         "site Reference to site object",
-															MarkdownDescription: "site Reference to site object",
+															MarkdownDescription: "site Reference to site object<br>Conflicts with `virtual_site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2975,14 +3016,14 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
 														},
 														"virtual_site": schema.SingleNestedAttribute{
 															Description:         "Virtual Site Reference to virtual site object",
-															MarkdownDescription: "Virtual Site Reference to virtual site object",
+															MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3008,7 +3049,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -3026,7 +3067,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"snat_pool_choice": schema.SingleNestedAttribute{
 													Description:         "Snat Pool Choice Snat Pool for the origin server",
-													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server",
+													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3039,7 +3080,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"no_snat_pool": schema.BoolAttribute{
 															Description:         "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3049,7 +3090,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 														},
 														"snat_pool": schema.SingleNestedAttribute{
 															Description:         "SNAT Pool Configure SNAT Pool to reach Origin Server",
-															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server",
+															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3064,7 +3105,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -3096,7 +3137,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"private_name": schema.SingleNestedAttribute{
 									Description:         "OriginServerPrivateName Specify origin server with private or public DNS name and site information",
-									MarkdownDescription: "OriginServerPrivateName Specify origin server with private or public DNS name and site information",
+									MarkdownDescription: "OriginServerPrivateName Specify origin server with private or public DNS name and site information<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -3110,21 +3151,24 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 										},
 										"network_choice": schema.SingleNestedAttribute{
 											Description:         "Site Network Inside or Outside Network",
-											MarkdownDescription: "Site Network Inside or Outside Network",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `segment` must be specified when `network_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"inside_network",
 													"outside_network",
 													"segment",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"inside_network": schema.BoolAttribute{
 													Description:         "Inside Network Inside network on the site",
-													MarkdownDescription: "Inside Network Inside network on the site",
+													MarkdownDescription: "Inside Network Inside network on the site<br>Conflicts with `outside_network` and `segment`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3134,7 +3178,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"outside_network": schema.BoolAttribute{
 													Description:         "Outside Network Outside network on the site",
-													MarkdownDescription: "Outside Network Outside network on the site",
+													MarkdownDescription: "Outside Network Outside network on the site<br>Conflicts with `inside_network` and `segment`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3144,7 +3188,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"segment": schema.SingleNestedAttribute{
 													Description:         "Segment Segment where this origin server is located",
-													MarkdownDescription: "Segment Segment where this origin server is located",
+													MarkdownDescription: "Segment Segment where this origin server is located<br>Conflicts with `inside_network` and `outside_network`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3170,7 +3214,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
@@ -3200,7 +3244,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "SiteLocator",
-													MarkdownDescription: "SiteLocator",
+													MarkdownDescription: "SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -3213,7 +3257,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"site": schema.SingleNestedAttribute{
 															Description:         "site Reference to site object",
-															MarkdownDescription: "site Reference to site object",
+															MarkdownDescription: "site Reference to site object<br>Conflicts with `virtual_site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3239,14 +3283,14 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
 														},
 														"virtual_site": schema.SingleNestedAttribute{
 															Description:         "Virtual Site Reference to virtual site object",
-															MarkdownDescription: "Virtual Site Reference to virtual site object",
+															MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3272,7 +3316,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -3290,7 +3334,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"snat_pool_choice": schema.SingleNestedAttribute{
 													Description:         "Snat Pool Choice Snat Pool for the origin server",
-													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server",
+													MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3303,7 +3347,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"no_snat_pool": schema.BoolAttribute{
 															Description:         "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+															MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3313,7 +3357,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 														},
 														"snat_pool": schema.SingleNestedAttribute{
 															Description:         "SNAT Pool Configure SNAT Pool to reach Origin Server",
-															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server",
+															MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3328,7 +3372,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																	Validators: []validator.List{
 																		listvalidator.SizeAtMost(128),
 																		listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																			regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																			regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																			"must be a valid IPv6 prefix",
 																		)),
 																		listvalidator.UniqueValues(),
@@ -3360,21 +3404,20 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"public_ip": schema.SingleNestedAttribute{
 									Description:         "OriginServerPublicIP Specify origin server with public IP",
-									MarkdownDescription: "OriginServerPublicIP Specify origin server with public IP",
+									MarkdownDescription: "OriginServerPublicIP Specify origin server with public IP<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_name`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"public_ip_choice": schema.SingleNestedAttribute{
 											Description:         "Public IP Choice Origin server public IP - either V4 or V6",
-											MarkdownDescription: "Public IP Choice Origin server public IP - either V4 or V6",
+											MarkdownDescription: "Public IP Choice Origin server public IP - either V4 or V6<br>`ip` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.Object{
 												exactlyoneofvalidator.RequiredExactlyOneOf(
 													"ip",
-													"ipv6",
 												),
 											},
 											Attributes: map[string]schema.Attribute{
@@ -3391,26 +3434,13 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 														),
 													},
 												},
-												"ipv6": schema.StringAttribute{
-													Description:         "IPV6 Public IPV6 address",
-													MarkdownDescription: "IPV6 Public IPV6 address",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.String{
-														stringvalidator.RegexMatches(
-															regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-															"must be a valid IPv6 address",
-														),
-													},
-												},
 											},
 										},
 									},
 								},
 								"public_name": schema.SingleNestedAttribute{
 									Description:         "OriginServerPublicName Specify origin server with public DNS name",
-									MarkdownDescription: "OriginServerPublicName Specify origin server with public DNS name",
+									MarkdownDescription: "OriginServerPublicName Specify origin server with public DNS name<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `vn_private_ip`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -3447,7 +3477,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"vn_private_ip": schema.SingleNestedAttribute{
 									Description:         "OriginServerVirtualNetworkIP Specify origin server IP address on virtual network other than inside or outside network",
-									MarkdownDescription: "OriginServerVirtualNetworkIP Specify origin server IP address on virtual network other than inside or outside network",
+									MarkdownDescription: "OriginServerVirtualNetworkIP Specify origin server IP address on virtual network other than inside or outside network<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, and `vn_private_name`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -3480,14 +3510,14 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
 										},
 										"virtual_network_ip_choice": schema.SingleNestedAttribute{
 											Description:         "Virtual Network IP Choice Origin server Virtual Network IP - either V4 or V6",
-											MarkdownDescription: "Virtual Network IP Choice Origin server Virtual Network IP - either V4 or V6",
+											MarkdownDescription: "Virtual Network IP Choice Origin server Virtual Network IP - either V4 or V6<br>Exactly one of `ip` or `ipv6` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -3500,7 +3530,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"ip": schema.StringAttribute{
 													Description:         "IPV4 IPV4 address",
-													MarkdownDescription: "IPV4 IPV4 address",
+													MarkdownDescription: "IPV4 IPV4 address<br>Conflicts with `ipv6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3513,7 +3543,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												},
 												"ipv6": schema.StringAttribute{
 													Description:         "IPV6 IPV6 address",
-													MarkdownDescription: "IPV6 IPV6 address",
+													MarkdownDescription: "IPV6 IPV6 address<br>Conflicts with `ip`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3530,7 +3560,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								},
 								"vn_private_name": schema.SingleNestedAttribute{
 									Description:         "OriginServerVirtualNetworkName Specify origin server name on virtual network other than inside or outside network",
-									MarkdownDescription: "OriginServerVirtualNetworkName Specify origin server name on virtual network other than inside or outside network",
+									MarkdownDescription: "OriginServerVirtualNetworkName Specify origin server name on virtual network other than inside or outside network<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, and `vn_private_ip`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -3570,7 +3600,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -3595,7 +3625,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 			},
 			"port_choice": schema.SingleNestedAttribute{
 				Description:         "Port Specify the port where origin server service is hosted.",
-				MarkdownDescription: "Port Specify the port where origin server service is hosted.",
+				MarkdownDescription: "Port Specify the port where origin server service is hosted.<br>Exactly one of `automatic_port`, `lb_port`, or `port` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -3609,7 +3639,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"automatic_port": schema.BoolAttribute{
 						Description:         "Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled",
-						MarkdownDescription: "Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled",
+						MarkdownDescription: "Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled<br>Conflicts with `lb_port` and `port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3619,7 +3649,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"lb_port": schema.BoolAttribute{
 						Description:         "Same as Loadbalancer port Endpoint port is selected based on loadbalancer port",
-						MarkdownDescription: "Same as Loadbalancer port Endpoint port is selected based on loadbalancer port",
+						MarkdownDescription: "Same as Loadbalancer port Endpoint port is selected based on loadbalancer port<br>Conflicts with `automatic_port` and `port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3629,7 +3659,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"port": schema.Int64Attribute{
 						Description:         "Port Endpoint service is available on this port",
-						MarkdownDescription: "Port Endpoint service is available on this port",
+						MarkdownDescription: "Port Endpoint service is available on this port<br>Conflicts with `automatic_port` and `lb_port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3646,7 +3676,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 			},
 			"tls_choice": schema.SingleNestedAttribute{
 				Description:         "Enable TLS",
-				MarkdownDescription: "Enable TLS",
+				MarkdownDescription: "Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -3659,7 +3689,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"no_tls": schema.BoolAttribute{
 						Description:         "No TLS",
-						MarkdownDescription: "No TLS",
+						MarkdownDescription: "No TLS<br>Conflicts with `use_tls`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3669,28 +3699,31 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 					},
 					"use_tls": schema.SingleNestedAttribute{
 						Description:         "Use TLS",
-						MarkdownDescription: "Use TLS",
+						MarkdownDescription: "Use TLS<br>Conflicts with `no_tls`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"max_session_keys_type_choice": schema.SingleNestedAttribute{
 								Description:         "Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.",
-								MarkdownDescription: "Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.<br>Exactly one of `default_session_key_caching`, `disable_session_key_caching`, or `max_session_keys` must be specified when `max_session_keys_type_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_session_key_caching",
 										"disable_session_key_caching",
 										"max_session_keys",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"default_session_key_caching": schema.BoolAttribute{
 										Description:         "Default Session Key Caching Default session key caching. Only one session key will be cached.",
-										MarkdownDescription: "Default Session Key Caching Default session key caching. Only one session key will be cached.",
+										MarkdownDescription: "Default Session Key Caching Default session key caching. Only one session key will be cached.<br>Conflicts with `disable_session_key_caching` and `max_session_keys`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3700,7 +3733,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"disable_session_key_caching": schema.BoolAttribute{
 										Description:         "Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.",
-										MarkdownDescription: "Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.",
+										MarkdownDescription: "Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.<br>Conflicts with `default_session_key_caching` and `max_session_keys`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3710,7 +3743,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"max_session_keys": schema.Int64Attribute{
 										Description:         "Max Session Keys Cached Number of session keys that are cached.",
-										MarkdownDescription: "Max Session Keys Cached Number of session keys that are cached.",
+										MarkdownDescription: "Max Session Keys Cached Number of session keys that are cached.<br>Conflicts with `default_session_key_caching` and `disable_session_key_caching`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3722,7 +3755,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"mtls_choice": schema.SingleNestedAttribute{
 								Description:         "Server mTLS choice mTLS parameters such as certificate, min/max TLS version and ciphers",
-								MarkdownDescription: "Server mTLS choice mTLS parameters such as certificate, min/max TLS version and ciphers",
+								MarkdownDescription: "Server mTLS choice mTLS parameters such as certificate, min/max TLS version and ciphers<br>Exactly one of `no_mtls`, `use_mtls`, or `use_mtls_obj` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3736,7 +3769,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"no_mtls": schema.BoolAttribute{
 										Description:         "No mTLS",
-										MarkdownDescription: "No mTLS",
+										MarkdownDescription: "No mTLS<br>Conflicts with `use_mtls` and `use_mtls_obj`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3746,7 +3779,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"use_mtls": schema.SingleNestedAttribute{
 										Description:         "Inline Certificate (legacy)",
-										MarkdownDescription: "Inline Certificate (legacy)",
+										MarkdownDescription: "Inline Certificate (legacy)<br>Conflicts with `no_mtls` and `use_mtls_obj`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3785,7 +3818,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 														},
 														"ocsp_stapling_choice": schema.SingleNestedAttribute{
 															Description:         "OCSP Response choice OCSP Stapling choice",
-															MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+															MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3799,7 +3832,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"custom_hash_algorithms": schema.SingleNestedAttribute{
 																	Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-																	MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+																	MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3813,13 +3846,15 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																			Computed:            false,
 																			Validators: []validator.List{
 																				listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA1", "SHA256"}...)),
+																				listvalidator.SizeBetween(1, 4),
+																				listvalidator.UniqueValues(),
 																			},
 																		},
 																	},
 																},
 																"disable_ocsp_stapling": schema.BoolAttribute{
 																	Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-																	MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+																	MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3829,7 +3864,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																},
 																"use_system_defaults": schema.BoolAttribute{
 																	Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-																	MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+																	MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3848,7 +3883,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -3856,12 +3891,13 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																		exactlyoneofvalidator.RequiredExactlyOneOf(
 																			"blindfold_secret_info",
 																			"clear_secret_info",
+																			"none",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3879,6 +3915,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
+																					WriteOnly:           true,
 																					Validators: []validator.String{
 																						stringvalidator.RegexMatches(
 																							regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -3900,7 +3937,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3933,6 +3970,16 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																				},
 																			},
 																		},
+																		"none": schema.BoolAttribute{
+																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																			Validators: []validator.Bool{
+																				boolvalidator.Equals(true),
+																			},
+																		},
 																	},
 																},
 															},
@@ -3944,7 +3991,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"use_mtls_obj": schema.SingleNestedAttribute{
 										Description:         "Root CA Certificate",
-										MarkdownDescription: "Root CA Certificate",
+										MarkdownDescription: "Root CA Certificate<br>Conflicts with `no_mtls` and `use_mtls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3970,7 +4017,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
@@ -3979,21 +4026,24 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"server_validation_choice": schema.SingleNestedAttribute{
 								Description:         "Server verification choice Choose whether to perform origin server verification.",
-								MarkdownDescription: "Server verification choice Choose whether to perform origin server verification.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Server verification choice Choose whether to perform origin server verification.<br>Exactly one of `skip_server_verification`, `use_server_verification`, or `volterra_trusted_ca` must be specified when `server_validation_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"skip_server_verification",
 										"use_server_verification",
 										"volterra_trusted_ca",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"skip_server_verification": schema.BoolAttribute{
 										Description:         "Skip Server Verification Skip origin server verification",
-										MarkdownDescription: "Skip Server Verification Skip origin server verification",
+										MarkdownDescription: "Skip Server Verification Skip origin server verification<br>Conflicts with `use_server_verification` and `volterra_trusted_ca`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4003,14 +4053,14 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"use_server_verification": schema.SingleNestedAttribute{
 										Description:         "Use Server Verification Perform origin server verification using the provided Root CA Certificate",
-										MarkdownDescription: "Use Server Verification Perform origin server verification using the provided Root CA Certificate",
+										MarkdownDescription: "Use Server Verification Perform origin server verification using the provided Root CA Certificate<br>Conflicts with `skip_server_verification` and `volterra_trusted_ca`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"trusted_ca_choice": schema.SingleNestedAttribute{
 												Description:         "trusted_ca_choice Root CA configuration for upstream TLS connections to origin servers",
-												MarkdownDescription: "trusted_ca_choice Root CA configuration for upstream TLS connections to origin servers",
+												MarkdownDescription: "trusted_ca_choice Root CA configuration for upstream TLS connections to origin servers<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -4023,7 +4073,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 												Attributes: map[string]schema.Attribute{
 													"trusted_ca": schema.SingleNestedAttribute{
 														Description:         "trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate",
-														MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate",
+														MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4049,14 +4099,14 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "trusted_ca_url Upload a Root CA Certificate specifically for this Origin Pool for verification of server's certificate",
-														MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Origin Pool for verification of server's certificate",
+														MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Origin Pool for verification of server's certificate<br>Conflicts with `trusted_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4070,7 +4120,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"volterra_trusted_ca": schema.BoolAttribute{
 										Description:         "F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate",
-										MarkdownDescription: "F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate",
+										MarkdownDescription: "F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate<br>Conflicts with `skip_server_verification` and `use_server_verification`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4082,21 +4132,24 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"sni_choice": schema.SingleNestedAttribute{
 								Description:         "sni choice Select SNI to be used for upstream connection",
-								MarkdownDescription: "sni choice Select SNI to be used for upstream connection",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "sni choice Select SNI to be used for upstream connection<br>Exactly one of `disable_sni`, `sni`, or `use_host_header_as_sni` must be specified when `sni_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_sni",
 										"sni",
 										"use_host_header_as_sni",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_sni": schema.BoolAttribute{
 										Description:         "disable_sni Do not use SNI.",
-										MarkdownDescription: "disable_sni Do not use SNI.",
+										MarkdownDescription: "disable_sni Do not use SNI.<br>Conflicts with `sni` and `use_host_header_as_sni`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4106,7 +4159,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"sni": schema.StringAttribute{
 										Description:         "sni SNI value to be used.",
-										MarkdownDescription: "sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`",
+										MarkdownDescription: "sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `disable_sni` and `use_host_header_as_sni`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4120,7 +4173,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 									},
 									"use_host_header_as_sni": schema.BoolAttribute{
 										Description:         "use_host_header_as_sni Use the host header as SNI. The host header value is extracted after any configured rewrites have been applied.",
-										MarkdownDescription: "use_host_header_as_sni Use the host header as SNI. The host header value is extracted after any configured rewrites have been applied.",
+										MarkdownDescription: "use_host_header_as_sni Use the host header as SNI. The host header value is extracted after any configured rewrites have been applied.<br>Conflicts with `disable_sni` and `sni`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4139,29 +4192,32 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-										MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"custom_security",
 												"default_security",
 												"low_security",
 												"medium_security",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"custom_security": schema.SingleNestedAttribute{
 												Description:         "Custom Security Custom selection of TLS versions and cipher suites",
-												MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites",
+												MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"cipher_suites": schema.ListAttribute{
 														Description:         "cipher_suites The TLS listener will only support the specified cipher list.",
-														MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.",
+														MarkdownDescription: "cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 														ElementType:         types.StringType,
 														Required:            true,
 														Optional:            false,
@@ -4201,7 +4257,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											},
 											"default_security": schema.BoolAttribute{
 												Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-												MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+												MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4211,7 +4267,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											},
 											"low_security": schema.BoolAttribute{
 												Description:         "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-												MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+												MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4221,7 +4277,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 											},
 											"medium_security": schema.BoolAttribute{
 												Description:         "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-												MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+												MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4246,20 +4302,23 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"map_downstream_to_upstream_conn_pool_type_choice": schema.SingleNestedAttribute{
 						Description:         "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
-						MarkdownDescription: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.<br>Exactly one of `disable_conn_pool_reuse` or `enable_conn_pool_reuse` must be specified when `map_downstream_to_upstream_conn_pool_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"disable_conn_pool_reuse",
 								"enable_conn_pool_reuse",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"disable_conn_pool_reuse": schema.BoolAttribute{
 								Description:         "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection",
-								MarkdownDescription: "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection",
+								MarkdownDescription: "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection<br>Conflicts with `enable_conn_pool_reuse`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -4269,7 +4328,7 @@ func (r *ResourceF5XCOriginPool) Schema(ctx context.Context, request resource.Sc
 							},
 							"enable_conn_pool_reuse": schema.BoolAttribute{
 								Description:         "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections",
-								MarkdownDescription: "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections",
+								MarkdownDescription: "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections<br>Conflicts with `disable_conn_pool_reuse`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -4343,9 +4402,17 @@ func (r *ResourceF5XCOriginPool) ModifyPlan(ctx context.Context, req resource.Mo
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCOriginPoolModel
 
 	// Read Terraform plan data into the model
@@ -4353,6 +4420,17 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCOriginPoolModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.TlsChoice.IsNull() && !configData.TlsChoice.IsUnknown() {
+		data.TlsChoice = configData.TlsChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -4430,6 +4508,24 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 		// resource modelToSpecRoot PointerField --> AdvancedOptions
 		if !data.AdvancedOptions.IsNull() && !data.AdvancedOptions.IsUnknown() {
 			advancedOptionsSpec := &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions{}
+			advancedOptionsSpec.CircuitBreakerChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DefaultCircuitBreaker{
+				DefaultCircuitBreaker: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.HttpProtocolType = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_AutoHttpConfig{
+				AutoHttpConfig: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoRequestLimitPerConnection{
+				NoRequestLimitPerConnection: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.OutlierDetectionChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableOutlierDetection{
+				DisableOutlierDetection: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.PanicThresholdType = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoPanicThreshold{
+				NoPanicThreshold: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.SubsetChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableSubsets{
+				DisableSubsets: &ves_io_schema.Empty{},
+			}
 			spec.AdvancedOptions = advancedOptionsSpec
 			var advancedOptionsModel OriginPoolOriginPoolAdvancedOptions
 
@@ -4440,7 +4536,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CircuitBreakerChoice
+			// resource modelToSpecNested OneOfField --> CircuitBreakerChoice
 			if !advancedOptionsModel.CircuitBreakerChoice.IsNull() && !advancedOptionsModel.CircuitBreakerChoice.IsUnknown() {
 				advancedOptionsCircuitBreakerChoiceModel := OriginPoolCircuitBreakerChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.CircuitBreakerChoice.As(ctx, &advancedOptionsCircuitBreakerChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4543,7 +4639,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 				advancedOptionsSpec.HttpIdleTimeout = uint32(300000)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> HttpProtocolType
+			// resource modelToSpecNested OneOfField --> HttpProtocolType
 			if !advancedOptionsModel.HttpProtocolTypeChoice.IsNull() && !advancedOptionsModel.HttpProtocolTypeChoice.IsUnknown() {
 				advancedOptionsHttpProtocolTypeChoiceModel := OriginPoolHttpProtoTypeChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.HttpProtocolTypeChoice.As(ctx, &advancedOptionsHttpProtocolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4578,9 +4674,12 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 						}
 
 						headerTransformationSpec := &ves_io_schema.HeaderTransformationType{}
+						headerTransformationSpec.HeaderTransformationChoice = &ves_io_schema.HeaderTransformationType_LegacyHeaderTransformation{
+							LegacyHeaderTransformation: &ves_io_schema.Empty{},
+						}
 						http1ConfigOneOfSpec.Http1Config.HeaderTransformation = headerTransformationSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> HeaderTransformationChoice
+						// resource modelToSpecNested OneOfField --> HeaderTransformationChoice
 						if !headerTransformationModel.HeaderTransformationChoice.IsNull() && !headerTransformationModel.HeaderTransformationChoice.IsUnknown() {
 							headerTransformationHeaderTransformationChoiceModel := OriginPoolHeaderTransformationChoice{}
 							response.Diagnostics.Append(headerTransformationModel.HeaderTransformationChoice.As(ctx, &headerTransformationHeaderTransformationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4668,7 +4767,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+			// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 			if !advancedOptionsModel.MaxRequestsPerConnectionChoice.IsNull() && !advancedOptionsModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 				advancedOptionsMaxRequestsPerConnectionChoiceModel := OriginPoolMaxRequestsPerConnChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.MaxRequestsPerConnectionChoice.As(ctx, &advancedOptionsMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4692,7 +4791,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutlierDetectionChoice
+			// resource modelToSpecNested OneOfField --> OutlierDetectionChoice
 			if !advancedOptionsModel.OutlierDetectionChoice.IsNull() && !advancedOptionsModel.OutlierDetectionChoice.IsUnknown() {
 				advancedOptionsOutlierDetectionChoiceModel := OriginPoolOutlierDetectionChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.OutlierDetectionChoice.As(ctx, &advancedOptionsOutlierDetectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4721,33 +4820,43 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					// resource modelToSpecNested UintField --> BaseEjectionTime
 					if !originPoolOutlierDetectionModel.BaseEjectionTime.IsNull() && !originPoolOutlierDetectionModel.BaseEjectionTime.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(uint32(originPoolOutlierDetectionModel.BaseEjectionTime.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Consecutive_5Xx
 					if !originPoolOutlierDetectionModel.Consecutive_5Xx.IsNull() && !originPoolOutlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(uint32(originPoolOutlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 					if !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(uint32(originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Interval
 					if !originPoolOutlierDetectionModel.Interval.IsNull() && !originPoolOutlierDetectionModel.Interval.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(uint32(originPoolOutlierDetectionModel.Interval.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> MaxEjectionPercent
 					if !originPoolOutlierDetectionModel.MaxEjectionPercent.IsNull() && !originPoolOutlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(uint32(originPoolOutlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(0)
 					}
 
 				}
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PanicThresholdType
+			// resource modelToSpecNested OneOfField --> PanicThresholdType
 			if !advancedOptionsModel.PanicThresholdTypeChoice.IsNull() && !advancedOptionsModel.PanicThresholdTypeChoice.IsUnknown() {
 				advancedOptionsPanicThresholdTypeChoiceModel := OriginPoolPanicThresholdTypeChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.PanicThresholdTypeChoice.As(ctx, &advancedOptionsPanicThresholdTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4802,7 +4911,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SubsetChoice
+			// resource modelToSpecNested OneOfField --> SubsetChoice
 			if !advancedOptionsModel.SubsetChoice.IsNull() && !advancedOptionsModel.SubsetChoice.IsUnknown() {
 				advancedOptionsSubsetChoiceModel := OriginPoolSubsetChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.SubsetChoice.As(ctx, &advancedOptionsSubsetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4826,6 +4935,9 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					}
 					enableSubsetsOneOfSpec := &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_EnableSubsets{}
 					enableSubsetsOneOfSpec.EnableSubsets = &ves_io_schema_views_origin_pool.OriginPoolSubsets{}
+					enableSubsetsOneOfSpec.EnableSubsets.FallbackPolicyChoice = &ves_io_schema_views_origin_pool.OriginPoolSubsets_AnyEndpoint{
+						AnyEndpoint: &ves_io_schema.Empty{},
+					}
 					advancedOptionsSpec.SubsetChoice = enableSubsetsOneOfSpec
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> EndpointSubsets
@@ -4862,7 +4974,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 						}
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> FallbackPolicyChoice
+					// resource modelToSpecNested OneOfField --> FallbackPolicyChoice
 					if !originPoolEnableSubsetsModel.FallbackPolicyChoice.IsNull() && !originPoolEnableSubsetsModel.FallbackPolicyChoice.IsUnknown() {
 						enableSubsetsFallbackPolicyChoiceModel := OriginPoolFallbackPolicyChoice{}
 						response.Diagnostics.Append(originPoolEnableSubsetsModel.FallbackPolicyChoice.As(ctx, &enableSubsetsFallbackPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5073,9 +5185,12 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					}
 					consulServiceOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_ConsulService{}
 					consulServiceOneOfSpec.ConsulService = &ves_io_schema_views_origin_pool.OriginServerConsulService{}
+					consulServiceOneOfSpec.ConsulService.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerConsulService_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = consulServiceOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolConsulSvcModel.NetworkChoice.IsNull() && !originPoolConsulSvcModel.NetworkChoice.IsUnknown() {
 						consulServiceNetworkChoiceModel := OriginPoolNetChoice{}
 						response.Diagnostics.Append(originPoolConsulSvcModel.NetworkChoice.As(ctx, &consulServiceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5289,9 +5404,12 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					}
 					k8sServiceOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_K8SService{}
 					k8sServiceOneOfSpec.K8SService = &ves_io_schema_views_origin_pool.OriginServerK8SService{}
+					k8sServiceOneOfSpec.K8SService.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerK8SService_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = k8sServiceOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolK8SSvcModel.NetworkChoice.IsNull() && !originPoolK8SSvcModel.NetworkChoice.IsUnknown() {
 						k8sServiceNetworkChoiceModel := OriginPoolOriginServerK8SSvcNetChoice{}
 						response.Diagnostics.Append(originPoolK8SSvcModel.NetworkChoice.As(ctx, &k8sServiceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5512,9 +5630,12 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					}
 					privateIpOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_PrivateIp{}
 					privateIpOneOfSpec.PrivateIp = &ves_io_schema_views_origin_pool.OriginServerPrivateIP{}
+					privateIpOneOfSpec.PrivateIp.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerPrivateIP_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = privateIpOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolPrivateIpModel.NetworkChoice.IsNull() && !originPoolPrivateIpModel.NetworkChoice.IsUnknown() {
 						privateIpNetworkChoiceModel := OriginPoolOriginServerPrivateIPNetChoice{}
 						response.Diagnostics.Append(originPoolPrivateIpModel.NetworkChoice.As(ctx, &privateIpNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5733,6 +5854,9 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					}
 					privateNameOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_PrivateName{}
 					privateNameOneOfSpec.PrivateName = &ves_io_schema_views_origin_pool.OriginServerPrivateName{}
+					privateNameOneOfSpec.PrivateName.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerPrivateName_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = privateNameOneOfSpec
 
 					// resource modelToSpecNested RequiredStringField --> DnsName
@@ -5740,7 +5864,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 						privateNameOneOfSpec.PrivateName.DnsName = string(originPoolPrivateNameModel.DnsName.ValueString())
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolPrivateNameModel.NetworkChoice.IsNull() && !originPoolPrivateNameModel.NetworkChoice.IsUnknown() {
 						privateNameNetworkChoiceModel := OriginPoolOriginServerPrivateNameNetChoice{}
 						response.Diagnostics.Append(originPoolPrivateNameModel.NetworkChoice.As(ctx, &privateNameNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5959,13 +6083,6 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipSpecStr
 						}
 
-						// resource modelToSpecNested StringOfOneOfField --> Ipv6
-						if !publicIpPublicIpChoiceModel.Ipv6.IsNull() && !publicIpPublicIpChoiceModel.Ipv6.IsUnknown() {
-							ipv6SpecStr := &ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6{}
-							ipv6SpecStr.Ipv6 = string(publicIpPublicIpChoiceModel.Ipv6.ValueString())
-							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipv6SpecStr
-						}
-
 					}
 
 				}
@@ -6106,6 +6223,13 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 				if response.Diagnostics.HasError() {
 					return
 				}
+				delete(mapOfString, "ves.io/config-propagation-destination")
+				delete(mapOfString, "ves.io/app_type")
+				delete(mapOfString, "ves.io/api-scope")
+				delete(mapOfString, "ves.io/provider")
+				if len(mapOfString) == 0 {
+					mapOfString = nil
+				}
 
 				originServersSpec[i].Labels = mapOfString
 			} else {
@@ -6172,9 +6296,18 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			}
 			useTlsOneOfSpec := &ves_io_schema_views_origin_pool.CreateSpecType_UseTls{}
 			useTlsOneOfSpec.UseTls = &ves_io_schema_views_origin_pool.UpstreamTlsParameters{}
+			useTlsOneOfSpec.UseTls.MaxSessionKeysType = &ves_io_schema_views_origin_pool.UpstreamTlsParameters_DefaultSessionKeyCaching{
+				DefaultSessionKeyCaching: &ves_io_schema.Empty{},
+			}
+			useTlsOneOfSpec.UseTls.ServerValidationChoice = &ves_io_schema_views_origin_pool.UpstreamTlsParameters_VolterraTrustedCa{
+				VolterraTrustedCa: &ves_io_schema.Empty{},
+			}
+			useTlsOneOfSpec.UseTls.SniChoice = &ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseHostHeaderAsSni{
+				UseHostHeaderAsSni: &ves_io_schema.Empty{},
+			}
 			spec.TlsChoice = useTlsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxSessionKeysType
+			// resource modelToSpecNested OneOfField --> MaxSessionKeysType
 			if !originPoolUseTlsModel.MaxSessionKeysTypeChoice.IsNull() && !originPoolUseTlsModel.MaxSessionKeysTypeChoice.IsUnknown() {
 				useTlsMaxSessionKeysTypeChoiceModel := OriginPoolMaxSessionKeysTypeChoice{}
 				response.Diagnostics.Append(originPoolUseTlsModel.MaxSessionKeysTypeChoice.As(ctx, &useTlsMaxSessionKeysTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6391,6 +6524,13 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -6425,7 +6565,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ServerValidationChoice
+			// resource modelToSpecNested OneOfField --> ServerValidationChoice
 			if !originPoolUseTlsModel.ServerValidationChoice.IsNull() && !originPoolUseTlsModel.ServerValidationChoice.IsUnknown() {
 				useTlsServerValidationChoiceModel := OriginPoolServerValChoice{}
 				response.Diagnostics.Append(originPoolUseTlsModel.ServerValidationChoice.As(ctx, &useTlsServerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6502,7 +6642,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SniChoice
+			// resource modelToSpecNested OneOfField --> SniChoice
 			if !originPoolUseTlsModel.SniChoice.IsNull() && !originPoolUseTlsModel.SniChoice.IsUnknown() {
 				useTlsSniChoiceModel := OriginPoolSniChoice{}
 				response.Diagnostics.Append(originPoolUseTlsModel.SniChoice.As(ctx, &useTlsSniChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6542,9 +6682,12 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 				}
 
 				tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+				tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+					DefaultSecurity: &ves_io_schema.Empty{},
+				}
 				useTlsOneOfSpec.UseTls.TlsConfig = tlsConfigSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> Choice
+				// resource modelToSpecNested OneOfField --> Choice
 				if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 					tlsConfigChoiceModel := OriginPoolTlsConfigChoice{}
 					response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6657,6 +6800,9 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 		// resource modelToSpecRoot PointerField --> UpstreamConnPoolReuseType
 		if !data.UpstreamConnPoolReuseType.IsNull() && !data.UpstreamConnPoolReuseType.IsUnknown() {
 			upstreamConnPoolReuseTypeSpec := &ves_io_schema.UpstreamConnPoolReuseType{}
+			upstreamConnPoolReuseTypeSpec.MapDownstreamToUpstreamConnPoolType = &ves_io_schema.UpstreamConnPoolReuseType_EnableConnPoolReuse{
+				EnableConnPoolReuse: &ves_io_schema.Empty{},
+			}
 			spec.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeSpec
 			var upstreamConnPoolReuseTypeModel OriginPoolUpstreamConnPoolReuseType
 
@@ -6667,7 +6813,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+			// resource modelToSpecNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 			if !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsNull() && !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsUnknown() {
 				upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel := OriginPoolMapDownstreamToUpstreamConnPoolTypeChoice{}
 				response.Diagnostics.Append(upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.As(ctx, &upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6697,7 +6843,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6720,7 +6866,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_origin_pool.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "origin_pool", err),
 		)
 		return
 	}
@@ -6843,8 +6989,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 		var originPoolOriginPoolAdvancedOptionsModel = &OriginPoolOriginPoolAdvancedOptions{}
 		advancedOptionsElement := specData.GetAdvancedOptions()
 
-		// resource specToModelNested RequiredOneOfField --> CircuitBreakerChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> CircuitBreakerChoice
 		if advancedOptionsElement.GetCircuitBreakerChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionscircuitBreakerChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6946,8 +7091,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 		// resource specToModelNested UintField --> HttpIdleTimeout
 		originPoolOriginPoolAdvancedOptionsModel.HttpIdleTimeout = types.Int64Value(int64(advancedOptionsElement.GetHttpIdleTimeout()))
 
-		// resource specToModelNested RequiredOneOfField --> HttpProtocolType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> HttpProtocolType
 		if advancedOptionsElement.GetHttpProtocolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6984,8 +7128,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 						// Recursively populate the nested struct
 
-						// resource specToModelNested RequiredOneOfField --> HeaderTransformationChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> HeaderTransformationChoice
 						if headerTransformationElement.GetHeaderTransformationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7169,8 +7312,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			originPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = types.ObjectNull(OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 		if advancedOptionsElement.GetMaxRequestsPerConnectionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7218,8 +7360,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> OutlierDetectionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OutlierDetectionChoice
 		if advancedOptionsElement.GetOutlierDetectionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionsoutlierDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7293,8 +7434,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> PanicThresholdType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> PanicThresholdType
 		if advancedOptionsElement.GetPanicThresholdType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7398,8 +7538,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			originPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = types.ObjectNull(OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> SubsetChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SubsetChoice
 		if advancedOptionsElement.GetSubsetChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionssubsetChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7468,8 +7607,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 						enableSubsetsAttributeMap["endpoint_subsets"] = types.ListNull(types.ObjectType{AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap})
 					}
 
-					// resource specToModelNested RequiredOneOfField --> FallbackPolicyChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> FallbackPolicyChoice
 					if enableSubsetsElement.GetFallbackPolicyChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						enableSubsetsfallbackPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7719,14 +7857,12 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			AttrTypes: OriginPoolHealthcheckObjectRefModelAttributeMap,
 		}
 		nullHealthcheckList := basetypes.NewListNull(healthcheckObjectType)
-		var priorValHealthcheck types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("healthcheck"), &priorValHealthcheck)
-		if !priorValHealthcheck.IsNull() && !priorValHealthcheck.IsUnknown() {
-			data.Healthcheck = priorValHealthcheck
+		if !data.Healthcheck.IsNull() && !data.Healthcheck.IsUnknown() && len(data.Healthcheck.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Healthcheck = basetypes.NewListValueMust(healthcheckObjectType, nil)
 		} else {
 			data.Healthcheck = nullHealthcheckList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
@@ -7802,8 +7938,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					if isConsulService && consulServiceOptionsWrapper != nil && consulServiceOptionsWrapper.ConsulService != nil {
 						consulServiceElement := consulServiceOptionsWrapper.ConsulService
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if consulServiceElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							consulServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8209,8 +8344,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					if isK8SService && k8sServiceOptionsWrapper != nil && k8sServiceOptionsWrapper.K8SService != nil {
 						k8sServiceElement := k8sServiceOptionsWrapper.K8SService
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if k8sServiceElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							k8sServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8602,8 +8736,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					if isPrivateIp && privateIpOptionsWrapper != nil && privateIpOptionsWrapper.PrivateIp != nil {
 						privateIpElement := privateIpOptionsWrapper.PrivateIp
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if privateIpElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							privateIpnetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9032,8 +9165,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 							privateNameAttributeMap["dns_name"] = types.StringNull()
 						}
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if privateNameElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							privateNamenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9428,16 +9560,6 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 								publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringOfOneOfField --> Ipv6
-							ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-							if isIpv6 {
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-							} else {
-								// Empty string, set to null
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -9721,15 +9843,16 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 			// resource specToModelNested MapOfStringField --> Labels
 			if originServersElement.GetLabels() != nil {
-				// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-				// They will be picked up during the next Read.
-				filteredMap := make(map[string]string)
+				// Filter out configured omitted map keys across all operations so backend-injected
+				// forbidden keys never enter or vanish from Terraform state.
+				filteredMap := make(map[string]string, len(originServersElement.GetLabels()))
 				for k, v := range originServersElement.GetLabels() {
-					if !strings.HasPrefix(k, "ves.io/") {
-						filteredMap[k] = v
-					}
+					filteredMap[k] = v
 				}
-
+				delete(filteredMap, "ves.io/config-propagation-destination")
+				delete(filteredMap, "ves.io/app_type")
+				delete(filteredMap, "ves.io/api-scope")
+				delete(filteredMap, "ves.io/provider")
 				if len(filteredMap) > 0 {
 					labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 					response.Diagnostics.Append(labelsDiags...)
@@ -9858,8 +9981,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 			if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 				useTlsElement := useTlsOptionsWrapper.UseTls
 
-				// resource specToModelNested RequiredOneOfField --> MaxSessionKeysType
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> MaxSessionKeysType
 				if useTlsElement.GetMaxSessionKeysType() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10160,6 +10282,15 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 												}
 											}
 
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -10291,8 +10422,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					useTlsAttributeMap["mtls_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ServerValidationChoice
 				if useTlsElement.GetServerValidationChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10445,8 +10575,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 					useTlsAttributeMap["server_validation_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SniChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SniChoice
 				if useTlsElement.GetSniChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlssniChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10511,8 +10640,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10691,8 +10819,7 @@ func (r *ResourceF5XCOriginPool) Create(ctx context.Context, request resource.Cr
 		var originPoolUpstreamConnPoolReuseTypeModel = &OriginPoolUpstreamConnPoolReuseType{}
 		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
 
-		// resource specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10797,14 +10924,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 	defer cancel()
 	priorTlsChoice := data.TlsChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "origin_pool", err),
 		)
 		return
 	}
@@ -10927,8 +11050,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		var originPoolOriginPoolAdvancedOptionsModel = &OriginPoolOriginPoolAdvancedOptions{}
 		advancedOptionsElement := specData.GetAdvancedOptions()
 
-		// resource specToModelNested RequiredOneOfField --> CircuitBreakerChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> CircuitBreakerChoice
 		if advancedOptionsElement.GetCircuitBreakerChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionscircuitBreakerChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11021,7 +11143,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap, map[string]attr.Value{
+				"circuit_breaker":         types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap),
+				"default_circuit_breaker": types.BoolValue(true),
+				"disable_circuit_breaker": types.BoolNull(),
+			})
 		}
 
 		// resource specToModelNested UintField --> ConnectionTimeout
@@ -11030,8 +11156,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		// resource specToModelNested UintField --> HttpIdleTimeout
 		originPoolOriginPoolAdvancedOptionsModel.HttpIdleTimeout = types.Int64Value(int64(advancedOptionsElement.GetHttpIdleTimeout()))
 
-		// resource specToModelNested RequiredOneOfField --> HttpProtocolType
-		// <no value>
+		// resource specToModelNested OneOfField --> HttpProtocolType
 		if advancedOptionsElement.GetHttpProtocolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11068,8 +11193,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 
 						// Recursively populate the nested struct
 
-						// resource specToModelNested RequiredOneOfField --> HeaderTransformationChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> HeaderTransformationChoice
 						if headerTransformationElement.GetHeaderTransformationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11131,7 +11255,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap)
+							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap, map[string]attr.Value{
+								"default_header_transformation":       types.BoolNull(),
+								"legacy_header_transformation":        types.BoolValue(true),
+								"preserve_case_header_transformation": types.BoolNull(),
+								"proper_case_header_transformation":   types.BoolNull(),
+							})
 						}
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
@@ -11203,7 +11332,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap, map[string]attr.Value{
+				"auto_http_config": types.BoolValue(true),
+				"http1_config":     types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap),
+				"http2_options":    types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap),
+			})
 		}
 
 		// resource specToModelNested OneOfField --> LbSourceIpPersistanceChoice
@@ -11253,8 +11386,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = types.ObjectNull(OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 		if advancedOptionsElement.GetMaxRequestsPerConnectionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11299,11 +11431,13 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap, map[string]attr.Value{
+				"max_requests_per_connection":     types.Int64Null(),
+				"no_request_limit_per_connection": types.BoolValue(true),
+			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> OutlierDetectionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> OutlierDetectionChoice
 		if advancedOptionsElement.GetOutlierDetectionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionsoutlierDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11374,11 +11508,13 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_outlier_detection": types.BoolValue(true),
+				"outlier_detection":         types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap),
+			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> PanicThresholdType
-		// <no value>
+		// resource specToModelNested OneOfField --> PanicThresholdType
 		if advancedOptionsElement.GetPanicThresholdType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11423,7 +11559,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap, map[string]attr.Value{
+				"no_panic_threshold": types.BoolValue(true),
+				"panic_threshold":    types.Int64Null(),
+			})
 		}
 
 		// resource specToModelNested OneOfField --> ProxyProtocolChoice
@@ -11482,8 +11621,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = types.ObjectNull(OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> SubsetChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> SubsetChoice
 		if advancedOptionsElement.GetSubsetChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionssubsetChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11552,8 +11690,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 						enableSubsetsAttributeMap["endpoint_subsets"] = types.ListNull(types.ObjectType{AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap})
 					}
 
-					// resource specToModelNested RequiredOneOfField --> FallbackPolicyChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> FallbackPolicyChoice
 					if enableSubsetsElement.GetFallbackPolicyChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						enableSubsetsfallbackPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11635,7 +11772,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 						enableSubsetsAttributeMap["fallback_policy_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						enableSubsetsAttributeMap["fallback_policy_choice"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap)
+						enableSubsetsAttributeMap["fallback_policy_choice"] = types.ObjectValueMust(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap, map[string]attr.Value{
+							"any_endpoint":   types.BoolValue(true),
+							"default_subset": types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap),
+							"fail_request":   types.BoolNull(),
+						})
 					}
 
 					enableSubsetsObj, enableSubsetsObjDiags := types.ObjectValue(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap, enableSubsetsAttributeMap)
@@ -11665,7 +11806,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap)
+			originPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectValueMust(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_subsets": types.BoolValue(true),
+				"enable_subsets":  types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap),
+			})
 		}
 
 		advancedOptionsObj, advancedOptionsDiags := utils.GoStructToObjectValue(
@@ -11803,14 +11947,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			AttrTypes: OriginPoolHealthcheckObjectRefModelAttributeMap,
 		}
 		nullHealthcheckList := basetypes.NewListNull(healthcheckObjectType)
-		var priorValHealthcheck types.List
-		_ = request.State.GetAttribute(ctx, path.Root("healthcheck"), &priorValHealthcheck)
-		if !priorValHealthcheck.IsNull() && !priorValHealthcheck.IsUnknown() {
-			data.Healthcheck = priorValHealthcheck
+		if !data.Healthcheck.IsNull() && !data.Healthcheck.IsUnknown() && len(data.Healthcheck.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Healthcheck = basetypes.NewListValueMust(healthcheckObjectType, nil)
 		} else {
 			data.Healthcheck = nullHealthcheckList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
@@ -11886,8 +12028,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					if isConsulService && consulServiceOptionsWrapper != nil && consulServiceOptionsWrapper.ConsulService != nil {
 						consulServiceElement := consulServiceOptionsWrapper.ConsulService
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if consulServiceElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							consulServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11931,7 +12072,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							consulServiceAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							consulServiceAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceNetworkChoiceModelAttributeMap)
+							consulServiceAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoiceConsulServiceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+							})
 						}
 
 						// resource specToModelNested RequiredStringField --> ServiceName
@@ -12293,8 +12437,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					if isK8SService && k8sServiceOptionsWrapper != nil && k8sServiceOptionsWrapper.K8SService != nil {
 						k8sServiceElement := k8sServiceOptionsWrapper.K8SService
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if k8sServiceElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							k8sServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12347,7 +12490,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							k8sServiceAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							k8sServiceAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceNetworkChoiceModelAttributeMap)
+							k8sServiceAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoiceK8SServiceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+								"vk8s_networks":   types.BoolNull(),
+							})
 						}
 
 						// resource specToModelNested EnumField --> Protocol
@@ -12686,8 +12833,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					if isPrivateIp && privateIpOptionsWrapper != nil && privateIpOptionsWrapper.PrivateIp != nil {
 						privateIpElement := privateIpOptionsWrapper.PrivateIp
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if privateIpElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							privateIpnetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12775,7 +12921,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							privateIpAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							privateIpAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap)
+							privateIpAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+								"segment":         types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested RequiredOneOfField --> PrivateIpChoice
@@ -13116,8 +13266,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							privateNameAttributeMap["dns_name"] = types.StringNull()
 						}
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if privateNameElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							privateNamenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13205,7 +13354,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 							privateNameAttributeMap["network_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							privateNameAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap)
+							privateNameAttributeMap["network_choice"] = types.ObjectValueMust(OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap, map[string]attr.Value{
+								"inside_network":  types.BoolValue(true),
+								"outside_network": types.BoolNull(),
+								"segment":         types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested UintField --> RefreshInterval
@@ -13512,16 +13665,6 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 								publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringOfOneOfField --> Ipv6
-							ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-							if isIpv6 {
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-							} else {
-								// Empty string, set to null
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -13805,10 +13948,18 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 
 			// resource specToModelNested MapOfStringField --> Labels
 			if originServersElement.GetLabels() != nil {
-				// READ operation: keep backend-injected keys so they enter the state.
-				// Optional+Computed: preserve null when API returns an empty map.
-				if len(originServersElement.GetLabels()) > 0 {
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(originServersElement.GetLabels())
+				// Filter out configured omitted map keys across all operations so backend-injected
+				// forbidden keys never enter or vanish from Terraform state.
+				filteredMap := make(map[string]string, len(originServersElement.GetLabels()))
+				for k, v := range originServersElement.GetLabels() {
+					filteredMap[k] = v
+				}
+				delete(filteredMap, "ves.io/config-propagation-destination")
+				delete(filteredMap, "ves.io/app_type")
+				delete(filteredMap, "ves.io/api-scope")
+				delete(filteredMap, "ves.io/provider")
+				if len(filteredMap) > 0 {
+					labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 					response.Diagnostics.Append(labelsDiags...)
 					if response.Diagnostics.HasError() {
 						return
@@ -13900,7 +14051,14 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.PortChoice = types.ObjectNull(OriginPoolPortChoiceModelAttributeMap)
+
+		if data.PortChoice.IsNull() || data.PortChoice.IsUnknown() || ((data.PortChoice.Attributes()["automatic_port"].IsNull() || data.PortChoice.Attributes()["automatic_port"].IsUnknown()) && (data.PortChoice.Attributes()["lb_port"].IsNull() || data.PortChoice.Attributes()["lb_port"].IsUnknown()) && (data.PortChoice.Attributes()["port"].IsNull() || data.PortChoice.Attributes()["port"].IsUnknown())) {
+			data.PortChoice = types.ObjectValueMust(OriginPoolPortChoiceModelAttributeMap, map[string]attr.Value{
+				"automatic_port": types.BoolNull(),
+				"lb_port":        types.BoolNull(),
+				"port":           types.Int64Value(443),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> TlsChoice
@@ -13935,8 +14093,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 				useTlsElement := useTlsOptionsWrapper.UseTls
 
-				// resource specToModelNested RequiredOneOfField --> MaxSessionKeysType
-				// <no value>
+				// resource specToModelNested OneOfField --> MaxSessionKeysType
 				if useTlsElement.GetMaxSessionKeysType() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13990,7 +14147,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["max_session_keys_type_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["max_session_keys_type_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap)
+					useTlsAttributeMap["max_session_keys_type_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap, map[string]attr.Value{
+						"default_session_key_caching": types.BoolValue(true),
+						"disable_session_key_caching": types.BoolNull(),
+						"max_session_keys":            types.Int64Null(),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -14235,6 +14396,15 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 												} else {
 													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -14377,11 +14547,14 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["mtls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["mtls_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+					useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_mtls":      types.BoolValue(true),
+						"use_mtls":     types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap),
+						"use_mtls_obj": types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ServerValidationChoice
 				if useTlsElement.GetServerValidationChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14531,11 +14704,14 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["server_validation_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["server_validation_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap)
+					useTlsAttributeMap["server_validation_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap, map[string]attr.Value{
+						"skip_server_verification": types.BoolNull(),
+						"use_server_verification":  types.ObjectNull(OriginPoolTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap),
+						"volterra_trusted_ca":      types.BoolValue(true),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SniChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SniChoice
 				if useTlsElement.GetSniChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlssniChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14589,7 +14765,11 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					useTlsAttributeMap["sni_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					useTlsAttributeMap["sni_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap)
+					useTlsAttributeMap["sni_choice"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsSniChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_sni":            types.BoolNull(),
+						"sni":                    types.StringNull(),
+						"use_host_header_as_sni": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredPointerField --> TlsConfig
@@ -14600,8 +14780,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// <no value>
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14721,7 +14900,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 						originPoolTlsConfigModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						originPoolTlsConfigModel.Choice = types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap)
+						originPoolTlsConfigModel.Choice = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap, map[string]attr.Value{
+							"custom_security":  types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap),
+							"default_security": types.BoolValue(true),
+							"low_security":     types.BoolNull(),
+							"medium_security":  types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -14738,8 +14922,14 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					useTlsAttributeMap["tls_config"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap)
+					useTlsAttributeMap["tls_config"] = types.ObjectValueMust(OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap, map[string]attr.Value{
+						"choice": types.ObjectValueMust(OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap, map[string]attr.Value{
+							"custom_security":  types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap),
+							"default_security": types.BoolValue(true),
+							"low_security":     types.BoolNull(),
+							"medium_security":  types.BoolNull(),
+						}),
+					})
 				}
 
 				useTlsObj, useTlsObjDiags := types.ObjectValue(OriginPoolTlsChoiceUseTlsModelAttributeMap, useTlsAttributeMap)
@@ -14772,7 +14962,13 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.TlsChoice = types.ObjectNull(OriginPoolTlsChoiceModelAttributeMap)
+
+		if data.TlsChoice.IsNull() || data.TlsChoice.IsUnknown() || ((data.TlsChoice.Attributes()["no_tls"].IsNull() || data.TlsChoice.Attributes()["no_tls"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["default_session_key_caching"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["default_session_key_caching"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["disable_session_key_caching"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["disable_session_key_caching"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["max_session_keys"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["max_session_keys_type_choice"].(types.Object).Attributes()["max_session_keys"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["no_mtls"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).IsUnknown() || (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["tls_certificates"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls"].(types.Object).Attributes()["tls_certificates"].IsUnknown())) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["name"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["name"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["namespace"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["tenant"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["mtls_choice"].(types.Object).Attributes()["use_mtls_obj"].(types.Object).Attributes()["tenant"].IsUnknown()))))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["skip_server_verification"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["skip_server_verification"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).IsUnknown() || (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["name"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["use_server_verification"].(types.Object).Attributes()["trusted_ca_choice"].(types.Object).Attributes()["trusted_ca_url"].IsUnknown())))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["volterra_trusted_ca"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["server_validation_choice"].(types.Object).Attributes()["volterra_trusted_ca"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["disable_sni"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["disable_sni"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["sni"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["sni"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["use_host_header_as_sni"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["sni_choice"].(types.Object).Attributes()["use_host_header_as_sni"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).IsUnknown() || (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).IsUnknown() || ((data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["cipher_suites"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["max_version"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["custom_security"].(types.Object).Attributes()["min_version"].IsUnknown()))) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["default_security"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["low_security"].IsUnknown()) && (data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsNull() || data.TlsChoice.Attributes()["use_tls"].(types.Object).Attributes()["tls_config"].(types.Object).Attributes()["choice"].(types.Object).Attributes()["medium_security"].IsUnknown()))))))) {
+			data.TlsChoice = types.ObjectValueMust(OriginPoolTlsChoiceModelAttributeMap, map[string]attr.Value{
+				"no_tls":  types.BoolValue(true),
+				"use_tls": types.ObjectNull(OriginPoolTlsChoiceUseTlsModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> UpstreamConnPoolReuseType
@@ -14780,8 +14976,7 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		var originPoolUpstreamConnPoolReuseTypeModel = &OriginPoolUpstreamConnPoolReuseType{}
 		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
 
-		// resource specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-		// <no value>
+		// resource specToModelNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14825,7 +15020,10 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap)
+			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectValueMust(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, map[string]attr.Value{
+				"disable_conn_pool_reuse": types.BoolNull(),
+				"enable_conn_pool_reuse":  types.BoolValue(true),
+			})
 		}
 
 		upstreamConnPoolReuseTypeObj, upstreamConnPoolReuseTypeDiags := utils.GoStructToObjectValue(
@@ -14839,7 +15037,15 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 		}
 		data.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeObj
 	} else {
-		data.UpstreamConnPoolReuseType = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap)
+
+		if data.UpstreamConnPoolReuseType.IsNull() || data.UpstreamConnPoolReuseType.IsUnknown() || (data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).IsNull() || data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).IsUnknown() || ((data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["disable_conn_pool_reuse"].IsNull() || data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["disable_conn_pool_reuse"].IsUnknown()) && (data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["enable_conn_pool_reuse"].IsNull() || data.UpstreamConnPoolReuseType.Attributes()["map_downstream_to_upstream_conn_pool_type_choice"].(types.Object).Attributes()["enable_conn_pool_reuse"].IsUnknown()))) {
+			data.UpstreamConnPoolReuseType = types.ObjectValueMust(OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap, map[string]attr.Value{
+				"map_downstream_to_upstream_conn_pool_type_choice": types.ObjectValueMust(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, map[string]attr.Value{
+					"disable_conn_pool_reuse": types.BoolNull(),
+					"enable_conn_pool_reuse":  types.BoolValue(true),
+				}),
+			})
+		}
 	}
 
 	// Restore prior state for TlsChoice. The API redacts sensitive fields
@@ -14857,6 +15063,12 @@ func (r *ResourceF5XCOriginPool) Read(ctx context.Context, request resource.Read
 }
 
 func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCOriginPoolModel
@@ -14866,6 +15078,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planTlsChoice := data.TlsChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -14885,7 +15098,11 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planTlsChoice := data.TlsChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.TlsChoice.IsNull() && !configData.TlsChoice.IsUnknown() {
+		data.TlsChoice = configData.TlsChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -14962,6 +15179,24 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 		// resource modelToSpecRoot PointerField --> AdvancedOptions
 		if !data.AdvancedOptions.IsNull() && !data.AdvancedOptions.IsUnknown() {
 			advancedOptionsSpec := &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions{}
+			advancedOptionsSpec.CircuitBreakerChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DefaultCircuitBreaker{
+				DefaultCircuitBreaker: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.HttpProtocolType = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_AutoHttpConfig{
+				AutoHttpConfig: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoRequestLimitPerConnection{
+				NoRequestLimitPerConnection: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.OutlierDetectionChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableOutlierDetection{
+				DisableOutlierDetection: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.PanicThresholdType = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoPanicThreshold{
+				NoPanicThreshold: &ves_io_schema.Empty{},
+			}
+			advancedOptionsSpec.SubsetChoice = &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableSubsets{
+				DisableSubsets: &ves_io_schema.Empty{},
+			}
 			spec.AdvancedOptions = advancedOptionsSpec
 			var advancedOptionsModel OriginPoolOriginPoolAdvancedOptions
 
@@ -14972,7 +15207,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CircuitBreakerChoice
+			// resource modelToSpecNested OneOfField --> CircuitBreakerChoice
 			if !advancedOptionsModel.CircuitBreakerChoice.IsNull() && !advancedOptionsModel.CircuitBreakerChoice.IsUnknown() {
 				advancedOptionsCircuitBreakerChoiceModel := OriginPoolCircuitBreakerChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.CircuitBreakerChoice.As(ctx, &advancedOptionsCircuitBreakerChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15075,7 +15310,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 				advancedOptionsSpec.HttpIdleTimeout = uint32(300000)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> HttpProtocolType
+			// resource modelToSpecNested OneOfField --> HttpProtocolType
 			if !advancedOptionsModel.HttpProtocolTypeChoice.IsNull() && !advancedOptionsModel.HttpProtocolTypeChoice.IsUnknown() {
 				advancedOptionsHttpProtocolTypeChoiceModel := OriginPoolHttpProtoTypeChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.HttpProtocolTypeChoice.As(ctx, &advancedOptionsHttpProtocolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15110,9 +15345,12 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 						}
 
 						headerTransformationSpec := &ves_io_schema.HeaderTransformationType{}
+						headerTransformationSpec.HeaderTransformationChoice = &ves_io_schema.HeaderTransformationType_LegacyHeaderTransformation{
+							LegacyHeaderTransformation: &ves_io_schema.Empty{},
+						}
 						http1ConfigOneOfSpec.Http1Config.HeaderTransformation = headerTransformationSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> HeaderTransformationChoice
+						// resource modelToSpecNested OneOfField --> HeaderTransformationChoice
 						if !headerTransformationModel.HeaderTransformationChoice.IsNull() && !headerTransformationModel.HeaderTransformationChoice.IsUnknown() {
 							headerTransformationHeaderTransformationChoiceModel := OriginPoolHeaderTransformationChoice{}
 							response.Diagnostics.Append(headerTransformationModel.HeaderTransformationChoice.As(ctx, &headerTransformationHeaderTransformationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15200,7 +15438,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+			// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 			if !advancedOptionsModel.MaxRequestsPerConnectionChoice.IsNull() && !advancedOptionsModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 				advancedOptionsMaxRequestsPerConnectionChoiceModel := OriginPoolMaxRequestsPerConnChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.MaxRequestsPerConnectionChoice.As(ctx, &advancedOptionsMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15224,7 +15462,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutlierDetectionChoice
+			// resource modelToSpecNested OneOfField --> OutlierDetectionChoice
 			if !advancedOptionsModel.OutlierDetectionChoice.IsNull() && !advancedOptionsModel.OutlierDetectionChoice.IsUnknown() {
 				advancedOptionsOutlierDetectionChoiceModel := OriginPoolOutlierDetectionChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.OutlierDetectionChoice.As(ctx, &advancedOptionsOutlierDetectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15253,33 +15491,43 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					// resource modelToSpecNested UintField --> BaseEjectionTime
 					if !originPoolOutlierDetectionModel.BaseEjectionTime.IsNull() && !originPoolOutlierDetectionModel.BaseEjectionTime.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(uint32(originPoolOutlierDetectionModel.BaseEjectionTime.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.BaseEjectionTime = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Consecutive_5Xx
 					if !originPoolOutlierDetectionModel.Consecutive_5Xx.IsNull() && !originPoolOutlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(uint32(originPoolOutlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Consecutive_5Xx = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 					if !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(uint32(originPoolOutlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.ConsecutiveGatewayFailure = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> Interval
 					if !originPoolOutlierDetectionModel.Interval.IsNull() && !originPoolOutlierDetectionModel.Interval.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(uint32(originPoolOutlierDetectionModel.Interval.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.Interval = uint32(0)
 					}
 
 					// resource modelToSpecNested UintField --> MaxEjectionPercent
 					if !originPoolOutlierDetectionModel.MaxEjectionPercent.IsNull() && !originPoolOutlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(uint32(originPoolOutlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+					} else {
+						outlierDetectionOneOfSpec.OutlierDetection.MaxEjectionPercent = uint32(0)
 					}
 
 				}
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PanicThresholdType
+			// resource modelToSpecNested OneOfField --> PanicThresholdType
 			if !advancedOptionsModel.PanicThresholdTypeChoice.IsNull() && !advancedOptionsModel.PanicThresholdTypeChoice.IsUnknown() {
 				advancedOptionsPanicThresholdTypeChoiceModel := OriginPoolPanicThresholdTypeChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.PanicThresholdTypeChoice.As(ctx, &advancedOptionsPanicThresholdTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15334,7 +15582,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SubsetChoice
+			// resource modelToSpecNested OneOfField --> SubsetChoice
 			if !advancedOptionsModel.SubsetChoice.IsNull() && !advancedOptionsModel.SubsetChoice.IsUnknown() {
 				advancedOptionsSubsetChoiceModel := OriginPoolSubsetChoice{}
 				response.Diagnostics.Append(advancedOptionsModel.SubsetChoice.As(ctx, &advancedOptionsSubsetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15358,6 +15606,9 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					}
 					enableSubsetsOneOfSpec := &ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_EnableSubsets{}
 					enableSubsetsOneOfSpec.EnableSubsets = &ves_io_schema_views_origin_pool.OriginPoolSubsets{}
+					enableSubsetsOneOfSpec.EnableSubsets.FallbackPolicyChoice = &ves_io_schema_views_origin_pool.OriginPoolSubsets_AnyEndpoint{
+						AnyEndpoint: &ves_io_schema.Empty{},
+					}
 					advancedOptionsSpec.SubsetChoice = enableSubsetsOneOfSpec
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> EndpointSubsets
@@ -15394,7 +15645,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 						}
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> FallbackPolicyChoice
+					// resource modelToSpecNested OneOfField --> FallbackPolicyChoice
 					if !originPoolEnableSubsetsModel.FallbackPolicyChoice.IsNull() && !originPoolEnableSubsetsModel.FallbackPolicyChoice.IsUnknown() {
 						enableSubsetsFallbackPolicyChoiceModel := OriginPoolFallbackPolicyChoice{}
 						response.Diagnostics.Append(originPoolEnableSubsetsModel.FallbackPolicyChoice.As(ctx, &enableSubsetsFallbackPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15605,9 +15856,12 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					}
 					consulServiceOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_ConsulService{}
 					consulServiceOneOfSpec.ConsulService = &ves_io_schema_views_origin_pool.OriginServerConsulService{}
+					consulServiceOneOfSpec.ConsulService.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerConsulService_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = consulServiceOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolConsulSvcModel.NetworkChoice.IsNull() && !originPoolConsulSvcModel.NetworkChoice.IsUnknown() {
 						consulServiceNetworkChoiceModel := OriginPoolNetChoice{}
 						response.Diagnostics.Append(originPoolConsulSvcModel.NetworkChoice.As(ctx, &consulServiceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15821,9 +16075,12 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					}
 					k8sServiceOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_K8SService{}
 					k8sServiceOneOfSpec.K8SService = &ves_io_schema_views_origin_pool.OriginServerK8SService{}
+					k8sServiceOneOfSpec.K8SService.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerK8SService_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = k8sServiceOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolK8SSvcModel.NetworkChoice.IsNull() && !originPoolK8SSvcModel.NetworkChoice.IsUnknown() {
 						k8sServiceNetworkChoiceModel := OriginPoolOriginServerK8SSvcNetChoice{}
 						response.Diagnostics.Append(originPoolK8SSvcModel.NetworkChoice.As(ctx, &k8sServiceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16044,9 +16301,12 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					}
 					privateIpOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_PrivateIp{}
 					privateIpOneOfSpec.PrivateIp = &ves_io_schema_views_origin_pool.OriginServerPrivateIP{}
+					privateIpOneOfSpec.PrivateIp.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerPrivateIP_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = privateIpOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolPrivateIpModel.NetworkChoice.IsNull() && !originPoolPrivateIpModel.NetworkChoice.IsUnknown() {
 						privateIpNetworkChoiceModel := OriginPoolOriginServerPrivateIPNetChoice{}
 						response.Diagnostics.Append(originPoolPrivateIpModel.NetworkChoice.As(ctx, &privateIpNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16265,6 +16525,9 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					}
 					privateNameOneOfSpec := &ves_io_schema_views_origin_pool.OriginServerType_PrivateName{}
 					privateNameOneOfSpec.PrivateName = &ves_io_schema_views_origin_pool.OriginServerPrivateName{}
+					privateNameOneOfSpec.PrivateName.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerPrivateName_InsideNetwork{
+						InsideNetwork: &ves_io_schema.Empty{},
+					}
 					originServersSpec[i].Choice = privateNameOneOfSpec
 
 					// resource modelToSpecNested RequiredStringField --> DnsName
@@ -16272,7 +16535,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 						privateNameOneOfSpec.PrivateName.DnsName = string(originPoolPrivateNameModel.DnsName.ValueString())
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+					// resource modelToSpecNested OneOfField --> NetworkChoice
 					if !originPoolPrivateNameModel.NetworkChoice.IsNull() && !originPoolPrivateNameModel.NetworkChoice.IsUnknown() {
 						privateNameNetworkChoiceModel := OriginPoolOriginServerPrivateNameNetChoice{}
 						response.Diagnostics.Append(originPoolPrivateNameModel.NetworkChoice.As(ctx, &privateNameNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16491,13 +16754,6 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipSpecStr
 						}
 
-						// resource modelToSpecNested StringOfOneOfField --> Ipv6
-						if !publicIpPublicIpChoiceModel.Ipv6.IsNull() && !publicIpPublicIpChoiceModel.Ipv6.IsUnknown() {
-							ipv6SpecStr := &ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6{}
-							ipv6SpecStr.Ipv6 = string(publicIpPublicIpChoiceModel.Ipv6.ValueString())
-							publicIpOneOfSpec.PublicIp.PublicIpChoice = ipv6SpecStr
-						}
-
 					}
 
 				}
@@ -16638,6 +16894,13 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 				if response.Diagnostics.HasError() {
 					return
 				}
+				delete(mapOfString, "ves.io/config-propagation-destination")
+				delete(mapOfString, "ves.io/app_type")
+				delete(mapOfString, "ves.io/api-scope")
+				delete(mapOfString, "ves.io/provider")
+				if len(mapOfString) == 0 {
+					mapOfString = nil
+				}
 
 				originServersSpec[i].Labels = mapOfString
 			} else {
@@ -16704,9 +16967,18 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			}
 			useTlsOneOfSpec := &ves_io_schema_views_origin_pool.ReplaceSpecType_UseTls{}
 			useTlsOneOfSpec.UseTls = &ves_io_schema_views_origin_pool.UpstreamTlsParameters{}
+			useTlsOneOfSpec.UseTls.MaxSessionKeysType = &ves_io_schema_views_origin_pool.UpstreamTlsParameters_DefaultSessionKeyCaching{
+				DefaultSessionKeyCaching: &ves_io_schema.Empty{},
+			}
+			useTlsOneOfSpec.UseTls.ServerValidationChoice = &ves_io_schema_views_origin_pool.UpstreamTlsParameters_VolterraTrustedCa{
+				VolterraTrustedCa: &ves_io_schema.Empty{},
+			}
+			useTlsOneOfSpec.UseTls.SniChoice = &ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseHostHeaderAsSni{
+				UseHostHeaderAsSni: &ves_io_schema.Empty{},
+			}
 			spec.TlsChoice = useTlsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxSessionKeysType
+			// resource modelToSpecNested OneOfField --> MaxSessionKeysType
 			if !originPoolUseTlsModel.MaxSessionKeysTypeChoice.IsNull() && !originPoolUseTlsModel.MaxSessionKeysTypeChoice.IsUnknown() {
 				useTlsMaxSessionKeysTypeChoiceModel := OriginPoolMaxSessionKeysTypeChoice{}
 				response.Diagnostics.Append(originPoolUseTlsModel.MaxSessionKeysTypeChoice.As(ctx, &useTlsMaxSessionKeysTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16923,6 +17195,13 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -16957,7 +17236,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ServerValidationChoice
+			// resource modelToSpecNested OneOfField --> ServerValidationChoice
 			if !originPoolUseTlsModel.ServerValidationChoice.IsNull() && !originPoolUseTlsModel.ServerValidationChoice.IsUnknown() {
 				useTlsServerValidationChoiceModel := OriginPoolServerValChoice{}
 				response.Diagnostics.Append(originPoolUseTlsModel.ServerValidationChoice.As(ctx, &useTlsServerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17034,7 +17313,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SniChoice
+			// resource modelToSpecNested OneOfField --> SniChoice
 			if !originPoolUseTlsModel.SniChoice.IsNull() && !originPoolUseTlsModel.SniChoice.IsUnknown() {
 				useTlsSniChoiceModel := OriginPoolSniChoice{}
 				response.Diagnostics.Append(originPoolUseTlsModel.SniChoice.As(ctx, &useTlsSniChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17074,9 +17353,12 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 				}
 
 				tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+				tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+					DefaultSecurity: &ves_io_schema.Empty{},
+				}
 				useTlsOneOfSpec.UseTls.TlsConfig = tlsConfigSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> Choice
+				// resource modelToSpecNested OneOfField --> Choice
 				if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 					tlsConfigChoiceModel := OriginPoolTlsConfigChoice{}
 					response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17189,6 +17471,9 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 		// resource modelToSpecRoot PointerField --> UpstreamConnPoolReuseType
 		if !data.UpstreamConnPoolReuseType.IsNull() && !data.UpstreamConnPoolReuseType.IsUnknown() {
 			upstreamConnPoolReuseTypeSpec := &ves_io_schema.UpstreamConnPoolReuseType{}
+			upstreamConnPoolReuseTypeSpec.MapDownstreamToUpstreamConnPoolType = &ves_io_schema.UpstreamConnPoolReuseType_EnableConnPoolReuse{
+				EnableConnPoolReuse: &ves_io_schema.Empty{},
+			}
 			spec.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeSpec
 			var upstreamConnPoolReuseTypeModel OriginPoolUpstreamConnPoolReuseType
 
@@ -17199,7 +17484,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+			// resource modelToSpecNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 			if !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsNull() && !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsUnknown() {
 				upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel := OriginPoolMapDownstreamToUpstreamConnPoolTypeChoice{}
 				response.Diagnostics.Append(upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.As(ctx, &upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17229,7 +17514,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -17237,24 +17522,20 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_origin_pool.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_origin_pool.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "origin_pool", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "origin_pool", err),
 		)
 		return
 	}
@@ -17376,8 +17657,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 		var originPoolOriginPoolAdvancedOptionsModel = &OriginPoolOriginPoolAdvancedOptions{}
 		advancedOptionsElement := specData.GetAdvancedOptions()
 
-		// resource specToModelNested RequiredOneOfField --> CircuitBreakerChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> CircuitBreakerChoice
 		if advancedOptionsElement.GetCircuitBreakerChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionscircuitBreakerChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17479,8 +17759,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 		// resource specToModelNested UintField --> HttpIdleTimeout
 		originPoolOriginPoolAdvancedOptionsModel.HttpIdleTimeout = types.Int64Value(int64(advancedOptionsElement.GetHttpIdleTimeout()))
 
-		// resource specToModelNested RequiredOneOfField --> HttpProtocolType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> HttpProtocolType
 		if advancedOptionsElement.GetHttpProtocolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17517,8 +17796,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 						// Recursively populate the nested struct
 
-						// resource specToModelNested RequiredOneOfField --> HeaderTransformationChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> HeaderTransformationChoice
 						if headerTransformationElement.GetHeaderTransformationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17702,8 +17980,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			originPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = types.ObjectNull(OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 		if advancedOptionsElement.GetMaxRequestsPerConnectionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17751,8 +18028,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			originPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> OutlierDetectionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OutlierDetectionChoice
 		if advancedOptionsElement.GetOutlierDetectionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionsoutlierDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17826,8 +18102,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			originPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> PanicThresholdType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> PanicThresholdType
 		if advancedOptionsElement.GetPanicThresholdType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17931,8 +18206,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			originPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = types.ObjectNull(OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> SubsetChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SubsetChoice
 		if advancedOptionsElement.GetSubsetChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			advancedOptionssubsetChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18001,8 +18275,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 						enableSubsetsAttributeMap["endpoint_subsets"] = types.ListNull(types.ObjectType{AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap})
 					}
 
-					// resource specToModelNested RequiredOneOfField --> FallbackPolicyChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> FallbackPolicyChoice
 					if enableSubsetsElement.GetFallbackPolicyChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						enableSubsetsfallbackPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18252,14 +18525,12 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			AttrTypes: OriginPoolHealthcheckObjectRefModelAttributeMap,
 		}
 		nullHealthcheckList := basetypes.NewListNull(healthcheckObjectType)
-		var priorValHealthcheck types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("healthcheck"), &priorValHealthcheck)
-		if !priorValHealthcheck.IsNull() && !priorValHealthcheck.IsUnknown() {
-			data.Healthcheck = priorValHealthcheck
+		if !data.Healthcheck.IsNull() && !data.Healthcheck.IsUnknown() && len(data.Healthcheck.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Healthcheck = basetypes.NewListValueMust(healthcheckObjectType, nil)
 		} else {
 			data.Healthcheck = nullHealthcheckList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
@@ -18335,8 +18606,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					if isConsulService && consulServiceOptionsWrapper != nil && consulServiceOptionsWrapper.ConsulService != nil {
 						consulServiceElement := consulServiceOptionsWrapper.ConsulService
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if consulServiceElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							consulServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18742,8 +19012,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					if isK8SService && k8sServiceOptionsWrapper != nil && k8sServiceOptionsWrapper.K8SService != nil {
 						k8sServiceElement := k8sServiceOptionsWrapper.K8SService
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if k8sServiceElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							k8sServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19135,8 +19404,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					if isPrivateIp && privateIpOptionsWrapper != nil && privateIpOptionsWrapper.PrivateIp != nil {
 						privateIpElement := privateIpOptionsWrapper.PrivateIp
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if privateIpElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							privateIpnetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19565,8 +19833,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 							privateNameAttributeMap["dns_name"] = types.StringNull()
 						}
 
-						// resource specToModelNested RequiredOneOfField --> NetworkChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> NetworkChoice
 						if privateNameElement.GetNetworkChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							privateNamenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19961,16 +20228,6 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 								publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringOfOneOfField --> Ipv6
-							ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-							if isIpv6 {
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-							} else {
-								// Empty string, set to null
-								publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -20254,15 +20511,16 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 			// resource specToModelNested MapOfStringField --> Labels
 			if originServersElement.GetLabels() != nil {
-				// Filter out backend-injected keys during create/update to prevent Terraform core errors.
-				// They will be picked up during the next Read.
-				filteredMap := make(map[string]string)
+				// Filter out configured omitted map keys across all operations so backend-injected
+				// forbidden keys never enter or vanish from Terraform state.
+				filteredMap := make(map[string]string, len(originServersElement.GetLabels()))
 				for k, v := range originServersElement.GetLabels() {
-					if !strings.HasPrefix(k, "ves.io/") {
-						filteredMap[k] = v
-					}
+					filteredMap[k] = v
 				}
-
+				delete(filteredMap, "ves.io/config-propagation-destination")
+				delete(filteredMap, "ves.io/app_type")
+				delete(filteredMap, "ves.io/api-scope")
+				delete(filteredMap, "ves.io/provider")
 				if len(filteredMap) > 0 {
 					labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
 					response.Diagnostics.Append(labelsDiags...)
@@ -20391,8 +20649,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 			if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 				useTlsElement := useTlsOptionsWrapper.UseTls
 
-				// resource specToModelNested RequiredOneOfField --> MaxSessionKeysType
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> MaxSessionKeysType
 				if useTlsElement.GetMaxSessionKeysType() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlsmaxSessionKeysTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20693,6 +20950,15 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 												}
 											}
 
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -20824,8 +21090,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					useTlsAttributeMap["mtls_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ServerValidationChoice
 				if useTlsElement.GetServerValidationChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20978,8 +21243,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 					useTlsAttributeMap["server_validation_choice"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsServerValidationChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SniChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SniChoice
 				if useTlsElement.GetSniChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					useTlssniChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21044,8 +21308,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21224,8 +21487,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 		var originPoolUpstreamConnPoolReuseTypeModel = &OriginPoolUpstreamConnPoolReuseType{}
 		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
 
-		// resource specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21313,7 +21575,7 @@ func (r *ResourceF5XCOriginPool) Update(ctx context.Context, request resource.Up
 	}
 	// Restore plan value for TlsChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.TlsChoice = planTlsChoice
+	data.TlsChoice = utils.ResolveUnknowns(planTlsChoice, data.TlsChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -21351,8 +21613,26 @@ func (r *ResourceF5XCOriginPool) Delete(ctx context.Context, request resource.De
 	// Standard Delete Logic
 	opts := []vesapi.CallOpt{}
 	opts = append(opts, vesapi.WithFailIfReferred())
+	deleteFn := func() error {
+		return r.client.DeleteObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	}
 
-	err = r.client.DeleteObject(ctx, ves_io_schema_views_origin_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	err = deleteFn()
+	if err != nil && strings.Contains(err.Error(), "is still being referred by") {
+		// The object is still referenced by a parent object (e.g. the user is deleting it
+		// and re-pointing the parent to another object in the same apply). Reactively
+		// detach it from any referring parents Terraform manages, then retry.
+		tflog.Info(ctx, fmt.Sprintf("[hook] origin_pool delete hit 409, attempting reactive unbind: %s", err))
+		if unbindErr := hook.OriginPoolUnbindReferencingObjects(ctx, r.client, data.Namespace.ValueString(), data.Name.ValueString(), err.Error()); unbindErr != nil {
+			tflog.Warn(ctx, fmt.Sprintf("[hook] origin_pool reactive unbind failed: %s", unbindErr))
+		}
+		// Retry immediately: the unbind above (when it applies) removes the reference
+		// that caused the conflict, so there is nothing to gain from sleeping first.
+		err = deleteFn()
+	}
+	if err != nil {
+		err = utils.DeleteWithTransientRetry(ctx, "origin_pool", deleteFn)
+	}
 
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") || strings.Contains(err.Error(), "NotFound") {
@@ -21361,7 +21641,7 @@ func (r *ResourceF5XCOriginPool) Delete(ctx context.Context, request resource.De
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "origin_pool", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "origin_pool", err),
 		)
 		return
 	}

@@ -34,6 +34,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -112,8 +113,8 @@ func (r *ResourceF5XCCrl) Metadata(ctx context.Context, request resource.Metadat
 func (r *ResourceF5XCCrl) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a crl This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of crl) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a crl This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of crl) etc. can be fetched",
+		MarkdownDescription: "Certificate Revocation List(CRL)<br><br>It contains information about CRL server and how to download the CRL file<br>CRL file is used to validate the certificate presented to check whether it is revoked or not.<br>Clients offerring revoked certificate will not be allowed to access the HTTP Loadbalancer.<br>CRL file is downloaded/refreshed based on the refresh interval.",
+		Description:         "Certificate Revocation List(CRL) It contains information about CRL server and how to download the CRL file CRL file is used to validate the certificate presented to check whether it is revoked or not. Clients offerring revoked certificate will not be allowed to access the HTTP Loadbalancer. CRL file is downloaded/refreshed based on the refresh interval.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -181,7 +182,7 @@ func (r *ResourceF5XCCrl) Schema(ctx context.Context, request resource.SchemaReq
 			},
 			"access_info_choice": schema.SingleNestedAttribute{
 				Description:         "CRL Access information",
-				MarkdownDescription: "CRL Access information",
+				MarkdownDescription: "CRL Access information<br>`http_access` must be specified when `access_info_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -325,9 +326,17 @@ func (r *ResourceF5XCCrl) ModifyPlan(ctx context.Context, req resource.ModifyPla
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCrl) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCrlModel
 
 	// Read Terraform plan data into the model
@@ -457,7 +466,7 @@ func (r *ResourceF5XCCrl) Create(ctx context.Context, request resource.CreateReq
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -480,7 +489,7 @@ func (r *ResourceF5XCCrl) Create(ctx context.Context, request resource.CreateReq
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_crl.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "crl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "crl", err),
 		)
 		return
 	}
@@ -664,7 +673,7 @@ func (r *ResourceF5XCCrl) Create(ctx context.Context, request resource.CreateReq
 	refreshIntervalValue := specData.GetRefreshInterval()
 	if refreshIntervalValue > 0 {
 		data.RefreshInterval = types.Int64Value(int64(refreshIntervalValue))
-	} else {
+	} else if data.RefreshInterval.IsNull() || data.RefreshInterval.IsUnknown() {
 		data.RefreshInterval = types.Int64Null()
 	}
 
@@ -680,7 +689,7 @@ func (r *ResourceF5XCCrl) Create(ctx context.Context, request resource.CreateReq
 	serverPortValue := specData.GetServerPort()
 	if serverPortValue > 0 {
 		data.ServerPort = types.Int64Value(int64(serverPortValue))
-	} else {
+	} else if data.ServerPort.IsNull() || data.ServerPort.IsUnknown() {
 		data.ServerPort = types.Int64Null()
 	}
 
@@ -688,7 +697,7 @@ func (r *ResourceF5XCCrl) Create(ctx context.Context, request resource.CreateReq
 	timeoutValue := specData.GetTimeout()
 	if timeoutValue > 0 {
 		data.Timeout = types.Int64Value(int64(timeoutValue))
-	} else {
+	} else if data.Timeout.IsNull() || data.Timeout.IsUnknown() {
 		data.Timeout = types.Int64Null()
 	}
 
@@ -735,14 +744,10 @@ func (r *ResourceF5XCCrl) Read(ctx context.Context, request resource.ReadRequest
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "crl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "crl", err),
 		)
 		return
 	}
@@ -926,7 +931,7 @@ func (r *ResourceF5XCCrl) Read(ctx context.Context, request resource.ReadRequest
 	refreshIntervalValue := specData.GetRefreshInterval()
 	if refreshIntervalValue > 0 {
 		data.RefreshInterval = types.Int64Value(int64(refreshIntervalValue))
-	} else {
+	} else if data.RefreshInterval.IsNull() || data.RefreshInterval.IsUnknown() {
 		data.RefreshInterval = types.Int64Null()
 	}
 
@@ -942,7 +947,7 @@ func (r *ResourceF5XCCrl) Read(ctx context.Context, request resource.ReadRequest
 	serverPortValue := specData.GetServerPort()
 	if serverPortValue > 0 {
 		data.ServerPort = types.Int64Value(int64(serverPortValue))
-	} else {
+	} else if data.ServerPort.IsNull() || data.ServerPort.IsUnknown() {
 		data.ServerPort = types.Int64Null()
 	}
 
@@ -950,7 +955,7 @@ func (r *ResourceF5XCCrl) Read(ctx context.Context, request resource.ReadRequest
 	timeoutValue := specData.GetTimeout()
 	if timeoutValue > 0 {
 		data.Timeout = types.Int64Value(int64(timeoutValue))
-	} else {
+	} else if data.Timeout.IsNull() || data.Timeout.IsUnknown() {
 		data.Timeout = types.Int64Null()
 	}
 
@@ -963,6 +968,12 @@ func (r *ResourceF5XCCrl) Read(ctx context.Context, request resource.ReadRequest
 }
 
 func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCrlModel
@@ -1112,7 +1123,7 @@ func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateReq
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1120,24 +1131,20 @@ func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateReq
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_crl.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_crl.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "crl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "crl", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "crl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "crl", err),
 		)
 		return
 	}
@@ -1320,7 +1327,7 @@ func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateReq
 	refreshIntervalValue := specData.GetRefreshInterval()
 	if refreshIntervalValue > 0 {
 		data.RefreshInterval = types.Int64Value(int64(refreshIntervalValue))
-	} else {
+	} else if data.RefreshInterval.IsNull() || data.RefreshInterval.IsUnknown() {
 		data.RefreshInterval = types.Int64Null()
 	}
 
@@ -1336,7 +1343,7 @@ func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateReq
 	serverPortValue := specData.GetServerPort()
 	if serverPortValue > 0 {
 		data.ServerPort = types.Int64Value(int64(serverPortValue))
-	} else {
+	} else if data.ServerPort.IsNull() || data.ServerPort.IsUnknown() {
 		data.ServerPort = types.Int64Null()
 	}
 
@@ -1344,7 +1351,7 @@ func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateReq
 	timeoutValue := specData.GetTimeout()
 	if timeoutValue > 0 {
 		data.Timeout = types.Int64Value(int64(timeoutValue))
-	} else {
+	} else if data.Timeout.IsNull() || data.Timeout.IsUnknown() {
 		data.Timeout = types.Int64Null()
 	}
 
@@ -1420,7 +1427,7 @@ func (r *ResourceF5XCCrl) Delete(ctx context.Context, request resource.DeleteReq
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "crl", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "crl", err),
 		)
 		return
 	}

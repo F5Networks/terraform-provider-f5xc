@@ -29,12 +29,12 @@ type DataSourceF5XCGeoLocationSet struct {
 	client *client.APIClient
 }
 
-type GeoLocationSetGlobalSpecTypeLocationChoice struct {
+type GeoLocationSetLocationChoice struct {
 	CustomGeoLocationSelector types.Object `tfsdk:"custom_geo_location_selector"`
 	Global                    types.Bool   `tfsdk:"global"`
 }
 
-type GeoLocationSetGlobalSpecTypeCustomGeoLocationSelector struct {
+type GeoLocationSetCustomGeoLocationSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
@@ -91,8 +91,8 @@ func (d *DataSourceF5XCGeoLocationSet) Metadata(ctx context.Context, request dat
 func (r *DataSourceF5XCGeoLocationSet) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a geo_location_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of geo_location_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a geo_location_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of geo_location_set) etc. can be fetched",
+		MarkdownDescription: "Defines the geo_location_set created by user",
+		Description:         "Defines the geo_location_set created by user",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -247,7 +247,7 @@ func (d *DataSourceF5XCGeoLocationSet) Read(ctx context.Context, request datasou
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_geo_location_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "geo_location_set", err))
 		return
 	}
 
@@ -374,7 +374,7 @@ func (d *DataSourceF5XCGeoLocationSet) Read(ctx context.Context, request datasou
 		locationChoiceChoices := specData.GetLocationChoice()
 
 		// The model struct that will be populated by the nested template.
-		var locationChoiceChoicesModel = &GeoLocationSetGlobalSpecTypeLocationChoice{}
+		var locationChoiceChoicesModel = &GeoLocationSetLocationChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -35,9 +36,11 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -427,7 +430,7 @@ var ExternalConnectorConnectionTypeIpsecIkeParametersLocalIkeIdModelAttributeMap
 	"use_default_local_ike_id": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> ModeChoice
+// Attribute map for OneOfField --> ModeChoice
 var ExternalConnectorConnectionTypeIpsecIkeParametersModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"initiator": types.BoolType,
@@ -540,7 +543,7 @@ var ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelEpsModelAttri
 	"remote_tunnel_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> TunnelSourceVn
+// Attribute map for OneOfField --> TunnelSourceVn
 var ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnModelAttributeMap = map[string]attr.Type{
 
 	"segment": types.ObjectType{
@@ -576,8 +579,8 @@ func (r *ResourceF5XCExternalConnector) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a external_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of external_connector) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a external_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of external_connector) etc. can be fetched",
+		MarkdownDescription: "External Connector configuration mainly includes the following:<br>1. Tunnel connfiguration between F5 CE and external (3rd party) device<br>2. Tunnel specific parameters (IPSec, GRE)",
+		Description:         "External Connector configuration mainly includes the following: 1. Tunnel connfiguration between F5 CE and external (3rd party) device 2. Tunnel specific parameters (IPSec, GRE)",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -668,17 +671,21 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 						Description:         "",
 						MarkdownDescription: "",
 						Required:            false,
-						Optional:            false,
+						Optional:            true,
 						Computed:            true,
+						Validators: []validator.String{
+							requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+						},
 						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+							stringplanmodifier.UseNonNullStateForUnknown(),
+							requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 						},
 					},
 				},
 			},
 			"connection_type_choice": schema.SingleNestedAttribute{
 				Description:         "Connection Type You will need to choose the type of tunnel be it IPSec, GRE or no tunnel.",
-				MarkdownDescription: "Connection Type You will need to choose the type of tunnel be it IPSec, GRE or no tunnel.",
+				MarkdownDescription: "Connection Type You will need to choose the type of tunnel be it IPSec, GRE or no tunnel.<br>Exactly one of `gre` or `ipsec` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -691,7 +698,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"gre": schema.SingleNestedAttribute{
 						Description:         "GRE External Connector with GRE tunnel",
-						MarkdownDescription: "GRE External Connector with GRE tunnel",
+						MarkdownDescription: "GRE External Connector with GRE tunnel<br>Conflicts with `ipsec`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -791,7 +798,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 									},
 									"tunnel_source_vn_choice": schema.SingleNestedAttribute{
 										Description:         "Tunnel Source Segment Configure Virtual Network to which the tunnel payload belongs.",
-										MarkdownDescription: "Tunnel Source Segment Configure Virtual Network to which the tunnel payload belongs.",
+										MarkdownDescription: "Tunnel Source Segment Configure Virtual Network to which the tunnel payload belongs.<br>Exactly one of `segment`, `site_local_inside_network`, or `site_local_network` must be specified when `tunnel_source_vn_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -805,7 +812,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"segment": schema.SingleNestedAttribute{
 												Description:         "Segment Interface belongs to user configured inside network segment",
-												MarkdownDescription: "Segment Interface belongs to user configured inside network segment",
+												MarkdownDescription: "Segment Interface belongs to user configured inside network segment<br>Conflicts with `site_local_inside_network` and `site_local_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -842,7 +849,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -852,7 +859,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 											},
 											"site_local_inside_network": schema.BoolAttribute{
 												Description:         "Site Local Network Inside Interface belongs to site local network inside",
-												MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+												MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `segment` and `site_local_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -862,7 +869,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 											},
 											"site_local_network": schema.BoolAttribute{
 												Description:         "Site Local Network Interface belongs to site local network (outside)",
-												MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+												MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `segment` and `site_local_inside_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -878,7 +885,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 					},
 					"ipsec": schema.SingleNestedAttribute{
 						Description:         "IPSec External Connector with IPSec tunnel",
-						MarkdownDescription: "IPSec External Connector with IPSec tunnel",
+						MarkdownDescription: "IPSec External Connector with IPSec tunnel<br>Conflicts with `gre`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -892,7 +899,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"dpd_choice": schema.SingleNestedAttribute{
 										Description:         "Dead Peer Detection (DPD) Dead Peer Detection is a method used to determine whether an IPsec peer is still active and responsive. The keep alive timer specifies the frequency of the keep alive messages being sent.",
-										MarkdownDescription: "Dead Peer Detection (DPD) Dead Peer Detection is a method used to determine whether an IPsec peer is still active and responsive. The keep alive timer specifies the frequency of the keep alive messages being sent.",
+										MarkdownDescription: "Dead Peer Detection (DPD) Dead Peer Detection is a method used to determine whether an IPsec peer is still active and responsive. The keep alive timer specifies the frequency of the keep alive messages being sent.<br>Exactly one of `dpd_disabled` or `dpd_keep_alive_timer` must be specified when `dpd_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -905,7 +912,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"dpd_disabled": schema.BoolAttribute{
 												Description:         "Disabled Disabled Dead Peer Detection",
-												MarkdownDescription: "Disabled Disabled Dead Peer Detection",
+												MarkdownDescription: "Disabled Disabled Dead Peer Detection<br>Conflicts with `dpd_keep_alive_timer`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -915,7 +922,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 											},
 											"dpd_keep_alive_timer": schema.SingleNestedAttribute{
 												Description:         "Enabled Enable Dead Peer Detection (DPD) by setting the keepalive timer.",
-												MarkdownDescription: "Enabled Enable Dead Peer Detection (DPD) by setting the keepalive timer.",
+												MarkdownDescription: "Enabled Enable Dead Peer Detection (DPD) by setting the keepalive timer.<br>Conflicts with `dpd_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -959,10 +966,14 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 												Description:         "",
 												MarkdownDescription: "",
 												Required:            false,
-												Optional:            false,
+												Optional:            true,
 												Computed:            true,
+												Validators: []validator.String{
+													requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+												},
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
+													requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 												},
 											},
 										},
@@ -992,17 +1003,21 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 												Description:         "",
 												MarkdownDescription: "",
 												Required:            false,
-												Optional:            false,
+												Optional:            true,
 												Computed:            true,
+												Validators: []validator.String{
+													requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+												},
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
+													requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 												},
 											},
 										},
 									},
 									"local_ike_id_choice": schema.SingleNestedAttribute{
 										Description:         "Local IKE ID There are cases where you will need to set the local and/or remote IKE IDs.",
-										MarkdownDescription: "Local IKE ID There are cases where you will need to set the local and/or remote IKE IDs.",
+										MarkdownDescription: "Local IKE ID There are cases where you will need to set the local and/or remote IKE IDs.<br>`use_default_local_ike_id` must be specified when `local_ike_id_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1026,20 +1041,23 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 									},
 									"mode_choice": schema.SingleNestedAttribute{
 										Description:         "Mode Initiator means the CE site will actively try to bring up the tunnel to the remote end whereas responder means that the CE site will only reply to connection attempts from the remote gateway.",
-										MarkdownDescription: "Mode Initiator means the CE site will actively try to bring up the tunnel to the remote end whereas responder means that the CE site will only reply to connection attempts from the remote gateway.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Mode Initiator means the CE site will actively try to bring up the tunnel to the remote end whereas responder means that the CE site will only reply to connection attempts from the remote gateway.<br>Exactly one of `initiator` or `responder` must be specified when `mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"initiator",
 												"responder",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"initiator": schema.BoolAttribute{
 												Description:         "Initiator Configure as Tunnel Initiator",
-												MarkdownDescription: "Initiator Configure as Tunnel Initiator",
+												MarkdownDescription: "Initiator Configure as Tunnel Initiator<br>Conflicts with `responder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1049,7 +1067,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 											},
 											"responder": schema.BoolAttribute{
 												Description:         "Responder Configure as Tunnel Responder",
-												MarkdownDescription: "Responder Configure as Tunnel Responder",
+												MarkdownDescription: "Responder Configure as Tunnel Responder<br>Conflicts with `initiator`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1061,7 +1079,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 									},
 									"remote_ike_id_choice": schema.SingleNestedAttribute{
 										Description:         "Remote IKE ID There are cases where you will need to set the local and/or remote IKE IDs.",
-										MarkdownDescription: "Remote IKE ID There are cases where you will need to set the local and/or remote IKE IDs.",
+										MarkdownDescription: "Remote IKE ID There are cases where you will need to set the local and/or remote IKE IDs.<br>Exactly one of `rm_hostname`, `rm_ip_address`, or `use_default_remote_ike_id` must be specified when `remote_ike_id_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1075,21 +1093,21 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"rm_hostname": schema.StringAttribute{
 												Description:         "Hostname Configure an hostname Remote IKE ID",
-												MarkdownDescription: "Hostname Configure an hostname Remote IKE ID",
+												MarkdownDescription: "Hostname Configure an hostname Remote IKE ID<br>Conflicts with `rm_ip_address` and `use_default_remote_ike_id`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"rm_ip_address": schema.SingleNestedAttribute{
 												Description:         "IP Address Configure an IP address as Remote IKE ID",
-												MarkdownDescription: "IP Address Configure an IP address as Remote IKE ID",
+												MarkdownDescription: "IP Address Configure an IP address as Remote IKE ID<br>Conflicts with `rm_hostname` and `use_default_remote_ike_id`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"ver_choice": schema.SingleNestedAttribute{
 														Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-														MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+														MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack`, `ipv4`, or `ipv6` must be specified when `ver_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1103,7 +1121,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 														Attributes: map[string]schema.Attribute{
 															"dual_stack": schema.SingleNestedAttribute{
 																Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4` and `ipv6`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1156,7 +1174,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 															},
 															"ipv4": schema.SingleNestedAttribute{
 																Description:         "IPv4 Address IPv4 Address",
-																MarkdownDescription: "IPv4 Address IPv4 Address",
+																MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack` and `ipv6`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1178,7 +1196,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 															},
 															"ipv6": schema.SingleNestedAttribute{
 																Description:         "IPv6 ADDRESS IPv6 Address",
-																MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
+																MarkdownDescription: "IPv6 ADDRESS IPv6 Address<br>Conflicts with `dual_stack` and `ipv4`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1204,7 +1222,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 											},
 											"use_default_remote_ike_id": schema.BoolAttribute{
 												Description:         "Use Default Remote IKE ID Use default remote IKE ID (IP address of tunnel gateway)",
-												MarkdownDescription: "Use Default Remote IKE ID Use default remote IKE ID (IP address of tunnel gateway)",
+												MarkdownDescription: "Use Default Remote IKE ID Use default remote IKE ID (IP address of tunnel gateway)<br>Conflicts with `rm_hostname` and `rm_ip_address`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1319,21 +1337,24 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 									},
 									"tunnel_source_vn_choice": schema.SingleNestedAttribute{
 										Description:         "Payload Segment/Network Place the tunnel interface in one of the existing local virtual networks or the segments within the site. You can also create a new segment for this external connection.",
-										MarkdownDescription: "Payload Segment/Network Place the tunnel interface in one of the existing local virtual networks or the segments within the site. You can also create a new segment for this external connection.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Payload Segment/Network Place the tunnel interface in one of the existing local virtual networks or the segments within the site. You can also create a new segment for this external connection.<br>Exactly one of `segment`, `site_local_inside_network`, or `site_local_network` must be specified when `tunnel_source_vn_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"segment",
 												"site_local_inside_network",
 												"site_local_network",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"segment": schema.SingleNestedAttribute{
 												Description:         "Segment Interface belongs to user configured network segment",
-												MarkdownDescription: "Segment Interface belongs to user configured network segment",
+												MarkdownDescription: "Segment Interface belongs to user configured network segment<br>Conflicts with `site_local_inside_network` and `site_local_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1370,7 +1391,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -1380,7 +1401,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 											},
 											"site_local_inside_network": schema.BoolAttribute{
 												Description:         "Site Local Network Inside Interface belongs to site local network inside",
-												MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+												MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `segment` and `site_local_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1390,7 +1411,7 @@ func (r *ResourceF5XCExternalConnector) Schema(ctx context.Context, request reso
 											},
 											"site_local_network": schema.BoolAttribute{
 												Description:         "Site Local Network Interface belongs to site local network (outside)",
-												MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+												MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `segment` and `site_local_inside_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1468,9 +1489,17 @@ func (r *ResourceF5XCExternalConnector) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCExternalConnectorModel
 
 	// Read Terraform plan data into the model
@@ -1573,6 +1602,11 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 			// resource modelToSpecNested RequiredStringField --> Namespace
 			if !ceSiteReferenceModel.Namespace.IsNull() && !ceSiteReferenceModel.Namespace.IsUnknown() {
 				ceSiteReferenceSpec.Namespace = string(ceSiteReferenceModel.Namespace.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> Tenant
+			if !ceSiteReferenceModel.Tenant.IsNull() && !ceSiteReferenceModel.Tenant.IsUnknown() {
+				ceSiteReferenceSpec.Tenant = string(ceSiteReferenceModel.Tenant.ValueString())
 			}
 
 		}
@@ -1768,6 +1802,9 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 				}
 
 				ikeParametersSpec := &ves_io_schema_views_external_connector.IkeParameters{}
+				ikeParametersSpec.ModeChoice = &ves_io_schema_views_external_connector.IkeParameters_Initiator{
+					Initiator: &ves_io_schema.Empty{},
+				}
 				ipsecOneOfSpec.Ipsec.IkeParameters = ikeParametersSpec
 
 				// resource modelToSpecNested OneOfField --> DpdChoice
@@ -1826,6 +1863,11 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 						ikePhase1ProfileSpec.Namespace = string(ikePhase1ProfileModel.Namespace.ValueString())
 					}
 
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase1ProfileModel.Tenant.IsNull() && !ikePhase1ProfileModel.Tenant.IsUnknown() {
+						ikePhase1ProfileSpec.Tenant = string(ikePhase1ProfileModel.Tenant.ValueString())
+					}
+
 				}
 
 				// resource modelToSpecNested RequiredPointerField --> IkePhase2Profile
@@ -1849,6 +1891,11 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 						ikePhase2ProfileSpec.Namespace = string(ikePhase2ProfileModel.Namespace.ValueString())
 					}
 
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase2ProfileModel.Tenant.IsNull() && !ikePhase2ProfileModel.Tenant.IsUnknown() {
+						ikePhase2ProfileSpec.Tenant = string(ikePhase2ProfileModel.Tenant.ValueString())
+					}
+
 				}
 
 				// resource modelToSpecNested OneOfField --> LocalIkeId
@@ -1868,7 +1915,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> ModeChoice
+				// resource modelToSpecNested OneOfField --> ModeChoice
 				if !ikeParametersModel.ModeChoice.IsNull() && !ikeParametersModel.ModeChoice.IsUnknown() {
 					ikeParametersModeChoiceModel := ExternalConnectorModeChoice{}
 					response.Diagnostics.Append(ikeParametersModel.ModeChoice.As(ctx, &ikeParametersModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2035,6 +2082,9 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 				}
 
 				ipsecTunnelParametersSpec := &ves_io_schema_views_external_connector.TunnelParameters{}
+				ipsecTunnelParametersSpec.TunnelSourceVn = &ves_io_schema_views_external_connector.TunnelParameters_SiteLocalInsideNetwork{
+					SiteLocalInsideNetwork: &ves_io_schema.Empty{},
+				}
 				ipsecOneOfSpec.Ipsec.IpsecTunnelParameters = ipsecTunnelParametersSpec
 
 				// resource modelToSpecNested RequiredPointerField --> PeerIpAddress
@@ -2106,7 +2156,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 				// resource modelToSpecNested RequiredUintField --> TunnelMtu
 				ipsecTunnelParametersSpec.TunnelMtu = uint32(uint32(ipsecTunnelParametersModel.TunnelMtu.ValueInt64()))
 
-				// resource modelToSpecNested RequiredOneOfField --> TunnelSourceVn
+				// resource modelToSpecNested OneOfField --> TunnelSourceVn
 				if !ipsecTunnelParametersModel.TunnelSourceVnChoice.IsNull() && !ipsecTunnelParametersModel.TunnelSourceVnChoice.IsUnknown() {
 					ipsecTunnelParametersTunnelSourceVnChoiceModel := ExternalConnectorTunnelParametersTunnelSrcVnChoice{}
 					response.Diagnostics.Append(ipsecTunnelParametersModel.TunnelSourceVnChoice.As(ctx, &ipsecTunnelParametersTunnelSourceVnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2184,7 +2234,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2207,7 +2257,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_external_connector.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "external_connector", err),
 		)
 		return
 	}
@@ -2859,8 +2909,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 						externalConnectorIkeParametersModel.LocalIkeIdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersLocalIkeIdModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> ModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> ModeChoice
 					if ikeParametersElement.GetModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						ikeParametersmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3295,8 +3344,7 @@ func (r *ResourceF5XCExternalConnector) Create(ctx context.Context, request reso
 					// resource specToModelNested RequiredUintField --> TunnelMtu
 					externalConnectorTunnelParametersModel.TunnelMtu = types.Int64Value(int64(ipsecTunnelParametersElement.GetTunnelMtu()))
 
-					// resource specToModelNested RequiredOneOfField --> TunnelSourceVn
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> TunnelSourceVn
 					if ipsecTunnelParametersElement.GetTunnelSourceVn() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						ipsecTunnelParameterstunnelSourceVnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3509,14 +3557,10 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 	defer cancel()
 	priorConnectionTypeChoice := data.ConnectionTypeChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_external_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_external_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "external_connector", err),
 		)
 		return
 	}
@@ -4168,8 +4212,7 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 						externalConnectorIkeParametersModel.LocalIkeIdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersLocalIkeIdModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> ModeChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> ModeChoice
 					if ikeParametersElement.GetModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						ikeParametersmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4213,7 +4256,10 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 						externalConnectorIkeParametersModel.ModeChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorIkeParametersModel.ModeChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersModeChoiceModelAttributeMap)
+						externalConnectorIkeParametersModel.ModeChoice = types.ObjectValueMust(ExternalConnectorConnectionTypeIpsecIkeParametersModeChoiceModelAttributeMap, map[string]attr.Value{
+							"initiator": types.BoolValue(true),
+							"responder": types.BoolNull(),
+						})
 					}
 
 					// resource specToModelNested OneOfField --> RemoteIkeId
@@ -4604,8 +4650,7 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 					// resource specToModelNested RequiredUintField --> TunnelMtu
 					externalConnectorTunnelParametersModel.TunnelMtu = types.Int64Value(int64(ipsecTunnelParametersElement.GetTunnelMtu()))
 
-					// resource specToModelNested RequiredOneOfField --> TunnelSourceVn
-					// <no value>
+					// resource specToModelNested OneOfField --> TunnelSourceVn
 					if ipsecTunnelParametersElement.GetTunnelSourceVn() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						ipsecTunnelParameterstunnelSourceVnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4720,7 +4765,11 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnModelAttributeMap)
+						externalConnectorTunnelParametersModel.TunnelSourceVnChoice = types.ObjectValueMust(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnModelAttributeMap, map[string]attr.Value{
+							"segment":                   types.ObjectNull(ExternalConnectorConnectionTypeIpsecIpsecTunnelParametersTunnelSourceVnSegmentModelAttributeMap),
+							"site_local_inside_network": types.BoolValue(true),
+							"site_local_network":        types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -4789,6 +4838,12 @@ func (r *ResourceF5XCExternalConnector) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCExternalConnectorModel
@@ -4798,6 +4853,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planConnectionTypeChoice := data.ConnectionTypeChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -4817,7 +4873,6 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planConnectionTypeChoice := data.ConnectionTypeChoice
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -4912,6 +4967,11 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 			// resource modelToSpecNested RequiredStringField --> Namespace
 			if !ceSiteReferenceModel.Namespace.IsNull() && !ceSiteReferenceModel.Namespace.IsUnknown() {
 				ceSiteReferenceSpec.Namespace = string(ceSiteReferenceModel.Namespace.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> Tenant
+			if !ceSiteReferenceModel.Tenant.IsNull() && !ceSiteReferenceModel.Tenant.IsUnknown() {
+				ceSiteReferenceSpec.Tenant = string(ceSiteReferenceModel.Tenant.ValueString())
 			}
 
 		}
@@ -5107,6 +5167,9 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 				}
 
 				ikeParametersSpec := &ves_io_schema_views_external_connector.IkeParameters{}
+				ikeParametersSpec.ModeChoice = &ves_io_schema_views_external_connector.IkeParameters_Initiator{
+					Initiator: &ves_io_schema.Empty{},
+				}
 				ipsecOneOfSpec.Ipsec.IkeParameters = ikeParametersSpec
 
 				// resource modelToSpecNested OneOfField --> DpdChoice
@@ -5165,6 +5228,11 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 						ikePhase1ProfileSpec.Namespace = string(ikePhase1ProfileModel.Namespace.ValueString())
 					}
 
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase1ProfileModel.Tenant.IsNull() && !ikePhase1ProfileModel.Tenant.IsUnknown() {
+						ikePhase1ProfileSpec.Tenant = string(ikePhase1ProfileModel.Tenant.ValueString())
+					}
+
 				}
 
 				// resource modelToSpecNested RequiredPointerField --> IkePhase2Profile
@@ -5188,6 +5256,11 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 						ikePhase2ProfileSpec.Namespace = string(ikePhase2ProfileModel.Namespace.ValueString())
 					}
 
+					// resource modelToSpecNested StringField --> Tenant
+					if !ikePhase2ProfileModel.Tenant.IsNull() && !ikePhase2ProfileModel.Tenant.IsUnknown() {
+						ikePhase2ProfileSpec.Tenant = string(ikePhase2ProfileModel.Tenant.ValueString())
+					}
+
 				}
 
 				// resource modelToSpecNested OneOfField --> LocalIkeId
@@ -5207,7 +5280,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> ModeChoice
+				// resource modelToSpecNested OneOfField --> ModeChoice
 				if !ikeParametersModel.ModeChoice.IsNull() && !ikeParametersModel.ModeChoice.IsUnknown() {
 					ikeParametersModeChoiceModel := ExternalConnectorModeChoice{}
 					response.Diagnostics.Append(ikeParametersModel.ModeChoice.As(ctx, &ikeParametersModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5374,6 +5447,9 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 				}
 
 				ipsecTunnelParametersSpec := &ves_io_schema_views_external_connector.TunnelParameters{}
+				ipsecTunnelParametersSpec.TunnelSourceVn = &ves_io_schema_views_external_connector.TunnelParameters_SiteLocalInsideNetwork{
+					SiteLocalInsideNetwork: &ves_io_schema.Empty{},
+				}
 				ipsecOneOfSpec.Ipsec.IpsecTunnelParameters = ipsecTunnelParametersSpec
 
 				// resource modelToSpecNested RequiredPointerField --> PeerIpAddress
@@ -5445,7 +5521,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 				// resource modelToSpecNested RequiredUintField --> TunnelMtu
 				ipsecTunnelParametersSpec.TunnelMtu = uint32(uint32(ipsecTunnelParametersModel.TunnelMtu.ValueInt64()))
 
-				// resource modelToSpecNested RequiredOneOfField --> TunnelSourceVn
+				// resource modelToSpecNested OneOfField --> TunnelSourceVn
 				if !ipsecTunnelParametersModel.TunnelSourceVnChoice.IsNull() && !ipsecTunnelParametersModel.TunnelSourceVnChoice.IsUnknown() {
 					ipsecTunnelParametersTunnelSourceVnChoiceModel := ExternalConnectorTunnelParametersTunnelSrcVnChoice{}
 					response.Diagnostics.Append(ipsecTunnelParametersModel.TunnelSourceVnChoice.As(ctx, &ipsecTunnelParametersTunnelSourceVnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5523,7 +5599,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -5531,24 +5607,20 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_external_connector.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_external_connector.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "external_connector", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_external_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_external_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "external_connector", err),
 		)
 		return
 	}
@@ -6199,8 +6271,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 						externalConnectorIkeParametersModel.LocalIkeIdChoice = types.ObjectNull(ExternalConnectorConnectionTypeIpsecIkeParametersLocalIkeIdModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> ModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> ModeChoice
 					if ikeParametersElement.GetModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						ikeParametersmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6635,8 +6706,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 					// resource specToModelNested RequiredUintField --> TunnelMtu
 					externalConnectorTunnelParametersModel.TunnelMtu = types.Int64Value(int64(ipsecTunnelParametersElement.GetTunnelMtu()))
 
-					// resource specToModelNested RequiredOneOfField --> TunnelSourceVn
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> TunnelSourceVn
 					if ipsecTunnelParametersElement.GetTunnelSourceVn() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						ipsecTunnelParameterstunnelSourceVnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6832,7 +6902,7 @@ func (r *ResourceF5XCExternalConnector) Update(ctx context.Context, request reso
 	}
 	// Restore plan value for ConnectionTypeChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.ConnectionTypeChoice = planConnectionTypeChoice
+	data.ConnectionTypeChoice = utils.ResolveUnknowns(planConnectionTypeChoice, data.ConnectionTypeChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -6880,7 +6950,7 @@ func (r *ResourceF5XCExternalConnector) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "external_connector", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "external_connector", err),
 		)
 		return
 	}

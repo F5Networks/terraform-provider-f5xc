@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCNetworkInterface_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-interface-" + acctest.RandString(t, 8)
+	name := "example-network-interface-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCNetworkInterface_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withDescription(name, namespace, "network interface basic updated"),
+				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withDescription(name, namespace, "Updated basic network interface example"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCNetworkInterface_withTypeTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-interface-" + acctest.RandString(t, 8)
+	name := "example-network-interface-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCNetworkInterface_withTypeTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withType(name, namespace, "NETWORK_INTERFACE_ETHERNET"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withType(name, namespace, "NETWORK_INTERFACE_VLAN_INTERFACE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCNetworkInterface_withDHCPAddressTransition(t *testin
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-interface-" + acctest.RandString(t, 8)
+	name := "example-network-interface-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCNetworkInterface_withDHCPAddressTransition(t *testin
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withDHCPAddress(name, namespace, "NETWORK_INTERFACE_DHCP_ENABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withDHCPAddress(name, namespace, "NETWORK_INTERFACE_DHCP_DISABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCNetworkInterface_withDHCPServerTransition(t *testing
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-interface-" + acctest.RandString(t, 8)
+	name := "example-network-interface-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCNetworkInterface_withDHCPServerTransition(t *testing
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withDHCPServer(name, namespace, "NETWORK_INTERFACE_DHCP_SERVER_DISABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withDHCPServer(name, namespace, "NETWORK_INTERFACE_DHCP_SERVER_ENABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +168,7 @@ func TestAccResourceAutoF5XCNetworkInterface_withNetworkConfigTransition(t *test
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-interface-" + acctest.RandString(t, 8)
+	name := "example-network-interface-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +179,20 @@ func TestAccResourceAutoF5XCNetworkInterface_withNetworkConfigTransition(t *test
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withNetworkConfig(name, namespace, "NETWORK_INTERFACE_SITE_LOCAL"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_withNetworkConfig(name, namespace, "NETWORK_INTERFACE_SITE_LOCAL_INSIDE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,35 +203,39 @@ func TestAccResourceAutoF5XCNetworkInterface_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-network-interface-" + acctest.RandString(t, 8)
+	name := "example-network-interface-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkInterfaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_full(name, namespace, "test", "platform", "owner-a", "NETWORK_INTERFACE_DNS_DISABLE", "NETWORK_INTERFACE_GATEWAY_DISABLE", "NETWORK_INTERFACE_VLAN_TAGGING_DISABLE"),
+				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_full(name, namespace, "example", "platform", "example-owner", "NETWORK_INTERFACE_DNS_DISABLE", "NETWORK_INTERFACE_GATEWAY_DISABLE", "NETWORK_INTERFACE_VLAN_TAGGING_DISABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_full(name, namespace, "prod", "security", "owner-b", "NETWORK_INTERFACE_DNS_USE_CONFIGURED", "NETWORK_INTERFACE_GATEWAY_USE_CONFIGURED", "NETWORK_INTERFACE_VLAN_TAGGING_ENABLE"),
+				Config: testAccResourceAutoF5XCNetworkInterfaceConfig_full(name, namespace, "example", "security", "example-owner-alt", "NETWORK_INTERFACE_DNS_USE_CONFIGURED", "NETWORK_INTERFACE_GATEWAY_USE_CONFIGURED", "NETWORK_INTERFACE_VLAN_TAGGING_ENABLE"),
 			},
 			{
-				ResourceName:                         "f5xc_network_interface.test",
+				ResourceName:                         "f5xc_network_interface.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_network_interface.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNetworkInterfaceConfig_full("example-network-interface", namespace, "example", "platform", "example-owner", "NETWORK_INTERFACE_DNS_DISABLE", "NETWORK_INTERFACE_GATEWAY_DISABLE", "NETWORK_INTERFACE_VLAN_TAGGING_DISABLE"),
+		})
 }
 
 func testAccCheckNetworkInterfaceDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -240,35 +244,35 @@ func testAccCheckNetworkInterfaceDestroyProducer(t *testing.T) func(*terraform.S
 
 func testAccResourceAutoF5XCNetworkInterfaceConfig_base(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_interface" "example" {
+  name      = %q
+  namespace = %q
 
-	interface_choice = {
-		ethernet_interface = {
-			device = "eth0"
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
 
-			address_choice = {
-				dhcp_client = true
-			}
+      address_choice = {
+        dhcp_client = true
+      }
 
-			network_choice = {
-				site_local_network = true
-			}
+      network_choice = {
+        site_local_network = true
+      }
 
-			node_choice = {
-				cluster = true
-			}
+      node_choice = {
+        cluster = true
+      }
 
-			primary_choice = {
-				not_primary = true
-			}
+      primary_choice = {
+        not_primary = true
+      }
 
-			vlan_choice = {
-				untagged = true
-			}
-		}
-	}
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
 }
 `, name, namespace)
 }
@@ -279,36 +283,36 @@ func testAccResourceAutoF5XCNetworkInterfaceConfig_basic(name, namespace string)
 
 func testAccResourceAutoF5XCNetworkInterfaceConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
-	name        = %q
-	namespace   = %q
-	description = %q
+resource "f5xc_network_interface" "example" {
+  name        = %q
+  namespace   = %q
+  description = %q
 
-	interface_choice = {
-		ethernet_interface = {
-			device = "eth0"
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
 
-			address_choice = {
-				dhcp_client = true
-			}
+      address_choice = {
+        dhcp_client = true
+      }
 
-			network_choice = {
-				site_local_network = true
-			}
+      network_choice = {
+        site_local_network = true
+      }
 
-			node_choice = {
-				cluster = true
-			}
+      node_choice = {
+        cluster = true
+      }
 
-			primary_choice = {
-				not_primary = true
-			}
+      primary_choice = {
+        not_primary = true
+      }
 
-			vlan_choice = {
-				untagged = true
-			}
-		}
-	}
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
 }
 `, name, namespace, description)
 }
@@ -316,205 +320,205 @@ resource "f5xc_network_interface" "test" {
 func testAccResourceAutoF5XCNetworkInterfaceConfig_withType(name, namespace, interfaceType string) string {
 	if interfaceType == "NETWORK_INTERFACE_VLAN_INTERFACE" {
 		return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_interface" "example" {
+  name      = %q
+  namespace = %q
 
-	interface_choice = {
-		layer2_interface = {
-			layer2_interface_choice = {
-				l2vlan_interface = {
-					device  = "eth0"
-					vlan_id = 100
-				}
-			}
-		}
-	}
+  interface_choice = {
+    layer2_interface = {
+      layer2_interface_choice = {
+        l2vlan_interface = {
+          device  = "eth0"
+          vlan_id = 100
+        }
+      }
+    }
+  }
 }
 `, name, namespace)
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_interface" "example" {
+  name      = %q
+  namespace = %q
 
-	interface_choice = {
-		ethernet_interface = {
-			device = "eth0"
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
 
-			address_choice = {
-				dhcp_client = true
-			}
+      address_choice = {
+        dhcp_client = true
+      }
 
-			network_choice = {
-				site_local_network = true
-			}
+      network_choice = {
+        site_local_network = true
+      }
 
-			node_choice = {
-				cluster = true
-			}
+      node_choice = {
+        cluster = true
+      }
 
-			primary_choice = {
-				not_primary = true
-			}
+      primary_choice = {
+        not_primary = true
+      }
 
-			vlan_choice = {
-				untagged = true
-			}
-		}
-	}
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCNetworkInterfaceConfig_withDHCPAddress(name, namespace, dhcpAddress string) string {
 	addressChoice := `
-			address_choice = {
-				dhcp_client = true
-			}`
+      address_choice = {
+        dhcp_client = true
+      }`
 
 	if dhcpAddress == "NETWORK_INTERFACE_DHCP_DISABLE" {
 		addressChoice = `
-			address_choice = {
-				static_ip = {
-					network_prefix_choice = {
-						cluster_static_ip = {
-							ip_address = "10.10.10.10/24"
-						}
-					}
-				}
-			}`
+      address_choice = {
+        static_ip = {
+          network_prefix_choice = {
+            cluster_static_ip = {
+              ip_address = "10.10.10.10/24"
+            }
+          }
+        }
+      }`
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_interface" "example" {
+  name      = %q
+  namespace = %q
 
-	interface_choice = {
-		ethernet_interface = {
-			device = "eth0"
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
 %s
-			network_choice = {
-				site_local_network = true
-			}
+      network_choice = {
+        site_local_network = true
+      }
 
-			node_choice = {
-				cluster = true
-			}
+      node_choice = {
+        cluster = true
+      }
 
-			primary_choice = {
-				not_primary = true
-			}
+      primary_choice = {
+        not_primary = true
+      }
 
-			vlan_choice = {
-				untagged = true
-			}
-		}
-	}
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
 }
 `, name, namespace, addressChoice)
 }
 
 func testAccResourceAutoF5XCNetworkInterfaceConfig_withDHCPServer(name, namespace, dhcpServer string) string {
 	addressChoice := `
-			address_choice = {
-				dhcp_client = true
-			}`
+      address_choice = {
+        dhcp_client = true
+      }`
 
 	if dhcpServer == "NETWORK_INTERFACE_DHCP_SERVER_ENABLE" {
 		addressChoice = `
-			address_choice = {
-				dhcp_server = {
-					dhcp_networks = [{
-						dns_choice = {
-							same_as_dgw = true
-						}
-						gateway_choice = {
-							first_address = true
-						}
-						network_prefix_choice = {
-							network_prefix = "10.10.20.0/24"
-						}
-						pool_settings = ["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]
-					}]
-					interfaces_addressing_choice = {
-						automatic_from_start = true
-					}
-				}
-			}`
+      address_choice = {
+        dhcp_server = {
+          dhcp_networks = [{
+            dns_choice = {
+              same_as_dgw = true
+            }
+            gateway_choice = {
+              first_address = true
+            }
+            network_prefix_choice = {
+              network_prefix = "10.10.20.0/24"
+            }
+            pool_settings = ["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]
+          }]
+          interfaces_addressing_choice = {
+            automatic_from_start = true
+          }
+        }
+      }`
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_interface" "example" {
+  name      = %q
+  namespace = %q
 
-	interface_choice = {
-		ethernet_interface = {
-			device = "eth0"
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
 %s
-			network_choice = {
-				site_local_network = true
-			}
+      network_choice = {
+        site_local_network = true
+      }
 
-			node_choice = {
-				cluster = true
-			}
+      node_choice = {
+        cluster = true
+      }
 
-			primary_choice = {
-				not_primary = true
-			}
+      primary_choice = {
+        not_primary = true
+      }
 
-			vlan_choice = {
-				untagged = true
-			}
-		}
-	}
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
 }
 `, name, namespace, addressChoice)
 }
 
 func testAccResourceAutoF5XCNetworkInterfaceConfig_withNetworkConfig(name, namespace, networkConfig string) string {
 	networkChoice := `
-			network_choice = {
-				site_local_network = true
-			}`
+      network_choice = {
+        site_local_network = true
+      }`
 
 	if networkConfig == "NETWORK_INTERFACE_SITE_LOCAL_INSIDE" {
 		networkChoice = `
-			network_choice = {
-				site_local_inside_network = true
-			}`
+      network_choice = {
+        site_local_inside_network = true
+      }`
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
-	name      = %q
-	namespace = %q
+resource "f5xc_network_interface" "example" {
+  name      = %q
+  namespace = %q
 
-	interface_choice = {
-		ethernet_interface = {
-			device = "eth0"
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
 
-			address_choice = {
-				dhcp_client = true
-			}
+      address_choice = {
+        dhcp_client = true
+      }
 %s
-			node_choice = {
-				cluster = true
-			}
+      node_choice = {
+        cluster = true
+      }
 
-			primary_choice = {
-				not_primary = true
-			}
+      primary_choice = {
+        not_primary = true
+      }
 
-			vlan_choice = {
-				untagged = true
-			}
-		}
-	}
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
 }
 `, name, namespace, networkChoice)
 }
@@ -543,10 +547,10 @@ func testAccResourceAutoF5XCNetworkInterfaceConfig_full(
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_network_interface" "test" {
+resource "f5xc_network_interface" "example" {
   name        = %q
   namespace   = %q
-  description = "network interface full"
+  description = "Full network interface example"
 
   labels = {
     env  = %q
@@ -557,19 +561,19 @@ resource "f5xc_network_interface" "test" {
     owner = %q
   }
 
-	interface_choice = {
-		ethernet_interface = {
-			device = "eth0"
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
 %s%s
-			node_choice = {
-				cluster = true
-			}
+      node_choice = {
+        cluster = true
+      }
 
-			primary_choice = {
-				not_primary = true
-			}%s
-		}
-	}
+      primary_choice = {
+        not_primary = true
+      }%s
+    }
+  }
 }
 `, name, namespace, env, team, owner, addressChoice, networkChoice, vlanChoiceBlock)
 }

@@ -98,6 +98,14 @@ func (c *NamespaceCustomAPIGrpcClient) doRPCGetActiveServicePolicies(ctx context
 	rsp, err := c.grpcClient.GetActiveServicePolicies(ctx, req, opts...)
 	return rsp, err
 }
+func (c *NamespaceCustomAPIGrpcClient) doRPCGetDynamicDefaultValues(ctx context.Context, yamlReq string, opts ...grpc.CallOption) (proto.Message, error) {
+	req := &GetDynamicDefaultValuesReq{}
+	if err := codec.FromYAML(yamlReq, req); err != nil {
+		return nil, fmt.Errorf("YAML Request %s is not of type *ves.io.schema.namespace.GetDynamicDefaultValuesReq", yamlReq)
+	}
+	rsp, err := c.grpcClient.GetDynamicDefaultValues(ctx, req, opts...)
+	return rsp, err
+}
 func (c *NamespaceCustomAPIGrpcClient) doRPCGetFastACLsForInternetVIPs(ctx context.Context, yamlReq string, opts ...grpc.CallOption) (proto.Message, error) {
 	req := &GetFastACLsForInternetVIPsRequest{}
 	if err := codec.FromYAML(yamlReq, req); err != nil {
@@ -217,6 +225,7 @@ func NewNamespaceCustomAPIGrpcClient(cc *grpc.ClientConn) server.CustomClient {
 	rpcFns["GetActiveAlertPolicies"] = ccl.doRPCGetActiveAlertPolicies
 	rpcFns["GetActiveNetworkPolicies"] = ccl.doRPCGetActiveNetworkPolicies
 	rpcFns["GetActiveServicePolicies"] = ccl.doRPCGetActiveServicePolicies
+	rpcFns["GetDynamicDefaultValues"] = ccl.doRPCGetDynamicDefaultValues
 	rpcFns["GetFastACLsForInternetVIPs"] = ccl.doRPCGetFastACLsForInternetVIPs
 	rpcFns["NetworkingInventory"] = ccl.doRPCNetworkingInventory
 	rpcFns["OIDCOAuthDiscovery"] = ccl.doRPCOIDCOAuthDiscovery
@@ -898,6 +907,88 @@ func (c *NamespaceCustomAPIRestClient) doRPCGetActiveServicePolicies(ctx context
 	pbRsp := &GetActiveServicePoliciesResponse{}
 	if err := codec.FromJSON(string(body), pbRsp); err != nil {
 		return nil, errors.Wrapf(err, "JSON Response %s is not of type *ves.io.schema.namespace.GetActiveServicePoliciesResponse", body)
+	}
+	if callOpts.OutCallResponse != nil {
+		callOpts.OutCallResponse.ProtoMsg = pbRsp
+		callOpts.OutCallResponse.JSON = string(body)
+	}
+	return pbRsp, nil
+}
+func (c *NamespaceCustomAPIRestClient) doRPCGetDynamicDefaultValues(ctx context.Context, callOpts *server.CustomCallOpts) (proto.Message, error) {
+	if callOpts.URI == "" {
+		return nil, fmt.Errorf("Error, URI should be specified, got empty")
+	}
+	url := fmt.Sprintf("%s%s", c.baseURL, callOpts.URI)
+
+	yamlReq := callOpts.YAMLReq
+	req := &GetDynamicDefaultValuesReq{}
+	if err := codec.FromYAML(yamlReq, req); err != nil {
+		return nil, fmt.Errorf("YAML Request %s is not of type *ves.io.schema.namespace.GetDynamicDefaultValuesReq: %s", yamlReq, err)
+	}
+
+	var hReq *http.Request
+	hm := strings.ToLower(callOpts.HTTPMethod)
+	switch hm {
+	case "post", "put":
+		jsn, err := codec.ToJSON(req, codec.ToWithUseProtoFieldName())
+		if err != nil {
+			return nil, errors.Wrap(err, "Custom RestClient converting YAML to JSON")
+		}
+		var op string
+		if hm == "post" {
+			op = http.MethodPost
+		} else {
+			op = http.MethodPut
+		}
+		newReq, err := http.NewRequest(op, url, bytes.NewBuffer([]byte(jsn)))
+		if err != nil {
+			return nil, errors.Wrapf(err, "Creating new HTTP %s request for custom API", op)
+		}
+		hReq = newReq
+	case "get":
+		newReq, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "Creating new HTTP GET request for custom API")
+		}
+		hReq = newReq
+		q := hReq.URL.Query()
+		_ = q
+		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
+		q.Add("request_body", fmt.Sprintf("%v", req.RequestBody))
+
+		hReq.URL.RawQuery += q.Encode()
+	case "delete":
+		newReq, err := http.NewRequest(http.MethodDelete, url, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "Creating new HTTP DELETE request for custom API")
+		}
+		hReq = newReq
+	default:
+		return nil, fmt.Errorf("Error, invalid/empty HTTPMethod(%s) specified, should be POST|DELETE|GET", callOpts.HTTPMethod)
+	}
+	hReq = hReq.WithContext(ctx)
+	hReq.Header.Set("Content-Type", "application/json")
+	client.AddHdrsToReq(callOpts.Headers, hReq)
+
+	rsp, err := c.client.Do(hReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "Custom API RestClient")
+	}
+	defer rsp.Body.Close()
+
+	// checking whether the status code is a successful status code (2xx series)
+	if rsp.StatusCode < 200 || rsp.StatusCode > 299 {
+		body, err := io.ReadAll(rsp.Body)
+		return nil, fmt.Errorf("Unsuccessful custom API %s on %s, status code %d, body %s, err %s", callOpts.HTTPMethod, callOpts.URI, rsp.StatusCode, body, err)
+	}
+
+	body, err := io.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "Custom API RestClient read body")
+	}
+	pbRsp := &DynamicDefaultValuesResp{}
+	if err := codec.FromJSON(string(body), pbRsp); err != nil {
+		return nil, errors.Wrapf(err, "JSON Response %s is not of type *ves.io.schema.namespace.DynamicDefaultValuesResp", body)
 	}
 	if callOpts.OutCallResponse != nil {
 		callOpts.OutCallResponse.ProtoMsg = pbRsp
@@ -1767,6 +1858,7 @@ func NewNamespaceCustomAPIRestClient(baseURL string, hc http.Client) server.Cust
 	rpcFns["GetActiveAlertPolicies"] = ccl.doRPCGetActiveAlertPolicies
 	rpcFns["GetActiveNetworkPolicies"] = ccl.doRPCGetActiveNetworkPolicies
 	rpcFns["GetActiveServicePolicies"] = ccl.doRPCGetActiveServicePolicies
+	rpcFns["GetDynamicDefaultValues"] = ccl.doRPCGetDynamicDefaultValues
 	rpcFns["GetFastACLsForInternetVIPs"] = ccl.doRPCGetFastACLsForInternetVIPs
 	rpcFns["NetworkingInventory"] = ccl.doRPCNetworkingInventory
 	rpcFns["OIDCOAuthDiscovery"] = ccl.doRPCOIDCOAuthDiscovery
@@ -1819,6 +1911,10 @@ func (c *namespaceCustomAPIInprocClient) GetActiveNetworkPolicies(ctx context.Co
 func (c *namespaceCustomAPIInprocClient) GetActiveServicePolicies(ctx context.Context, in *GetActiveServicePoliciesRequest, opts ...grpc.CallOption) (*GetActiveServicePoliciesResponse, error) {
 	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.namespace.NamespaceCustomAPI.GetActiveServicePolicies")
 	return c.NamespaceCustomAPIServer.GetActiveServicePolicies(ctx, in)
+}
+func (c *namespaceCustomAPIInprocClient) GetDynamicDefaultValues(ctx context.Context, in *GetDynamicDefaultValuesReq, opts ...grpc.CallOption) (*DynamicDefaultValuesResp, error) {
+	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.namespace.NamespaceCustomAPI.GetDynamicDefaultValues")
+	return c.NamespaceCustomAPIServer.GetDynamicDefaultValues(ctx, in)
 }
 func (c *namespaceCustomAPIInprocClient) GetFastACLsForInternetVIPs(ctx context.Context, in *GetFastACLsForInternetVIPsRequest, opts ...grpc.CallOption) (*GetFastACLsForInternetVIPsResponse, error) {
 	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.namespace.NamespaceCustomAPI.GetFastACLsForInternetVIPs")
@@ -2263,6 +2359,54 @@ func (s *namespaceCustomAPISrv) GetActiveServicePolicies(ctx context.Context, in
 		return rsp, server.GRPCStatusFromError(server.MaybePublicRestError(ctx, err)).Err()
 	}
 	bodyFields = append(bodyFields, svcfw.GenAuditRspBodyFields(ctx, s.svc, "ves.io.schema.namespace.GetActiveServicePoliciesResponse", rsp)...)
+
+	return rsp, nil
+}
+func (s *namespaceCustomAPISrv) GetDynamicDefaultValues(ctx context.Context, in *GetDynamicDefaultValuesReq) (*DynamicDefaultValuesResp, error) {
+	ah := s.svc.GetAPIHandler("ves.io.schema.namespace.NamespaceCustomAPI")
+	cah, ok := ah.(NamespaceCustomAPIServer)
+	if !ok {
+		return nil, fmt.Errorf("ah %v is not of type *NamespaceCustomAPIServer", ah)
+	}
+
+	var (
+		rsp *DynamicDefaultValuesResp
+		err error
+	)
+
+	bodyFields := svcfw.GenAuditReqBodyFields(ctx, s.svc, "ves.io.schema.namespace.GetDynamicDefaultValuesReq", in)
+	defer func() {
+		if len(bodyFields) > 0 {
+			server.ExtendAPIAudit(ctx, svcfw.PublicAPIBodyLog.Uid, bodyFields)
+		}
+		userMsg := "The 'NamespaceCustomAPI.GetDynamicDefaultValues' operation on 'namespace'"
+		if err == nil {
+			userMsg += " was successfully performed."
+		} else {
+			userMsg += " failed to be performed."
+		}
+		server.AddUserMsgToAPIAudit(ctx, userMsg)
+	}()
+
+	if err := svcfw.FillOneofDefaultChoice(ctx, s.svc, in); err != nil {
+		err = server.MaybePublicRestError(ctx, errors.Wrapf(err, "Filling oneof default choice"))
+		return nil, server.GRPCStatusFromError(err).Err()
+	}
+
+	if s.svc.Config().EnableAPIValidation {
+		if rvFn := s.svc.GetRPCValidator("ves.io.schema.namespace.NamespaceCustomAPI.GetDynamicDefaultValues"); rvFn != nil {
+			if verr := rvFn(ctx, in); verr != nil {
+				err = server.MaybePublicRestError(ctx, errors.Wrapf(verr, "Validating Request"))
+				return nil, server.GRPCStatusFromError(err).Err()
+			}
+		}
+	}
+
+	rsp, err = cah.GetDynamicDefaultValues(ctx, in)
+	if err != nil {
+		return rsp, server.GRPCStatusFromError(server.MaybePublicRestError(ctx, err)).Err()
+	}
+	bodyFields = append(bodyFields, svcfw.GenAuditRspBodyFields(ctx, s.svc, "ves.io.schema.namespace.DynamicDefaultValuesResp", rsp)...)
 
 	return rsp, nil
 }
@@ -3977,6 +4121,104 @@ var NamespaceCustomAPISwaggerJSON string = `{
             "x-ves-proto-service": "ves.io.schema.namespace.NamespaceCustomAPI",
             "x-ves-proto-service-type": "CUSTOM_PUBLIC"
         },
+        "/public/namespaces/{namespace}/dynamic-default-values": {
+            "post": {
+                "summary": "Get Dynamic Default Values",
+                "description": "GetDynamicDefaultValues returns dynamic default values for fields of a given object type.\nThe request body TypeUrl identifies the object type; the handler uses the unmarshalled body\nto determine context-appropriate defaults.\nThe response is a key-value map where each key is a field name and the value is its default,\nwhich may be a string, object reference, number, boolean, or any other type — as determined by the handler.\nAn empty response means no defaults are available for the given context.",
+                "operationId": "ves.io.schema.namespace.NamespaceCustomAPI.GetDynamicDefaultValues",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "$ref": "#/definitions/namespaceDynamicDefaultValuesResp"
+                        }
+                    },
+                    "401": {
+                        "description": "Returned when operation is not authorized",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when there is no permission to access resource",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Returned when resource is not found",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Returned when operation on resource is conflicting with current value",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "429": {
+                        "description": "Returned when operation has been rejected as it is happening too frequently",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Returned when server encountered an error in processing API",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "503": {
+                        "description": "Returned when service is unavailable temporarily",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "504": {
+                        "description": "Returned when server timed out processing request",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "description": "namespace\n\nx-example: \"system\"\nNamespace in which the defaults are scoped.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Namespace"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/namespaceGetDynamicDefaultValuesReq"
+                        }
+                    }
+                ],
+                "tags": [
+                    "NamespaceCustomAPI"
+                ],
+                "externalDocs": {
+                    "description": "Examples of this operation",
+                    "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-namespace-namespacecustomapi-getdynamicdefaultvalues"
+                },
+                "x-ves-proto-rpc": "ves.io.schema.namespace.NamespaceCustomAPI.GetDynamicDefaultValues"
+            },
+            "x-displayname": "NamespaceCustomAPI",
+            "x-ves-proto-service": "ves.io.schema.namespace.NamespaceCustomAPI",
+            "x-ves-proto-service-type": "CUSTOM_PUBLIC"
+        },
         "/public/namespaces/{namespace}/fast_acls_for_internet_vips": {
             "get": {
                 "summary": "Get FastACLs For Internet VIPs",
@@ -4495,11 +4737,9 @@ var NamespaceCustomAPISwaggerJSON string = `{
             "description": "List of all supported Violation Types\n\nVIOL_NONE\nVIOL_FILETYPE\nVIOL_METHOD\nVIOL_MANDATORY_HEADER\nVIOL_HTTP_RESPONSE_STATUS\nVIOL_REQUEST_MAX_LENGTH\nVIOL_FILE_UPLOAD\nVIOL_FILE_UPLOAD_IN_BODY\nVIOL_XML_MALFORMED\nVIOL_JSON_MALFORMED\nVIOL_ASM_COOKIE_MODIFIED\nVIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS\nVIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE\nVIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT\nVIOL_HTTP_PROTOCOL_NULL_IN_REQUEST\nVIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION\nVIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START\nVIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST\nVIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING\nVIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS\nVIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER\nVIOL_EVASION_DIRECTORY_TRAVERSALS\nVIOL_MALFORMED_REQUEST\nVIOL_EVASION_MULTIPLE_DECODING\nVIOL_DATA_GUARD\nVIOL_EVASION_APACHE_WHITESPACE\nVIOL_COOKIE_MODIFIED\nVIOL_EVASION_IIS_UNICODE_CODEPOINTS\nVIOL_EVASION_IIS_BACKSLASHES\nVIOL_EVASION_PERCENT_U_DECODING\nVIOL_EVASION_BARE_BYTE_DECODING\nVIOL_EVASION_BAD_UNESCAPE\nVIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING\nVIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST\nVIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS\nVIOL_ENCODING\nVIOL_COOKIE_MALFORMED\nVIOL_GRAPHQL_FORMAT\nVIOL_GRAPHQL_MALFORMED\nVIOL_GRAPHQL_INTROSPECTION_QUERY",
             "title": "App Firewall Violation Type",
             "enum": [
-                "VIOL_NONE",
                 "VIOL_FILETYPE",
                 "VIOL_METHOD",
                 "VIOL_MANDATORY_HEADER",
-                "VIOL_HTTP_RESPONSE_STATUS",
                 "VIOL_REQUEST_MAX_LENGTH",
                 "VIOL_FILE_UPLOAD",
                 "VIOL_FILE_UPLOAD_IN_BODY",
@@ -4519,7 +4759,6 @@ var NamespaceCustomAPISwaggerJSON string = `{
                 "VIOL_EVASION_DIRECTORY_TRAVERSALS",
                 "VIOL_MALFORMED_REQUEST",
                 "VIOL_EVASION_MULTIPLE_DECODING",
-                "VIOL_DATA_GUARD",
                 "VIOL_EVASION_APACHE_WHITESPACE",
                 "VIOL_COOKIE_MODIFIED",
                 "VIOL_EVASION_IIS_UNICODE_CODEPOINTS",
@@ -4531,10 +4770,7 @@ var NamespaceCustomAPISwaggerJSON string = `{
                 "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST",
                 "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS",
                 "VIOL_ENCODING",
-                "VIOL_COOKIE_MALFORMED",
-                "VIOL_GRAPHQL_FORMAT",
-                "VIOL_GRAPHQL_MALFORMED",
-                "VIOL_GRAPHQL_INTROSPECTION_QUERY"
+                "VIOL_COOKIE_MALFORMED"
             ],
             "default": "VIOL_NONE",
             "x-displayname": "App Firewall Violation Type",
@@ -5039,6 +5275,21 @@ var NamespaceCustomAPISwaggerJSON string = `{
                 }
             }
         },
+        "namespaceDynamicDefaultValuesResp": {
+            "type": "object",
+            "description": "Response body of GetDynamicDefaultValues request.\nThe handler is responsible for the structure of the response body.",
+            "title": "DynamicDefaultValuesResp",
+            "x-displayname": "Response for GetDynamicDefaultValues",
+            "x-ves-proto-message": "ves.io.schema.namespace.DynamicDefaultValuesResp",
+            "properties": {
+                "response_body": {
+                    "description": " Generic response body whose structure is determined by the handler.",
+                    "title": "response_body",
+                    "$ref": "#/definitions/protobufAny",
+                    "x-displayname": "Response Body"
+                }
+            }
+        },
         "namespaceGetActiveAlertPoliciesResponse": {
             "type": "object",
             "description": "GetActiveAlertPoliciesResponse is the shape of the response for GetActiveAlertPolicies.",
@@ -5099,6 +5350,28 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "$ref": "#/definitions/schemaviewsObjectRefType"
                     },
                     "x-displayname": "Service Policies"
+                }
+            }
+        },
+        "namespaceGetDynamicDefaultValuesReq": {
+            "type": "object",
+            "description": "Request body of GetDynamicDefaultValues request.\nThe caller provides the object type and its current Create/Replace request body so that the handler\ncan use object-specific context (e.g. vendor_type) to determine appropriate defaults.",
+            "title": "GetDynamicDefaultValuesReq",
+            "x-displayname": "Request for GetDynamicDefaultValues",
+            "x-ves-proto-message": "ves.io.schema.namespace.GetDynamicDefaultValuesReq",
+            "properties": {
+                "namespace": {
+                    "type": "string",
+                    "description": " Namespace in which the defaults are scoped.\n\nExample: - \"system\"-",
+                    "title": "namespace",
+                    "x-displayname": "Namespace",
+                    "x-ves-example": "system"
+                },
+                "request_body": {
+                    "description": " Body of the Create/Replace request (as google.protobuf.Any) whose TypeUrl identifies the object type\n and whose value provides object-specific context for selecting appropriate defaults.",
+                    "title": "request_body",
+                    "$ref": "#/definitions/protobufAny",
+                    "x-displayname": "Request Body"
                 }
             }
         },
@@ -6739,6 +7012,13 @@ var NamespaceCustomAPISwaggerJSON string = `{
             "x-displayname": "Virtual Server Inventory Results",
             "x-ves-proto-message": "ves.io.schema.namespace.VirtualServerInventoryResultType",
             "properties": {
+                "access_policy_count": {
+                    "type": "integer",
+                    "description": " Number of virtual servers with access policy configured",
+                    "title": "Access Policy Count",
+                    "format": "int64",
+                    "x-displayname": "Access Policy Count"
+                },
                 "http_count": {
                     "type": "integer",
                     "description": " Number of HTTP or HTTPS virtual servers configured",

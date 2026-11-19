@@ -32,6 +32,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -87,8 +88,8 @@ func (r *ResourceF5XCPolicer) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCPolicer) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a policer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policer) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a policer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policer) etc. can be fetched",
+		MarkdownDescription: "* Policer objects enforces traffic rate limits<br>* network_policy_rule and fast_acl_rule can refer to a policer. Packets<br>matching those rules will be subjected to the traffic contract specified in<br>the policer",
+		Description:         "Policer objects enforces traffic rate limits network_policy_rule and fast_acl_rule can refer to a policer. Packets matching those rules will be subjected to the traffic contract specified in the policer",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -262,9 +263,17 @@ func (r *ResourceF5XCPolicer) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCPolicer) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCPolicerModel
 
 	// Read Terraform plan data into the model
@@ -404,7 +413,7 @@ func (r *ResourceF5XCPolicer) Create(ctx context.Context, request resource.Creat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -427,7 +436,7 @@ func (r *ResourceF5XCPolicer) Create(ctx context.Context, request resource.Creat
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_policer.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "policer", err),
 		)
 		return
 	}
@@ -634,14 +643,10 @@ func (r *ResourceF5XCPolicer) Read(ctx context.Context, request resource.ReadReq
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "policer", err),
 		)
 		return
 	}
@@ -814,6 +819,12 @@ func (r *ResourceF5XCPolicer) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCPolicer) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCPolicerModel
@@ -973,7 +984,7 @@ func (r *ResourceF5XCPolicer) Update(ctx context.Context, request resource.Updat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -981,24 +992,20 @@ func (r *ResourceF5XCPolicer) Update(ctx context.Context, request resource.Updat
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_policer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_policer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "policer", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "policer", err),
 		)
 		return
 	}
@@ -1233,7 +1240,7 @@ func (r *ResourceF5XCPolicer) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "policer", err),
 		)
 		return
 	}

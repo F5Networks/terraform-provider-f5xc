@@ -34,6 +34,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -190,8 +191,8 @@ func (r *ResourceF5XCNetworkPolicyRule) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_policy_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_rule) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_policy_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_policy_rule) etc. can be fetched",
+		MarkdownDescription: "Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule.<br>Local Endpoint is picked from the network policy to which this rule has been attached<br><br>Action on a match can be<br>* Allow<br>* Deny<br><br>Match Criteria<br>* Ports specify the port range to be matched, if not set it matches to any<br>* Protocol specify the protocol to be matched<br>Supported values are<br>* tcp<br>* udp<br>* icmp<br>* Remote Endpoint<br>* prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint.<br>* prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.<br>* ip_prefix_set: Reference to list of IP configured prefixes. However its different from 'prefix' because it is a reference to ip-prefix-set object, which can be re-used across objects<br>* Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector<br><br>Label Preference<br>An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,<br>* Labels from the interface for the address<br>* Labels from POD or Service for the address<br>* Labels from Virtual Network for the address<br>* Labels from Namespace for the address<br><br>Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached<br><br>Prefix selector labels (BNF grammar):<br><selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax><br><requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ]<br><set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set><br><inclusion-exclusion>     ::= <inclusion> | <exclusion><br><exclusion>               ::= 'notin'<br><inclusion>               ::= 'in'<br><value-set>               ::= '(' <values> ')'<br><values>                  ::= VALUE | VALUE ',' <values><br><exact-match-restriction> ::= ['='|'=='|'!='] VALUE<br><br>KEY is a sequence of one or more characters. Max length is 63 characters.<br>VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\\.])'. Max length is 63 characters.<br>Delimiter is white space: (' ', '\\t')<br><br>Note:<br>(1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the<br>VALUEs in its requirement<br>(2) Exclusion - ' notin ' - denotes that the KEY is not equal to any<br>of the VALUEs in its requirement or does not exist<br>(3) The empty string is a valid VALUE<br>(4) A requirement with just a KEY - as in 'y' above - denotes that<br>the KEY exists and can be any VALUE.<br>(5) A requirement with just !KEY requires that the KEY not exist.",
+		Description:         "Network Policy Rule is applied to given remote endpoints to and from a given local endpoint and is a terminal rule. Local Endpoint is picked from the network policy to which this rule has been attached Action on a match can be Allow Deny Match Criteria Ports specify the port range to be matched, if not set it matches to any Protocol specify the protocol to be matched Supported values are tcp udp icmp Remote Endpoint prefix : Prefix specifies a list of IP Prefixes. A prefix is specified as IP Subnet and Prefix length and array of prefixes can represent prefix in local endpoint. prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression. ip_prefix_set: Reference to list of IP configured prefixes. However its different from 'prefix' because it is a reference to ip-prefix-set object, which can be re-used across objects Label Matcher specifies the label list which will be matched for identifying remote endpoint of type prefix_selector Label Preference An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference, Labels from the interface for the address Labels from POD or Service for the address Labels from Virtual Network for the address Labels from Namespace for the address Role of rule as egress or ingress (i.e. to or from) is also determined from the policy to which this rule has been attached Prefix selector labels (BNF grammar): <selector-syntax>         ::= <requirement> | <requirement> ',' <selector-syntax> <requirement>             ::= [!] KEY [ <set-based-restriction> | <exact-match-restriction> ] <set-based-restriction>   ::= '' | <inclusion-exclusion> <value-set> <inclusion-exclusion>     ::= <inclusion> | <exclusion> <exclusion>               ::= 'notin' <inclusion>               ::= 'in' <value-set>               ::= '(' <values> ')' <values>                  ::= VALUE | VALUE ',' <values> <exact-match-restriction> ::= ['='|'=='|'!='] VALUE KEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters '([A-Za-z0-9_-\\.])'. Max length is 63 characters. Delimiter is white space: (' ', '\\t') Note: (1) Inclusion - ' in ' - denotes that the KEY exists and is equal to any of the VALUEs in its requirement (2) Exclusion - ' notin ' - denotes that the KEY is not equal to any of the VALUEs in its requirement or does not exist (3) The empty string is a valid VALUE (4) A requirement with just a KEY - as in 'y' above - denotes that the KEY exists and can be any VALUE. (5) A requirement with just !KEY requires that the KEY not exist.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -331,7 +332,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 			},
 			"protocol": schema.StringAttribute{
 				Description:         "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-				MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`",
+				MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -342,7 +343,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 			},
 			"remote_endpoint_choice": schema.SingleNestedAttribute{
 				Description:         "Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint",
-				MarkdownDescription: "Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint",
+				MarkdownDescription: "Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint<br>Exactly one of `ip_prefix_set`, `prefix`, or `prefix_selector` must be specified when `remote_endpoint_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -356,7 +357,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"ip_prefix_set": schema.SingleNestedAttribute{
 						Description:         "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-						MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+						MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `prefix` and `prefix_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -393,7 +394,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -403,7 +404,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 					},
 					"prefix": schema.SingleNestedAttribute{
 						Description:         "prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination",
-						MarkdownDescription: "prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination",
+						MarkdownDescription: "prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination<br>Conflicts with `ip_prefix_set` and `prefix_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -418,7 +419,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -442,7 +443,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 					},
 					"prefix_selector": schema.SingleNestedAttribute{
 						Description:         "prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple",
-						MarkdownDescription: "prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple",
+						MarkdownDescription: "prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple<br>Conflicts with `ip_prefix_set` and `prefix`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -525,9 +526,17 @@ func (r *ResourceF5XCNetworkPolicyRule) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCNetworkPolicyRuleModel
 
 	// Read Terraform plan data into the model
@@ -841,7 +850,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -864,7 +873,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_network_policy_rule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "network_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "network_policy_rule", err),
 		)
 		return
 	}
@@ -1077,7 +1086,12 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 			}
 			data.Ports = listValue
 		} else {
-			data.Ports = types.ListNull(types.StringType)
+			if !data.Ports.IsNull() && !data.Ports.IsUnknown() && len(data.Ports.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.Ports = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.Ports = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -1191,29 +1205,31 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("remote_endpoint_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("remote_endpoint_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -1340,14 +1356,10 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "network_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "network_policy_rule", err),
 		)
 		return
 	}
@@ -1560,7 +1572,12 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 			}
 			data.Ports = listValue
 		} else {
-			data.Ports = types.ListNull(types.StringType)
+			if !data.Ports.IsNull() && !data.Ports.IsUnknown() && len(data.Ports.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.Ports = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.Ports = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -1674,29 +1691,31 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("remote_endpoint_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("remote_endpoint_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -1789,6 +1808,12 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCNetworkPolicyRuleModel
@@ -2122,7 +2147,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2130,24 +2155,20 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_network_policy_rule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_network_policy_rule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "network_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "network_policy_rule", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "network_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "network_policy_rule", err),
 		)
 		return
 	}
@@ -2359,7 +2380,12 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 			}
 			data.Ports = listValue
 		} else {
-			data.Ports = types.ListNull(types.StringType)
+			if !data.Ports.IsNull() && !data.Ports.IsUnknown() && len(data.Ports.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.Ports = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.Ports = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -2473,29 +2499,31 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("remote_endpoint_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("remote_endpoint_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -2651,7 +2679,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "network_policy_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "network_policy_rule", err),
 		)
 		return
 	}

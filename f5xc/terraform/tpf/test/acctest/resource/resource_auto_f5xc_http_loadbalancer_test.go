@@ -15,8 +15,16 @@
 package resource
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/base64"
+	"encoding/pem"
 	"fmt"
+	"math/big"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -24,16 +32,36 @@ import (
 	httpLoadbalancerSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/http_loadbalancer"
 )
 
+// getTestHttpLbTenant returns the tenant value for HTTP load balancer acceptance tests.
+//
+// Why: Object references inside set attributes (such as origin pool references in routes)
+// require an explicit tenant attribute to prevent Terraform set element hash drift
+// between configuration and backend-enriched state.
+//
+// How: Delegates to acctest.DefaultTenant(), which resolves the tenant from F5XC_TEST_TENANT,
+// TF_ACC_F5XC_TENANT, or F5XC_API_URL, falling back to "terraforminfraex-bqyukwxm".
+//
+// Returns:
+//   - string: The tenant identifier to use in acceptance test HCL configurations.
+//
+// Example:
+//
+//	tenant := getTestHttpLbTenant()
+//	// tenant == "terraforminfraex-bqyukwxm" when no tenant override is set
+func getTestHttpLbTenant() string {
+	return acctest.DefaultTenant()
+}
+
 // Removing t.Parallel() from the tests below because running http_loadbalancer acceptance tests in parallel
 // causes F5 XC backend STM transaction collisions when multiple loadbalancers/pools are created concurrently.
 // By removing t.Parallel(), tests execute sequentially and avoid backend race conditions.
 
 func TestAccResourceAutoF5XCHttpLoadbalancer_basic(t *testing.T) {
 	namespace := acctest.DefaultNamespace()
-	random := acctest.RandString(t, 8)
+	random := testAccRunSuffix(t)
 
-	lbName := "tf-acc-http-lb-" + random
-	opName := "tf-acc-http-op-" + random
+	lbName := "example-http-lb-" + random
+	opName := "example-http-op-" + random
 	domain := fmt.Sprintf("%s.example.com", lbName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -45,23 +73,23 @@ func TestAccResourceAutoF5XCHttpLoadbalancer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_basic(lbName, opName, namespace, domain),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCHttpLoadbalancer_withHashPolicyTransition(t *testing.T) {
+func TestAccResourceAutoF5XCHttpLoadbalancer_withHashPolicy(t *testing.T) {
 	namespace := acctest.DefaultNamespace()
-	random := acctest.RandString(t, 8)
+	random := testAccRunSuffix(t)
 
-	lbName := "tf-acc-http-lb-" + random
-	opName := "tf-acc-http-op-" + random
+	lbName := "example-http-lb-" + random
+	opName := "example-http-op-" + random
 	domain := fmt.Sprintf("%s.example.com", lbName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -73,73 +101,222 @@ func TestAccResourceAutoF5XCHttpLoadbalancer_withHashPolicyTransition(t *testing
 				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withHashPolicy(lbName, opName, namespace, domain, "round_robin"),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withHashPolicy(lbName, opName, namespace, domain, "least_active"),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCHttpLoadbalancer_withAdvertiseTransition(t *testing.T) {
+func TestAccResourceAutoF5XCHttpLoadbalancer_withAdvertise(t *testing.T) {
 	namespace := acctest.DefaultNamespace()
-	random := acctest.RandString(t, 8)
+	random := testAccRunSuffix(t)
 
-	lbName := "tf-acc-http-lb-" + random
-	opName := "tf-acc-http-op-" + random
+	lbName := "example-http-lb-" + random
+	opName := "example-http-op-" + random
 	domain := fmt.Sprintf("%s.example.com", lbName)
+	resourceName := "f5xc_http_loadbalancer.example"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
 		Steps: []resource.TestStep{
+			// -----------------------------------------------------------------
+			// Phase 1: Initial Create unbeworben (UC-5 Baseline / Null Status)
+			// -----------------------------------------------------------------
 			{
-				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertise(lbName, opName, namespace, domain, "do_not_advertise"),
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(
+					lbName, opName, namespace, domain, "do_not_advertise", "initial unadvertised",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", lbName),
+					resource.TestCheckNoResourceAttr(resourceName, "host_name"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         resourceName,
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID(resourceName),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
+			// -----------------------------------------------------------------
+			// Phase 2: Aktivierung -> Public VIP (UC-2 Dependency Changed)
+			// Statusfeld-Planmodifier setzt Plan auf Unknown -> Backend weist Hostname & VIP zu.
+			// -----------------------------------------------------------------
 			{
-				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertise(lbName, opName, namespace, domain, "advertise_on_public_default_vip"),
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(
+					lbName, opName, namespace, domain, "advertise_on_public_default_vip", "activated advertise",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "activated advertise"),
+					resource.TestCheckResourceAttrSet(resourceName, "host_name"),
+					resource.TestCheckResourceAttrSet(resourceName, "dns_info.0.ip_address"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         resourceName,
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID(resourceName),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			// -----------------------------------------------------------------
+			// Phase 3: State-Preservation bei unverändertem VIP (UC-3 Unchanged Dependency)
+			// In-place Update eines anderen Attributs (description); host_name & dns_info
+			// bleiben stabil erhalten und erzeugen keinen Plan-Drift.
+			// -----------------------------------------------------------------
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(
+					lbName, opName, namespace, domain, "advertise_on_public_default_vip", "updated description with vip unchanged",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "updated description with vip unchanged"),
+					resource.TestCheckResourceAttrSet(resourceName, "host_name"),
+					resource.TestCheckResourceAttrSet(resourceName, "dns_info.0.ip_address"),
+				),
+			},
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID(resourceName),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			// -----------------------------------------------------------------
+			// Phase 4: De-Advertising zurück zu do_not_advertise (UC-4 De-Advertise Transition)
+			// Planmodifier erkennt Dependency-Änderung und setzt Plan auf Unknown -> Backend
+			// leert host_name und dns_info ohne "inconsistent result after apply".
+			// -----------------------------------------------------------------
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(
+					lbName, opName, namespace, domain, "do_not_advertise", "de-advertised",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "de-advertised"),
+					resource.TestCheckNoResourceAttr(resourceName, "host_name"),
+				),
+			},
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID(resourceName),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCHttpLoadbalancer_withChallengeTransition(t *testing.T) {
+// TestAccResourceAutoF5XCHttpLoadbalancer_advertisePublicInitial verifies direct creation of an HTTP
+// load balancer with a public VIP (UC-1: Asynchronous Initial Allocation).
+//
+// Why: In F5 XC, allocating a public VIP and assigning the canonical host_name (<tenant>.<namespace>.ac.vh.ves.io)
+// and dns_info is an asynchronous backend controller process. The synchronous POST response to CreateObject
+// typically returns before the VIP reconciler completes, leaving gc_spec.host_name empty ("").
+// The statusfieldmodifier ensures that during initial creation (State.Raw.IsNull()), the plan value remains
+// Unknown, avoiding "Provider produced inconsistent result after apply" errors when the initial state is null.
+//
+// How: The test uses a multi-phase lifecycle:
+//   - Phase 1 (Create): Provisions the resource directly with advertise_on_public_default_vip.
+//     Only synchronous baseline attributes (name, description) are asserted. Status fields like host_name
+//     are intentionally not asserted here because the backend has not yet completed VIP allocation.
+//   - Phase 2 (Async Allocation & State Refresh): Allows backend reconciliation time via PreConfig wait,
+//     then triggers a refresh/read step where Terraform imports the controller-assigned host_name and
+//     dns_info into state and asserts their presence.
+//   - Phase 3 (Import): Validates state consistency via ImportState.
+//
+// Parameters:
+//   - t: standard testing handle
+func TestAccResourceAutoF5XCHttpLoadbalancer_advertisePublicInitial(t *testing.T) {
 	namespace := acctest.DefaultNamespace()
-	random := acctest.RandString(t, 8)
+	random := testAccRunSuffix(t)
 
-	lbName := "tf-acc-http-lb-" + random
-	opName := "tf-acc-http-op-" + random
+	lbName := "example-http-lb-init-" + random
+	opName := "example-http-op-init-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+	resourceName := "f5xc_http_loadbalancer.example"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// -----------------------------------------------------------------
+			// Phase 1: Direktes Erstellen mit Public VIP (UC-1 Asynchrone Initial-Allokation)
+			// State.Raw.IsNull() -> Plan bleibt Unknown -> Create gelingt ohne Drift/Error.
+			// HINWEIS: host_name und dns_info werden in Step 1 bewusst NICHT geprüft, da das
+			// F5 XC Backend die VIP asynchron zuweist und der initiale POST-Response noch null liefert.
+			// -----------------------------------------------------------------
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(
+					lbName, opName, namespace, domain, "advertise_on_public_default_vip", "initially public",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", lbName),
+					resource.TestCheckResourceAttr(resourceName, "description", "initially public"),
+				),
+			},
+			// -----------------------------------------------------------------
+			// Phase 2: Verifikation der asynchron zugewiesenen VIP-Attribute nach Refresh
+			// PreConfig wartet auf den Backend-Reconciler. Beim Start von Step 2 ruft Terraform
+			// Read() auf, übernimmt host_name & dns_info in den State und validiert sie.
+			// -----------------------------------------------------------------
+			{
+				PreConfig: func() {
+					// Gibt dem asynchronen F5 XC Controller Zeit zur VIP-Zuweisung
+					time.Sleep(5 * time.Second)
+				},
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(
+					lbName, opName, namespace, domain, "advertise_on_public_default_vip", "initially public verified",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "initially public verified"),
+					resource.TestCheckResourceAttrSet(resourceName, "host_name"),
+					resource.TestCheckResourceAttrSet(resourceName, "dns_info.0.ip_address"),
+				),
+			},
+			// -----------------------------------------------------------------
+			// Phase 3: ImportState-Verifikation
+			// -----------------------------------------------------------------
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID(resourceName),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_withChallenge(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-http-lb-" + random
+	opName := "example-http-op-" + random
 	domain := fmt.Sprintf("%s.example.com", lbName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -151,34 +328,34 @@ func TestAccResourceAutoF5XCHttpLoadbalancer_withChallengeTransition(t *testing.
 				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withChallenge(lbName, opName, namespace, domain, "no_challenge"),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withChallenge(lbName, opName, namespace, domain, "js_challenge"),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCHttpLoadbalancer_withHttpPortTransition(t *testing.T) {
+func TestAccResourceAutoF5XCHttpLoadbalancer_withHttpPort(t *testing.T) {
 	namespace := acctest.DefaultNamespace()
-	random := acctest.RandString(t, 8)
+	random := testAccRunSuffix(t)
 
-	lbName := "tf-acc-http-lb-" + random
-	opName := "tf-acc-http-op-" + random
+	lbName := "example-http-lb-" + random
+	opName := "example-http-op-" + random
 	domain := fmt.Sprintf("%s.example.com", lbName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -190,34 +367,34 @@ func TestAccResourceAutoF5XCHttpLoadbalancer_withHttpPortTransition(t *testing.T
 				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withHttpPort(lbName, opName, namespace, domain, 8080),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withHttpPort(lbName, opName, namespace, domain, 8880),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCHttpLoadbalancer_full(t *testing.T) {
+func TestAccResourceAutoF5XCHttpLoadbalancer_httpsAutoCert(t *testing.T) {
 	namespace := acctest.DefaultNamespace()
-	random := acctest.RandString(t, 8)
+	random := testAccRunSuffix(t)
 
-	lbName := "tf-acc-http-lb-" + random
-	opName := "tf-acc-http-op-" + random
+	lbName := "example-https-lb-" + random
+	opName := "example-https-op-" + random
 	domain := fmt.Sprintf("%s.example.com", lbName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -226,31 +403,399 @@ func TestAccResourceAutoF5XCHttpLoadbalancer_full(t *testing.T) {
 		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccResourceAutoF5XCHttpLoadbalancerConfig_full(lbName, opName, namespace, domain),
-				ExpectNonEmptyPlan: true,
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsAutoCert(lbName, opName, namespace, domain),
+				Check: resource.TestCheckResourceAttr(
+					"f5xc_http_loadbalancer.example",
+					"loadbalancer_type_choice.https_auto_cert.connection_idle_timeout",
+					"120000",
+				),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnoreAutoCert(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config:             testAccResourceAutoF5XCHttpLoadbalancerConfig_fullUpdated(lbName, opName, namespace, domain),
-				ExpectNonEmptyPlan: true,
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsAutoCertUpdated(lbName, opName, namespace, domain),
 			},
 			{
-				ResourceName:                         "f5xc_http_loadbalancer.test",
+				ResourceName:                         "f5xc_http_loadbalancer.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.test"),
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnoreAutoCert(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_httpsWithCertificateRef(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-https-lb-" + random
+	opName := "example-https-op-" + random
+	certName := "example-https-cert-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithCertRef(lbName, opName, certName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithCertRefUpdated(lbName, opName, certName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_httpsWithInlineCertificate(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-https-lb-" + random
+	opName := "example-https-op-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithInlineCert(lbName, opName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnoreInlineCert(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithInlineCertUpdated(lbName, opName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnoreInlineCert(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_httpsWithBlindfoldKey(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-https-lb-" + random
+	opName := "example-https-op-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithBlindfoldKey(t, lbName, opName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnoreInlineCert(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_withWafAndAppFirewall(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-waf-lb-" + random
+	opName := "example-waf-op-" + random
+	wafName := "example-waf-fw-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withAppFirewall(lbName, opName, wafName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withoutAppFirewall(lbName, opName, wafName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_stateHealingSetNestedSecrets(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+	lbName := "state-healing-http-lb-" + random
+	opName := "state-healing-origin-pool-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+	config := testAccHttpLoadbalancerSetNestedSecretConfig(t, lbName, opName, namespace, domain)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: config},
+			{RefreshState: true},
+			{Config: config, PlanOnly: true, ExpectNonEmptyPlan: false},
+		},
+	})
+}
+
+// TestAccResourceAutoF5XCHttpLoadbalancer_legacyRouteImportAndIgnoreChanges verifies that
+// routes is modeled as an ordered ListNestedAttribute supporting index-based lifecycle.ignore_changes
+// and that ReadStateFallback populates omitted legacy route_state_choice and simple_route.advanced_options
+// default choices on import and refresh without "object is required, but no definition was found" errors.
+//
+// Why: Routing rules in F5 XC HTTP load balancers are evaluated sequentially (first-match wins),
+// so routes must be a ListNestedAttribute (routes.0, routes.1) rather than a SetNestedAttribute.
+// Furthermore, legacy HTTP load balancer objects created before route_state was introduced (or where
+// the backend omits default OneOf choices inside simple_route.advanced_options on GET) return nil
+// for those required OneOf containers, requiring ReadStateFallback to synthesize the schema default
+// choice when prior state is empty (such as during terraform import).
+//
+// How: Runs a three-step acceptance test:
+//   - Step 1 (Create & Read Verification): Creates an HTTP load balancer with two ordered routes
+//     (/legacy-route-0 and /legacy-route-1), simple_route.advanced_options default choices, and
+//     lifecycle { ignore_changes = [routes[0]] }, verifying ordered list indices and nested attributes.
+//   - Step 2 (ImportState Verification): Imports the resource into an empty state and verifies that
+//     route_state_choice and advanced_options.*_choice are populated cleanly without drift.
+//   - Step 3 (Lifecycle IgnoreChanges Verification): Modifies routes[0] in the HCL configuration while
+//     lifecycle { ignore_changes = [routes[0]] } is active and asserts an empty plan (ExpectNonEmptyPlan: false).
+//
+// Parameters:
+//   - t: standard testing handle
+func TestAccResourceAutoF5XCHttpLoadbalancer_legacyRouteImportAndIgnoreChanges(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "legacy-routes-lb-" + random
+	opName := "legacy-routes-op-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+	resourceName := "f5xc_http_loadbalancer.example"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_legacyRouteImportAndIgnoreChanges(
+					lbName, opName, namespace, domain, "/legacy-route-0", "/legacy-route-1",
+				),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "routes.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.path.path_match_choice.prefix", "/legacy-route-0"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.route_state_choice.route_state_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.buffer_choice.common_buffering", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.cluster_retract_choice.do_not_retract_cluster", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.hash_policy_choice.common_hash_policy", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.mirroring_choice.disable_mirroring", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.retry_policy_choice.default_retry_policy", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.rewrite_choice.disable_prefix_rewrite", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.spdy_choice.disable_spdy", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.0.choice.simple_route.advanced_options.websocket_choice.disable_web_socket_config", "true"),
+					resource.TestCheckResourceAttr(resourceName, "routes.1.choice.simple_route.path.path_match_choice.prefix", "/legacy-route-1"),
+					resource.TestCheckResourceAttr(resourceName, "routes.1.route_state_choice.route_state_enabled", "true"),
+				),
+			},
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID(resourceName),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_legacyRouteImportAndIgnoreChanges(
+					lbName, opName, namespace, domain, "/legacy-route-0-ignored", "/legacy-route-1",
+				),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_withRoutesAndMoreOptions(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-routes-lb-" + random
+	opName := "example-routes-op-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withRoutesAndMoreOptions(lbName, opName, namespace, domain, "/api", true),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_withRoutesAndMoreOptions(lbName, opName, namespace, domain, "/v2/api", false),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_extensive(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-ext-lb-" + random
+	opName := "example-ext-op-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_extensive(lbName, opName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_extensiveUpdated(lbName, opName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCHttpLoadbalancer_full(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	random := testAccRunSuffix(t)
+
+	lbName := "example-http-lb-" + random
+	opName := "example-http-op-" + random
+	domain := fmt.Sprintf("%s.example.com", lbName)
+
+	acctest.VcrTestWithOptions(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_full(lbName, opName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCHttpLoadbalancerConfig_fullUpdated(lbName, opName, namespace, domain),
+			},
+			{
+				ResourceName:                         "f5xc_http_loadbalancer.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              testAccHttpLoadbalancerImportStateVerifyIgnore(),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_http_loadbalancer.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCHttpLoadbalancerConfig_fullUpdated(lbName, opName, "default", domain),
+		},
+	)
 }
 
 func testAccCheckHttpLoadbalancerDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -261,9 +806,74 @@ func testAccHttpLoadbalancerImportStateVerifyIgnore() []string {
 	return []string{
 		"labels.%",
 		"labels.ves.io/config-propagation-destination",
+		"labels.ves.io/app_type",
 		"host_name",
 		"dns_info",
 	}
+}
+
+func testAccHttpLoadbalancerImportStateVerifyIgnoreAutoCert() []string {
+	return []string{
+		"labels.%",
+		"labels.ves.io/config-propagation-destination",
+		"labels.ves.io/app_type",
+		"host_name",
+		"dns_info",
+		"auto_cert_info",
+		"cert_state",
+	}
+}
+
+func testAccHttpLoadbalancerImportStateVerifyIgnoreInlineCert() []string {
+	return []string{
+		"labels.%",
+		"labels.ves.io/config-propagation-destination",
+		"labels.ves.io/app_type",
+		"host_name",
+		"dns_info",
+		"loadbalancer_type_choice.https.tls_certificates_choice.tls_parameters.tls_certificates.0.private_key",
+	}
+}
+
+func testAccHTTPLoadbalancerCertificateB64(domain string) (string, string) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		panic(fmt.Sprintf("failed to generate HTTP load balancer acceptance private key: %v", err))
+	}
+
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
+	if err != nil {
+		panic(fmt.Sprintf("failed to generate HTTP load balancer acceptance certificate serial: %v", err))
+	}
+
+	now := time.Now().UTC()
+	template := &x509.Certificate{
+		SerialNumber: serialNumber,
+		Subject: pkix.Name{
+			CommonName: domain,
+		},
+		NotBefore:             now.Add(-time.Hour),
+		NotAfter:              now.AddDate(10, 0, 0),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		DNSNames:              []string{domain},
+	}
+
+	certificateDER, err := x509.CreateCertificate(rand.Reader, template, template, &privateKey.PublicKey, privateKey)
+	if err != nil {
+		panic(fmt.Sprintf("failed to generate HTTP load balancer acceptance certificate: %v", err))
+	}
+
+	certificatePEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certificateDER})
+	privateKeyDER, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		panic(fmt.Sprintf("failed to marshal HTTP load balancer acceptance private key: %v", err))
+	}
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: privateKeyDER})
+
+	return base64.StdEncoding.EncodeToString(certificatePEM), base64.StdEncoding.EncodeToString(privateKeyPEM)
 }
 
 func testAccResourceAutoF5XCHttpLoadbalancerConfig_basic(lbName, opName, namespace, domain string) string {
@@ -271,7 +881,19 @@ func testAccResourceAutoF5XCHttpLoadbalancerConfig_basic(lbName, opName, namespa
 		"do_not_advertise = true",
 		"round_robin = true",
 		"no_challenge = true",
-		8080,
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
 		"",
 		"",
 	)
@@ -286,23 +908,76 @@ func testAccResourceAutoF5XCHttpLoadbalancerConfig_withHashPolicy(lbName, opName
 		"do_not_advertise = true",
 		hashBlock,
 		"no_challenge = true",
-		8080,
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
 		"",
 		"",
 	)
 }
 
 func testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertise(lbName, opName, namespace, domain, advertiseChoice string) string {
+	return testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(lbName, opName, namespace, domain, advertiseChoice, "")
+}
+
+// testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle generates Terraform configuration
+// for HTTP load balancer acceptance tests covering advertising lifecycle transitions and state preservation.
+//
+// Why: Enables testing all statusfieldmodifier lifecycle use cases (initial creation, activation,
+// in-place updates without plan drift, and de-advertising) by supporting custom description strings.
+//
+// How: Dispatches advertiseChoice into the appropriate advertise_choice HCL block, formats the optional
+// description line, and invokes testAccResourceAutoF5XCHttpLoadbalancerConfigBase.
+//
+// Parameters:
+//   - lbName: Load balancer resource name.
+//   - opName: Origin pool resource name.
+//   - namespace: Tenant namespace.
+//   - domain: Fully-qualified domain name.
+//   - advertiseChoice: Advertising choice ("do_not_advertise" or "advertise_on_public_default_vip").
+//   - description: Custom description text (empty string omits description).
+//
+// Returns:
+//   - string: Formatted HCL configuration string.
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_withAdvertiseLifecycle(
+	lbName, opName, namespace, domain, advertiseChoice, description string,
+) string {
 	advertiseBlock := "do_not_advertise = true"
 	if advertiseChoice == "advertise_on_public_default_vip" {
 		advertiseBlock = "advertise_on_public_default_vip = true"
+	}
+	descLine := ""
+	if description != "" {
+		descLine = fmt.Sprintf("description = %q", description)
 	}
 	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
 		advertiseBlock,
 		"round_robin = true",
 		"no_challenge = true",
-		8080,
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
 		"",
+		"",
+		descLine,
 		"",
 	)
 }
@@ -319,7 +994,19 @@ func testAccResourceAutoF5XCHttpLoadbalancerConfig_withChallenge(lbName, opName,
 		"do_not_advertise = true",
 		"round_robin = true",
 		challengeBlock,
-		8080,
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
 		"",
 		"",
 	)
@@ -330,10 +1017,989 @@ func testAccResourceAutoF5XCHttpLoadbalancerConfig_withHttpPort(lbName, opName, 
 		"do_not_advertise = true",
 		"round_robin = true",
 		"no_challenge = true",
-		port,
+		fmt.Sprintf(`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = %d
+      }
+    }
+  }`, port),
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
 		"",
 		"",
 	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsAutoCert(lbName, opName, namespace, domain string) string {
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"do_not_advertise = true",
+		"round_robin = true",
+		"no_challenge = true",
+		`loadbalancer_type_choice = {
+    https_auto_cert = {
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        enable_path_normalize = true
+      }
+      mtls_choice = {
+        no_mtls = true
+      }
+      tls_config = {
+        choice = {
+          default_security = true
+        }
+      }
+      http_redirect = true
+      add_hsts      = true
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		"",
+		"",
+	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsAutoCertUpdated(lbName, opName, namespace, domain string) string {
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"advertise_on_public_default_vip = true",
+		"least_active = true",
+		"no_challenge = true",
+		`loadbalancer_type_choice = {
+    https_auto_cert = {
+      port_choice = {
+        port = 8443
+      }
+      path_normalize_choice = {
+        disable_path_normalize = true
+      }
+      mtls_choice = {
+        no_mtls = true
+      }
+      tls_config = {
+        choice = {
+          custom_security = {
+            cipher_suites = [
+              "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+              "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+            ]
+            min_version = ["TLSv1_2"]
+            max_version = ["TLSv1_3"]
+          }
+        }
+      }
+      server_header_choice = {
+        server_name = "custom-server"
+      }
+      connection_idle_timeout = 60000
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		`description = "HTTPS auto cert load balancer updated"`,
+		`labels = { env = "prod", tier = "edge" }`,
+	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithCertRef(lbName, opName, certName, namespace, domain string) string {
+	certB64, keyB64 := testAccHTTPLoadbalancerCertificateB64(domain)
+
+	certResource := fmt.Sprintf(`
+resource "f5xc_certificate" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Acceptance test certificate for HTTP LB"
+
+  certificate_url = "string:///%s"
+
+  private_key = {
+    secret_info_choice = {
+      clear_secret_info = {
+        url = "string:///%s"
+      }
+    }
+  }
+}
+`, certName, namespace, certB64, keyB64)
+
+	lbBody := testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"do_not_advertise = true",
+		"round_robin = true",
+		"no_challenge = true",
+		`loadbalancer_type_choice = {
+    https = {
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        enable_path_normalize = true
+      }
+      tls_certificates_choice = {
+        tls_cert_params = {
+          certificates = [
+            {
+              name      = f5xc_certificate.example.name
+              namespace = f5xc_certificate.example.namespace
+            }
+          ]
+          mtls_choice = {
+            no_mtls = true
+          }
+          tls_config = {
+            choice = {
+              default_security = true
+            }
+          }
+        }
+      }
+      http_redirect = true
+      add_hsts      = true
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		"",
+		"",
+	)
+
+	return certResource + "\n" + lbBody
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithCertRefUpdated(lbName, opName, certName, namespace, domain string) string {
+	certB64, keyB64 := testAccHTTPLoadbalancerCertificateB64(domain)
+
+	certResource := fmt.Sprintf(`
+resource "f5xc_certificate" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Acceptance test certificate for HTTP LB"
+
+  certificate_url = "string:///%s"
+
+  private_key = {
+    secret_info_choice = {
+      clear_secret_info = {
+        url = "string:///%s"
+      }
+    }
+  }
+}
+`, certName, namespace, certB64, keyB64)
+
+	lbBody := testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"advertise_on_public_default_vip = true",
+		"least_active = true",
+		"no_challenge = true",
+		`loadbalancer_type_choice = {
+    https = {
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        disable_path_normalize = true
+      }
+      tls_certificates_choice = {
+        tls_cert_params = {
+          certificates = [
+            {
+              name      = f5xc_certificate.example.name
+              namespace = f5xc_certificate.example.namespace
+            }
+          ]
+          mtls_choice = {
+            no_mtls = true
+          }
+          tls_config = {
+            choice = {
+              medium_security = true
+            }
+          }
+        }
+      }
+      server_header_choice = {
+        default_header = true
+      }
+      http_protocol_options = {
+        http_protocol_choice = {
+          http_protocol_enable_v1_v2 = true
+        }
+      }
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		`description = "HTTPS with cert ref updated"`,
+		`labels = { env = "staging" }`,
+	)
+
+	return certResource + "\n" + lbBody
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithInlineCert(lbName, opName, namespace, domain string) string {
+	certB64, keyB64 := testAccHTTPLoadbalancerCertificateB64(domain)
+
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"do_not_advertise = true",
+		"round_robin = true",
+		"no_challenge = true",
+		fmt.Sprintf(`loadbalancer_type_choice = {
+    https = {
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        enable_path_normalize = true
+      }
+      tls_certificates_choice = {
+        tls_parameters = {
+          tls_certificates = [
+            {
+              certificate_url = "string:///%s"
+              description     = "Acceptance test inline certificate"
+              ocsp_stapling_choice = {
+                use_system_defaults = true
+              }
+              private_key = {
+                secret_info_choice = {
+                  clear_secret_info = {
+                    url = "string:///%s"
+                  }
+                }
+              }
+            }
+          ]
+          mtls_choice = {
+            no_mtls = true
+          }
+          tls_config = {
+            choice = {
+              default_security = true
+            }
+          }
+        }
+      }
+      http_redirect = true
+      add_hsts      = true
+    }
+  }`, certB64, keyB64),
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		"",
+		"",
+	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithInlineCertUpdated(lbName, opName, namespace, domain string) string {
+	certB64, keyB64 := testAccHTTPLoadbalancerCertificateB64(domain)
+
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"advertise_on_public_default_vip = true",
+		"least_active = true",
+		"no_challenge = true",
+		fmt.Sprintf(`loadbalancer_type_choice = {
+    https = {
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        disable_path_normalize = true
+      }
+      tls_certificates_choice = {
+        tls_parameters = {
+          tls_certificates = [
+            {
+              certificate_url = "string:///%s"
+              description     = "Acceptance test inline certificate updated"
+              ocsp_stapling_choice = {
+                disable_ocsp_stapling = true
+              }
+              private_key = {
+                secret_info_choice = {
+                  clear_secret_info = {
+                    url = "string:///%s"
+                  }
+                }
+              }
+            }
+          ]
+          mtls_choice = {
+            no_mtls = true
+          }
+          tls_config = {
+            choice = {
+              low_security = true
+            }
+          }
+        }
+      }
+      server_header_choice = {
+        pass_through = true
+      }
+    }
+  }`, certB64, keyB64),
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		`description = "HTTPS inline cert updated"`,
+		`labels = { env = "test" }`,
+	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_httpsWithBlindfoldKey(t testing.TB, lbName, opName, namespace, domain string) string {
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"do_not_advertise = true",
+		"round_robin = true",
+		"no_challenge = true",
+		fmt.Sprintf(`loadbalancer_type_choice = {
+    https = {
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        enable_path_normalize = true
+      }
+      tls_certificates_choice = {
+        tls_parameters = {
+          tls_certificates = [
+            {
+              certificate_url = "string:///%s"
+              description     = "Acceptance test blindfold certificate"
+              ocsp_stapling_choice = {
+                use_system_defaults = true
+              }
+              private_key = {
+                secret_info_choice = {
+                  blindfold_secret_info = {
+                    location = "string:///%s"
+                  }
+                }
+              }
+            }
+          ]
+          mtls_choice = {
+            no_mtls = true
+          }
+          tls_config = {
+            choice = {
+              default_security = true
+            }
+          }
+        }
+      }
+    }
+  }`, TestCertB64, blindFoldKeyB64(t)),
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		"",
+		"",
+	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_withAppFirewall(lbName, opName, wafName, namespace, domain string) string {
+	wafResource := fmt.Sprintf(`
+resource "f5xc_app_firewall" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Acceptance test app firewall for HTTP LB"
+
+  enforcement_mode_choice = {
+    monitoring = true
+  }
+  detection_setting_choice = {
+    default_detection_settings = true
+  }
+  allowed_response_codes_choice = {
+    allow_all_response_codes = true
+  }
+  anonymization_setting_choice = {
+    default_anonymization = true
+  }
+  blocking_page_choice = {
+    use_default_blocking_page = true
+  }
+  enhance_with_ai_choice = {
+    disable_ai_enhancements = true
+  }
+}
+`, wafName, namespace)
+
+	lbBody := testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"do_not_advertise = true",
+		"round_robin = true",
+		"no_challenge = true",
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		`app_firewall = {
+      name      = f5xc_app_firewall.example.name
+      namespace = f5xc_app_firewall.example.namespace
+    }`,
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		"",
+		"",
+	)
+
+	return wafResource + "\n" + lbBody
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_withoutAppFirewall(lbName, opName, wafName, namespace, domain string) string {
+	wafResource := testAccResourceAutoF5XCHttpLoadbalancerConfig_appFirewall(wafName, namespace)
+	lbBody := testAccResourceAutoF5XCHttpLoadbalancerConfig_basic(lbName, opName, namespace, domain)
+
+	return wafResource + "\n" + lbBody
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_withRoutesAndMoreOptions(lbName, opName, namespace, domain, pathPrefix string, isHeaderUser bool) string {
+	userChoice := "user_id_client_ip = true"
+	maxReqLimit := `no_request_limit_per_connection = true`
+	if !isHeaderUser {
+		maxReqLimit = `max_requests_per_connection = 100`
+	}
+
+	routesBlock := fmt.Sprintf(`
+  routes = [
+    {
+      choice = {
+        simple_route = {
+          path = {
+            path_match_choice = {
+              prefix = %q
+            }
+          }
+          http_method = ["ANY"]
+          host_rewrite_params_choice = {
+            disable_host_rewrite = true
+          }
+          origin_pools = [
+            {
+              pool_choice = {
+                pool = {
+                  name      = f5xc_origin_pool.example.name
+                  namespace = f5xc_origin_pool.example.namespace
+                  tenant    = %q
+                }
+              }
+              weight   = 1
+              priority = 1
+            }
+          ]
+        }
+      }
+      route_state_choice = {
+        route_state_enabled = true
+      }
+    }
+  ]`, pathPrefix, getTestHttpLbTenant())
+
+	moreOptionBlock := fmt.Sprintf(`
+  more_option = {
+    http10_choice = {
+      enable_http10 = true
+    }
+    max_requests_per_connection_choice = {
+      %s
+    }
+    idle_timeout            = 30000
+    max_request_header_size = 60
+    request_headers_to_add = [
+      {
+        name = "X-Custom-Req"
+        value_choice = {
+          value = "custom-req-val"
+        }
+        append = false
+      }
+    ]
+    response_headers_to_add = [
+      {
+        name = "X-Custom-Resp"
+        value_choice = {
+          value = "custom-resp-val"
+        }
+        append = false
+      }
+    ]
+  }`, maxReqLimit)
+
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"do_not_advertise = true",
+		"round_robin = true",
+		"no_challenge = true",
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		"disable_waf = true",
+		userChoice,
+		"enable_malicious_user_detection = true",
+		"enable_threat_mesh = true",
+		routesBlock,
+		moreOptionBlock,
+		`description = "HTTP load balancer with routes and more options"`,
+		`labels = { env = "test" }`,
+	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_extensive(lbName, opName, namespace, domain string) string {
+	wafName := fmt.Sprintf("%s-waf", lbName)
+	wafResource := testAccResourceAutoF5XCHttpLoadbalancerConfig_appFirewall(wafName, namespace)
+
+	routesBlock := fmt.Sprintf(`
+  routes = [
+    {
+      choice = {
+        simple_route = {
+          path = {
+            path_match_choice = {
+              prefix = "/api"
+            }
+          }
+          http_method = ["GET"]
+          host_rewrite_params_choice = {
+            disable_host_rewrite = true
+          }
+          origin_pools = [
+            {
+              pool_choice = {
+                pool = {
+                  name      = f5xc_origin_pool.example.name
+                  namespace = f5xc_origin_pool.example.namespace
+                  tenant    = %q
+                }
+              }
+              weight   = 1
+              priority = 1
+            }
+          ]
+        }
+      }
+      route_state_choice = {
+        route_state_enabled = true
+      }
+    },
+    {
+      choice = {
+        direct_response_route = {
+          path = {
+            path_match_choice = {
+              path = "/healthz"
+            }
+          }
+          http_method = ["GET"]
+          route_direct_response = {
+            response_body_encoded = "string:///b2s="
+            response_code         = 200
+          }
+        }
+      }
+      route_state_choice = {
+        route_state_enabled = true
+      }
+    }
+  ]`, getTestHttpLbTenant())
+
+	moreOptionBlock := `
+  more_option = {
+    http10_choice = {
+      enable_http10 = true
+    }
+    max_requests_per_connection_choice = {
+      max_requests_per_connection = 200
+    }
+    idle_timeout                  = 45000
+    max_request_header_size       = 64
+    request_headers_to_add = [
+      {
+        name = "X-Acceptance-Request"
+        value_choice = {
+          value = "create"
+        }
+        append = false
+      }
+    ]
+    request_headers_to_remove = ["X-Remove-Request"]
+    response_headers_to_add = [
+      {
+        name = "X-Acceptance-Response"
+        value_choice = {
+          value = "create"
+        }
+        append = false
+      }
+    ]
+    response_headers_to_remove = ["X-Remove-Response"]
+  }`
+
+	lbBody := testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"do_not_advertise = true",
+		"source_ip_stickiness = true",
+		"no_challenge = true",
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		`app_firewall = {
+      name      = f5xc_app_firewall.example.name
+      namespace = f5xc_app_firewall.example.namespace
+    }`,
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		routesBlock,
+		moreOptionBlock,
+		`description = "Extensive acceptance test HTTP load balancer"`,
+		`labels = { scenario = "extensive", phase = "create" }`,
+		testAccResourceAutoF5XCHttpLoadbalancerConfigExtensiveRootBlocks(domain, false),
+	)
+
+	return wafResource + "\n" + lbBody
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_extensiveUpdated(lbName, opName, namespace, domain string) string {
+	wafName := fmt.Sprintf("%s-waf", lbName)
+	wafResource := testAccResourceAutoF5XCHttpLoadbalancerConfig_appFirewall(wafName, namespace)
+
+	routesBlock := fmt.Sprintf(`
+  routes = [
+    {
+      choice = {
+        simple_route = {
+          path = {
+            path_match_choice = {
+              prefix = "/v2/api"
+            }
+          }
+          http_method = ["ANY"]
+          host_rewrite_params_choice = {
+            disable_host_rewrite = true
+          }
+          origin_pools = [
+            {
+              pool_choice = {
+                pool = {
+                  name      = f5xc_origin_pool.example.name
+                  namespace = f5xc_origin_pool.example.namespace
+                  tenant    = %q
+                }
+              }
+              weight   = 1
+              priority = 1
+            }
+          ]
+        }
+      }
+      route_state_choice = {
+        route_state_enabled = true
+      }
+    },
+    {
+      choice = {
+        redirect_route = {
+          path = {
+            path_match_choice = {
+              prefix = "/old"
+            }
+          }
+          http_method = ["GET"]
+          route_redirect = {
+            response_code  = 302
+            proto_redirect = "https"
+            redirect_path_choice = {
+              path_redirect = "/new"
+            }
+            query_params_choice = {
+              retain_all_params = true
+            }
+          }
+        }
+      }
+      route_state_choice = {
+        route_state_enabled = true
+      }
+    }
+  ]`, getTestHttpLbTenant())
+
+	moreOptionBlock := `
+  more_option = {
+    http10_choice = {
+      enable_http10 = true
+    }
+    max_requests_per_connection_choice = {
+      no_request_limit_per_connection = true
+    }
+    idle_timeout            = 30000
+    max_request_header_size = 60
+    request_headers_to_add = [
+      {
+        name = "X-Acceptance-Request"
+        value_choice = {
+          value = "update"
+        }
+        append = true
+      }
+    ]
+    response_headers_to_add = [
+      {
+        name = "X-Acceptance-Response"
+        value_choice = {
+          value = "update"
+        }
+        append = true
+      }
+    ]
+  }`
+
+	lbBody := testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain,
+		"advertise_on_public_default_vip = true",
+		"least_active = true",
+		`js_challenge = {
+      js_script_delay = 2000
+    }`,
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8880
+      }
+    }
+  }`,
+		`app_firewall = {
+      name      = f5xc_app_firewall.example.name
+      namespace = f5xc_app_firewall.example.namespace
+    }`,
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		routesBlock,
+		moreOptionBlock,
+		`description = "Extensive acceptance test HTTP load balancer updated"`,
+		`labels = { scenario = "extensive", phase = "update" }`,
+		testAccResourceAutoF5XCHttpLoadbalancerConfigExtensiveRootBlocks(domain, true),
+	)
+
+	return wafResource + "\n" + lbBody
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_appFirewall(wafName, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_app_firewall" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Acceptance test app firewall for HTTP LB"
+
+  enforcement_mode_choice = {
+    monitoring = true
+  }
+  detection_setting_choice = {
+    default_detection_settings = true
+  }
+  allowed_response_codes_choice = {
+    allow_all_response_codes = true
+  }
+  anonymization_setting_choice = {
+    default_anonymization = true
+  }
+  blocking_page_choice = {
+    use_default_blocking_page = true
+  }
+  enhance_with_ai_choice = {
+    disable_ai_enhancements = true
+  }
+}
+`, wafName, namespace)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfigExtensiveRootBlocks(domain string, updated bool) string {
+	if updated {
+		return fmt.Sprintf(`
+  cors_policy = {
+    allow_credentials = false
+    allow_origin      = ["https://%s"]
+    allow_methods     = "GET,POST,OPTIONS"
+    allow_headers     = "Content-Type,Authorization"
+    expose_headers    = "X-Acceptance-Response"
+    maximum_age       = 300
+  }
+
+  csrf_policy = {
+    allowed_domains_choice = {
+      all_load_balancer_domains = true
+    }
+  }
+
+  slow_ddos_mitigation_choice = {
+    system_default_timeouts = true
+  }
+
+  waf_exclusion = {
+    waf_exclusion_choice = {
+      waf_exclusion_inline_rules = {
+        rules = [
+          {
+            metadata = {
+              name        = "skip-admin-waf"
+              description = "Skip WAF processing for admin acceptance path"
+            }
+            domain_choice = {
+              exact_value = %q
+            }
+            path_choice = {
+              path_prefix = "/admin"
+            }
+            methods = ["POST"]
+            waf_advanced_configuration_choice = {
+              waf_skip_processing = true
+            }
+          }
+        ]
+      }
+    }
+  }
+
+  blocked_clients = [
+    {
+      metadata = {
+        name = "blocked-prefix-updated"
+      }
+      client_source_choice = {
+        ip_prefix = "203.0.113.0/24"
+      }
+      actions = ["SKIP_PROCESSING_WAF"]
+    }
+  ]
+
+  trusted_clients = [
+    {
+      metadata = {
+        name = "trusted-prefix-updated"
+      }
+      client_source_choice = {
+        ip_prefix = "198.51.100.0/24"
+      }
+      actions = ["SKIP_PROCESSING_WAF"]
+    }
+  ]
+`, domain, domain)
+	}
+
+	return fmt.Sprintf(`
+  cors_policy = {
+    allow_credentials = true
+    allow_origin      = ["https://%s"]
+    allow_methods     = "GET,OPTIONS"
+    allow_headers     = "Content-Type,Authorization"
+    expose_headers    = "X-Acceptance-Response"
+    maximum_age       = 600
+  }
+
+  csrf_policy = {
+    allowed_domains_choice = {
+      custom_domain_list = {
+        domains = [%q]
+      }
+    }
+  }
+
+  slow_ddos_mitigation_choice = {
+    system_default_timeouts = true
+  }
+
+  waf_exclusion = {
+    waf_exclusion_choice = {
+      waf_exclusion_inline_rules = {
+        rules = [
+          {
+            metadata = {
+              name        = "skip-api-waf"
+              description = "Skip WAF processing for API acceptance path"
+            }
+            domain_choice = {
+              exact_value = %q
+            }
+            path_choice = {
+              path_prefix = "/api"
+            }
+            methods = ["GET"]
+            waf_advanced_configuration_choice = {
+              waf_skip_processing = true
+            }
+          }
+        ]
+      }
+    }
+  }
+
+  blocked_clients = [
+    {
+      metadata = {
+        name = "blocked-prefix"
+      }
+      client_source_choice = {
+        ip_prefix = "192.0.2.0/24"
+      }
+      actions = ["SKIP_PROCESSING_WAF"]
+    }
+  ]
+
+  trusted_clients = [
+    {
+      metadata = {
+        name = "trusted-prefix"
+      }
+      client_source_choice = {
+        ip_prefix = "198.51.100.0/24"
+      }
+      actions = ["SKIP_PROCESSING_WAF"]
+    }
+  ]
+`, domain, domain, domain)
 }
 
 func testAccResourceAutoF5XCHttpLoadbalancerConfig_full(lbName, opName, namespace, domain string) string {
@@ -341,9 +2007,21 @@ func testAccResourceAutoF5XCHttpLoadbalancerConfig_full(lbName, opName, namespac
 		"do_not_advertise = true",
 		"source_ip_stickiness = true",
 		"no_challenge = true",
-		8080,
-		"description = \"Acceptance test HTTP load balancer\"",
-		"labels = { env = \"test\" }",
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8080
+      }
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		`description = "Acceptance test HTTP load balancer"`,
+		`labels = { env = "test" }`,
 	)
 }
 
@@ -354,17 +2032,201 @@ func testAccResourceAutoF5XCHttpLoadbalancerConfig_fullUpdated(lbName, opName, n
 		`js_challenge = {
       js_script_delay = 2000
     }`,
-		8880,
-		"description = \"Acceptance test HTTP load balancer updated\"",
-		"labels = { env = \"staging\", tier = \"edge\" }",
+		`loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 8880
+      }
+    }
+  }`,
+		"disable_waf = true",
+		"user_id_client_ip = true",
+		"disable_malicious_user_detection = true",
+		"disable_threat_mesh = true",
+		"",
+		"",
+		`description = "Acceptance test HTTP load balancer updated"`,
+		`labels = { env = "staging", tier = "edge" }`,
 	)
 }
 
-func testAccResourceAutoF5XCHttpLoadbalancerConfigBase(lbName, opName, namespace, domain, advertiseBody, hashBody, challengeBody string, port int, descriptionLine, labelsLine string) string {
+func testAccHttpLoadbalancerSetNestedSecretConfig(t testing.TB, lbName, opName, namespace, domain string) string {
+	t.Helper()
+	routesBlock := fmt.Sprintf(`
+routes = [{
+	choice = {
+		simple_route = {
+			path = { path_match_choice = { prefix = "/state-healing" } }
+			http_method = ["ANY"]
+			host_rewrite_params_choice = { disable_host_rewrite = true }
+			origin_pools = [{
+				pool_choice = { pool = { name = f5xc_origin_pool.example.name, namespace = f5xc_origin_pool.example.namespace, tenant = %q } }
+				weight = 1
+				priority = 1
+			}]
+			advanced_options = {
+				buffer_choice = { common_buffering = true }
+				cluster_retract_choice = { do_not_retract_cluster = true }
+				hash_policy_choice = { common_hash_policy = true }
+				mirroring_choice = { disable_mirroring = true }
+				retry_policy_choice = { default_retry_policy = true }
+				rewrite_choice = { disable_prefix_rewrite = true }
+				spdy_choice = { disable_spdy = true }
+				websocket_choice = { disable_web_socket_config = true }
+				request_cookies_to_add = [{ name = "state-req-cookie", value_choice = { secret_value = { secret_info_choice = { blindfold_secret_info = { location = "string:///%s" } } } } }]
+				request_headers_to_add = [{ name = "x-state-request", append = false, value_choice = { secret_value = { secret_info_choice = { blindfold_secret_info = { location = "string:///%s" } } } } }]
+				response_cookies_to_add = [{ name = "state-resp-cookie", value_choice = { secret_value = { secret_info_choice = { blindfold_secret_info = { location = "string:///%s" } } } } }]
+				response_headers_to_add = [{ name = "x-state-response", append = false, value_choice = { secret_value = { secret_info_choice = { blindfold_secret_info = { location = "string:///%s" } } } } }]
+			}
+		}
+	}
+	route_state_choice = { route_state_enabled = true }
+}]
+`, getTestHttpLbTenant(), blindFoldKeyB64(t), blindFoldKeyB64(t), blindFoldKeyB64(t), blindFoldKeyB64(t))
+
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(
+		lbName, opName, namespace, domain,
+		"do_not_advertise = true", "round_robin = true", "no_challenge = true",
+		`loadbalancer_type_choice = { http = { port_choice = { port = 8080 } } }`,
+		"disable_waf = true", "user_id_client_ip = true", "disable_malicious_user_detection = true", "disable_threat_mesh = true",
+		routesBlock, "", `description = "HTTP load balancer state healing"`, `labels = { env = "acceptance" }`,
+	)
+}
+
+// testAccResourceAutoF5XCHttpLoadbalancerConfig_legacyRouteImportAndIgnoreChanges builds the HCL
+// configuration for testing ordered routes ListNestedAttribute indexing, lifecycle.ignore_changes
+// on routes[0], and ReadStateFallback on route_state_choice and simple_route.advanced_options.
+//
+// Why: Provides a deterministic two-route HTTP load balancer configuration with explicit
+// advanced_options default choices and an index-targeted lifecycle.ignore_changes block.
+//
+// How: Formats a two-element routes list and a lifecycle { ignore_changes = [routes[0]] } block
+// into testAccResourceAutoF5XCHttpLoadbalancerConfigBase.
+//
+// Parameters:
+//   - lbName: Load balancer resource name.
+//   - opName: Origin pool resource name.
+//   - namespace: Target namespace.
+//   - domain: Load balancer domain name.
+//   - firstRoutePrefix: Path prefix for routes[0].
+//   - secondRoutePrefix: Path prefix for routes[1].
+//
+// Returns:
+//   - string: Complete HCL configuration string.
+func testAccResourceAutoF5XCHttpLoadbalancerConfig_legacyRouteImportAndIgnoreChanges(
+	lbName, opName, namespace, domain, firstRoutePrefix, secondRoutePrefix string,
+) string {
+	tenant := getTestHttpLbTenant()
+	routesBlock := fmt.Sprintf(`
+  routes = [
+    {
+      choice = {
+        simple_route = {
+          path = {
+            path_match_choice = {
+              prefix = %q
+            }
+          }
+          http_method = ["GET"]
+          host_rewrite_params_choice = {
+            disable_host_rewrite = true
+          }
+          origin_pools = [
+            {
+              pool_choice = {
+                pool = {
+                  name      = f5xc_origin_pool.example.name
+                  namespace = f5xc_origin_pool.example.namespace
+                  tenant    = %q
+                }
+              }
+              weight   = 1
+              priority = 1
+            }
+          ]
+          advanced_options = {
+            buffer_choice          = { common_buffering = true }
+            cluster_retract_choice = { do_not_retract_cluster = true }
+            hash_policy_choice     = { common_hash_policy = true }
+            mirroring_choice       = { disable_mirroring = true }
+            retry_policy_choice    = { default_retry_policy = true }
+            rewrite_choice         = { disable_prefix_rewrite = true }
+            spdy_choice            = { disable_spdy = true }
+            websocket_choice       = { disable_web_socket_config = true }
+          }
+        }
+      }
+      route_state_choice = {
+        route_state_enabled = true
+      }
+    },
+    {
+      choice = {
+        simple_route = {
+          path = {
+            path_match_choice = {
+              prefix = %q
+            }
+          }
+          http_method = ["POST"]
+          host_rewrite_params_choice = {
+            disable_host_rewrite = true
+          }
+          origin_pools = [
+            {
+              pool_choice = {
+                pool = {
+                  name      = f5xc_origin_pool.example.name
+                  namespace = f5xc_origin_pool.example.namespace
+                  tenant    = %q
+                }
+              }
+              weight   = 1
+              priority = 1
+            }
+          ]
+        }
+      }
+      route_state_choice = {
+        route_state_enabled = true
+      }
+    }
+  ]`, firstRoutePrefix, tenant, secondRoutePrefix, tenant)
+
+	lifecycleBlock := `
+  lifecycle {
+    ignore_changes = [
+      routes[0],
+    ]
+  }`
+
+	return testAccResourceAutoF5XCHttpLoadbalancerConfigBase(
+		lbName, opName, namespace, domain,
+		"do_not_advertise = true", "round_robin = true", "no_challenge = true",
+		`loadbalancer_type_choice = { http = { port_choice = { port = 8080 } } }`,
+		"disable_waf = true", "user_id_client_ip = true", "disable_malicious_user_detection = true", "disable_threat_mesh = true",
+		routesBlock, "", `description = "HTTP load balancer legacy route import and ignore_changes"`, `labels = { env = "acceptance" }`,
+		lifecycleBlock,
+	)
+}
+
+func testAccResourceAutoF5XCHttpLoadbalancerConfigBase(
+	lbName, opName, namespace, domain,
+	advertiseBody, hashBody, challengeBody, loadbalancerTypeBody, wafBody, userIdBody, maliciousUserBody, threatMeshBody,
+	routesBlock, moreOptionBlock, descriptionLine, labelsLine string,
+	extraBlocks ...string,
+) string {
+	rootExtraBlock := ""
+	for _, block := range extraBlocks {
+		if block != "" {
+			rootExtraBlock += "\n" + block
+		}
+	}
+
 	return fmt.Sprintf(`
-resource "f5xc_origin_pool" "test" {
-  name                   = "%s"
-  namespace              = "%s"
+resource "f5xc_origin_pool" "example" {
+  name                   = %q
+  namespace              = %q
   description            = "Acceptance test origin pool for HTTP load balancer"
   loadbalancer_algorithm = ["ROUND_ROBIN"]
   endpoint_selection     = ["LOCAL_PREFERRED"]
@@ -386,24 +2248,24 @@ resource "f5xc_origin_pool" "test" {
   tls_choice = {
     no_tls = true
   }
-}
 
-resource "f5xc_http_loadbalancer" "test" {
-  name      = "%s"
-  namespace = "%s"
-
-  %s
-  %s
-
-  domains = ["%s"]
-
-  loadbalancer_type_choice = {
-    http = {
-      port_choice = {
-        port = %d
-      }
+  upstream_conn_pool_reuse_type = {
+    map_downstream_to_upstream_conn_pool_type_choice = {
+      disable_conn_pool_reuse = true
     }
   }
+}
+
+resource "f5xc_http_loadbalancer" "example" {
+  name      = %q
+  namespace = %q
+
+  %s
+  %s
+
+  domains = [%q]
+
+  %s
 
   advertise_choice = {
     %s
@@ -413,8 +2275,8 @@ resource "f5xc_http_loadbalancer" "test" {
     {
       pool_choice = {
         pool = {
-          name      = f5xc_origin_pool.test.name
-          namespace = f5xc_origin_pool.test.namespace
+          name      = f5xc_origin_pool.example.name
+          namespace = f5xc_origin_pool.example.namespace
         }
       }
       weight   = 1
@@ -423,7 +2285,7 @@ resource "f5xc_http_loadbalancer" "test" {
   ]
 
   waf_choice = {
-    disable_waf = true
+    %s
   }
 
   challenge_type_choice = {
@@ -431,7 +2293,7 @@ resource "f5xc_http_loadbalancer" "test" {
   }
 
   user_id_choice = {
-    user_id_client_ip = true
+    %s
   }
 
   rate_limit_choice = {
@@ -451,7 +2313,7 @@ resource "f5xc_http_loadbalancer" "test" {
   }
 
   malicious_user_detection_choice = {
-    disable_malicious_user_detection = true
+    %s
   }
 
   api_discovery_choice = {
@@ -475,12 +2337,32 @@ resource "f5xc_http_loadbalancer" "test" {
   }
 
   threat_mesh_choice = {
-    disable_threat_mesh = true
+    %s
   }
 
   malware_protection_choice = {
     disable_malware_protection = true
   }
+
+  %s
+  %s
+  %s
 }
-`, opName, namespace, lbName, namespace, descriptionLine, labelsLine, domain, port, advertiseBody, challengeBody, hashBody)
+`,
+		opName, namespace,
+		lbName, namespace,
+		descriptionLine, labelsLine,
+		domain,
+		loadbalancerTypeBody,
+		advertiseBody,
+		wafBody,
+		challengeBody,
+		userIdBody,
+		hashBody,
+		maliciousUserBody,
+		threatMeshBody,
+		routesBlock,
+		moreOptionBlock,
+		rootExtraBlock,
+	)
 }

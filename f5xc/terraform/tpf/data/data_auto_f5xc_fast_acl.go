@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -20,6 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -34,38 +38,38 @@ type DataSourceF5XCFastAcl struct {
 	client *client.APIClient
 }
 
-type FastAclCreateSpecTypeSiteChoice struct {
+type FastAclSiteChoice struct {
 	ReAcl   types.Object `tfsdk:"re_acl"`
 	SiteAcl types.Object `tfsdk:"site_acl"`
 }
 
-type FastAclCreateSpecTypeReAcl struct {
+type FastAclReAcl struct {
 	FastAclRules types.List   `tfsdk:"fast_acl_rules"`
 	VipChoice    types.Object `tfsdk:"vip_choice"`
 }
 
-type FastAclFastAclFastACLRuleType struct {
+type FastAclFastACLRuleType struct {
 	Action       types.Object `tfsdk:"action"`
 	Metadata     types.Object `tfsdk:"metadata"`
 	Port         types.List   `tfsdk:"port"`
 	SourceChoice types.Object `tfsdk:"source_choice"`
 }
 
-type FastAclFastAclRuleFastAclRuleAction struct {
+type FastAclFastAclRuleAction struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 }
 
-type FastAclFastAclRuleActionActionChoice struct {
+type FastAclActionChoice struct {
 	PolicerAction         types.Object `tfsdk:"policer_action"`
 	ProtocolPolicerAction types.Object `tfsdk:"protocol_policer_action"`
 	SimpleAction          types.List   `tfsdk:"simple_action"`
 }
 
-type FastAclFastAclRuleActionPolicerAction struct {
+type FastAclPolicerAction struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type FastAclFastAclRuleActionProtocolPolicerAction struct {
+type FastAclProtoPolicerAction struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
@@ -78,44 +82,44 @@ type FastAclPortValueType struct {
 	PortValueTypeChoice types.Object `tfsdk:"port_value_type_choice"`
 }
 
-type FastAclPortValueTypePortValueTypeChoice struct {
+type FastAclPortValueTypeChoice struct {
 	All         types.Bool  `tfsdk:"all"`
 	Dns         types.Bool  `tfsdk:"dns"`
 	UserDefined types.Int64 `tfsdk:"user_defined"`
 }
 
-type FastAclFastACLRuleTypeSourceChoice struct {
+type FastAclSrcChoice struct {
 	IpPrefixSet types.Object `tfsdk:"ip_prefix_set"`
 	Prefix      types.Object `tfsdk:"prefix"`
 }
 
-type FastAclFastACLRuleTypeIpPrefixSet struct {
+type FastAclIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type FastAclFastACLRuleTypePrefix struct {
+type FastAclPrefix struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
 
-type FastAclReACLTypeVipChoice struct {
+type FastAclVipChoice struct {
 	AllPublicVips     types.Bool   `tfsdk:"all_public_vips"`
 	DefaultTenantVip  types.Bool   `tfsdk:"default_tenant_vip"`
 	SelectedTenantVip types.Object `tfsdk:"selected_tenant_vip"`
 }
 
-type FastAclReACLTypeSelectedTenantVip struct {
+type FastAclSelectedTenantVip struct {
 	DefaultTenantVip types.Bool `tfsdk:"default_tenant_vip"`
 	PublicIpRefs     types.List `tfsdk:"public_ip_refs"`
 }
 
-type FastAclCreateSpecTypeSiteAcl struct {
+type FastAclSiteAcl struct {
 	FastAclRules  types.List   `tfsdk:"fast_acl_rules"`
 	NetworkChoice types.Object `tfsdk:"network_choice"`
 	VipChoice     types.Object `tfsdk:"vip_choice"`
 }
 
-type FastAclSiteACLTypeNetworkChoice struct {
+type FastAclNetChoice struct {
 	InsideNetwork  types.Bool `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool `tfsdk:"outside_network"`
 }
@@ -585,8 +589,8 @@ func (d *DataSourceF5XCFastAcl) Metadata(ctx context.Context, request datasource
 func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Destination type Type of destination configuration. It will provide destination IP, port and protocol 'ves-io' tenant has the option of choosing all type of destination type Any other tenant can choose destination as interface_services, vip_services or all_services Further details on each destination type on RE and CE is provided in destination options Destination protocol and port for VIP or interface services is picked from configured listener",
-		Description:         "Destination type Type of destination configuration. It will provide destination IP, port and protocol 'ves-io' tenant has the option of choosing all type of destination type Any other tenant can choose destination as interface_services, vip_services or all_services Further details on each destination type on RE and CE is provided in destination options Destination protocol and port for VIP or interface services is picked from configured listener",
+		MarkdownDescription: "Fast ACL provides destination and specifies rules to protect the site from denial of service attacks.<br>- It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}.<br>- Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action<br>- Destination is always provided as a combination of destination IP and port<br><br>Typical Usecase(s) are:<br>- Rate-limiting traffic to destination<br>- Accepting traffic from certain source IPs to destination<br>- Ratelimiting or dropping traffic from source IPs to destination<br><br>These ACL rules are applied at very early stage in datapath ingress processing and form<br>first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress),<br>unlike session based ACL where action is calculated only on first packet in session.<br><br>Fast ACL picks source based on Longest prefix match for faster processing, which differs<br>from traditional ACL where rules are evaluated in order. If none of the rule matches<br>then default action is to forward the packet<br><br>Fast ACL on a customer edge(CE) Site<br><br>Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site<br>- Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall<br>- Network Firewall is referred to by a Fleet<br>- CE site is member of the Fleet<br>- Only tenant can configure the set<br>- Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE<br><br>Selection of Destination<br>- Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL<br><br>Fast ACL on RE<br><br>- Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s)<br>- Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected<br><br>Selection of public VIP destination<br>- tenant ACL can pick VIP corresponding to tenant only<br>Selection of shared VIP destination<br>- tenant CANNOT use this option on RE.<br>Custom prefixes destination<br>- tenant CANNOT use this option on RE.<br>Shared VIP services<br>- tenant CANNOT use this option, is only meant for volterra administrators<br><br>Default Protocol Policer<br><br>- Is valid on CE and RE and configurable by any tenant<br>- Used for rate limiting<br>- Applied when none of the source rules match<br>- Protocols supported are ICMP, TCP, UDP, DNS",
+		Description:         "Fast ACL provides destination and specifies rules to protect the site from denial of service attacks. - It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}. - Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action - Destination is always provided as a combination of destination IP and port Typical Usecase(s) are: - Rate-limiting traffic to destination - Accepting traffic from certain source IPs to destination - Ratelimiting or dropping traffic from source IPs to destination These ACL rules are applied at very early stage in datapath ingress processing and form first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress), unlike session based ACL where action is calculated only on first packet in session. Fast ACL picks source based on Longest prefix match for faster processing, which differs from traditional ACL where rules are evaluated in order. If none of the rule matches then default action is to forward the packet Fast ACL on a customer edge(CE) Site Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site - Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall - Network Firewall is referred to by a Fleet - CE site is member of the Fleet - Only tenant can configure the set - Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE Selection of Destination - Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL Fast ACL on RE - Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s) - Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected Selection of public VIP destination - tenant ACL can pick VIP corresponding to tenant only Selection of shared VIP destination - tenant CANNOT use this option on RE. Custom prefixes destination - tenant CANNOT use this option on RE. Shared VIP services - tenant CANNOT use this option, is only meant for volterra administrators Default Protocol Policer - Is valid on CE and RE and configurable by any tenant - Used for rate limiting - Applied when none of the source rules match - Protocols supported are ICMP, TCP, UDP, DNS",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1294,9 +1298,15 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_fast_acl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_fast_acl.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_fast_acl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "fast_acl", err))
 		return
 	}
 
@@ -1304,7 +1314,41 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_fast_acl.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -1327,8 +1371,14 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -1337,6 +1387,7 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -1457,10 +1508,15 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 	if oneofSiteChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		siteChoiceChoices := rawSpecMap["site_choice"]
+		var siteChoiceChoices interface{}
+		if v := rawSpecMap["site_choice"]; v != nil {
+			siteChoiceChoices = v
+		} else {
+			siteChoiceChoices = specData.GetSiteChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var siteChoiceChoicesModel = &FastAclCreateSpecTypeSiteChoice{}
+		var siteChoiceChoicesModel = &FastAclSiteChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1478,14 +1534,14 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 				if len(reAclElement.GetFastAclRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					fastAclRulesElements := make([]FastAclFastAclFastACLRuleType, 0, len(reAclElement.GetFastAclRules()))
+					fastAclRulesElements := make([]FastAclFastACLRuleType, 0, len(reAclElement.GetFastAclRules()))
 					for _, fastAclRulesElement := range reAclElement.GetFastAclRules() {
-						fastAclFastAclFastACLRuleTypeModel := FastAclFastAclFastACLRuleType{}
+						fastAclFastACLRuleTypeModel := FastAclFastACLRuleType{}
 
 						// data specToModelNested RequiredPointerField --> Action
 						if fastAclRulesElement.GetAction() != nil {
 							// Create the nested Go struct
-							fastAclFastAclRuleFastAclRuleActionModel := &FastAclFastAclRuleFastAclRuleAction{}
+							fastAclFastAclRuleActionModel := &FastAclFastAclRuleAction{}
 							actionElement := fastAclRulesElement.GetAction()
 
 							// Recursively populate the nested struct
@@ -1698,18 +1754,18 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								fastAclFastAclRuleFastAclRuleActionModel.ActionChoice = finalObj
+								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
-								fastAclFastAclRuleFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesActionActionModelAttributeMap)
+								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesActionActionModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							fastAclFastAclRuleFastAclRuleActionModelObj, objDiags := types.ObjectValueFrom(ctx, FastAclSiteChoiceReAclFastAclRulesActionModelAttributeMap, fastAclFastAclRuleFastAclRuleActionModel)
+							fastAclFastAclRuleActionModelObj, objDiags := types.ObjectValueFrom(ctx, FastAclSiteChoiceReAclFastAclRulesActionModelAttributeMap, fastAclFastAclRuleActionModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fastAclFastAclFastACLRuleTypeModel.Action = fastAclFastAclRuleFastAclRuleActionModelObj
+							fastAclFastACLRuleTypeModel.Action = fastAclFastAclRuleActionModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1718,7 +1774,7 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							fastAclFastAclFastACLRuleTypeModel.Action = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesActionModelAttributeMap)
+							fastAclFastACLRuleTypeModel.Action = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesActionModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
@@ -1751,7 +1807,7 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fastAclFastAclFastACLRuleTypeModel.Metadata = fastAclMessageMetaTypeModelObj
+							fastAclFastACLRuleTypeModel.Metadata = fastAclMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1760,7 +1816,7 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							fastAclFastAclFastACLRuleTypeModel.Metadata = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesMetadataModelAttributeMap)
+							fastAclFastACLRuleTypeModel.Metadata = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested ArrayOfPointerField --> Port
@@ -1864,13 +1920,13 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fastAclFastAclFastACLRuleTypeModel.Port = portListValue
+							fastAclFastACLRuleTypeModel.Port = portListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							fastAclFastAclFastACLRuleTypeModel.Port = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceReAclFastAclRulesPortModelAttributeMap})
+							fastAclFastACLRuleTypeModel.Port = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceReAclFastAclRulesPortModelAttributeMap})
 						}
 
 						// data specToModelNested RequiredOneOfField --> Source
@@ -2015,12 +2071,12 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							fastAclFastAclFastACLRuleTypeModel.SourceChoice = finalObj
+							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
-							fastAclFastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesSourceModelAttributeMap)
+							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceReAclFastAclRulesSourceModelAttributeMap)
 						}
 
-						fastAclRulesElements = append(fastAclRulesElements, fastAclFastAclFastACLRuleTypeModel)
+						fastAclRulesElements = append(fastAclRulesElements, fastAclFastACLRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2212,14 +2268,14 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 				if len(siteAclElement.GetFastAclRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					fastAclRulesElements := make([]FastAclFastAclFastACLRuleType, 0, len(siteAclElement.GetFastAclRules()))
+					fastAclRulesElements := make([]FastAclFastACLRuleType, 0, len(siteAclElement.GetFastAclRules()))
 					for _, fastAclRulesElement := range siteAclElement.GetFastAclRules() {
-						fastAclFastAclFastACLRuleTypeModel := FastAclFastAclFastACLRuleType{}
+						fastAclFastACLRuleTypeModel := FastAclFastACLRuleType{}
 
 						// data specToModelNested RequiredPointerField --> Action
 						if fastAclRulesElement.GetAction() != nil {
 							// Create the nested Go struct
-							fastAclFastAclRuleFastAclRuleActionModel := &FastAclFastAclRuleFastAclRuleAction{}
+							fastAclFastAclRuleActionModel := &FastAclFastAclRuleAction{}
 							actionElement := fastAclRulesElement.GetAction()
 
 							// Recursively populate the nested struct
@@ -2432,18 +2488,18 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								fastAclFastAclRuleFastAclRuleActionModel.ActionChoice = finalObj
+								fastAclFastAclRuleActionModel.ActionChoice = finalObj
 							} else {
-								fastAclFastAclRuleFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesActionActionModelAttributeMap)
+								fastAclFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesActionActionModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							fastAclFastAclRuleFastAclRuleActionModelObj, objDiags := types.ObjectValueFrom(ctx, FastAclSiteChoiceSiteAclFastAclRulesActionModelAttributeMap, fastAclFastAclRuleFastAclRuleActionModel)
+							fastAclFastAclRuleActionModelObj, objDiags := types.ObjectValueFrom(ctx, FastAclSiteChoiceSiteAclFastAclRulesActionModelAttributeMap, fastAclFastAclRuleActionModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fastAclFastAclFastACLRuleTypeModel.Action = fastAclFastAclRuleFastAclRuleActionModelObj
+							fastAclFastACLRuleTypeModel.Action = fastAclFastAclRuleActionModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2452,7 +2508,7 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							fastAclFastAclFastACLRuleTypeModel.Action = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesActionModelAttributeMap)
+							fastAclFastACLRuleTypeModel.Action = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesActionModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
@@ -2485,7 +2541,7 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fastAclFastAclFastACLRuleTypeModel.Metadata = fastAclMessageMetaTypeModelObj
+							fastAclFastACLRuleTypeModel.Metadata = fastAclMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -2494,7 +2550,7 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							fastAclFastAclFastACLRuleTypeModel.Metadata = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesMetadataModelAttributeMap)
+							fastAclFastACLRuleTypeModel.Metadata = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested ArrayOfPointerField --> Port
@@ -2598,13 +2654,13 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							if response.Diagnostics.HasError() {
 								return
 							}
-							fastAclFastAclFastACLRuleTypeModel.Port = portListValue
+							fastAclFastACLRuleTypeModel.Port = portListValue
 
 						} else {
 							// The source list is empty or nil.
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
-							fastAclFastAclFastACLRuleTypeModel.Port = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceSiteAclFastAclRulesPortModelAttributeMap})
+							fastAclFastACLRuleTypeModel.Port = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceSiteAclFastAclRulesPortModelAttributeMap})
 						}
 
 						// data specToModelNested RequiredOneOfField --> Source
@@ -2749,12 +2805,12 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							fastAclFastAclFastACLRuleTypeModel.SourceChoice = finalObj
+							fastAclFastACLRuleTypeModel.SourceChoice = finalObj
 						} else {
-							fastAclFastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesSourceModelAttributeMap)
+							fastAclFastACLRuleTypeModel.SourceChoice = types.ObjectNull(FastAclSiteChoiceSiteAclFastAclRulesSourceModelAttributeMap)
 						}
 
-						fastAclRulesElements = append(fastAclRulesElements, fastAclFastAclFastACLRuleTypeModel)
+						fastAclRulesElements = append(fastAclRulesElements, fastAclFastACLRuleTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.

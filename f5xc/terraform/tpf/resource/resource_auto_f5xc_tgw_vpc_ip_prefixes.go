@@ -23,11 +23,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"gopkg.volterra.us/stdlib/codec"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema_views_aws_tgw_site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/aws_tgw_site"
 )
 
@@ -76,8 +80,8 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCTgwVpcIpPrefixes) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
+		MarkdownDescription: "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC.<br>It can be used to automatically site creation in the AWS TGW.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC. It can be used to automatically site creation in the AWS TGW. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -94,7 +98,7 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) Schema(ctx context.Context, request resou
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"vpc_ip_prefixes": schema.MapNestedAttribute{
@@ -186,9 +190,17 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCTgwVpcIpPrefixes) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCTgwVpcIpPrefixesModel
 
 	// Read Terraform plan data into the model
@@ -275,7 +287,7 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) Create(ctx context.Context, request resou
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "tgw_vpc_ip_prefixes", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "tgw_vpc_ip_prefixes", err),
 		)
 		return
 	}
@@ -331,6 +343,12 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCTgwVpcIpPrefixes) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCTgwVpcIpPrefixesModel
@@ -419,7 +437,7 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) Update(ctx context.Context, request resou
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "tgw_vpc_ip_prefixes", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "tgw_vpc_ip_prefixes", err),
 		)
 		return
 	}
@@ -480,7 +498,7 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) Delete(ctx context.Context, request resou
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "tgw_vpc_ip_prefixes", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "tgw_vpc_ip_prefixes", err),
 			)
 			return
 		}
@@ -496,7 +514,7 @@ func (r *ResourceF5XCTgwVpcIpPrefixes) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "tgw_vpc_ip_prefixes", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "tgw_vpc_ip_prefixes", err),
 		)
 		return
 	}

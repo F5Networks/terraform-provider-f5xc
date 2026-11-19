@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -36,6 +37,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -80,6 +82,7 @@ type AlertReceiverSecretType struct {
 type AlertReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type AlertReceiverBlindfoldSecretInfo struct {
@@ -248,6 +251,7 @@ var AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofModelAttributeMap = map[st
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -293,6 +297,7 @@ var AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofModelAttributeMap = m
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -338,6 +343,7 @@ var AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap = map[string]a
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -436,6 +442,7 @@ var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneo
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -481,6 +488,7 @@ var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoO
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -547,7 +555,7 @@ var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsModelAttributeMap = map
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ServerValidationChoice
+// Attribute map for OneOfField --> ServerValidationChoice
 var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"use_server_verification": types.ObjectType{
@@ -620,6 +628,7 @@ var AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap = map[string
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -648,8 +657,8 @@ func (r *ResourceF5XCAlertReceiver) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a alert_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_receiver) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a alert_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_receiver) etc. can be fetched",
+		MarkdownDescription: "Alert Receiver is used to specify a receiver (slack, pagerDuty, etc.,) to send the alert notifications.<br>An Alert Receiver may be associated with one or more Alert Policy objects, which defines one or more routes to match<br>the incoming alert.",
+		Description:         "Alert Receiver is used to specify a receiver (slack, pagerDuty, etc.,) to send the alert notifications. An Alert Receiver may be associated with one or more Alert Policy objects, which defines one or more routes to match the incoming alert.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -717,7 +726,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 			},
 			"receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Receiver Receiver Config",
-				MarkdownDescription: "Receiver Receiver Config",
+				MarkdownDescription: "Receiver Receiver Config<br>Exactly one of `email`, `opsgenie`, `pagerduty`, `slack`, `sms`, or `webhook` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -734,7 +743,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"email": schema.SingleNestedAttribute{
 						Description:         "Email Send alert notifications as Email",
-						MarkdownDescription: "Email Send alert notifications as Email",
+						MarkdownDescription: "Email Send alert notifications as Email<br>Conflicts with `opsgenie`, `pagerduty`, `slack`, `sms`, and `webhook`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -756,7 +765,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 					},
 					"opsgenie": schema.SingleNestedAttribute{
 						Description:         "OpsGenie Send alert notifications to OpsGenie",
-						MarkdownDescription: "OpsGenie Send alert notifications to OpsGenie",
+						MarkdownDescription: "OpsGenie Send alert notifications to OpsGenie<br>Conflicts with `email`, `pagerduty`, `slack`, `sms`, and `webhook`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -770,7 +779,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -778,12 +787,13 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -801,6 +811,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -822,7 +833,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -853,6 +864,16 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -880,7 +901,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 					},
 					"pagerduty": schema.SingleNestedAttribute{
 						Description:         "PagerDuty Send alert notifications to PagerDuty",
-						MarkdownDescription: "PagerDuty Send alert notifications to PagerDuty",
+						MarkdownDescription: "PagerDuty Send alert notifications to PagerDuty<br>Conflicts with `email`, `opsgenie`, `slack`, `sms`, and `webhook`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -894,7 +915,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -902,12 +923,13 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -925,6 +947,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -946,7 +969,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -977,6 +1000,16 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -1004,7 +1037,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 					},
 					"slack": schema.SingleNestedAttribute{
 						Description:         "Slack Send alert notifications to Slack",
-						MarkdownDescription: "Slack Send alert notifications to Slack",
+						MarkdownDescription: "Slack Send alert notifications to Slack<br>Conflicts with `email`, `opsgenie`, `pagerduty`, `sms`, and `webhook`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1031,7 +1064,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -1039,12 +1072,13 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1062,6 +1096,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1083,7 +1118,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1116,6 +1151,16 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 													},
 												},
 											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 										},
 									},
 								},
@@ -1124,23 +1169,24 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 					},
 					"sms": schema.SingleNestedAttribute{
 						Description:         "SMS Send alert notifications as SMS",
-						MarkdownDescription: "SMS Send alert notifications as SMS",
+						MarkdownDescription: "SMS Send alert notifications as SMS<br>Conflicts with `email`, `opsgenie`, `pagerduty`, `slack`, and `webhook`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"contact_number": schema.StringAttribute{
 								Description:         "Contact Number Contact number of the user in ITU E.164 format [+][country code][subscriber number including area code]",
-								MarkdownDescription: "Contact Number Contact number of the user in ITU E.164 format [+][country code][subscriber number including area code]",
+								MarkdownDescription: "Contact Number Contact number of the user in ITU E.164 format [+][country code][subscriber number including area code]<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 							},
 						},
 					},
 					"webhook": schema.SingleNestedAttribute{
 						Description:         "Webhook Send alert notifications to Webhook",
-						MarkdownDescription: "Webhook Send alert notifications to Webhook",
+						MarkdownDescription: "Webhook Send alert notifications to Webhook<br>Conflicts with `email`, `opsgenie`, `pagerduty`, `slack`, and `sms`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1154,7 +1200,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"auth_choice": schema.SingleNestedAttribute{
 										Description:         "HTTP Authentication header HTTP Authentication header controls how to authenticate to the HTTP endpoint",
-										MarkdownDescription: "HTTP Authentication header HTTP Authentication header controls how to authenticate to the HTTP endpoint",
+										MarkdownDescription: "HTTP Authentication header HTTP Authentication header controls how to authenticate to the HTTP endpoint<br>Exactly one of `auth_token`, `basic_auth`, `client_cert_obj`, or `no_authorization` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -1169,7 +1215,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 										Attributes: map[string]schema.Attribute{
 											"auth_token": schema.SingleNestedAttribute{
 												Description:         "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)",
-												MarkdownDescription: "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)",
+												MarkdownDescription: "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)<br>Conflicts with `basic_auth`, `client_cert_obj`, and `no_authorization`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1183,7 +1229,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 														Attributes: map[string]schema.Attribute{
 															"secret_info_choice": schema.SingleNestedAttribute{
 																Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -1191,12 +1237,13 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																	exactlyoneofvalidator.RequiredExactlyOneOf(
 																		"blindfold_secret_info",
 																		"clear_secret_info",
+																		"none",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
 																	"blindfold_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1214,6 +1261,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
+																				WriteOnly:           true,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
 																						regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1235,7 +1283,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																	},
 																	"clear_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1268,6 +1316,16 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																			},
 																		},
 																	},
+																	"none": schema.BoolAttribute{
+																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.Bool{
+																			boolvalidator.Equals(true),
+																		},
+																	},
 																},
 															},
 														},
@@ -1276,7 +1334,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"basic_auth": schema.SingleNestedAttribute{
 												Description:         "Basic Authentication Use HTTP Basic Auth for authentication to the HTTP(s) server",
-												MarkdownDescription: "Basic Authentication Use HTTP Basic Auth for authentication to the HTTP(s) server",
+												MarkdownDescription: "Basic Authentication Use HTTP Basic Auth for authentication to the HTTP(s) server<br>Conflicts with `auth_token`, `client_cert_obj`, and `no_authorization`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1290,7 +1348,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 														Attributes: map[string]schema.Attribute{
 															"secret_info_choice": schema.SingleNestedAttribute{
 																Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -1298,12 +1356,13 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																	exactlyoneofvalidator.RequiredExactlyOneOf(
 																		"blindfold_secret_info",
 																		"clear_secret_info",
+																		"none",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
 																	"blindfold_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1321,6 +1380,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
+																				WriteOnly:           true,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
 																						regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1342,7 +1402,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																	},
 																	"clear_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1373,6 +1433,16 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																					),
 																				},
 																			},
+																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.Bool{
+																			boolvalidator.Equals(true),
 																		},
 																	},
 																},
@@ -1393,7 +1463,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"client_cert_obj": schema.SingleNestedAttribute{
 												Description:         "Enable TLS Auth With Certificate Object Use certificate and key files for client cert authentication to the server.",
-												MarkdownDescription: "Enable TLS Auth With Certificate Object Use certificate and key files for client cert authentication to the server.",
+												MarkdownDescription: "Enable TLS Auth With Certificate Object Use certificate and key files for client cert authentication to the server.<br>Conflicts with `auth_token`, `basic_auth`, and `no_authorization`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1430,7 +1500,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -1440,7 +1510,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"no_authorization": schema.BoolAttribute{
 												Description:         "No Authentication Do not use authentication to the HTTP(s) server",
-												MarkdownDescription: "No Authentication Do not use authentication to the HTTP(s) server",
+												MarkdownDescription: "No Authentication Do not use authentication to the HTTP(s) server<br>Conflicts with `auth_token`, `basic_auth`, and `client_cert_obj`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1468,7 +1538,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 									},
 									"tls_choice": schema.SingleNestedAttribute{
 										Description:         "Enable TLS",
-										MarkdownDescription: "Enable TLS",
+										MarkdownDescription: "Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -1481,7 +1551,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 										Attributes: map[string]schema.Attribute{
 											"no_tls": schema.BoolAttribute{
 												Description:         "No TLS",
-												MarkdownDescription: "No TLS",
+												MarkdownDescription: "No TLS<br>Conflicts with `use_tls`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1491,7 +1561,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"use_tls": schema.SingleNestedAttribute{
 												Description:         "Use TLS",
-												MarkdownDescription: "Use TLS",
+												MarkdownDescription: "Use TLS<br>Conflicts with `no_tls`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1524,20 +1594,23 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 													},
 													"server_validation_choice": schema.SingleNestedAttribute{
 														Description:         "Server verification choice Choose whether to perform server verification.",
-														MarkdownDescription: "Server verification choice Choose whether to perform server verification.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "Server verification choice Choose whether to perform server verification.<br>Exactly one of `use_server_verification` or `volterra_trusted_ca` must be specified when `server_validation_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"use_server_verification",
 																"volterra_trusted_ca",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"use_server_verification": schema.SingleNestedAttribute{
 																Description:         "Use Server Verification Perform server verification using the provided trusted CA list",
-																MarkdownDescription: "Use Server Verification Perform server verification using the provided trusted CA list",
+																MarkdownDescription: "Use Server Verification Perform server verification using the provided trusted CA list<br>Conflicts with `volterra_trusted_ca`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1581,7 +1654,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 																							Optional:            false,
 																							Computed:            true,
 																							PlanModifiers: []planmodifier.String{
-																								stringplanmodifier.UseStateForUnknown(),
+																								stringplanmodifier.UseNonNullStateForUnknown(),
 																							},
 																						},
 																					},
@@ -1593,7 +1666,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 															},
 															"volterra_trusted_ca": schema.BoolAttribute{
 																Description:         "F5XC Trusted CA Perform server verification using F5XC default trusted CA list",
-																MarkdownDescription: "F5XC Trusted CA Perform server verification using F5XC default trusted CA list",
+																MarkdownDescription: "F5XC Trusted CA Perform server verification using F5XC default trusted CA list<br>Conflicts with `use_server_verification`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1605,7 +1678,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 													},
 													"sni_choice": schema.SingleNestedAttribute{
 														Description:         "sni choice Select SNI to be used for upstream connection",
-														MarkdownDescription: "sni choice Select SNI to be used for upstream connection",
+														MarkdownDescription: "sni choice Select SNI to be used for upstream connection<br>Exactly one of `disable_sni` or `sni` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -1618,7 +1691,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 														Attributes: map[string]schema.Attribute{
 															"disable_sni": schema.BoolAttribute{
 																Description:         "disable_sni Do not use SNI.",
-																MarkdownDescription: "disable_sni Do not use SNI.",
+																MarkdownDescription: "disable_sni Do not use SNI.<br>Conflicts with `sni`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1628,7 +1701,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 															},
 															"sni": schema.StringAttribute{
 																Description:         "sni SNI value to be used.",
-																MarkdownDescription: "sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`",
+																MarkdownDescription: "sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `disable_sni`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1657,7 +1730,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -1665,12 +1738,13 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1688,6 +1762,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1709,7 +1784,7 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1740,6 +1815,16 @@ func (r *ResourceF5XCAlertReceiver) Schema(ctx context.Context, request resource
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -1812,9 +1897,17 @@ func (r *ResourceF5XCAlertReceiver) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAlertReceiverModel
 
 	// Read Terraform plan data into the model
@@ -1822,6 +1915,17 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCAlertReceiverModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.ReceiverChoice.IsNull() && !configData.ReceiverChoice.IsUnknown() {
+		data.ReceiverChoice = configData.ReceiverChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -2002,6 +2106,13 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !apiKeySecretInfoChoiceModel.None.IsNull() && !apiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						apiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -2092,6 +2203,13 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(alertReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !routingKeySecretInfoChoiceModel.None.IsNull() && !routingKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						routingKeySpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -2191,6 +2309,13 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -2211,6 +2336,8 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> ContactNumber
 			if !alertReceiverSmsModel.ContactNumber.IsNull() && !alertReceiverSmsModel.ContactNumber.IsUnknown() {
 				smsOneOfSpec.Sms.ContactNumber = string(alertReceiverSmsModel.ContactNumber.ValueString())
+			} else {
+				smsOneOfSpec.Sms.ContactNumber = ""
 			}
 
 		}
@@ -2326,6 +2453,13 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 
 								}
 
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									tokenSpec.SecretInfoOneof = noneSpecBool
+								}
+
 							}
 
 						}
@@ -2411,6 +2545,13 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 										clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(alertReceiverClearSecretInfoModel.Url.ValueString())
 									}
 
+								}
+
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									passwordSpec.SecretInfoOneof = noneSpecBool
 								}
 
 							}
@@ -2517,6 +2658,9 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 						}
 						useTlsOneOfSpec := &ves_io_schema_alert_receiver.HTTPConfig_UseTls{}
 						useTlsOneOfSpec.UseTls = &ves_io_schema_alert_receiver.TLSConfig{}
+						useTlsOneOfSpec.UseTls.ServerValidationChoice = &ves_io_schema_alert_receiver.TLSConfig_VolterraTrustedCa{
+							VolterraTrustedCa: &ves_io_schema.Empty{},
+						}
 						httpConfigSpec.TlsChoice = useTlsOneOfSpec
 
 						// resource modelToSpecNested EnumField --> MaxVersion
@@ -2567,7 +2711,7 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 							}
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> ServerValidationChoice
+						// resource modelToSpecNested OneOfField --> ServerValidationChoice
 						if !alertReceiverUseTlsModel.ServerValidationChoice.IsNull() && !alertReceiverUseTlsModel.ServerValidationChoice.IsUnknown() {
 							useTlsServerValidationChoiceModel := AlertReceiverServerValChoice{}
 							response.Diagnostics.Append(alertReceiverUseTlsModel.ServerValidationChoice.As(ctx, &useTlsServerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2743,6 +2887,13 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -2753,7 +2904,7 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2776,7 +2927,7 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_alert_receiver.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "alert_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "alert_receiver", err),
 		)
 		return
 	}
@@ -3047,6 +3198,15 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -3212,6 +3372,15 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 							} else {
 								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -3389,6 +3558,15 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -3448,12 +3626,8 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 				smsElement := smsOptionsWrapper.Sms
 
 				// resource specToModelNested StringField --> ContactNumber
-				if smsElement.GetContactNumber() != "" {
-					smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
-				} else {
-					// Empty string, set to null
-					smsAttributeMap["contact_number"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
 
 				smsObj, smsObjDiags := types.ObjectValue(AlertReceiverReceiverSmsModelAttributeMap, smsAttributeMap)
 				response.Diagnostics.Append(smsObjDiags...)
@@ -3604,6 +3778,15 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 											} else {
 												tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -3763,6 +3946,15 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 											} else {
 												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -3988,8 +4180,7 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 									}
 								}
 
-								// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> ServerValidationChoice
 								if useTlsElement.GetServerValidationChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4322,6 +4513,15 @@ func (r *ResourceF5XCAlertReceiver) Create(ctx context.Context, request resource
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -4436,14 +4636,10 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 	defer cancel()
 	priorReceiverChoice := data.ReceiverChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "alert_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "alert_receiver", err),
 		)
 		return
 	}
@@ -4714,6 +4910,15 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -4891,6 +5096,15 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 							} else {
 								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -5080,6 +5294,15 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -5151,12 +5374,8 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 				smsElement := smsOptionsWrapper.Sms
 
 				// resource specToModelNested StringField --> ContactNumber
-				if smsElement.GetContactNumber() != "" {
-					smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
-				} else {
-					// Empty string, set to null
-					smsAttributeMap["contact_number"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
 
 				smsObj, smsObjDiags := types.ObjectValue(AlertReceiverReceiverSmsModelAttributeMap, smsAttributeMap)
 				response.Diagnostics.Append(smsObjDiags...)
@@ -5307,6 +5526,15 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 											} else {
 												tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -5480,6 +5708,15 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 											}
 										}
 
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+										}
+
 										// --- End of Choices ---
 
 										// Create the final ObjectValue for this OneOf field
@@ -5644,7 +5881,12 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 						alertReceiverHTTPConfigModel.AuthChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						alertReceiverHTTPConfigModel.AuthChoice = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap)
+						alertReceiverHTTPConfigModel.AuthChoice = types.ObjectValueMust(AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap, map[string]attr.Value{
+							"auth_token":       types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenModelAttributeMap),
+							"basic_auth":       types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap),
+							"client_cert_obj":  types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap),
+							"no_authorization": types.BoolValue(true),
+						})
 					}
 
 					// resource specToModelNested BoolField --> EnableHttp2
@@ -5715,8 +5957,7 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 									}
 								}
 
-								// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-								// <no value>
+								// resource specToModelNested OneOfField --> ServerValidationChoice
 								if useTlsElement.GetServerValidationChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5848,7 +6089,10 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 									useTlsAttributeMap["server_validation_choice"] = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									useTlsAttributeMap["server_validation_choice"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap)
+									useTlsAttributeMap["server_validation_choice"] = types.ObjectValueMust(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap, map[string]attr.Value{
+										"use_server_verification": types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap),
+										"volterra_trusted_ca":     types.BoolValue(true),
+									})
 								}
 
 								// resource specToModelNested RequiredOneOfField --> SniChoice
@@ -6049,6 +6293,15 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -6146,6 +6399,12 @@ func (r *ResourceF5XCAlertReceiver) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAlertReceiverModel
@@ -6155,6 +6414,7 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planReceiverChoice := data.ReceiverChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -6174,7 +6434,11 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planReceiverChoice := data.ReceiverChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.ReceiverChoice.IsNull() && !configData.ReceiverChoice.IsUnknown() {
+		data.ReceiverChoice = configData.ReceiverChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -6354,6 +6618,13 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !apiKeySecretInfoChoiceModel.None.IsNull() && !apiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						apiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -6444,6 +6715,13 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(alertReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !routingKeySecretInfoChoiceModel.None.IsNull() && !routingKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						routingKeySpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -6543,6 +6821,13 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -6563,6 +6848,8 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> ContactNumber
 			if !alertReceiverSmsModel.ContactNumber.IsNull() && !alertReceiverSmsModel.ContactNumber.IsUnknown() {
 				smsOneOfSpec.Sms.ContactNumber = string(alertReceiverSmsModel.ContactNumber.ValueString())
+			} else {
+				smsOneOfSpec.Sms.ContactNumber = ""
 			}
 
 		}
@@ -6678,6 +6965,13 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 
 								}
 
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									tokenSpec.SecretInfoOneof = noneSpecBool
+								}
+
 							}
 
 						}
@@ -6763,6 +7057,13 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 										clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(alertReceiverClearSecretInfoModel.Url.ValueString())
 									}
 
+								}
+
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									passwordSpec.SecretInfoOneof = noneSpecBool
 								}
 
 							}
@@ -6869,6 +7170,9 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 						}
 						useTlsOneOfSpec := &ves_io_schema_alert_receiver.HTTPConfig_UseTls{}
 						useTlsOneOfSpec.UseTls = &ves_io_schema_alert_receiver.TLSConfig{}
+						useTlsOneOfSpec.UseTls.ServerValidationChoice = &ves_io_schema_alert_receiver.TLSConfig_VolterraTrustedCa{
+							VolterraTrustedCa: &ves_io_schema.Empty{},
+						}
 						httpConfigSpec.TlsChoice = useTlsOneOfSpec
 
 						// resource modelToSpecNested EnumField --> MaxVersion
@@ -6919,7 +7223,7 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 							}
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> ServerValidationChoice
+						// resource modelToSpecNested OneOfField --> ServerValidationChoice
 						if !alertReceiverUseTlsModel.ServerValidationChoice.IsNull() && !alertReceiverUseTlsModel.ServerValidationChoice.IsUnknown() {
 							useTlsServerValidationChoiceModel := AlertReceiverServerValChoice{}
 							response.Diagnostics.Append(alertReceiverUseTlsModel.ServerValidationChoice.As(ctx, &useTlsServerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7095,6 +7399,13 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -7105,7 +7416,7 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -7113,24 +7424,20 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_alert_receiver.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_alert_receiver.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "alert_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "alert_receiver", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "alert_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "alert_receiver", err),
 		)
 		return
 	}
@@ -7400,6 +7707,15 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -7565,6 +7881,15 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 							} else {
 								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							routingKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -7742,6 +8067,15 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -7801,12 +8135,8 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 				smsElement := smsOptionsWrapper.Sms
 
 				// resource specToModelNested StringField --> ContactNumber
-				if smsElement.GetContactNumber() != "" {
-					smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
-				} else {
-					// Empty string, set to null
-					smsAttributeMap["contact_number"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
 
 				smsObj, smsObjDiags := types.ObjectValue(AlertReceiverReceiverSmsModelAttributeMap, smsAttributeMap)
 				response.Diagnostics.Append(smsObjDiags...)
@@ -7957,6 +8287,15 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 											} else {
 												tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -8116,6 +8455,15 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 											} else {
 												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 											}
+										}
+
+										// resource specToModelNested BoolOfOneOfPointerField --> None
+										_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+										if isNone {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+										} else {
+											passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 										}
 
 										// --- End of Choices ---
@@ -8341,8 +8689,7 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 									}
 								}
 
-								// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> ServerValidationChoice
 								if useTlsElement.GetServerValidationChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8675,6 +9022,15 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -8772,7 +9128,7 @@ func (r *ResourceF5XCAlertReceiver) Update(ctx context.Context, request resource
 	}
 	// Restore plan value for ReceiverChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.ReceiverChoice = planReceiverChoice
+	data.ReceiverChoice = utils.ResolveUnknowns(planReceiverChoice, data.ReceiverChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -8820,7 +9176,7 @@ func (r *ResourceF5XCAlertReceiver) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "alert_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "alert_receiver", err),
 		)
 		return
 	}

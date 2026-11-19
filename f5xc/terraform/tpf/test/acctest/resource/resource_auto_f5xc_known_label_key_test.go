@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCKnownLabelKey_basic(t *testing.T) {
 	t.Parallel()
 
-	key := "tf-acc-klk-" + acctest.RandString(t, 8)
+	key := "example-klk-" + testAccRunSuffix(t)
 	namespace := "shared"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCKnownLabelKey_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCKnownLabelKeyConfig_basic(key, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_known_label_key.test",
+				ResourceName:                         "f5xc_known_label_key.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccKnownLabelKeyImportStateID("f5xc_known_label_key.test"),
+				ImportStateIdFunc:                    testAccKnownLabelKeyImportStateID("f5xc_known_label_key.example"),
 				ImportStateVerifyIdentifierAttribute: "key",
 			},
 			{
 				Config: testAccResourceAutoF5XCKnownLabelKeyConfig_basicUpdated(key, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_known_label_key.test",
+				ResourceName:                         "f5xc_known_label_key.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccKnownLabelKeyImportStateID("f5xc_known_label_key.test"),
+				ImportStateIdFunc:                    testAccKnownLabelKeyImportStateID("f5xc_known_label_key.example"),
 				ImportStateVerifyIdentifierAttribute: "key",
 			},
 		},
@@ -62,10 +62,10 @@ func TestAccResourceAutoF5XCKnownLabelKey_basic(t *testing.T) {
 func TestAccResourceAutoF5XCKnownLabelKey_withDescription(t *testing.T) {
 	t.Parallel()
 
-	key := "tf-acc-klk-" + acctest.RandString(t, 8)
+	key := "example-klk-" + testAccRunSuffix(t)
 	namespace := "shared"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckKnownLabelKeyDestroyProducer(t),
@@ -74,14 +74,18 @@ func TestAccResourceAutoF5XCKnownLabelKey_withDescription(t *testing.T) {
 				Config: testAccResourceAutoF5XCKnownLabelKeyConfig_withDescription(key, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_known_label_key.test",
+				ResourceName:                         "f5xc_known_label_key.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccKnownLabelKeyImportStateID("f5xc_known_label_key.test"),
+				ImportStateIdFunc:                    testAccKnownLabelKeyImportStateID("f5xc_known_label_key.example"),
 				ImportStateVerifyIdentifierAttribute: "key",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCKnownLabelKeyConfig_withDescription("example-klk", "shared"),
+		})
 }
 
 func testAccKnownLabelKeyImportStateID(resourceAddr string) func(*terraform.State) (string, error) {
@@ -117,7 +121,7 @@ func testAccCheckKnownLabelKeyDestroyProducer(t *testing.T) func(*terraform.Stat
 
 func testAccResourceAutoF5XCKnownLabelKeyConfig_basic(key, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_known_label_key" "test" {
+resource "f5xc_known_label_key" "example" {
   key       = %q
   namespace = %q
 }
@@ -126,20 +130,20 @@ resource "f5xc_known_label_key" "test" {
 
 func testAccResourceAutoF5XCKnownLabelKeyConfig_basicUpdated(key, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_known_label_key" "test" {
+resource "f5xc_known_label_key" "example" {
   key         = %q
   namespace   = %q
-  description = "Updated known label key"
+  description = "Updated known label key example"
 }
 `, key, namespace)
 }
 
 func testAccResourceAutoF5XCKnownLabelKeyConfig_withDescription(key, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_known_label_key" "test" {
+resource "f5xc_known_label_key" "example" {
   key         = %q
   namespace   = %q
-  description = "Acceptance test known label key"
+  description = "Known label key example"
 }
 `, key, namespace)
 }

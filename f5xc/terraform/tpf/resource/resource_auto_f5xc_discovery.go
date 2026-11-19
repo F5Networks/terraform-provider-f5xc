@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -38,6 +39,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -99,6 +101,7 @@ type DiscoverySecretType struct {
 type DiscoverySecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type DiscoveryBlindfoldSecretInfo struct {
@@ -193,6 +196,7 @@ type DiscoveryConsulVipDiscoveryInfoType struct {
 }
 
 type DiscoveryPublishChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
 	Publish types.Bool `tfsdk:"publish"`
 }
 
@@ -245,6 +249,7 @@ type DiscoveryK8SVipDiscoveryInfoType struct {
 }
 
 type DiscoveryK8SVipDiscoveryInfoTypePublishChoice struct {
+	Disable       types.Bool   `tfsdk:"disable"`
 	DnsDelegation types.Object `tfsdk:"dns_delegation"`
 	Publish       types.Object `tfsdk:"publish"`
 	PublishFqdns  types.Bool   `tfsdk:"publish_fqdns"`
@@ -255,7 +260,7 @@ type DiscoveryDnsDelegation struct {
 	Subdomain types.String `tfsdk:"subdomain"`
 }
 
-type DiscoveryK8SVipDiscoveryInfoTypePublish struct {
+type DiscoveryPublish struct {
 	Namespace types.String `tfsdk:"namespace"`
 }
 
@@ -275,14 +280,8 @@ type DiscoveryRefOrSelectorChoice struct {
 }
 
 type DiscoverySite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
-}
-
-type DiscoveryInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
+	NetworkType types.List `tfsdk:"network_type"`
+	Ref         types.List `tfsdk:"ref"`
 }
 
 type DiscoveryVirtualNet struct {
@@ -290,14 +289,8 @@ type DiscoveryVirtualNet struct {
 }
 
 type DiscoveryVirtualSite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
-}
-
-type DiscoveryVSiteRefTypeInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
+	NetworkType types.List `tfsdk:"network_type"`
+	Ref         types.List `tfsdk:"ref"`
 }
 
 // ResourceF5XCDiscoveryModel describes the resource data model.
@@ -324,7 +317,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> ClusterIdentifierChoice
+// Attribute map for OneOfField --> ClusterIdentifierChoice
 var DiscoveryClusterIdentifierChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster_id":    types.StringType,
@@ -467,6 +460,7 @@ var DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsPasswordSec
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersAdminCredentialsPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -492,7 +486,7 @@ var DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityMod
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ServerValidationChoice
+// Attribute map for OneOfField --> ServerValidationChoice
 var DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"skip_server_verification": types.BoolType,
@@ -682,6 +676,7 @@ var DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoKeyUrl
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoConnectionInfoTlsInfoKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -727,6 +722,7 @@ var DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoPasswdUrlS
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoPasswdUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -752,9 +748,10 @@ var DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoModelAttributeMap = map[st
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PublishChoice
+// Attribute map for OneOfField --> PublishChoice
 var DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoPublishChoiceModelAttributeMap = map[string]attr.Type{
 
+	"disable": types.BoolType,
 	"publish": types.BoolType,
 }
 
@@ -847,6 +844,7 @@ var DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInf
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInfoKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -881,6 +879,7 @@ var DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlSecretI
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -898,7 +897,7 @@ var DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlSecretI
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> K8SPodNetworkChoice
+// Attribute map for OneOfField --> K8SPodNetworkChoice
 var DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoK8SPodNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"isolated":  types.BoolType,
@@ -943,9 +942,10 @@ var DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoModelAttributeMap = map[strin
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PublishChoice
+// Attribute map for OneOfField --> PublishChoice
 var DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceModelAttributeMap = map[string]attr.Type{
 
+	"disable": types.BoolType,
 	"dns_delegation": types.ObjectType{
 		AttrTypes: DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceDnsDelegationModelAttributeMap,
 	},
@@ -1006,9 +1006,6 @@ var DiscoveryWhereRefOrSelectorModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> Site
 var DiscoveryWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap,
-	},
 	"network_type": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -1022,13 +1019,6 @@ var DiscoveryWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Ref
@@ -1057,9 +1047,6 @@ var DiscoveryWhereRefOrSelectorVirtualNetworkModelAttributeMap = map[string]attr
 // Attribute map for PointerOfOneOfField --> VirtualSite
 var DiscoveryWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap,
-	},
 	"network_type": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -1075,13 +1062,6 @@ var DiscoveryWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Ty
 	},
 }
 
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
-}
-
 func NewResourceF5XCDiscovery() resource.Resource {
 	return &ResourceF5XCDiscovery{}
 }
@@ -1093,8 +1073,8 @@ func (r *ResourceF5XCDiscovery) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of discovery) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of discovery) etc. can be fetched",
+		MarkdownDescription: "Service discovery in F5XC performs following<br><br>Dynamic service discovery: Resolving the load balancer endpoints for a ADC cluster<br>Dynamic VIP discovery: Publishing virtual IP to attract traffic from clients",
+		Description:         "Service discovery in F5XC performs following Dynamic service discovery: Resolving the load balancer endpoints for a ADC cluster Dynamic VIP discovery: Publishing virtual IP to attract traffic from clients",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1162,20 +1142,23 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 			},
 			"cluster_identifier_choice": schema.SingleNestedAttribute{
 				Description:         "cluster identifier choice Specify identifier for discovery cluster. This identifier can be specified in endpoint object to discover only from this discovery object. This is useful when a site has multiple discovery objects and endpoint wants to discover from few of them. The default behaviour for endpoint is to discover from all discovery objects of the site.",
-				MarkdownDescription: "cluster identifier choice Specify identifier for discovery cluster. This identifier can be specified in endpoint object to discover only from this discovery object. This is useful when a site has multiple discovery objects and endpoint wants to discover from few of them. The default behaviour for endpoint is to discover from all discovery objects of the site.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "cluster identifier choice Specify identifier for discovery cluster. This identifier can be specified in endpoint object to discover only from this discovery object. This is useful when a site has multiple discovery objects and endpoint wants to discover from few of them. The default behaviour for endpoint is to discover from all discovery objects of the site.<br>Exactly one of `cluster_id` or `no_cluster_id` must be specified when `cluster_identifier_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"cluster_id",
 						"no_cluster_id",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"cluster_id": schema.StringAttribute{
 						Description:         "Cluster identifier Specify identifier for discovery cluster. This identifier can be specified in endpoint object to discover only from this discovery object.",
-						MarkdownDescription: "Cluster identifier Specify identifier for discovery cluster. This identifier can be specified in endpoint object to discover only from this discovery object.<br>**Validation:** `Length LengthAtMost(256)`",
+						MarkdownDescription: "Cluster identifier Specify identifier for discovery cluster. This identifier can be specified in endpoint object to discover only from this discovery object.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `no_cluster_id`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1185,7 +1168,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 					},
 					"no_cluster_id": schema.BoolAttribute{
 						Description:         "no cluster identifier There is no cluster identifier specified. In this mode all endpoints of the site will discover from this discovery object.",
-						MarkdownDescription: "no cluster identifier There is no cluster identifier specified. In this mode all endpoints of the site will discover from this discovery object.",
+						MarkdownDescription: "no cluster identifier There is no cluster identifier specified. In this mode all endpoints of the site will discover from this discovery object.<br>Conflicts with `cluster_id`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1197,7 +1180,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 			},
 			"discovery_choice": schema.SingleNestedAttribute{
 				Description:         "discovery choice Select discovery method",
-				MarkdownDescription: "discovery choice Select discovery method",
+				MarkdownDescription: "discovery choice Select discovery method<br>Exactly one of `discovery_cbip`, `discovery_consul`, `discovery_k8s`, or `discovery_third_party` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -1212,7 +1195,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 				Attributes: map[string]schema.Attribute{
 					"discovery_cbip": schema.SingleNestedAttribute{
 						Description:         "discovery BIG-IP Discovery configuration for BIG-IP",
-						MarkdownDescription: "discovery BIG-IP Discovery configuration for BIG-IP",
+						MarkdownDescription: "discovery BIG-IP Discovery configuration for BIG-IP<br>Conflicts with `discovery_consul`, `discovery_k8s`, and `discovery_third_party`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1245,7 +1228,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 													Attributes: map[string]schema.Attribute{
 														"secret_info_choice": schema.SingleNestedAttribute{
 															Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -1253,12 +1236,13 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																exactlyoneofvalidator.RequiredExactlyOneOf(
 																	"blindfold_secret_info",
 																	"clear_secret_info",
+																	"none",
 																),
 															},
 															Attributes: map[string]schema.Attribute{
 																"blindfold_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1276,6 +1260,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
+																			WriteOnly:           true,
 																			Validators: []validator.String{
 																				stringvalidator.RegexMatches(
 																					regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1297,7 +1282,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																},
 																"clear_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1330,6 +1315,16 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																		},
 																	},
 																},
+																"none": schema.BoolAttribute{
+																	Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            false,
+																	Validators: []validator.Bool{
+																		boolvalidator.Equals(true),
+																	},
+																},
 															},
 														},
 													},
@@ -1355,20 +1350,23 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 											Attributes: map[string]schema.Attribute{
 												"server_validation_choice": schema.SingleNestedAttribute{
 													Description:         "BIG-IP Root CA Certificate BIG-IP Root CA Certificate choice",
-													MarkdownDescription: "BIG-IP Root CA Certificate BIG-IP Root CA Certificate choice",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "BIG-IP Root CA Certificate BIG-IP Root CA Certificate choice<br>Exactly one of `skip_server_verification` or `trusted_ca` must be specified when `server_validation_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"skip_server_verification",
 															"trusted_ca",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"skip_server_verification": schema.BoolAttribute{
 															Description:         "Skip Server Verification Skip origin server verification",
-															MarkdownDescription: "Skip Server Verification Skip origin server verification",
+															MarkdownDescription: "Skip Server Verification Skip origin server verification<br>Conflicts with `trusted_ca`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1378,7 +1376,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 														},
 														"trusted_ca": schema.SingleNestedAttribute{
 															Description:         "trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate",
-															MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate",
+															MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate<br>Conflicts with `skip_server_verification`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1404,7 +1402,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -1438,7 +1436,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 											Attributes: map[string]schema.Attribute{
 												"sync_type_choice": schema.SingleNestedAttribute{
 													Description:         "Sync Type",
-													MarkdownDescription: "Sync Type",
+													MarkdownDescription: "Sync Type<br>Exactly one of `manual_sync`, `not_applicable`, or `xc_managed_sync` must be specified when `sync_type_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1452,7 +1450,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 													Attributes: map[string]schema.Attribute{
 														"manual_sync": schema.BoolAttribute{
 															Description:         "Manual Sync Configuration changes must be synced manually.",
-															MarkdownDescription: "Manual Sync Configuration changes must be synced manually.",
+															MarkdownDescription: "Manual Sync Configuration changes must be synced manually.<br>Conflicts with `not_applicable` and `xc_managed_sync`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1462,7 +1460,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 														},
 														"not_applicable": schema.BoolAttribute{
 															Description:         "Default (Not Applicable) Not applicable for Standalone or Auto-Sync HA.",
-															MarkdownDescription: "Default (Not Applicable) Not applicable for Standalone or Auto-Sync HA.",
+															MarkdownDescription: "Default (Not Applicable) Not applicable for Standalone or Auto-Sync HA.<br>Conflicts with `manual_sync` and `xc_managed_sync`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1472,7 +1470,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 														},
 														"xc_managed_sync": schema.BoolAttribute{
 															Description:         "Distributed Cloud Managed Auto Sync Distributed Cloud updates the active BIG-IP and initiates a sync automatically.",
-															MarkdownDescription: "Distributed Cloud Managed Auto Sync Distributed Cloud updates the active BIG-IP and initiates a sync automatically.",
+															MarkdownDescription: "Distributed Cloud Managed Auto Sync Distributed Cloud updates the active BIG-IP and initiates a sync automatically.<br>Conflicts with `manual_sync` and `not_applicable`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1539,7 +1537,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 										},
 										"namespace_mapping_choice": schema.SingleNestedAttribute{
 											Description:         "Mapping Preference Select the mapping between BIG-IP partition from which services will be discovered, and App Namespace to the discovered services will be shared.",
-											MarkdownDescription: "Mapping Preference Select the mapping between BIG-IP partition from which services will be discovered, and App Namespace to the discovered services will be shared.",
+											MarkdownDescription: "Mapping Preference Select the mapping between BIG-IP partition from which services will be discovered, and App Namespace to the discovered services will be shared.<br>Exactly one of `default_all` or `namespace_mapping` must be specified when `namespace_mapping_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1552,7 +1550,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 											Attributes: map[string]schema.Attribute{
 												"default_all": schema.BoolAttribute{
 													Description:         "Default (Automatic) If configuring in an App Namespace, discovered services across all BIG-IP partitions will be discovered in the current Namespace",
-													MarkdownDescription: "Default (Automatic) If configuring in an App Namespace, discovered services across all BIG-IP partitions will be discovered in the current Namespace",
+													MarkdownDescription: "Default (Automatic) If configuring in an App Namespace, discovered services across all BIG-IP partitions will be discovered in the current Namespace<br>Conflicts with `namespace_mapping`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1562,7 +1560,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 												},
 												"namespace_mapping": schema.SingleNestedAttribute{
 													Description:         "Custom Select the BIG-IP partitions from which services will be discovered. If configuring in Shared Configuration, services can be discovered in selected App Namespaces. If configuring in App Namespace services will be discovered in the current Namespace.",
-													MarkdownDescription: "Custom Select the BIG-IP partitions from which services will be discovered. If configuring in Shared Configuration, services can be discovered in selected App Namespaces. If configuring in App Namespace services will be discovered in the current Namespace.",
+													MarkdownDescription: "Custom Select the BIG-IP partitions from which services will be discovered. If configuring in Shared Configuration, services can be discovered in selected App Namespaces. If configuring in App Namespace services will be discovered in the current Namespace.<br>Conflicts with `default_all`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1659,7 +1657,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 					},
 					"discovery_consul": schema.SingleNestedAttribute{
 						Description:         "discovery consul Discovery configuration for Hashicorp Consul",
-						MarkdownDescription: "discovery consul Discovery configuration for Hashicorp Consul",
+						MarkdownDescription: "discovery consul Discovery configuration for Hashicorp Consul<br>Conflicts with `discovery_cbip`, `discovery_k8s`, and `discovery_third_party`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1722,7 +1720,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 														Attributes: map[string]schema.Attribute{
 															"secret_info_choice": schema.SingleNestedAttribute{
 																Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -1730,12 +1728,13 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																	exactlyoneofvalidator.RequiredExactlyOneOf(
 																		"blindfold_secret_info",
 																		"clear_secret_info",
+																		"none",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
 																	"blindfold_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1753,6 +1752,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
+																				WriteOnly:           true,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
 																						regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1774,7 +1774,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																	},
 																	"clear_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1805,6 +1805,16 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																					),
 																				},
 																			},
+																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.Bool{
+																			boolvalidator.Equals(true),
 																		},
 																	},
 																},
@@ -1859,7 +1869,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -1867,12 +1877,13 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 															exactlyoneofvalidator.RequiredExactlyOneOf(
 																"blindfold_secret_info",
 																"clear_secret_info",
+																"none",
 															),
 														},
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1890,6 +1901,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
+																		WriteOnly:           true,
 																		Validators: []validator.String{
 																			stringvalidator.RegexMatches(
 																				regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1911,7 +1923,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1944,16 +1956,27 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																	},
 																},
 															},
+															"none": schema.BoolAttribute{
+																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+																Validators: []validator.Bool{
+																	boolvalidator.Equals(true),
+																},
+															},
 														},
 													},
 												},
 											},
 											"user_name": schema.StringAttribute{
 												Description:         "username username in consul",
-												MarkdownDescription: "username username in consul<br>**Validation:** `Length LengthAtMost(64)`",
+												MarkdownDescription: "username username in consul<br>**Validation:** `Length LengthAtMost(64)`<br>**Default:** ``",
 												Required:            false,
 												Optional:            true,
-												Computed:            false,
+												Computed:            true,
+												Default:             stringdefault.StaticString(""),
 												Validators: []validator.String{
 													stringvalidator.LengthAtMost(64),
 												},
@@ -1971,19 +1994,33 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 								Attributes: map[string]schema.Attribute{
 									"publish_choice": schema.SingleNestedAttribute{
 										Description:         "publish choice Enable or disable VIP Publishing.",
-										MarkdownDescription: "publish choice Enable or disable VIP Publishing.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "publish choice Enable or disable VIP Publishing.<br>Exactly one of `disable` or `publish` must be specified when `publish_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
+												"disable",
 												"publish",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "disable Disable VIP Publishing",
+												MarkdownDescription: "disable Disable VIP Publishing<br>Conflicts with `publish`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"publish": schema.BoolAttribute{
 												Description:         "publish Publish domain to VIP mapping.",
-												MarkdownDescription: "publish Publish domain to VIP mapping.",
+												MarkdownDescription: "publish Publish domain to VIP mapping.<br>Conflicts with `disable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1999,7 +2036,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 					},
 					"discovery_k8s": schema.SingleNestedAttribute{
 						Description:         "discovery K8s Discovery configuration for K8s.",
-						MarkdownDescription: "discovery K8s Discovery configuration for K8s.",
+						MarkdownDescription: "discovery K8s Discovery configuration for K8s.<br>Conflicts with `discovery_cbip`, `discovery_consul`, and `discovery_third_party`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2013,7 +2050,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 								Attributes: map[string]schema.Attribute{
 									"config_type_choice": schema.SingleNestedAttribute{
 										Description:         "Oneof for K8s config Kubernetes credentials can be kubeconfig or TLS param",
-										MarkdownDescription: "Oneof for K8s config Kubernetes credentials can be kubeconfig or TLS param",
+										MarkdownDescription: "Oneof for K8s config Kubernetes credentials can be kubeconfig or TLS param<br>Exactly one of `connection_info` or `kubeconfig_url` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -2026,7 +2063,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 										Attributes: map[string]schema.Attribute{
 											"connection_info": schema.SingleNestedAttribute{
 												Description:         "REST connection info Provide API server access details (endpoint and TLS parameters)",
-												MarkdownDescription: "REST connection info Provide API server access details (endpoint and TLS parameters)",
+												MarkdownDescription: "REST connection info Provide API server access details (endpoint and TLS parameters)<br>Conflicts with `kubeconfig_url`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2075,7 +2112,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -2083,12 +2120,13 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -2106,6 +2144,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -2127,7 +2166,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																			},
 																			"clear_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -2158,6 +2197,16 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																							),
 																						},
 																					},
+																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
 																				},
 																			},
 																		},
@@ -2198,14 +2247,14 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 											},
 											"kubeconfig_url": schema.SingleNestedAttribute{
 												Description:         "Kubeconfig Provide kubeconfig file to connect to K8s cluster",
-												MarkdownDescription: "Kubeconfig Provide kubeconfig file to connect to K8s cluster",
+												MarkdownDescription: "Kubeconfig Provide kubeconfig file to connect to K8s cluster<br>Conflicts with `connection_info`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -2213,12 +2262,13 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 															exactlyoneofvalidator.RequiredExactlyOneOf(
 																"blindfold_secret_info",
 																"clear_secret_info",
+																"none",
 															),
 														},
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2236,6 +2286,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
+																		WriteOnly:           true,
 																		Validators: []validator.String{
 																			stringvalidator.RegexMatches(
 																				regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -2257,7 +2308,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2290,6 +2341,16 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 																	},
 																},
 															},
+															"none": schema.BoolAttribute{
+																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+																Validators: []validator.Bool{
+																	boolvalidator.Equals(true),
+																},
+															},
 														},
 													},
 												},
@@ -2298,20 +2359,23 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 									},
 									"k8s_pod_network_choice": schema.SingleNestedAttribute{
 										Description:         "Kubernetes Network reachability Specify which IP addresses to discover from Kubernetes services based on reachability of Kubernetes POD",
-										MarkdownDescription: "Kubernetes Network reachability Specify which IP addresses to discover from Kubernetes services based on reachability of Kubernetes POD",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Kubernetes Network reachability Specify which IP addresses to discover from Kubernetes services based on reachability of Kubernetes POD<br>Exactly one of `isolated` or `reachable` must be specified when `k8s_pod_network_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"isolated",
 												"reachable",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"isolated": schema.BoolAttribute{
 												Description:         "isolated Specifies Kubernetes POD network is isolated from VER. In this mode NodePort is discovered when Kubernetes cluster is external and ClusterIP is discovered when Kubernetes cluster is in InCluster mode.",
-												MarkdownDescription: "isolated Specifies Kubernetes POD network is isolated from VER. In this mode NodePort is discovered when Kubernetes cluster is external and ClusterIP is discovered when Kubernetes cluster is in InCluster mode.",
+												MarkdownDescription: "isolated Specifies Kubernetes POD network is isolated from VER. In this mode NodePort is discovered when Kubernetes cluster is external and ClusterIP is discovered when Kubernetes cluster is in InCluster mode.<br>Conflicts with `reachable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2321,7 +2385,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 											},
 											"reachable": schema.BoolAttribute{
 												Description:         "Kubernetes Pod reachability Specifies Kubernetes POD is reachable from VER. When POD is reachable, VER always discovers POD IP Address for configured endpoints.",
-												MarkdownDescription: "Kubernetes Pod reachability Specifies Kubernetes POD is reachable from VER. When POD is reachable, VER always discovers POD IP Address for configured endpoints.",
+												MarkdownDescription: "Kubernetes Pod reachability Specifies Kubernetes POD is reachable from VER. When POD is reachable, VER always discovers POD IP Address for configured endpoints.<br>Conflicts with `isolated`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2335,7 +2399,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 							},
 							"namespace_mapping_choice": schema.SingleNestedAttribute{
 								Description:         "Mapping Preference Select the mapping between K8s namespaces from which services will be discovered, and App Namespace to the discovered services will be shared.",
-								MarkdownDescription: "Mapping Preference Select the mapping between K8s namespaces from which services will be discovered, and App Namespace to the discovered services will be shared.",
+								MarkdownDescription: "Mapping Preference Select the mapping between K8s namespaces from which services will be discovered, and App Namespace to the discovered services will be shared.<br>Exactly one of `default_all` or `namespace_mapping` must be specified when `namespace_mapping_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2348,7 +2412,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 								Attributes: map[string]schema.Attribute{
 									"default_all": schema.BoolAttribute{
 										Description:         "Default (Automatic) If configuring in an App Namespace, discovered services across all K8s namespaces will be discovered in the current Namespace",
-										MarkdownDescription: "Default (Automatic) If configuring in an App Namespace, discovered services across all K8s namespaces will be discovered in the current Namespace",
+										MarkdownDescription: "Default (Automatic) If configuring in an App Namespace, discovered services across all K8s namespaces will be discovered in the current Namespace<br>Conflicts with `namespace_mapping`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2358,7 +2422,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 									},
 									"namespace_mapping": schema.SingleNestedAttribute{
 										Description:         "Custom Select the K8s namespaces from which services will be discovered. If configuring in Shared Configuration, services can be discovered in selected App Namespaces. If configuring in App Namespace services will be discovered in the current Namespace.",
-										MarkdownDescription: "Custom Select the K8s namespaces from which services will be discovered. If configuring in Shared Configuration, services can be discovered in selected App Namespaces. If configuring in App Namespace services will be discovered in the current Namespace.",
+										MarkdownDescription: "Custom Select the K8s namespaces from which services will be discovered. If configuring in Shared Configuration, services can be discovered in selected App Namespaces. If configuring in App Namespace services will be discovered in the current Namespace.<br>Conflicts with `default_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2409,21 +2473,35 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 								Attributes: map[string]schema.Attribute{
 									"publish_choice": schema.SingleNestedAttribute{
 										Description:         "publish choice Select VIP Publishing or DNS Delegation",
-										MarkdownDescription: "publish choice Select VIP Publishing or DNS Delegation",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "publish choice Select VIP Publishing or DNS Delegation<br>Exactly one of `disable`, `dns_delegation`, `publish`, or `publish_fqdns` must be specified when `publish_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
+												"disable",
 												"dns_delegation",
 												"publish",
 												"publish_fqdns",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
+											"disable": schema.BoolAttribute{
+												Description:         "disable Disable VIP Publishing and DNS Delegation",
+												MarkdownDescription: "disable Disable VIP Publishing and DNS Delegation<br>Conflicts with `dns_delegation`, `publish`, and `publish_fqdns`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 											"dns_delegation": schema.SingleNestedAttribute{
 												Description:         "dns delegation Program DNS delegation for a sub-domain in external cluster",
-												MarkdownDescription: "dns delegation Program DNS delegation for a sub-domain in external cluster",
+												MarkdownDescription: "dns delegation Program DNS delegation for a sub-domain in external cluster<br>Conflicts with `disable`, `publish`, and `publish_fqdns`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2454,7 +2532,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 											},
 											"publish": schema.SingleNestedAttribute{
 												Description:         "publish Publish domain to VIP mapping.",
-												MarkdownDescription: "publish Publish domain to VIP mapping.",
+												MarkdownDescription: "publish Publish domain to VIP mapping.<br>Conflicts with `disable`, `dns_delegation`, and `publish_fqdns`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2473,7 +2551,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 											},
 											"publish_fqdns": schema.BoolAttribute{
 												Description:         "publish_fqdns Use this option to publish domain to VIP mapping when all domains are expected to be fully qualified i.e. they include the namespace.",
-												MarkdownDescription: "publish_fqdns Use this option to publish domain to VIP mapping when all domains are expected to be fully qualified i.e. they include the namespace.",
+												MarkdownDescription: "publish_fqdns Use this option to publish domain to VIP mapping when all domains are expected to be fully qualified i.e. they include the namespace.<br>Conflicts with `disable`, `dns_delegation`, and `publish`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2489,7 +2567,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 					},
 					"discovery_third_party": schema.SingleNestedAttribute{
 						Description:         "discovery Third Party Discovery configuration for Third Party",
-						MarkdownDescription: "discovery Third Party Discovery configuration for Third Party",
+						MarkdownDescription: "discovery Third Party Discovery configuration for Third Party<br>Conflicts with `discovery_cbip`, `discovery_consul`, and `discovery_k8s`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2521,7 +2599,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 								Validators: []validator.List{
 									listvalidator.SizeBetween(1, 5),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+										regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 										"must be a valid IP prefix",
 									)),
 									listvalidator.UniqueValues(),
@@ -2540,7 +2618,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 				Attributes: map[string]schema.Attribute{
 					"ref_or_selector_choice": schema.SingleNestedAttribute{
 						Description:         "ref_or_selector One of following",
-						MarkdownDescription: "ref_or_selector One of following",
+						MarkdownDescription: "ref_or_selector One of following<br>Exactly one of `site`, `virtual_network`, or `virtual_site` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -2554,46 +2632,11 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 						Attributes: map[string]schema.Attribute{
 							"site": schema.SingleNestedAttribute{
 								Description:         "site Direct reference to site object",
-								MarkdownDescription: "site Direct reference to site object",
+								MarkdownDescription: "site Direct reference to site object<br>Conflicts with `virtual_network` and `virtual_site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description:         "Internet VIP Choice Internet VIP Choice",
-										MarkdownDescription: "Internet VIP Choice Internet VIP Choice",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
-												"disable_internet_vip",
-												"enable_internet_vip",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description:         "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description:         "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-										},
-									},
 									"network_type": schema.ListAttribute{
 										Description:         "network_type The type of network on the referred site",
 										MarkdownDescription: "network_type The type of network on the referred site<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`",
@@ -2639,7 +2682,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2649,7 +2692,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 							},
 							"virtual_network": schema.SingleNestedAttribute{
 								Description:         "virtual_network Direct reference to virtual network object",
-								MarkdownDescription: "virtual_network Direct reference to virtual network object",
+								MarkdownDescription: "virtual_network Direct reference to virtual network object<br>Conflicts with `site` and `virtual_site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2686,7 +2729,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2696,46 +2739,11 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 							},
 							"virtual_site": schema.SingleNestedAttribute{
 								Description:         "virtual_site Direct reference to virtual site object",
-								MarkdownDescription: "virtual_site Direct reference to virtual site object",
+								MarkdownDescription: "virtual_site Direct reference to virtual site object<br>Conflicts with `site` and `virtual_network`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description:         "Internet VIP Choice Internet VIP Choice",
-										MarkdownDescription: "Internet VIP Choice Internet VIP Choice",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
-												"disable_internet_vip",
-												"enable_internet_vip",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description:         "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description:         "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-										},
-									},
 									"network_type": schema.ListAttribute{
 										Description:         "network_type The type of network on the referred virtual_site",
 										MarkdownDescription: "network_type The type of network on the referred virtual_site<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`",
@@ -2781,7 +2789,7 @@ func (r *ResourceF5XCDiscovery) Schema(ctx context.Context, request resource.Sch
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2855,9 +2863,17 @@ func (r *ResourceF5XCDiscovery) ModifyPlan(ctx context.Context, req resource.Mod
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDiscoveryModel
 
 	// Read Terraform plan data into the model
@@ -2865,6 +2881,17 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCDiscoveryModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.DiscoveryChoice.IsNull() && !configData.DiscoveryChoice.IsUnknown() {
+		data.DiscoveryChoice = configData.DiscoveryChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -2938,7 +2965,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ClusterIdentifierChoice
+	// resource modelToSpecRoot OneOfField --> ClusterIdentifierChoice
 	if !data.ClusterIdentifierChoice.IsNull() && !data.ClusterIdentifierChoice.IsUnknown() {
 		clusterIdentifierChoiceModel := DiscoveryClusterIdentifierChoice{}
 		response.Diagnostics.Append(data.ClusterIdentifierChoice.As(ctx, &clusterIdentifierChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2960,6 +2987,10 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 			spec.ClusterIdentifierChoice = noClusterIdSpecBool
 		}
 
+	} else {
+		spec.ClusterIdentifierChoice = &ves_io_schema_discovery.CreateSpecType_NoClusterId{
+			NoClusterId: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> DiscoveryChoice
@@ -3082,6 +3113,13 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 								}
 
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									passwordSpec.SecretInfoOneof = noneSpecBool
+								}
+
 							}
 
 						}
@@ -3102,9 +3140,12 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 						}
 
 						cbipCertificateAuthoritySpec := &ves_io_schema_discovery.CbipCertificateAuthority{}
+						cbipCertificateAuthoritySpec.ServerValidationChoice = &ves_io_schema_discovery.CbipCertificateAuthority_SkipServerVerification{
+							SkipServerVerification: &ves_io_schema.Empty{},
+						}
 						cbipClustersSpec[i].CbipCertificateAuthority = cbipCertificateAuthoritySpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ServerValidationChoice
+						// resource modelToSpecNested OneOfField --> ServerValidationChoice
 						if !cbipCertificateAuthorityModel.ServerValidationChoice.IsNull() && !cbipCertificateAuthorityModel.ServerValidationChoice.IsUnknown() {
 							cbipCertificateAuthorityServerValidationChoiceModel := DiscoveryServerValChoice{}
 							response.Diagnostics.Append(cbipCertificateAuthorityModel.ServerValidationChoice.As(ctx, &cbipCertificateAuthorityServerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3352,6 +3393,9 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 			}
 			discoveryConsulOneOfSpec := &ves_io_schema_discovery.CreateSpecType_DiscoveryConsul{}
 			discoveryConsulOneOfSpec.DiscoveryConsul = &ves_io_schema_discovery.ConsulDiscoveryType{}
+			discoveryConsulOneOfSpec.DiscoveryConsul.NamespaceMappingChoice = &ves_io_schema_discovery.ConsulDiscoveryType_DefaultAll{
+				DefaultAll: &ves_io_schema.Empty{},
+			}
 			spec.DiscoveryChoice = discoveryConsulOneOfSpec
 
 			// resource modelToSpecNested RequiredPointerField --> AccessInfo
@@ -3467,6 +3511,13 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 								}
 
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									keyUrlSpec.SecretInfoOneof = noneSpecBool
+								}
+
 							}
 
 						}
@@ -3566,6 +3617,13 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwdUrlSecretInfoChoiceModel.None.IsNull() && !passwdUrlSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwdUrlSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -3573,6 +3631,8 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 					// resource modelToSpecNested StringField --> UserName
 					if !httpBasicAuthInfoModel.UserName.IsNull() && !httpBasicAuthInfoModel.UserName.IsUnknown() {
 						httpBasicAuthInfoSpec.UserName = string(httpBasicAuthInfoModel.UserName.ValueString())
+					} else {
+						httpBasicAuthInfoSpec.UserName = ""
 					}
 
 				}
@@ -3588,14 +3648,24 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 				}
 
 				publishInfoSpec := &ves_io_schema_discovery.ConsulVipDiscoveryInfoType{}
+				publishInfoSpec.PublishChoice = &ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable{
+					Disable: &ves_io_schema.Empty{},
+				}
 				discoveryConsulOneOfSpec.DiscoveryConsul.PublishInfo = publishInfoSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PublishChoice
+				// resource modelToSpecNested OneOfField --> PublishChoice
 				if !publishInfoModel.PublishChoice.IsNull() && !publishInfoModel.PublishChoice.IsUnknown() {
 					publishInfoPublishChoiceModel := DiscoveryPublishChoice{}
 					response.Diagnostics.Append(publishInfoModel.PublishChoice.As(ctx, &publishInfoPublishChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !publishInfoPublishChoiceModel.Disable.IsNull() && !publishInfoPublishChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						publishInfoSpec.PublishChoice = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Publish
@@ -3631,6 +3701,9 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 				}
 
 				accessInfoSpec := &ves_io_schema_discovery.K8SAccessInfo{}
+				accessInfoSpec.K8SPodNetworkChoice = &ves_io_schema_discovery.K8SAccessInfo_Isolated{
+					Isolated: &ves_io_schema.Empty{},
+				}
 				discoveryK8sOneOfSpec.DiscoveryK8S.AccessInfo = accessInfoSpec
 
 				// resource modelToSpecNested RequiredOneOfField --> ConfigType
@@ -3743,6 +3816,13 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -3831,13 +3911,20 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !kubeconfigUrlSecretInfoChoiceModel.None.IsNull() && !kubeconfigUrlSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								kubeconfigUrlOneOfSpec.KubeconfigUrl.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> K8SPodNetworkChoice
+				// resource modelToSpecNested OneOfField --> K8SPodNetworkChoice
 				if !accessInfoModel.K8SPodNetworkChoice.IsNull() && !accessInfoModel.K8SPodNetworkChoice.IsUnknown() {
 					accessInfoK8SPodNetworkChoiceModel := DiscoveryK8SPodNetChoice{}
 					response.Diagnostics.Append(accessInfoModel.K8SPodNetworkChoice.As(ctx, &accessInfoK8SPodNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3937,14 +4024,24 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 				}
 
 				publishInfoSpec := &ves_io_schema_discovery.K8SVipDiscoveryInfoType{}
+				publishInfoSpec.PublishChoice = &ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable{
+					Disable: &ves_io_schema.Empty{},
+				}
 				discoveryK8sOneOfSpec.DiscoveryK8S.PublishInfo = publishInfoSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PublishChoice
+				// resource modelToSpecNested OneOfField --> PublishChoice
 				if !publishInfoModel.PublishChoice.IsNull() && !publishInfoModel.PublishChoice.IsUnknown() {
 					publishInfoPublishChoiceModel := DiscoveryK8SVipDiscoveryInfoTypePublishChoice{}
 					response.Diagnostics.Append(publishInfoModel.PublishChoice.As(ctx, &publishInfoPublishChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !publishInfoPublishChoiceModel.Disable.IsNull() && !publishInfoPublishChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						publishInfoSpec.PublishChoice = disableSpecBool
 					}
 
 					// resource modelToSpecNested PointerOfOneOfField --> DnsDelegation
@@ -3991,8 +4088,8 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 					// resource modelToSpecNested PointerOfOneOfField --> Publish
 					if !publishInfoPublishChoiceModel.Publish.IsNull() && !publishInfoPublishChoiceModel.Publish.IsUnknown() {
-						var discoveryK8SVipDiscoveryInfoTypePublishModel DiscoveryK8SVipDiscoveryInfoTypePublish
-						response.Diagnostics.Append(publishInfoPublishChoiceModel.Publish.As(ctx, &discoveryK8SVipDiscoveryInfoTypePublishModel, basetypes.ObjectAsOptions{})...)
+						var discoveryPublishModel DiscoveryPublish
+						response.Diagnostics.Append(publishInfoPublishChoiceModel.Publish.As(ctx, &discoveryPublishModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
 						}
@@ -4001,8 +4098,8 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 						publishInfoSpec.PublishChoice = publishOneOfSpec
 
 						// resource modelToSpecNested RequiredStringField --> Namespace
-						if !discoveryK8SVipDiscoveryInfoTypePublishModel.Namespace.IsNull() && !discoveryK8SVipDiscoveryInfoTypePublishModel.Namespace.IsUnknown() {
-							publishOneOfSpec.Publish.Namespace = string(discoveryK8SVipDiscoveryInfoTypePublishModel.Namespace.ValueString())
+						if !discoveryPublishModel.Namespace.IsNull() && !discoveryPublishModel.Namespace.IsUnknown() {
+							publishOneOfSpec.Publish.Namespace = string(discoveryPublishModel.Namespace.ValueString())
 						}
 
 					}
@@ -4088,31 +4185,10 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 					}
 					siteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_Site{}
 					siteOneOfSpec.Site = &ves_io_schema.SiteRefType{}
-					whereSpec.RefOrSelector = siteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !discoverySiteModel.InternetVipChoice.IsNull() && !discoverySiteModel.InternetVipChoice.IsUnknown() {
-						siteInternetVipChoiceModel := DiscoveryInternetVipChoice{}
-						response.Diagnostics.Append(discoverySiteModel.InternetVipChoice.As(ctx, &siteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !siteInternetVipChoiceModel.DisableInternetVip.IsNull() && !siteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.SiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !siteInternetVipChoiceModel.EnableInternetVip.IsNull() && !siteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.SiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = enableInternetVipSpecBool
-						}
-
+					siteOneOfSpec.Site.InternetVipChoice = &ves_io_schema.SiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
 					}
+					whereSpec.RefOrSelector = siteOneOfSpec
 
 					// resource modelToSpecNested EnumField --> NetworkType
 					if !discoverySiteModel.NetworkType.IsNull() && !discoverySiteModel.NetworkType.IsUnknown() {
@@ -4228,31 +4304,10 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 					}
 					virtualSiteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_VirtualSite{}
 					virtualSiteOneOfSpec.VirtualSite = &ves_io_schema.VSiteRefType{}
-					whereSpec.RefOrSelector = virtualSiteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !discoveryVirtualSiteModel.InternetVipChoice.IsNull() && !discoveryVirtualSiteModel.InternetVipChoice.IsUnknown() {
-						virtualSiteInternetVipChoiceModel := DiscoveryVSiteRefTypeInternetVipChoice{}
-						response.Diagnostics.Append(discoveryVirtualSiteModel.InternetVipChoice.As(ctx, &virtualSiteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.VSiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.VSiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = enableInternetVipSpecBool
-						}
-
+					virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = &ves_io_schema.VSiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
 					}
+					whereSpec.RefOrSelector = virtualSiteOneOfSpec
 
 					// resource modelToSpecNested EnumField --> NetworkType
 					if !discoveryVirtualSiteModel.NetworkType.IsNull() && !discoveryVirtualSiteModel.NetworkType.IsUnknown() {
@@ -4321,7 +4376,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4344,7 +4399,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_discovery.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "discovery", err),
 		)
 		return
 	}
@@ -4462,7 +4517,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClusterIdentifierChoice
+	// resource SpecToModelRoot OneOfField --> ClusterIdentifierChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -4511,8 +4566,6 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ClusterIdentifierChoice = types.ObjectNull(DiscoveryClusterIdentifierChoiceModelAttributeMap)
 	}
 
@@ -4657,6 +4710,15 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -4728,8 +4790,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> ServerValidationChoice
 							if cbipCertificateAuthorityElement.GetServerValidationChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								cbipCertificateAuthorityserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5332,6 +5393,15 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -5530,6 +5600,15 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 									}
 								}
 
+								// resource specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := passwdUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -5568,12 +5647,8 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 						}
 
 						// resource specToModelNested StringField --> UserName
-						if httpBasicAuthInfoElement.GetUserName() != "" {
-							discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
-						} else {
-							// Empty string, set to null
-							discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringNull()
-						}
+						// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+						discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
 						discoveryConsulHttpBasicAuthInfoTypeModelObj, discoveryConsulHttpBasicAuthInfoTypeModelObjDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoModelAttributeMap, discoveryConsulHttpBasicAuthInfoTypeModel)
@@ -5619,8 +5694,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PublishChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PublishChoice
 					if publishInfoElement.GetPublishChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						publishInfopublishChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5629,6 +5703,15 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Publish
 						_, isPublish := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Publish)
@@ -5851,6 +5934,15 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 												}
 											}
 
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -6036,6 +6128,15 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := kubeconfigUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -6085,8 +6186,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 						discoveryK8SAccessInfoModel.ConfigTypeChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> K8SPodNetworkChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> K8SPodNetworkChoice
 					if accessInfoElement.GetK8SPodNetworkChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						accessInfok8sPodNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6260,8 +6360,7 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PublishChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PublishChoice
 					if publishInfoElement.GetPublishChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						publishInfopublishChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6270,6 +6369,15 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested PointerOfOneOfField --> DnsDelegation
 						// GlobalSpecType
@@ -6499,54 +6607,6 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested EnumField --> NetworkType
 					{
 						if siteElement.GetNetworkType().String() != "" {
@@ -6705,54 +6765,6 @@ func (r *ResourceF5XCDiscovery) Create(ctx context.Context, request resource.Cre
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested EnumField --> NetworkType
 					{
 						if virtualSiteElement.GetNetworkType().String() != "" {
@@ -6907,14 +6919,10 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 	defer cancel()
 	priorDiscoveryChoice := data.DiscoveryChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "discovery", err),
 		)
 		return
 	}
@@ -7032,7 +7040,7 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClusterIdentifierChoice
+	// resource SpecToModelRoot OneOfField --> ClusterIdentifierChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -7081,9 +7089,13 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.ClusterIdentifierChoice = types.ObjectNull(DiscoveryClusterIdentifierChoiceModelAttributeMap)
+
+		if data.ClusterIdentifierChoice.IsNull() || data.ClusterIdentifierChoice.IsUnknown() || ((data.ClusterIdentifierChoice.Attributes()["cluster_id"].IsNull() || data.ClusterIdentifierChoice.Attributes()["cluster_id"].IsUnknown()) && (data.ClusterIdentifierChoice.Attributes()["no_cluster_id"].IsNull() || data.ClusterIdentifierChoice.Attributes()["no_cluster_id"].IsUnknown())) {
+			data.ClusterIdentifierChoice = types.ObjectValueMust(DiscoveryClusterIdentifierChoiceModelAttributeMap, map[string]attr.Value{
+				"cluster_id":    types.StringNull(),
+				"no_cluster_id": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> DiscoveryChoice
@@ -7227,6 +7239,15 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -7310,8 +7331,7 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> ServerValidationChoice
 							if cbipCertificateAuthorityElement.GetServerValidationChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								cbipCertificateAuthorityserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7391,7 +7411,10 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 								discoveryCbipCertAuthorityModel.ServerValidationChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								discoveryCbipCertAuthorityModel.ServerValidationChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceModelAttributeMap)
+								discoveryCbipCertAuthorityModel.ServerValidationChoice = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceModelAttributeMap, map[string]attr.Value{
+									"skip_server_verification": types.BoolValue(true),
+									"trusted_ca":               types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceTrustedCaModelAttributeMap),
+								})
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
@@ -7408,8 +7431,12 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 							// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryCbipClusterModel.CbipCertificateAuthority = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityModelAttributeMap)
+							discoveryCbipClusterModel.CbipCertificateAuthority = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityModelAttributeMap, map[string]attr.Value{
+								"server_validation_choice": types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceModelAttributeMap, map[string]attr.Value{
+									"skip_server_verification": types.BoolValue(true),
+									"trusted_ca":               types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersCbipCertificateAuthorityServerValidationChoiceTrustedCaModelAttributeMap),
+								}),
+							})
 						}
 
 						// resource specToModelNested RequiredArrayOfStringField --> CbipMgmtIps
@@ -7575,8 +7602,9 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 							// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							discoveryCbipClusterModel.MgmtPort = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMgmtPortModelAttributeMap)
+							discoveryCbipClusterModel.MgmtPort = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryCbipCbipClustersMgmtPortModelAttributeMap, map[string]attr.Value{
+								"port": types.Int64Value(443),
+							})
 						}
 
 						// resource specToModelNested OneOfField --> NamespaceMappingChoice
@@ -7914,6 +7942,15 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -8124,6 +8161,15 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 									}
 								}
 
+								// resource specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := passwdUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -8174,12 +8220,8 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 						}
 
 						// resource specToModelNested StringField --> UserName
-						if httpBasicAuthInfoElement.GetUserName() != "" {
-							discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
-						} else {
-							// Empty string, set to null
-							discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringNull()
-						}
+						// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+						discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
 						discoveryConsulHttpBasicAuthInfoTypeModelObj, discoveryConsulHttpBasicAuthInfoTypeModelObjDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoModelAttributeMap, discoveryConsulHttpBasicAuthInfoTypeModel)
@@ -8225,8 +8267,7 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PublishChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PublishChoice
 					if publishInfoElement.GetPublishChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						publishInfopublishChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8235,6 +8276,15 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Publish
 						_, isPublish := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Publish)
@@ -8261,7 +8311,10 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 						discoveryConsulVipDiscoveryInfoTypeModel.PublishChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						discoveryConsulVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoPublishChoiceModelAttributeMap)
+						discoveryConsulVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoPublishChoiceModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolValue(true),
+							"publish": types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -8278,8 +8331,12 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					discoveryConsulAttributeMap["publish_info"] = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoModelAttributeMap)
+					discoveryConsulAttributeMap["publish_info"] = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoModelAttributeMap, map[string]attr.Value{
+						"publish_choice": types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryConsulPublishInfoPublishChoiceModelAttributeMap, map[string]attr.Value{
+							"disable": types.BoolValue(true),
+							"publish": types.BoolNull(),
+						}),
+					})
 				}
 
 				discoveryConsulObj, discoveryConsulObjDiags := types.ObjectValue(DiscoveryDiscoveryChoiceDiscoveryConsulModelAttributeMap, discoveryConsulAttributeMap)
@@ -8455,6 +8512,15 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 												} else {
 													keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeConnectionInfoTlsInfoKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 												}
+											}
+
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 											}
 
 											// --- End of Choices ---
@@ -8654,6 +8720,15 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := kubeconfigUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -8680,7 +8755,21 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 								}
 								accessInfoconfigTypeChoiceChoicesAttributeMap["kubeconfig_url"] = kubeconfigUrlObj
 							} else {
-								accessInfoconfigTypeChoiceChoicesAttributeMap["kubeconfig_url"] = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlModelAttributeMap)
+								if accessInfoconfigTypeChoiceChoices == nil || (isKubeconfigUrl && kubeconfigUrlOptionsWrapper != nil) {
+									// State Healing: Restore a redacted OneOf-pointer object from prior state.
+									{
+										savedPointerObjectPath := path.Root("discovery_choice").AtName("discovery_k8s").AtName("access_info").AtName("config_type_choice").AtName("kubeconfig_url")
+										var savedPointerObject types.Object
+										stateHealDiags := request.State.GetAttribute(ctx, savedPointerObjectPath, &savedPointerObject)
+										if !stateHealDiags.HasError() && !savedPointerObject.IsNull() && !savedPointerObject.IsUnknown() {
+											accessInfoconfigTypeChoiceChoicesAttributeMap["kubeconfig_url"] = savedPointerObject
+										} else {
+											accessInfoconfigTypeChoiceChoicesAttributeMap["kubeconfig_url"] = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlModelAttributeMap)
+										}
+									}
+								} else {
+									accessInfoconfigTypeChoiceChoicesAttributeMap["kubeconfig_url"] = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeKubeconfigUrlModelAttributeMap)
+								}
 							}
 						}
 
@@ -8703,8 +8792,7 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 						discoveryK8SAccessInfoModel.ConfigTypeChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> K8SPodNetworkChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> K8SPodNetworkChoice
 					if accessInfoElement.GetK8SPodNetworkChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						accessInfok8sPodNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8748,7 +8836,10 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 						discoveryK8SAccessInfoModel.K8SPodNetworkChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						discoveryK8SAccessInfoModel.K8SPodNetworkChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoK8SPodNetworkChoiceModelAttributeMap)
+						discoveryK8SAccessInfoModel.K8SPodNetworkChoice = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoK8SPodNetworkChoiceModelAttributeMap, map[string]attr.Value{
+							"isolated":  types.BoolValue(true),
+							"reachable": types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -8878,8 +8969,7 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PublishChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PublishChoice
 					if publishInfoElement.GetPublishChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						publishInfopublishChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8888,6 +8978,15 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested PointerOfOneOfField --> DnsDelegation
 						// <no value>
@@ -8988,7 +9087,12 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 						discoveryK8SVipDiscoveryInfoTypeModel.PublishChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						discoveryK8SVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceModelAttributeMap)
+						discoveryK8SVipDiscoveryInfoTypeModel.PublishChoice = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceModelAttributeMap, map[string]attr.Value{
+							"disable":        types.BoolValue(true),
+							"dns_delegation": types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceDnsDelegationModelAttributeMap),
+							"publish":        types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoicePublishModelAttributeMap),
+							"publish_fqdns":  types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -9005,8 +9109,14 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					discoveryK8sAttributeMap["publish_info"] = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoModelAttributeMap)
+					discoveryK8sAttributeMap["publish_info"] = types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoModelAttributeMap, map[string]attr.Value{
+						"publish_choice": types.ObjectValueMust(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceModelAttributeMap, map[string]attr.Value{
+							"disable":        types.BoolValue(true),
+							"dns_delegation": types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoiceDnsDelegationModelAttributeMap),
+							"publish":        types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SPublishInfoPublishChoicePublishModelAttributeMap),
+							"publish_fqdns":  types.BoolNull(),
+						}),
+					})
 				}
 
 				discoveryK8sObj, discoveryK8sObjDiags := types.ObjectValue(DiscoveryDiscoveryChoiceDiscoveryK8SModelAttributeMap, discoveryK8sAttributeMap)
@@ -9116,54 +9226,6 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
-
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
 
 					// resource specToModelNested EnumField --> NetworkType
 					{
@@ -9323,54 +9385,6 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested EnumField --> NetworkType
 					{
 						if virtualSiteElement.GetNetworkType().String() != "" {
@@ -9496,6 +9510,12 @@ func (r *ResourceF5XCDiscovery) Read(ctx context.Context, request resource.ReadR
 }
 
 func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDiscoveryModel
@@ -9505,6 +9525,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planDiscoveryChoice := data.DiscoveryChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -9524,7 +9545,11 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planDiscoveryChoice := data.DiscoveryChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.DiscoveryChoice.IsNull() && !configData.DiscoveryChoice.IsUnknown() {
+		data.DiscoveryChoice = configData.DiscoveryChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -9597,7 +9622,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ClusterIdentifierChoice
+	// resource modelToSpecRoot OneOfField --> ClusterIdentifierChoice
 	if !data.ClusterIdentifierChoice.IsNull() && !data.ClusterIdentifierChoice.IsUnknown() {
 		clusterIdentifierChoiceModel := DiscoveryClusterIdentifierChoice{}
 		response.Diagnostics.Append(data.ClusterIdentifierChoice.As(ctx, &clusterIdentifierChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9619,6 +9644,10 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 			spec.ClusterIdentifierChoice = noClusterIdSpecBool
 		}
 
+	} else {
+		spec.ClusterIdentifierChoice = &ves_io_schema_discovery.ReplaceSpecType_NoClusterId{
+			NoClusterId: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> DiscoveryChoice
@@ -9741,6 +9770,13 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 								}
 
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									passwordSpec.SecretInfoOneof = noneSpecBool
+								}
+
 							}
 
 						}
@@ -9761,9 +9797,12 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 						}
 
 						cbipCertificateAuthoritySpec := &ves_io_schema_discovery.CbipCertificateAuthority{}
+						cbipCertificateAuthoritySpec.ServerValidationChoice = &ves_io_schema_discovery.CbipCertificateAuthority_SkipServerVerification{
+							SkipServerVerification: &ves_io_schema.Empty{},
+						}
 						cbipClustersSpec[i].CbipCertificateAuthority = cbipCertificateAuthoritySpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ServerValidationChoice
+						// resource modelToSpecNested OneOfField --> ServerValidationChoice
 						if !cbipCertificateAuthorityModel.ServerValidationChoice.IsNull() && !cbipCertificateAuthorityModel.ServerValidationChoice.IsUnknown() {
 							cbipCertificateAuthorityServerValidationChoiceModel := DiscoveryServerValChoice{}
 							response.Diagnostics.Append(cbipCertificateAuthorityModel.ServerValidationChoice.As(ctx, &cbipCertificateAuthorityServerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10011,6 +10050,9 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 			}
 			discoveryConsulOneOfSpec := &ves_io_schema_discovery.ReplaceSpecType_DiscoveryConsul{}
 			discoveryConsulOneOfSpec.DiscoveryConsul = &ves_io_schema_discovery.ConsulDiscoveryType{}
+			discoveryConsulOneOfSpec.DiscoveryConsul.NamespaceMappingChoice = &ves_io_schema_discovery.ConsulDiscoveryType_DefaultAll{
+				DefaultAll: &ves_io_schema.Empty{},
+			}
 			spec.DiscoveryChoice = discoveryConsulOneOfSpec
 
 			// resource modelToSpecNested RequiredPointerField --> AccessInfo
@@ -10126,6 +10168,13 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 								}
 
+								// resource modelToSpecNested BoolOfOneOfPointerField --> None
+								if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+									noneSpecBool := &ves_io_schema.SecretType_None{}
+									noneSpecBool.None = &ves_io_schema.Empty{}
+									keyUrlSpec.SecretInfoOneof = noneSpecBool
+								}
+
 							}
 
 						}
@@ -10225,6 +10274,13 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwdUrlSecretInfoChoiceModel.None.IsNull() && !passwdUrlSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwdUrlSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -10232,6 +10288,8 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 					// resource modelToSpecNested StringField --> UserName
 					if !httpBasicAuthInfoModel.UserName.IsNull() && !httpBasicAuthInfoModel.UserName.IsUnknown() {
 						httpBasicAuthInfoSpec.UserName = string(httpBasicAuthInfoModel.UserName.ValueString())
+					} else {
+						httpBasicAuthInfoSpec.UserName = ""
 					}
 
 				}
@@ -10247,14 +10305,24 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 				}
 
 				publishInfoSpec := &ves_io_schema_discovery.ConsulVipDiscoveryInfoType{}
+				publishInfoSpec.PublishChoice = &ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable{
+					Disable: &ves_io_schema.Empty{},
+				}
 				discoveryConsulOneOfSpec.DiscoveryConsul.PublishInfo = publishInfoSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PublishChoice
+				// resource modelToSpecNested OneOfField --> PublishChoice
 				if !publishInfoModel.PublishChoice.IsNull() && !publishInfoModel.PublishChoice.IsUnknown() {
 					publishInfoPublishChoiceModel := DiscoveryPublishChoice{}
 					response.Diagnostics.Append(publishInfoModel.PublishChoice.As(ctx, &publishInfoPublishChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !publishInfoPublishChoiceModel.Disable.IsNull() && !publishInfoPublishChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						publishInfoSpec.PublishChoice = disableSpecBool
 					}
 
 					// resource modelToSpecNested BoolOfOneOfPointerField --> Publish
@@ -10290,6 +10358,9 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 				}
 
 				accessInfoSpec := &ves_io_schema_discovery.K8SAccessInfo{}
+				accessInfoSpec.K8SPodNetworkChoice = &ves_io_schema_discovery.K8SAccessInfo_Isolated{
+					Isolated: &ves_io_schema.Empty{},
+				}
 				discoveryK8sOneOfSpec.DiscoveryK8S.AccessInfo = accessInfoSpec
 
 				// resource modelToSpecNested RequiredOneOfField --> ConfigType
@@ -10402,6 +10473,13 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -10490,13 +10568,20 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !kubeconfigUrlSecretInfoChoiceModel.None.IsNull() && !kubeconfigUrlSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								kubeconfigUrlOneOfSpec.KubeconfigUrl.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> K8SPodNetworkChoice
+				// resource modelToSpecNested OneOfField --> K8SPodNetworkChoice
 				if !accessInfoModel.K8SPodNetworkChoice.IsNull() && !accessInfoModel.K8SPodNetworkChoice.IsUnknown() {
 					accessInfoK8SPodNetworkChoiceModel := DiscoveryK8SPodNetChoice{}
 					response.Diagnostics.Append(accessInfoModel.K8SPodNetworkChoice.As(ctx, &accessInfoK8SPodNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10596,14 +10681,24 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 				}
 
 				publishInfoSpec := &ves_io_schema_discovery.K8SVipDiscoveryInfoType{}
+				publishInfoSpec.PublishChoice = &ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable{
+					Disable: &ves_io_schema.Empty{},
+				}
 				discoveryK8sOneOfSpec.DiscoveryK8S.PublishInfo = publishInfoSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PublishChoice
+				// resource modelToSpecNested OneOfField --> PublishChoice
 				if !publishInfoModel.PublishChoice.IsNull() && !publishInfoModel.PublishChoice.IsUnknown() {
 					publishInfoPublishChoiceModel := DiscoveryK8SVipDiscoveryInfoTypePublishChoice{}
 					response.Diagnostics.Append(publishInfoModel.PublishChoice.As(ctx, &publishInfoPublishChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+					if !publishInfoPublishChoiceModel.Disable.IsNull() && !publishInfoPublishChoiceModel.Disable.IsUnknown() {
+						disableSpecBool := &ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable{}
+						disableSpecBool.Disable = &ves_io_schema.Empty{}
+						publishInfoSpec.PublishChoice = disableSpecBool
 					}
 
 					// resource modelToSpecNested PointerOfOneOfField --> DnsDelegation
@@ -10650,8 +10745,8 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 					// resource modelToSpecNested PointerOfOneOfField --> Publish
 					if !publishInfoPublishChoiceModel.Publish.IsNull() && !publishInfoPublishChoiceModel.Publish.IsUnknown() {
-						var discoveryK8SVipDiscoveryInfoTypePublishModel DiscoveryK8SVipDiscoveryInfoTypePublish
-						response.Diagnostics.Append(publishInfoPublishChoiceModel.Publish.As(ctx, &discoveryK8SVipDiscoveryInfoTypePublishModel, basetypes.ObjectAsOptions{})...)
+						var discoveryPublishModel DiscoveryPublish
+						response.Diagnostics.Append(publishInfoPublishChoiceModel.Publish.As(ctx, &discoveryPublishModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
 						}
@@ -10660,8 +10755,8 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 						publishInfoSpec.PublishChoice = publishOneOfSpec
 
 						// resource modelToSpecNested RequiredStringField --> Namespace
-						if !discoveryK8SVipDiscoveryInfoTypePublishModel.Namespace.IsNull() && !discoveryK8SVipDiscoveryInfoTypePublishModel.Namespace.IsUnknown() {
-							publishOneOfSpec.Publish.Namespace = string(discoveryK8SVipDiscoveryInfoTypePublishModel.Namespace.ValueString())
+						if !discoveryPublishModel.Namespace.IsNull() && !discoveryPublishModel.Namespace.IsUnknown() {
+							publishOneOfSpec.Publish.Namespace = string(discoveryPublishModel.Namespace.ValueString())
 						}
 
 					}
@@ -10747,31 +10842,10 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 					}
 					siteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_Site{}
 					siteOneOfSpec.Site = &ves_io_schema.SiteRefType{}
-					whereSpec.RefOrSelector = siteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !discoverySiteModel.InternetVipChoice.IsNull() && !discoverySiteModel.InternetVipChoice.IsUnknown() {
-						siteInternetVipChoiceModel := DiscoveryInternetVipChoice{}
-						response.Diagnostics.Append(discoverySiteModel.InternetVipChoice.As(ctx, &siteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !siteInternetVipChoiceModel.DisableInternetVip.IsNull() && !siteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.SiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !siteInternetVipChoiceModel.EnableInternetVip.IsNull() && !siteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.SiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = enableInternetVipSpecBool
-						}
-
+					siteOneOfSpec.Site.InternetVipChoice = &ves_io_schema.SiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
 					}
+					whereSpec.RefOrSelector = siteOneOfSpec
 
 					// resource modelToSpecNested EnumField --> NetworkType
 					if !discoverySiteModel.NetworkType.IsNull() && !discoverySiteModel.NetworkType.IsUnknown() {
@@ -10887,31 +10961,10 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 					}
 					virtualSiteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_VirtualSite{}
 					virtualSiteOneOfSpec.VirtualSite = &ves_io_schema.VSiteRefType{}
-					whereSpec.RefOrSelector = virtualSiteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !discoveryVirtualSiteModel.InternetVipChoice.IsNull() && !discoveryVirtualSiteModel.InternetVipChoice.IsUnknown() {
-						virtualSiteInternetVipChoiceModel := DiscoveryVSiteRefTypeInternetVipChoice{}
-						response.Diagnostics.Append(discoveryVirtualSiteModel.InternetVipChoice.As(ctx, &virtualSiteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.VSiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.VSiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = enableInternetVipSpecBool
-						}
-
+					virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = &ves_io_schema.VSiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
 					}
+					whereSpec.RefOrSelector = virtualSiteOneOfSpec
 
 					// resource modelToSpecNested EnumField --> NetworkType
 					if !discoveryVirtualSiteModel.NetworkType.IsNull() && !discoveryVirtualSiteModel.NetworkType.IsUnknown() {
@@ -10980,7 +11033,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -10988,24 +11041,20 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_discovery.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_discovery.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "discovery", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "discovery", err),
 		)
 		return
 	}
@@ -11122,7 +11171,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClusterIdentifierChoice
+	// resource SpecToModelRoot OneOfField --> ClusterIdentifierChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -11171,8 +11220,6 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ClusterIdentifierChoice = types.ObjectNull(DiscoveryClusterIdentifierChoiceModelAttributeMap)
 	}
 
@@ -11317,6 +11364,15 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -11388,8 +11444,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ServerValidationChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> ServerValidationChoice
 							if cbipCertificateAuthorityElement.GetServerValidationChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								cbipCertificateAuthorityserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11992,6 +12047,15 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -12190,6 +12254,15 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 									}
 								}
 
+								// resource specToModelNested BoolOfOneOfPointerField --> None
+								_, isNone := passwdUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+								if isNone {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+								} else {
+									passwdUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+								}
+
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -12228,12 +12301,8 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 						}
 
 						// resource specToModelNested StringField --> UserName
-						if httpBasicAuthInfoElement.GetUserName() != "" {
-							discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
-						} else {
-							// Empty string, set to null
-							discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringNull()
-						}
+						// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+						discoveryConsulHttpBasicAuthInfoTypeModel.UserName = types.StringValue(httpBasicAuthInfoElement.GetUserName())
 
 						// This field needs to be converted to a types.ObjectValue before assignment.
 						discoveryConsulHttpBasicAuthInfoTypeModelObj, discoveryConsulHttpBasicAuthInfoTypeModelObjDiags := types.ObjectValueFrom(ctx, DiscoveryDiscoveryChoiceDiscoveryConsulAccessInfoHttpBasicAuthInfoModelAttributeMap, discoveryConsulHttpBasicAuthInfoTypeModel)
@@ -12279,8 +12348,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PublishChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PublishChoice
 					if publishInfoElement.GetPublishChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						publishInfopublishChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12289,6 +12357,15 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested BoolOfOneOfPointerField --> Publish
 						_, isPublish := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.ConsulVipDiscoveryInfoType_Publish)
@@ -12511,6 +12588,15 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 												}
 											}
 
+											// resource specToModelNested BoolOfOneOfPointerField --> None
+											_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+											if isNone {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+											} else {
+												keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+											}
+
 											// --- End of Choices ---
 
 											// Create the final ObjectValue for this OneOf field
@@ -12696,6 +12782,15 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := kubeconfigUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										kubeconfigUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -12745,8 +12840,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 						discoveryK8SAccessInfoModel.ConfigTypeChoice = types.ObjectNull(DiscoveryDiscoveryChoiceDiscoveryK8SAccessInfoConfigTypeModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> K8SPodNetworkChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> K8SPodNetworkChoice
 					if accessInfoElement.GetK8SPodNetworkChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						accessInfok8sPodNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12920,8 +13014,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PublishChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PublishChoice
 					if publishInfoElement.GetPublishChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						publishInfopublishChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12930,6 +13023,15 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 						publishInfopublishChoiceChoices := publishInfoElement.GetPublishChoice()
 
 						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Disable
+						_, isDisable := publishInfopublishChoiceChoices.(*ves_io_schema_discovery.K8SVipDiscoveryInfoType_Disable)
+
+						if isDisable {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+						} else {
+							publishInfopublishChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+						}
 
 						// resource specToModelNested PointerOfOneOfField --> DnsDelegation
 						// GlobalSpecType
@@ -13159,54 +13261,6 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested EnumField --> NetworkType
 					{
 						if siteElement.GetNetworkType().String() != "" {
@@ -13365,54 +13419,6 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(DiscoveryWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
 					// resource specToModelNested EnumField --> NetworkType
 					{
 						if virtualSiteElement.GetNetworkType().String() != "" {
@@ -13550,7 +13556,7 @@ func (r *ResourceF5XCDiscovery) Update(ctx context.Context, request resource.Upd
 	}
 	// Restore plan value for DiscoveryChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.DiscoveryChoice = planDiscoveryChoice
+	data.DiscoveryChoice = utils.ResolveUnknowns(planDiscoveryChoice, data.DiscoveryChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -13598,7 +13604,7 @@ func (r *ResourceF5XCDiscovery) Delete(ctx context.Context, request resource.Del
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "discovery", err),
 		)
 		return
 	}

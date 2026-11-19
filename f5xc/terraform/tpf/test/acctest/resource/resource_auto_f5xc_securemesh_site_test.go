@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCSecuremeshSite_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sms-" + acctest.RandString(t, 6)
+	name := "example-sms-" + acctest.RandString(t, 6)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSecuremeshSiteDestroyProducer(t),
@@ -39,30 +39,34 @@ func TestAccResourceAutoF5XCSecuremeshSite_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_withDescription(name, namespace, "securemesh site v1 updated"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSecuremeshSiteConfig_basic("example-sms", "system"),
+		})
 }
 
 func TestAccResourceAutoF5XCSecuremeshSite_withCertifiedHwTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sms-" + acctest.RandString(t, 6)
+	name := "example-sms-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +78,20 @@ func TestAccResourceAutoF5XCSecuremeshSite_withCertifiedHwTransition(t *testing.
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_withHw(name, namespace, "isv-8000-series-voltmesh"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_withHw(name, namespace, "generic-single-nic-voltmesh"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +101,7 @@ func TestAccResourceAutoF5XCSecuremeshSite_withCertifiedHwTransition(t *testing.
 func TestAccResourceAutoF5XCSecuremeshSite_withBlockedServicesTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sms-" + acctest.RandString(t, 6)
+	name := "example-sms-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +113,20 @@ func TestAccResourceAutoF5XCSecuremeshSite_withBlockedServicesTransition(t *test
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_withBlockedServices(name, namespace, "default_blocked_services = true"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_withBlockedServices(name, namespace, "blocked_services = {}"),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +136,7 @@ func TestAccResourceAutoF5XCSecuremeshSite_withBlockedServicesTransition(t *test
 func TestAccResourceAutoF5XCSecuremeshSite_withThreeMasterNodes(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sms-" + acctest.RandString(t, 6)
+	name := "example-sms-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +148,20 @@ func TestAccResourceAutoF5XCSecuremeshSite_withThreeMasterNodes(t *testing.T) {
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_threeNodes(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,7 +171,45 @@ func TestAccResourceAutoF5XCSecuremeshSite_withThreeMasterNodes(t *testing.T) {
 func TestAccResourceAutoF5XCSecuremeshSite_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sms-" + acctest.RandString(t, 6)
+	name := "example-sms-" + acctest.RandString(t, 6)
+	namespace := "system"
+
+	acctest.VcrTestWithOptions(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecuremeshSiteDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_full(name, namespace, "dev", "platform", false),
+			},
+			{
+				ResourceName:                         "f5xc_securemesh_site.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{
+				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_full(name, namespace, "example", "security", true),
+			},
+			{
+				ResourceName:                         "f5xc_securemesh_site.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCSecuremeshSiteConfig_full("example-sms", "system", "dev", "platform", false),
+	})
+}
+
+func TestAccResourceAutoF5XCSecuremeshSite_withCustomInfrastructureChoices(t *testing.T) {
+	t.Parallel()
+
+	name := "example-sms-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -176,23 +218,13 @@ func TestAccResourceAutoF5XCSecuremeshSite_full(t *testing.T) {
 		CheckDestroy:             testAccCheckSecuremeshSiteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_full(name, namespace, "dev", "platform"),
+				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_customInfrastructureChoices(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_securemesh_site.test",
+				ResourceName:                         "f5xc_securemesh_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
-				ImportStateVerifyIdentifierAttribute: "uid",
-			},
-			{
-				Config: testAccResourceAutoF5XCSecuremeshSiteConfig_full(name, namespace, "prod", "security"),
-			},
-			{
-				ResourceName:                         "f5xc_securemesh_site.test",
-				ImportState:                          true,
-				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,9 +235,20 @@ func testAccCheckSecuremeshSiteDestroyProducer(t *testing.T) func(*terraform.Sta
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_securemesh_site", securemeshSiteSchema.ObjectType, "securemesh site")
 }
 
+func testAccResourceAutoF5XCSecuremeshSiteImportStep() resource.TestStep {
+	return resource.TestStep{
+		ResourceName:                         "f5xc_securemesh_site.example",
+		ImportState:                          true,
+		ImportStateVerify:                    true,
+		ImportStateIdFunc:                    acctest.ImportStateID("f5xc_securemesh_site.example"),
+		ImportStateVerifyIgnore:              []string{"labels.%", "labels.ves.io/provider"},
+		ImportStateVerifyIdentifierAttribute: "uid",
+	}
+}
+
 func testAccResourceAutoF5XCSecuremeshSiteConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site" "test" {
+resource "f5xc_securemesh_site" "example" {
   name      = %q
   namespace = %q
 
@@ -238,7 +281,7 @@ resource "f5xc_securemesh_site" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site" "test" {
+resource "f5xc_securemesh_site" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -272,7 +315,7 @@ resource "f5xc_securemesh_site" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteConfig_withHw(name, namespace, certifiedHw string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site" "test" {
+resource "f5xc_securemesh_site" "example" {
   name      = %q
   namespace = %q
 
@@ -305,7 +348,7 @@ resource "f5xc_securemesh_site" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteConfig_withBlockedServices(name, namespace, blockedServicesChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site" "test" {
+resource "f5xc_securemesh_site" "example" {
   name      = %q
   namespace = %q
 
@@ -338,7 +381,7 @@ resource "f5xc_securemesh_site" "test" {
 
 func testAccResourceAutoF5XCSecuremeshSiteConfig_threeNodes(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site" "test" {
+resource "f5xc_securemesh_site" "example" {
   name      = %q
   namespace = %q
 
@@ -375,9 +418,19 @@ resource "f5xc_securemesh_site" "test" {
 `, name, namespace)
 }
 
-func testAccResourceAutoF5XCSecuremeshSiteConfig_full(name, namespace, envLabel, ownerLabel string) string {
+func testAccResourceAutoF5XCSecuremeshSiteConfig_full(name, namespace, envLabel, ownerLabel string, enableUpgradeDrain bool) string {
+	upgradeDrainChoice := `disable_upgrade_drain = true`
+	if enableUpgradeDrain {
+		upgradeDrainChoice = `enable_upgrade_drain = {
+        drain_max_unavailable_choice = {
+          drain_max_unavailable_node_count = 1
+        }
+        drain_node_timeout = 300
+      }`
+	}
+
 	return fmt.Sprintf(`
-resource "f5xc_securemesh_site" "test" {
+resource "f5xc_securemesh_site" "example" {
   name      = %q
   namespace = %q
 
@@ -386,19 +439,32 @@ resource "f5xc_securemesh_site" "test" {
     owner = %q
   }
 
+  annotations = {
+    purpose = "acceptance"
+  }
+
   address = "123 Main Street, Seattle, US"
 
   volterra_certified_hw = "isv-8000-series-voltmesh"
 
+  waf_signatures = {
+    signatures_update_mode_choice = {
+      manual = true
+    }
+  }
+
   master_node_configuration = [
     {
-      name = "master-node-1"
+      name      = "master-node-1"
+      public_ip = "192.0.2.10"
     },
-	{
-      name = "master-node-2"
-	},
-	{
-      name = "master-node-3"
+    {
+      name      = "master-node-2"
+      public_ip = "192.0.2.11"
+    },
+    {
+      name      = "master-node-3"
+      public_ip = "192.0.2.12"
     }
   ]
 
@@ -420,27 +486,141 @@ resource "f5xc_securemesh_site" "test" {
     default_blocked_services = true
   }
 
-	offline_survivability_mode = {
-		offline_survivability_mode_choice = {
-			enable_offline_survivability_mode = true
-		}
-	}
+  offline_survivability_mode = {
+    offline_survivability_mode_choice = {
+      enable_offline_survivability_mode = true
+    }
+  }
 
-	performance_enhancement_mode = {
-		perf_mode_choice = {
-			perf_mode_l3_enhanced = {
-				perf_mode_choice = {
-					jumbo = true
-				}
-			}
-		}
-	}
+  performance_enhancement_mode = {
+    perf_mode_choice = {
+      perf_mode_l3_enhanced = {
+        perf_mode_choice = {
+          jumbo = true
+        }
+      }
+    }
+  }
 
-	kubernetes_upgrade_drain = {
-		kubernetes_upgrade_drain_enable_choice = {
-			disable_upgrade_drain = true
-		}
-	}
+  kubernetes_upgrade_drain = {
+    kubernetes_upgrade_drain_enable_choice = {
+      %s
+    }
+  }
+
+  timeouts = {
+    create = "30m"
+    read   = "5m"
+    update = "30m"
+    delete = "30m"
+  }
 }
-`, name, namespace, envLabel, ownerLabel)
+`, name, namespace, envLabel, ownerLabel, upgradeDrainChoice)
+}
+
+func testAccResourceAutoF5XCSecuremeshSiteConfig_customInfrastructureChoices(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_securemesh_site" "example" {
+  name      = %q
+  namespace = %q
+
+  volterra_certified_hw = "isv-8000-series-voltmesh"
+
+  master_node_configuration = [
+    {
+      name      = "master-node-1"
+      public_ip = "192.0.2.20"
+    }
+  ]
+
+  bond_choice = {
+    no_bond_devices = true
+  }
+
+  network_cfg_choice = {
+    custom_network_config = {
+      forward_proxy_choice = {
+        no_forward_proxy = true
+      }
+
+      global_network_choice = {
+        no_global_network = true
+      }
+
+      interface_choice = {
+        default_interface_config = true
+      }
+
+      network_policy_choice = {
+        no_network_policy = true
+      }
+
+      site_mesh_group_choice = {
+        sm_connection_public_ip = true
+      }
+
+      slo_choice = {
+        slo_config = {
+          dc_cluster_group_choice = {
+            no_dc_cluster_group = true
+          }
+
+          static_route_choice = {
+            no_static_routes = true
+          }
+
+          static_v6_route_choice = {
+            no_v6_static_routes = true
+          }
+        }
+      }
+
+      sli_choice = {
+        default_sli_config = true
+      }
+
+      tunnel_dead_timeout = 10000
+      vip_vrrp_mode       = ["VIP_VRRP_ENABLE"]
+    }
+  }
+
+  logs_receiver_choice = {
+    log_receiver = {
+      name      = "ves-io-logs"
+      namespace = "system"
+    }
+  }
+
+  blocked_services_choice = {
+    blocked_services = {
+      blocked_sevice = [
+        {
+          blocked_services_value_type_choice = {
+            ssh = true
+          }
+          network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
+        }
+      ]
+    }
+  }
+
+  offline_survivability_mode = {
+    offline_survivability_mode_choice = {
+      no_offline_survivability_mode = true
+    }
+  }
+
+  performance_enhancement_mode = {
+    perf_mode_choice = {
+      perf_mode_l7_enhanced = true
+    }
+  }
+
+  waf_signatures = {
+    signatures_update_mode_choice = {
+      automatic = true
+    }
+  }
+}
+`, name, namespace)
 }

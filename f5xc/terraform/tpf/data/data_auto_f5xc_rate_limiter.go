@@ -29,45 +29,39 @@ type DataSourceF5XCRateLimiter struct {
 	client *client.APIClient
 }
 
-type RateLimiterRateLimiterRateLimitValue struct {
+type RateLimiterRateLimitValue struct {
 	ActionChoice     types.Object `tfsdk:"action_choice"`
-	AlgorithmChoice  types.Object `tfsdk:"algorithm_choice"`
 	BurstMultiplier  types.Int64  `tfsdk:"burst_multiplier"`
 	PeriodMultiplier types.Int64  `tfsdk:"period_multiplier"`
 	TotalNumber      types.Int64  `tfsdk:"total_number"`
 	Unit             types.List   `tfsdk:"unit"`
 }
 
-type RateLimiterRateLimitValueActionChoice struct {
+type RateLimiterActionChoice struct {
 	ActionBlock types.Object `tfsdk:"action_block"`
 	Disabled    types.Bool   `tfsdk:"disabled"`
 }
 
-type RateLimiterRateLimitValueActionBlock struct {
+type RateLimiterActionBlock struct {
 	BlockDurationChoice types.Object `tfsdk:"block_duration_choice"`
 }
 
-type RateLimiterRateLimitBlockActionBlockDurationChoice struct {
+type RateLimiterBlockDurationChoice struct {
 	Hours   types.Object `tfsdk:"hours"`
 	Minutes types.Object `tfsdk:"minutes"`
 	Seconds types.Object `tfsdk:"seconds"`
 }
 
-type RateLimiterRateLimitBlockActionHours struct {
+type RateLimiterHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type RateLimiterRateLimitBlockActionMinutes struct {
+type RateLimiterMinutes struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type RateLimiterRateLimitBlockActionSeconds struct {
+type RateLimiterSeconds struct {
 	Duration types.Int64 `tfsdk:"duration"`
-}
-
-type RateLimiterRateLimitValueAlgorithmChoice struct {
-	LeakyBucket types.Bool `tfsdk:"leaky_bucket"`
-	TokenBucket types.Bool `tfsdk:"token_bucket"`
 }
 
 // DataSourceF5XCRateLimiterModel describes the resource data model.
@@ -89,9 +83,6 @@ var RateLimiterLimitsModelAttributeMap = map[string]attr.Type{
 
 	"action_choice": types.ObjectType{
 		AttrTypes: RateLimiterLimitsActionChoiceModelAttributeMap,
-	},
-	"algorithm_choice": types.ObjectType{
-		AttrTypes: RateLimiterLimitsAlgorithmModelAttributeMap,
 	},
 	"burst_multiplier":  types.Int64Type,
 	"period_multiplier": types.Int64Type,
@@ -150,13 +141,6 @@ var RateLimiterLimitsActionChoiceActionBlockBlockDurationChoiceSecondsModelAttri
 	"duration": types.Int64Type,
 }
 
-// Attribute map for OneOfField --> Algorithm
-var RateLimiterLimitsAlgorithmModelAttributeMap = map[string]attr.Type{
-
-	"leaky_bucket": types.BoolType,
-	"token_bucket": types.BoolType,
-}
-
 // Attribute map for ArrayOfPointerField --> UserIdentification
 var RateLimiterUserIdentificationObjectRefModelAttributeMap = map[string]attr.Type{
 
@@ -179,8 +163,8 @@ func (d *DataSourceF5XCRateLimiter) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCRateLimiter) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a rate_limiter This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a rate_limiter This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of rate_limiter) etc. can be fetched",
+		MarkdownDescription: "A rate_limiter specifies a list of rate limit unit periods and the corresponding value of the total number of requests to be allowed in that period. It<br>also contains an optional reference to a user_identification object which determines how the user identifier for rate limiting is obtained from the input<br>fields extracted from the request.",
+		Description:         "A rate_limiter specifies a list of rate limit unit periods and the corresponding value of the total number of requests to be allowed in that period. It also contains an optional reference to a user_identification object which determines how the user identifier for rate limiting is obtained from the input fields extracted from the request.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -300,26 +284,6 @@ func (r *DataSourceF5XCRateLimiter) Schema(ctx context.Context, request datasour
 								},
 							},
 						},
-						"algorithm_choice": schema.SingleNestedAttribute{
-							Description: "algorithm The algorithm used for the RateLimitValue, learn more: https://gitlab.com/f5/volterra/ves.io/opera/-/wikis/Rate-limiting-explanations",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-							Attributes: map[string]schema.Attribute{
-								"leaky_bucket": schema.BoolAttribute{
-									Description: "LeakyBucketRateLimiter Leaky-Bucket is the default rate limiter algorithm for F5",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"token_bucket": schema.BoolAttribute{
-									Description: "TokenBucketRateLimiter Token-Bucket is a rate limiter algorithm that is stricter with enforcing limits",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-							},
-						},
 						"burst_multiplier": schema.Int64Attribute{
 							Description: "burst_multiplier The maximum burst of requests to accommodate, expressed as a multiple of the rate.",
 							Required:    false,
@@ -433,7 +397,7 @@ func (d *DataSourceF5XCRateLimiter) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_rate_limiter.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "rate_limiter", err))
 		return
 	}
 
@@ -495,10 +459,10 @@ func (d *DataSourceF5XCRateLimiter) Read(ctx context.Context, request datasource
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Limits
-	limitsElementsSpectToModel := make([]RateLimiterRateLimiterRateLimitValue, 0, len(specData.GetLimits()))
+	limitsElementsSpectToModel := make([]RateLimiterRateLimitValue, 0, len(specData.GetLimits()))
 
 	for _, limitsElement := range specData.GetLimits() {
-		rateLimiterRateLimiterRateLimitValueModel := RateLimiterRateLimiterRateLimitValue{}
+		rateLimiterRateLimitValueModel := RateLimiterRateLimitValue{}
 
 		// data specToModelNested OneOfField --> ActionChoice
 		if limitsElement.GetActionChoice() != nil {
@@ -656,68 +620,20 @@ func (d *DataSourceF5XCRateLimiter) Read(ctx context.Context, request datasource
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			rateLimiterRateLimiterRateLimitValueModel.ActionChoice = finalObj
+			rateLimiterRateLimitValueModel.ActionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			rateLimiterRateLimiterRateLimitValueModel.ActionChoice = types.ObjectNull(RateLimiterLimitsActionChoiceModelAttributeMap)
-		}
-
-		// data specToModelNested OneOfField --> Algorithm
-		if limitsElement.GetAlgorithm() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			limitsalgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			limitsalgorithmChoiceChoices := limitsElement.GetAlgorithm()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> LeakyBucket
-			_, isLeakyBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_LeakyBucket)
-
-			if isLeakyBucket {
-				limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolValue(true)
-			} else {
-				limitsalgorithmChoiceChoicesAttributeMap["leaky_bucket"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> TokenBucket
-			_, isTokenBucket := limitsalgorithmChoiceChoices.(*ves_io_schema_rate_limiter.RateLimitValue_TokenBucket)
-
-			if isTokenBucket {
-				limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolValue(true)
-			} else {
-				limitsalgorithmChoiceChoicesAttributeMap["token_bucket"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, limitsalgorithmChoiceChoicesObjDiags := types.ObjectValue(
-				RateLimiterLimitsAlgorithmModelAttributeMap, // The attribute schema for the OneOf choices
-				limitsalgorithmChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(limitsalgorithmChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			rateLimiterRateLimiterRateLimitValueModel.AlgorithmChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			rateLimiterRateLimiterRateLimitValueModel.AlgorithmChoice = types.ObjectNull(RateLimiterLimitsAlgorithmModelAttributeMap)
+			rateLimiterRateLimitValueModel.ActionChoice = types.ObjectNull(RateLimiterLimitsActionChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested UintField --> BurstMultiplier
-		rateLimiterRateLimiterRateLimitValueModel.BurstMultiplier = types.Int64Value(int64(limitsElement.GetBurstMultiplier()))
+		rateLimiterRateLimitValueModel.BurstMultiplier = types.Int64Value(int64(limitsElement.GetBurstMultiplier()))
 
 		// data specToModelNested UintField --> PeriodMultiplier
-		rateLimiterRateLimiterRateLimitValueModel.PeriodMultiplier = types.Int64Value(int64(limitsElement.GetPeriodMultiplier()))
+		rateLimiterRateLimitValueModel.PeriodMultiplier = types.Int64Value(int64(limitsElement.GetPeriodMultiplier()))
 
 		// data specToModelNested RequiredUintField --> TotalNumber
-		rateLimiterRateLimiterRateLimitValueModel.TotalNumber = types.Int64Value(int64(limitsElement.GetTotalNumber()))
+		rateLimiterRateLimitValueModel.TotalNumber = types.Int64Value(int64(limitsElement.GetTotalNumber()))
 
 		// data specToModelNested RequiredEnumField --> Unit
 		if limitsElement.GetUnit().String() != "" {
@@ -728,12 +644,12 @@ func (d *DataSourceF5XCRateLimiter) Read(ctx context.Context, request datasource
 			if response.Diagnostics.HasError() {
 				return
 			}
-			rateLimiterRateLimiterRateLimitValueModel.Unit = listValue
+			rateLimiterRateLimitValueModel.Unit = listValue
 		} else {
-			rateLimiterRateLimiterRateLimitValueModel.Unit = types.ListNull(types.StringType)
+			rateLimiterRateLimitValueModel.Unit = types.ListNull(types.StringType)
 		}
 
-		limitsElementsSpectToModel = append(limitsElementsSpectToModel, rateLimiterRateLimiterRateLimitValueModel)
+		limitsElementsSpectToModel = append(limitsElementsSpectToModel, rateLimiterRateLimitValueModel)
 	}
 
 	{

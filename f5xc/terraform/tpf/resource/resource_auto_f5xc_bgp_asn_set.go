@@ -18,8 +18,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -30,6 +30,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -56,7 +57,7 @@ type ResourceF5XCBgpAsnSetModel struct {
 	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
-	AsNumbers   types.List     `tfsdk:"as_numbers"`
+	AsNumbers   types.Set      `tfsdk:"as_numbers"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -82,8 +83,8 @@ func (r *ResourceF5XCBgpAsnSet) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCBgpAsnSet) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bgp_asn_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bgp_asn_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bgp_asn_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bgp_asn_set) etc. can be fetched",
+		MarkdownDescription: "An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create whitelists or blacklists for use in network policy or service policy. The<br>source or destination public IP address from the input packet/message is used as the key to lookup a GeoIP database in order to determine the origin ASN for<br>the IP address.",
+		Description:         "An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create whitelists or blacklists for use in network policy or service policy. The source or destination public IP address from the input packet/message is used as the key to lookup a GeoIP database in order to determine the origin ASN for the IP address.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -149,16 +150,15 @@ func (r *ResourceF5XCBgpAsnSet) Schema(ctx context.Context, request resource.Sch
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"as_numbers": schema.ListAttribute{
+			"as_numbers": schema.SetAttribute{
 				Description:         "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create whitelists or blacklists for use in network policy or service policy.",
 				MarkdownDescription: "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create whitelists or blacklists for use in network policy or service policy.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				ElementType:         types.Int64Type,
-				Validators: []validator.List{
-					listvalidator.SizeBetween(1, 256),
-					listvalidator.UniqueValues(),
+				Validators: []validator.Set{
+					setvalidator.SizeBetween(1, 256),
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
@@ -223,9 +223,17 @@ func (r *ResourceF5XCBgpAsnSet) ModifyPlan(ctx context.Context, req resource.Mod
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCBgpAsnSet) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCBgpAsnSetModel
 
 	// Read Terraform plan data into the model
@@ -320,7 +328,7 @@ func (r *ResourceF5XCBgpAsnSet) Create(ctx context.Context, request resource.Cre
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -343,7 +351,7 @@ func (r *ResourceF5XCBgpAsnSet) Create(ctx context.Context, request resource.Cre
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "bgp_asn_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "bgp_asn_set", err),
 		)
 		return
 	}
@@ -465,14 +473,17 @@ func (r *ResourceF5XCBgpAsnSet) Create(ctx context.Context, request resource.Cre
 	{
 		asNumbersValue := specData.GetAsNumbers()
 		if len(asNumbersValue) > 0 {
-			listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asNumbersValue)
-			response.Diagnostics.Append(listDiags...)
+			setValue, setDiags := types.SetValueFrom(ctx, types.Int64Type, asNumbersValue)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			data.AsNumbers = listValue
+			data.AsNumbers = setValue
+		} else if !data.AsNumbers.IsNull() && !data.AsNumbers.IsUnknown() && len(data.AsNumbers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.AsNumbers = types.SetValueMust(types.Int64Type, nil)
 		} else {
-			data.AsNumbers = types.ListNull(types.Int64Type)
+			data.AsNumbers = types.SetNull(types.Int64Type)
 		}
 	}
 
@@ -519,14 +530,10 @@ func (r *ResourceF5XCBgpAsnSet) Read(ctx context.Context, request resource.ReadR
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "bgp_asn_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "bgp_asn_set", err),
 		)
 		return
 	}
@@ -648,14 +655,17 @@ func (r *ResourceF5XCBgpAsnSet) Read(ctx context.Context, request resource.ReadR
 	{
 		asNumbersValue := specData.GetAsNumbers()
 		if len(asNumbersValue) > 0 {
-			listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asNumbersValue)
-			response.Diagnostics.Append(listDiags...)
+			setValue, setDiags := types.SetValueFrom(ctx, types.Int64Type, asNumbersValue)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			data.AsNumbers = listValue
+			data.AsNumbers = setValue
+		} else if !data.AsNumbers.IsNull() && !data.AsNumbers.IsUnknown() && len(data.AsNumbers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.AsNumbers = types.SetValueMust(types.Int64Type, nil)
 		} else {
-			data.AsNumbers = types.ListNull(types.Int64Type)
+			data.AsNumbers = types.SetNull(types.Int64Type)
 		}
 	}
 
@@ -668,6 +678,12 @@ func (r *ResourceF5XCBgpAsnSet) Read(ctx context.Context, request resource.ReadR
 }
 
 func (r *ResourceF5XCBgpAsnSet) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCBgpAsnSetModel
@@ -782,7 +798,7 @@ func (r *ResourceF5XCBgpAsnSet) Update(ctx context.Context, request resource.Upd
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -790,24 +806,20 @@ func (r *ResourceF5XCBgpAsnSet) Update(ctx context.Context, request resource.Upd
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "bgp_asn_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bgp_asn_set", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "bgp_asn_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bgp_asn_set", err),
 		)
 		return
 	}
@@ -928,14 +940,17 @@ func (r *ResourceF5XCBgpAsnSet) Update(ctx context.Context, request resource.Upd
 	{
 		asNumbersValue := specData.GetAsNumbers()
 		if len(asNumbersValue) > 0 {
-			listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asNumbersValue)
-			response.Diagnostics.Append(listDiags...)
+			setValue, setDiags := types.SetValueFrom(ctx, types.Int64Type, asNumbersValue)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			data.AsNumbers = listValue
+			data.AsNumbers = setValue
+		} else if !data.AsNumbers.IsNull() && !data.AsNumbers.IsUnknown() && len(data.AsNumbers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.AsNumbers = types.SetValueMust(types.Int64Type, nil)
 		} else {
-			data.AsNumbers = types.ListNull(types.Int64Type)
+			data.AsNumbers = types.SetNull(types.Int64Type)
 		}
 	}
 
@@ -1011,7 +1026,7 @@ func (r *ResourceF5XCBgpAsnSet) Delete(ctx context.Context, request resource.Del
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "bgp_asn_set", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "bgp_asn_set", err),
 		)
 		return
 	}

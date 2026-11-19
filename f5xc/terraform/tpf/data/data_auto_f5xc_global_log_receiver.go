@@ -30,33 +30,33 @@ type DataSourceF5XCGlobalLogReceiver struct {
 	client *client.APIClient
 }
 
-type GlobalLogReceiverGlobalSpecTypeFilterChoice struct {
+type GlobalLogReceiverFilterChoice struct {
 	NsAll     types.Bool   `tfsdk:"ns_all"`
 	NsCurrent types.Bool   `tfsdk:"ns_current"`
 	NsList    types.Object `tfsdk:"ns_list"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeNsList struct {
+type GlobalLogReceiverNsList struct {
 	Namespaces types.List `tfsdk:"namespaces"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeLogTypeChoice struct {
+type GlobalLogReceiverLogTypeChoice struct {
 	AuditLogs      types.Bool   `tfsdk:"audit_logs"`
 	DnsLogs        types.Bool   `tfsdk:"dns_logs"`
 	RequestLogs    types.Object `tfsdk:"request_logs"`
 	SecurityEvents types.Bool   `tfsdk:"security_events"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeRequestLogs struct {
+type GlobalLogReceiverReqLogs struct {
 	SamplingChoice types.Object `tfsdk:"sampling_choice"`
 }
 
-type GlobalLogReceiverRequestLogsConfigSamplingChoice struct {
+type GlobalLogReceiverSamplingChoice struct {
 	Sampled   types.Bool `tfsdk:"sampled"`
 	Unsampled types.Bool `tfsdk:"unsampled"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeReceiverChoice struct {
+type GlobalLogReceiverReceiverChoice struct {
 	AwsCloudWatchReceiver  types.Object `tfsdk:"aws_cloud_watch_receiver"`
 	AzureEventHubsReceiver types.Object `tfsdk:"azure_event_hubs_receiver"`
 	AzureReceiver          types.Object `tfsdk:"azure_receiver"`
@@ -71,7 +71,7 @@ type GlobalLogReceiverGlobalSpecTypeReceiverChoice struct {
 	SumoLogicReceiver      types.Object `tfsdk:"sumo_logic_receiver"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeAwsCloudWatchReceiver struct {
+type GlobalLogReceiverAwsCloudWatchReceiver struct {
 	AwsCred     types.Object `tfsdk:"aws_cred"`
 	AwsRegion   types.String `tfsdk:"aws_region"`
 	Batch       types.Object `tfsdk:"batch"`
@@ -80,38 +80,38 @@ type GlobalLogReceiverGlobalSpecTypeAwsCloudWatchReceiver struct {
 	StreamName  types.String `tfsdk:"stream_name"`
 }
 
-type GlobalLogReceiverGlobalLogReceiverBatchOptionType struct {
+type GlobalLogReceiverBatchOptionType struct {
 	BatchBytesChoice   types.Object `tfsdk:"batch_bytes_choice"`
 	BatchEventsChoice  types.Object `tfsdk:"batch_events_choice"`
 	BatchTimeoutChoice types.Object `tfsdk:"batch_timeout_choice"`
 }
 
-type GlobalLogReceiverBatchOptionTypeBatchBytesChoice struct {
+type GlobalLogReceiverBatchBytesChoice struct {
 	MaxBytes         types.Int64 `tfsdk:"max_bytes"`
 	MaxBytesDisabled types.Bool  `tfsdk:"max_bytes_disabled"`
 }
 
-type GlobalLogReceiverBatchOptionTypeBatchEventsChoice struct {
+type GlobalLogReceiverBatchEventsChoice struct {
 	MaxEvents         types.Int64 `tfsdk:"max_events"`
 	MaxEventsDisabled types.Bool  `tfsdk:"max_events_disabled"`
 }
 
-type GlobalLogReceiverBatchOptionTypeBatchTimeoutChoice struct {
+type GlobalLogReceiverBatchTimeoutChoice struct {
 	TimeoutSeconds        types.Int64 `tfsdk:"timeout_seconds"`
 	TimeoutSecondsDefault types.Bool  `tfsdk:"timeout_seconds_default"`
 }
 
-type GlobalLogReceiverGlobalLogReceiverCompressionType struct {
+type GlobalLogReceiverCompressionType struct {
 	CompressionChoice types.Object `tfsdk:"compression_choice"`
 }
 
-type GlobalLogReceiverCompressionTypeCompressionChoice struct {
+type GlobalLogReceiverCompressionChoice struct {
 	CompressionDefault types.Bool `tfsdk:"compression_default"`
 	CompressionGzip    types.Bool `tfsdk:"compression_gzip"`
 	CompressionNone    types.Bool `tfsdk:"compression_none"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeAzureEventHubsReceiver struct {
+type GlobalLogReceiverAzureEventHubsReceiver struct {
 	ConnectionString types.Object `tfsdk:"connection_string"`
 	Instance         types.String `tfsdk:"instance"`
 	Namespace        types.String `tfsdk:"namespace"`
@@ -121,23 +121,24 @@ type GlobalLogReceiverSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type GlobalLogReceiverSecretTypeSecretInfoChoice struct {
+type GlobalLogReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type GlobalLogReceiverSecretTypeBlindfoldSecretInfo struct {
+type GlobalLogReceiverBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type GlobalLogReceiverSecretTypeClearSecretInfo struct {
+type GlobalLogReceiverClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeAzureReceiver struct {
+type GlobalLogReceiverAzureReceiver struct {
 	Batch            types.Object `tfsdk:"batch"`
 	Compression      types.Object `tfsdk:"compression"`
 	ConnectionString types.Object `tfsdk:"connection_string"`
@@ -145,17 +146,17 @@ type GlobalLogReceiverGlobalSpecTypeAzureReceiver struct {
 	FilenameOptions  types.Object `tfsdk:"filename_options"`
 }
 
-type GlobalLogReceiverGlobalLogReceiverFilenameOptionsType struct {
+type GlobalLogReceiverFilenameOptionsType struct {
 	FolderChoice types.Object `tfsdk:"folder_choice"`
 }
 
-type GlobalLogReceiverFilenameOptionsTypeFolderChoice struct {
+type GlobalLogReceiverFolderChoice struct {
 	CustomFolder  types.String `tfsdk:"custom_folder"`
 	LogTypeFolder types.Bool   `tfsdk:"log_type_folder"`
 	NoFolder      types.Bool   `tfsdk:"no_folder"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeDatadogReceiver struct {
+type GlobalLogReceiverDatadogReceiver struct {
 	Batch          types.Object `tfsdk:"batch"`
 	Compression    types.Object `tfsdk:"compression"`
 	DatadogApiKey  types.Object `tfsdk:"datadog_api_key"`
@@ -163,49 +164,49 @@ type GlobalLogReceiverGlobalSpecTypeDatadogReceiver struct {
 	TlsChoice      types.Object `tfsdk:"tls_choice"`
 }
 
-type GlobalLogReceiverDatadogConfigEndpointChoice struct {
+type GlobalLogReceiverEndpointChoice struct {
 	Endpoint types.String `tfsdk:"endpoint"`
 	Site     types.String `tfsdk:"site"`
 }
 
-type GlobalLogReceiverDatadogConfigTlsChoice struct {
+type GlobalLogReceiverTlsChoice struct {
 	NoTls  types.Bool   `tfsdk:"no_tls"`
 	UseTls types.Object `tfsdk:"use_tls"`
 }
 
-type GlobalLogReceiverDatadogConfigUseTls struct {
+type GlobalLogReceiverUseTls struct {
 	CaChoice                types.Object `tfsdk:"ca_choice"`
 	MtlsChoice              types.Object `tfsdk:"mtls_choice"`
 	VerifyCertificateChoice types.Object `tfsdk:"verify_certificate_choice"`
 	VerifyHostnameChoice    types.Object `tfsdk:"verify_hostname_choice"`
 }
 
-type GlobalLogReceiverTLSConfigTypeCaChoice struct {
+type GlobalLogReceiverCaChoice struct {
 	NoCa         types.Bool   `tfsdk:"no_ca"`
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
 }
 
-type GlobalLogReceiverTLSConfigTypeMtlsChoice struct {
+type GlobalLogReceiverMtlsChoice struct {
 	MtlsDisabled types.Bool   `tfsdk:"mtls_disabled"`
 	MtlsEnable   types.Object `tfsdk:"mtls_enable"`
 }
 
-type GlobalLogReceiverTLSConfigTypeMtlsEnable struct {
+type GlobalLogReceiverMtlsEnable struct {
 	Certificate types.String `tfsdk:"certificate"`
 	KeyUrl      types.Object `tfsdk:"key_url"`
 }
 
-type GlobalLogReceiverTLSConfigTypeVerifyCertificateChoice struct {
+type GlobalLogReceiverVerifyCertChoice struct {
 	DisableVerifyCertificate types.Bool `tfsdk:"disable_verify_certificate"`
 	EnableVerifyCertificate  types.Bool `tfsdk:"enable_verify_certificate"`
 }
 
-type GlobalLogReceiverTLSConfigTypeVerifyHostnameChoice struct {
+type GlobalLogReceiverVerifyHostnameChoice struct {
 	DisableVerifyHostname types.Bool `tfsdk:"disable_verify_hostname"`
 	EnableVerifyHostname  types.Bool `tfsdk:"enable_verify_hostname"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeGcpBucketReceiver struct {
+type GlobalLogReceiverGcpBucketReceiver struct {
 	Batch           types.Object `tfsdk:"batch"`
 	Bucket          types.String `tfsdk:"bucket"`
 	Compression     types.Object `tfsdk:"compression"`
@@ -213,7 +214,7 @@ type GlobalLogReceiverGlobalSpecTypeGcpBucketReceiver struct {
 	GcpCred         types.Object `tfsdk:"gcp_cred"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeHttpReceiver struct {
+type GlobalLogReceiverHttpReceiver struct {
 	AuthChoice  types.Object `tfsdk:"auth_choice"`
 	Batch       types.Object `tfsdk:"batch"`
 	Compression types.Object `tfsdk:"compression"`
@@ -221,18 +222,18 @@ type GlobalLogReceiverGlobalSpecTypeHttpReceiver struct {
 	Uri         types.String `tfsdk:"uri"`
 }
 
-type GlobalLogReceiverHTTPConfigAuthChoice struct {
+type GlobalLogReceiverAuthChoice struct {
 	AuthBasic types.Object `tfsdk:"auth_basic"`
 	AuthNone  types.Bool   `tfsdk:"auth_none"`
 	AuthToken types.Object `tfsdk:"auth_token"`
 }
 
-type GlobalLogReceiverHTTPConfigAuthBasic struct {
+type GlobalLogReceiverAuthBasic struct {
 	Password types.Object `tfsdk:"password"`
 	UserName types.String `tfsdk:"user_name"`
 }
 
-type GlobalLogReceiverHTTPConfigAuthToken struct {
+type GlobalLogReceiverAuthToken struct {
 	Token types.Object `tfsdk:"token"`
 }
 
@@ -248,7 +249,7 @@ type GlobalLogReceiverHTTPConfigUseTls struct {
 	VerifyHostnameChoice    types.Object `tfsdk:"verify_hostname_choice"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeKafkaReceiver struct {
+type GlobalLogReceiverKafkaReceiver struct {
 	Batch            types.Object `tfsdk:"batch"`
 	BootstrapServers types.List   `tfsdk:"bootstrap_servers"`
 	Compression      types.Object `tfsdk:"compression"`
@@ -268,7 +269,7 @@ type GlobalLogReceiverKafkaConfigUseTls struct {
 	VerifyHostnameChoice    types.Object `tfsdk:"verify_hostname_choice"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeNewRelicReceiver struct {
+type GlobalLogReceiverNewRelicReceiver struct {
 	ApiKey         types.Object `tfsdk:"api_key"`
 	EndpointChoice types.Object `tfsdk:"endpoint_choice"`
 }
@@ -278,7 +279,7 @@ type GlobalLogReceiverNewRelicConfigEndpointChoice struct {
 	Us types.Bool `tfsdk:"us"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeQradarReceiver struct {
+type GlobalLogReceiverQradarReceiver struct {
 	Batch       types.Object `tfsdk:"batch"`
 	Compression types.Object `tfsdk:"compression"`
 	TlsChoice   types.Object `tfsdk:"tls_choice"`
@@ -297,7 +298,7 @@ type GlobalLogReceiverQRadarConfigUseTls struct {
 	VerifyHostnameChoice    types.Object `tfsdk:"verify_hostname_choice"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeS3Receiver struct {
+type GlobalLogReceiverS3Receiver struct {
 	AwsCred         types.Object `tfsdk:"aws_cred"`
 	AwsRegion       types.String `tfsdk:"aws_region"`
 	Batch           types.Object `tfsdk:"batch"`
@@ -306,7 +307,7 @@ type GlobalLogReceiverGlobalSpecTypeS3Receiver struct {
 	FilenameOptions types.Object `tfsdk:"filename_options"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeSplunkReceiver struct {
+type GlobalLogReceiverSplunkReceiver struct {
 	Batch          types.Object `tfsdk:"batch"`
 	Compression    types.Object `tfsdk:"compression"`
 	Endpoint       types.String `tfsdk:"endpoint"`
@@ -326,7 +327,7 @@ type GlobalLogReceiverSplunkConfigUseTls struct {
 	VerifyHostnameChoice    types.Object `tfsdk:"verify_hostname_choice"`
 }
 
-type GlobalLogReceiverGlobalSpecTypeSumoLogicReceiver struct {
+type GlobalLogReceiverSumoLogicReceiver struct {
 	Url types.Object `tfsdk:"url"`
 }
 
@@ -547,6 +548,7 @@ var GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOne
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -664,6 +666,7 @@ var GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofModelAt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -797,6 +800,7 @@ var GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -891,6 +895,7 @@ var GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableK
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1097,6 +1102,7 @@ var GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicPasswordSecretInfoOn
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1141,6 +1147,7 @@ var GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneof
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1279,6 +1286,7 @@ var GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyU
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1459,6 +1467,7 @@ var GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKey
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1520,6 +1529,7 @@ var GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofModelAttribute
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1690,6 +1700,7 @@ var GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1927,6 +1938,7 @@ var GlobalLogReceiverReceiverSplunkReceiverSplunkHecTokenSecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSplunkReceiverSplunkHecTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2014,6 +2026,7 @@ var GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2072,6 +2085,7 @@ var GlobalLogReceiverReceiverSumoLogicReceiverUrlSecretInfoOneofModelAttributeMa
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSumoLogicReceiverUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2103,8 +2117,8 @@ func (d *DataSourceF5XCGlobalLogReceiver) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a global_log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of global_log_receiver) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a global_log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of global_log_receiver) etc. can be fetched",
+		MarkdownDescription: "Global Log Receiver is used to specify a receiver (s3 bucket, etc.) for periodic streaming of access logs",
+		Description:         "Global Log Receiver is used to specify a receiver (s3 bucket, etc.) for periodic streaming of access logs",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2455,8 +2469,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -2639,8 +2660,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -2851,8 +2879,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -2995,8 +3030,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
+																						Sensitive:   true,
 																					},
 																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
 																			},
 																		},
 																	},
@@ -3301,8 +3343,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -3383,8 +3432,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
+																		Sensitive:   true,
 																	},
 																},
+															},
+															"none": schema.BoolAttribute{
+																Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
 															},
 														},
 													},
@@ -3613,8 +3669,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
+																						Sensitive:   true,
 																					},
 																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
 																			},
 																		},
 																	},
@@ -3914,8 +3977,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
+																						Sensitive:   true,
 																					},
 																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
 																			},
 																		},
 																	},
@@ -4032,8 +4102,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -4286,8 +4363,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
+																						Sensitive:   true,
 																					},
 																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
 																			},
 																		},
 																	},
@@ -4700,8 +4784,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -4824,8 +4915,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 																						Required:    false,
 																						Optional:    false,
 																						Computed:    true,
+																						Sensitive:   true,
 																					},
 																				},
+																			},
+																			"none": schema.BoolAttribute{
+																				Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
 																			},
 																		},
 																	},
@@ -4942,8 +5040,15 @@ func (r *DataSourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request da
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
+														Sensitive:   true,
 													},
 												},
+											},
+											"none": schema.BoolAttribute{
+												Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
 											},
 										},
 									},
@@ -5010,7 +5115,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_global_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "global_log_receiver", err))
 		return
 	}
 
@@ -5081,7 +5186,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 		filterChoiceChoices := specData.GetFilterChoice()
 
 		// The model struct that will be populated by the nested template.
-		var filterChoiceChoicesModel = &GlobalLogReceiverGlobalSpecTypeFilterChoice{}
+		var filterChoiceChoicesModel = &GlobalLogReceiverFilterChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5166,7 +5271,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 		logTypeChoiceChoices := specData.GetLogType()
 
 		// The model struct that will be populated by the nested template.
-		var logTypeChoiceChoicesModel = &GlobalLogReceiverGlobalSpecTypeLogTypeChoice{}
+		var logTypeChoiceChoicesModel = &GlobalLogReceiverLogTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5297,7 +5402,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 		receiverChoiceChoices := specData.GetReceiver()
 
 		// The model struct that will be populated by the nested template.
-		var receiverChoiceChoicesModel = &GlobalLogReceiverGlobalSpecTypeReceiverChoice{}
+		var receiverChoiceChoicesModel = &GlobalLogReceiverReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5372,7 +5477,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if awsCloudWatchReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := awsCloudWatchReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -5420,10 +5525,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -5469,10 +5574,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -5518,19 +5623,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAwsCloudWatchReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					awsCloudWatchReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					awsCloudWatchReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -5545,7 +5650,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if awsCloudWatchReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := awsCloudWatchReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -5602,19 +5707,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					awsCloudWatchReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					awsCloudWatchReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -5765,6 +5870,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 							}
 						}
 
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -5854,7 +5968,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if azureReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := azureReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -5902,10 +6016,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -5951,10 +6065,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -6000,19 +6114,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAzureReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAzureReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					azureReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					azureReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -6027,7 +6141,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if azureReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := azureReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -6084,19 +6198,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAzureReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAzureReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					azureReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					azureReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -6210,6 +6324,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 							}
 						}
 
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -6270,7 +6393,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> FilenameOptions
 				if azureReceiverElement.GetFilenameOptions() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel := &GlobalLogReceiverGlobalLogReceiverFilenameOptionsType{}
+					globalLogReceiverFilenameOptionsTypeModel := &GlobalLogReceiverFilenameOptionsType{}
 					filenameOptionsElement := azureReceiverElement.GetFilenameOptions()
 
 					// Recursively populate the nested struct
@@ -6327,19 +6450,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel.FolderChoice = finalObj
+						globalLogReceiverFilenameOptionsTypeModel.FolderChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel.FolderChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverFilenameOptionsFolderModelAttributeMap)
+						globalLogReceiverFilenameOptionsTypeModel.FolderChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverFilenameOptionsFolderModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAzureReceiverFilenameOptionsModelAttributeMap, globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel)
+					globalLogReceiverFilenameOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverAzureReceiverFilenameOptionsModelAttributeMap, globalLogReceiverFilenameOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					azureReceiverAttributeMap["filename_options"] = globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModelObj
+					azureReceiverAttributeMap["filename_options"] = globalLogReceiverFilenameOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -6375,7 +6498,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if datadogReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := datadogReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -6423,10 +6546,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -6472,10 +6595,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -6521,19 +6644,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverDatadogReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverDatadogReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					datadogReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					datadogReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -6548,7 +6671,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if datadogReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := datadogReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -6605,19 +6728,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverDatadogReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverDatadogReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					datadogReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					datadogReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -6729,6 +6852,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 							} else {
 								datadogApiKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := datadogApiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -7053,6 +7185,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 													}
 												}
 
+												// data specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -7282,7 +7423,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if gcpBucketReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := gcpBucketReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -7330,10 +7471,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -7379,10 +7520,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -7428,19 +7569,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverGcpBucketReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverGcpBucketReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					gcpBucketReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					gcpBucketReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7463,7 +7604,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if gcpBucketReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := gcpBucketReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -7520,19 +7661,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverGcpBucketReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverGcpBucketReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					gcpBucketReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					gcpBucketReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7547,7 +7688,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> FilenameOptions
 				if gcpBucketReceiverElement.GetFilenameOptions() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel := &GlobalLogReceiverGlobalLogReceiverFilenameOptionsType{}
+					globalLogReceiverFilenameOptionsTypeModel := &GlobalLogReceiverFilenameOptionsType{}
 					filenameOptionsElement := gcpBucketReceiverElement.GetFilenameOptions()
 
 					// Recursively populate the nested struct
@@ -7604,19 +7745,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel.FolderChoice = finalObj
+						globalLogReceiverFilenameOptionsTypeModel.FolderChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel.FolderChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverFilenameOptionsFolderModelAttributeMap)
+						globalLogReceiverFilenameOptionsTypeModel.FolderChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverFilenameOptionsFolderModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverGcpBucketReceiverFilenameOptionsModelAttributeMap, globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel)
+					globalLogReceiverFilenameOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverGcpBucketReceiverFilenameOptionsModelAttributeMap, globalLogReceiverFilenameOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					gcpBucketReceiverAttributeMap["filename_options"] = globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModelObj
+					gcpBucketReceiverAttributeMap["filename_options"] = globalLogReceiverFilenameOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7823,6 +7964,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -7873,12 +8023,8 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 							}
 
 							// data specToModelNested StringField --> UserName
-							if authBasicElement.GetUserName() != "" {
-								authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
-							} else {
-								// Empty string, set to null
-								authBasicAttributeMap["user_name"] = types.StringNull()
-							}
+							// The resource defaults this field to "", so API "" must stay "" to match it.
+							authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
 
 							authBasicObj, authBasicObjDiags := types.ObjectValue(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap, authBasicAttributeMap)
 							response.Diagnostics.Append(authBasicObjDiags...)
@@ -8012,6 +8158,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -8094,7 +8249,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if httpReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := httpReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -8142,10 +8297,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -8191,10 +8346,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -8240,19 +8395,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverHttpReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverHttpReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					httpReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					httpReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -8267,7 +8422,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if httpReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := httpReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -8324,19 +8479,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverHttpReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverHttpReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					httpReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					httpReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -8568,6 +8723,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// data specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -8807,7 +8971,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if kafkaReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := kafkaReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -8855,10 +9019,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -8904,10 +9068,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -8953,19 +9117,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverKafkaReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverKafkaReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					kafkaReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					kafkaReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -8992,7 +9156,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if kafkaReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := kafkaReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -9049,19 +9213,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverKafkaReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverKafkaReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					kafkaReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					kafkaReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -9301,6 +9465,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// data specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -9631,6 +9804,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 							}
 						}
 
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -9753,7 +9935,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if qradarReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := qradarReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -9801,10 +9983,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -9850,10 +10032,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -9899,19 +10081,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverQradarReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverQradarReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					qradarReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					qradarReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -9926,7 +10108,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if qradarReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := qradarReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -9983,19 +10165,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverQradarReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverQradarReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					qradarReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					qradarReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -10227,6 +10409,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// data specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -10524,7 +10715,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if s3ReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := s3ReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -10572,10 +10763,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -10621,10 +10812,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -10670,19 +10861,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverS3ReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverS3ReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					s3ReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					s3ReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -10705,7 +10896,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if s3ReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := s3ReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -10762,19 +10953,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverS3ReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverS3ReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					s3ReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					s3ReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -10789,7 +10980,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> FilenameOptions
 				if s3ReceiverElement.GetFilenameOptions() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel := &GlobalLogReceiverGlobalLogReceiverFilenameOptionsType{}
+					globalLogReceiverFilenameOptionsTypeModel := &GlobalLogReceiverFilenameOptionsType{}
 					filenameOptionsElement := s3ReceiverElement.GetFilenameOptions()
 
 					// Recursively populate the nested struct
@@ -10846,19 +11037,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel.FolderChoice = finalObj
+						globalLogReceiverFilenameOptionsTypeModel.FolderChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel.FolderChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverFilenameOptionsFolderModelAttributeMap)
+						globalLogReceiverFilenameOptionsTypeModel.FolderChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverFilenameOptionsFolderModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverS3ReceiverFilenameOptionsModelAttributeMap, globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModel)
+					globalLogReceiverFilenameOptionsTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverS3ReceiverFilenameOptionsModelAttributeMap, globalLogReceiverFilenameOptionsTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					s3ReceiverAttributeMap["filename_options"] = globalLogReceiverGlobalLogReceiverFilenameOptionsTypeModelObj
+					s3ReceiverAttributeMap["filename_options"] = globalLogReceiverFilenameOptionsTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -10894,7 +11085,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Batch
 				if splunkReceiverElement.GetBatch() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverGlobalLogReceiverBatchOptionType{}
+					globalLogReceiverBatchOptionTypeModel := &GlobalLogReceiverBatchOptionType{}
 					batchElement := splunkReceiverElement.GetBatch()
 
 					// Recursively populate the nested struct
@@ -10942,10 +11133,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverBatchBatchBytesModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchBytesChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverBatchBatchBytesModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchEvents
@@ -10991,10 +11182,10 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverBatchBatchEventsModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchEventsChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverBatchBatchEventsModelAttributeMap)
 					}
 
 					// data specToModelNested OneOfField --> BatchTimeout
@@ -11040,19 +11231,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverBatchBatchTimeoutModelAttributeMap)
+						globalLogReceiverBatchOptionTypeModel.BatchTimeoutChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverBatchBatchTimeoutModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverSplunkReceiverBatchModelAttributeMap, globalLogReceiverGlobalLogReceiverBatchOptionTypeModel)
+					globalLogReceiverBatchOptionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverSplunkReceiverBatchModelAttributeMap, globalLogReceiverBatchOptionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					splunkReceiverAttributeMap["batch"] = globalLogReceiverGlobalLogReceiverBatchOptionTypeModelObj
+					splunkReceiverAttributeMap["batch"] = globalLogReceiverBatchOptionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -11067,7 +11258,7 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 				// data specToModelNested PointerField --> Compression
 				if splunkReceiverElement.GetCompression() != nil {
 					// Create the nested Go struct
-					globalLogReceiverGlobalLogReceiverCompressionTypeModel := &GlobalLogReceiverGlobalLogReceiverCompressionType{}
+					globalLogReceiverCompressionTypeModel := &GlobalLogReceiverCompressionType{}
 					compressionElement := splunkReceiverElement.GetCompression()
 
 					// Recursively populate the nested struct
@@ -11124,19 +11315,19 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
+						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverGlobalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverCompressionCompressionChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					globalLogReceiverGlobalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverSplunkReceiverCompressionModelAttributeMap, globalLogReceiverGlobalLogReceiverCompressionTypeModel)
+					globalLogReceiverCompressionTypeModelObj, objDiags := types.ObjectValueFrom(ctx, GlobalLogReceiverReceiverSplunkReceiverCompressionModelAttributeMap, globalLogReceiverCompressionTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					splunkReceiverAttributeMap["compression"] = globalLogReceiverGlobalLogReceiverCompressionTypeModelObj
+					splunkReceiverAttributeMap["compression"] = globalLogReceiverCompressionTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -11256,6 +11447,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 							} else {
 								splunkHecTokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverSplunkHecTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := splunkHecTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -11527,6 +11727,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// data specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -11855,6 +12064,15 @@ func (d *DataSourceF5XCGlobalLogReceiver) Read(ctx context.Context, request data
 							} else {
 								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverSumoLogicReceiverUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---

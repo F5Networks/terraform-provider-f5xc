@@ -34,6 +34,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -42,6 +43,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -566,31 +568,11 @@ type ProtectedAppAuth struct {
 }
 
 type ProtectedAppBotDefenseFlowLabelAuthChoiceTypeLabelChoice struct {
-	Login        types.Object `tfsdk:"login"`
-	LoginMfa     types.Bool   `tfsdk:"login_mfa"`
-	LoginPartner types.Bool   `tfsdk:"login_partner"`
-	Logout       types.Bool   `tfsdk:"logout"`
-	TokenRefresh types.Bool   `tfsdk:"token_refresh"`
-}
-
-type ProtectedAppLogin struct {
-	TransactionResultChoice types.Object `tfsdk:"transaction_result_choice"`
-}
-
-type ProtectedAppTransactionResultChoice struct {
-	DisableTransactionResult types.Bool   `tfsdk:"disable_transaction_result"`
-	TransactionResult        types.Object `tfsdk:"transaction_result"`
-}
-
-type ProtectedAppTransactionResult struct {
-	FailureConditions types.List `tfsdk:"failure_conditions"`
-	SuccessConditions types.List `tfsdk:"success_conditions"`
-}
-
-type ProtectedAppBotDefenseTransactionResultCondition struct {
-	Name        types.String `tfsdk:"name"`
-	RegexValues types.List   `tfsdk:"regex_values"`
-	Status      types.List   `tfsdk:"status"`
+	Login        types.Bool `tfsdk:"login"`
+	LoginMfa     types.Bool `tfsdk:"login_mfa"`
+	LoginPartner types.Bool `tfsdk:"login_partner"`
+	Logout       types.Bool `tfsdk:"logout"`
+	TokenRefresh types.Bool `tfsdk:"token_refresh"`
 }
 
 type ProtectedAppFinancialServices struct {
@@ -687,7 +669,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> ConnectorTypeChoice
+// Attribute map for OneOfField --> ConnectorTypeChoice
 var ProtectedApplicationConnectorTypeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adobe_commerce_connector": types.BoolType,
@@ -832,7 +814,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -895,7 +877,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -941,7 +923,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceManualJsIns
 	"js_download_path": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> MobileSdkChoice
+// Attribute map for OneOfField --> MobileSdkChoice
 var ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_mobile_sdk": types.BoolType,
@@ -1495,7 +1477,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -1558,7 +1540,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -1607,7 +1589,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceManualJsIns
 	"js_download_path": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> MobileSdkChoice
+// Attribute map for OneOfField --> MobileSdkChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_mobile_sdk": types.BoolType,
@@ -1992,87 +1974,11 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabel
 // Attribute map for RequiredOneOfField --> LabelChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap = map[string]attr.Type{
 
-	"login": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap,
-	},
+	"login":         types.BoolType,
 	"login_mfa":     types.BoolType,
 	"login_partner": types.BoolType,
 	"logout":        types.BoolType,
 	"token_refresh": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Login
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap = map[string]attr.Type{
-
-	"transaction_result_choice": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> TransactionResultChoice
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_transaction_result": types.BoolType,
-	"transaction_result": types.ObjectType{
-		AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> TransactionResult
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap = map[string]attr.Type{
-
-	"failure_conditions": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"regex_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"status": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-	"success_conditions": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"regex_values": types.ListType{
-					ElemType: types.StringType,
-				},
-				"status": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> FailureConditions
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"status": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> SuccessConditions
-var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"regex_values": types.ListType{
-		ElemType: types.StringType,
-	},
-	"status": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> FinancialServices
@@ -2098,7 +2004,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabel
 	},
 }
 
-// Attribute map for RequiredOneOfField --> LabelChoice
+// Attribute map for OneOfField --> LabelChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap = map[string]attr.Type{
 
 	"checkin": types.BoolType,
@@ -2240,8 +2146,8 @@ func (r *ResourceF5XCProtectedApplication) Metadata(ctx context.Context, request
 func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a protected_application This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protected_application) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a protected_application This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protected_application) etc. can be fetched",
+		MarkdownDescription: "Configures application protected by Bot Defense",
+		Description:         "Configures application protected by Bot Defense",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2309,12 +2215,12 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 			},
 			"connector_type_choice": schema.SingleNestedAttribute{
 				Description:         "connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense.",
-				MarkdownDescription: "connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense.<br>Exactly one of `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, or `salesforce_commerce_connector` must be specified when `connector_type_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"adobe_commerce_connector",
 						"big_ip_iapp",
 						"cloudflare",
@@ -2324,10 +2230,13 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 						"salesforce_commerce_connector",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"adobe_commerce_connector": schema.BoolAttribute{
 						Description:         "Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.",
-						MarkdownDescription: "Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.",
+						MarkdownDescription: "Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.<br>Conflicts with `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2337,7 +2246,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"big_ip_iapp": schema.BoolAttribute{
 						Description:         "BIG-IP iApp connector iApp templates simplify the integration and configuration process.",
-						MarkdownDescription: "BIG-IP iApp connector iApp templates simplify the integration and configuration process.",
+						MarkdownDescription: "BIG-IP iApp connector iApp templates simplify the integration and configuration process.<br>Conflicts with `adobe_commerce_connector`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2347,7 +2256,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"cloudflare": schema.SingleNestedAttribute{
 						Description:         "Cloudflare Configure Cloudflare connector properties",
-						MarkdownDescription: "Cloudflare Configure Cloudflare connector properties",
+						MarkdownDescription: "Cloudflare Configure Cloudflare connector properties<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2369,7 +2278,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"java_script_choice": schema.SingleNestedAttribute{
 								Description:         "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
-								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
+								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.<br>Exactly one of `disable_js_insert`, `js_insertion_rules`, or `manual_js_insert` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2383,7 +2292,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 								Attributes: map[string]schema.Attribute{
 									"disable_js_insert": schema.BoolAttribute{
 										Description:         "disable_js_insert No web endpoints or to insert JavaScript manually",
-										MarkdownDescription: "disable_js_insert No web endpoints or to insert JavaScript manually",
+										MarkdownDescription: "disable_js_insert No web endpoints or to insert JavaScript manually<br>Conflicts with `js_insertion_rules` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2393,7 +2302,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"js_insertion_rules": schema.SingleNestedAttribute{
 										Description:         "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
-										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
+										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript<br>Conflicts with `disable_js_insert` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2412,20 +2321,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2435,14 +2347,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -2456,7 +2368,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2470,7 +2382,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2480,7 +2392,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2540,7 +2452,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"path_match_choice": schema.SingleNestedAttribute{
 																	Description:         "path_match A specification of path match",
-																	MarkdownDescription: "path_match A specification of path match",
+																	MarkdownDescription: "path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -2554,7 +2466,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"path": schema.StringAttribute{
 																			Description:         "exact Exact path value to match",
-																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2568,7 +2480,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"prefix": schema.StringAttribute{
 																			Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2582,7 +2494,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regular expression of path match (e.g. the value .* will match on all paths)",
-																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
+																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2638,20 +2550,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2661,14 +2576,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -2682,7 +2597,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2696,7 +2611,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2706,7 +2621,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2759,7 +2674,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"uri_path_choice": schema.SingleNestedAttribute{
 															Description:         "Path URI path matcher.",
-															MarkdownDescription: "Path URI path matcher.",
+															MarkdownDescription: "Path URI path matcher.<br>Exactly one of `exact_path`, `glob`, or `prefix` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -2773,7 +2688,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_path": schema.StringAttribute{
 																	Description:         "path Exact path value to match",
-																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `glob` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2787,7 +2702,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"glob": schema.StringAttribute{
 																	Description:         "glob Accepts wildcards * to match multiple characters or ? to match a single character",
-																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character",
+																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character<br>Conflicts with `exact_path` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2801,7 +2716,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"prefix": schema.StringAttribute{
 																	Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `exact_path` and `glob`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2822,7 +2737,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"manual_js_insert": schema.SingleNestedAttribute{
 										Description:         "manual_js_insert Insert JavaScript manually",
-										MarkdownDescription: "manual_js_insert Insert JavaScript manually",
+										MarkdownDescription: "manual_js_insert Insert JavaScript manually<br>Conflicts with `disable_js_insert` and `js_insertion_rules`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2860,20 +2775,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"mobile_sdk_choice": schema.SingleNestedAttribute{
 								Description:         "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.<br>Exactly one of `disable_mobile_sdk` or `mobile_sdk_config` must be specified when `mobile_sdk_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_mobile_sdk",
 										"mobile_sdk_config",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_mobile_sdk": schema.BoolAttribute{
 										Description:         "Disable Mobile SDK",
-										MarkdownDescription: "Disable Mobile SDK",
+										MarkdownDescription: "Disable Mobile SDK<br>Conflicts with `mobile_sdk_config`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2883,7 +2801,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"mobile_sdk_config": schema.SingleNestedAttribute{
 										Description:         "Mobile SDK configuration",
-										MarkdownDescription: "Mobile SDK configuration",
+										MarkdownDescription: "Mobile SDK configuration<br>Conflicts with `disable_mobile_sdk`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2922,7 +2840,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"value_match_choice": schema.SingleNestedAttribute{
 																	Description:         "value_match The variants of matching a header value",
-																	MarkdownDescription: "value_match The variants of matching a header value",
+																	MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2935,7 +2853,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"exact": schema.StringAttribute{
 																			Description:         "exact Header value to match exactly",
-																			MarkdownDescription: "exact Header value to match exactly",
+																			MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2946,7 +2864,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regex match of the header value in re2 format",
-																			MarkdownDescription: "regex Regex match of the header value in re2 format",
+																			MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2980,7 +2898,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_type_choice": schema.SingleNestedAttribute{
 											Description:         "Client Type Select type of client(s) that will access this endpoint",
-											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint",
+											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint<br>Exactly one of `mobile_client`, `web_client`, or `web_mobile_client` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -2994,14 +2912,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"mobile_client": schema.SingleNestedAttribute{
 													Description:         "Mobile Client Mobile traffic channel.",
-													MarkdownDescription: "Mobile Client Mobile traffic channel.",
+													MarkdownDescription: "Mobile Client Mobile traffic channel.<br>Conflicts with `web_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block` or `continue` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3014,7 +2932,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3056,14 +2974,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3076,7 +2994,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3086,7 +3004,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3104,14 +3022,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_client": schema.SingleNestedAttribute{
 													Description:         "Web Client Web traffic",
-													MarkdownDescription: "Web Client Web traffic",
+													MarkdownDescription: "Web Client Web traffic<br>Conflicts with `mobile_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block`, `continue`, or `redirect` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3125,7 +3043,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3168,14 +3086,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3188,7 +3106,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3198,7 +3116,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3212,7 +3130,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block` and `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3252,14 +3170,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_mobile_client": schema.SingleNestedAttribute{
 													Description:         "WebMobileTrafficChannel Web and mobile traffic channel.",
-													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.",
+													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.<br>Conflicts with `mobile_client` and `web_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mobile_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_mobile` or `continue_mobile` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3272,7 +3190,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_mobile": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3314,14 +3232,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_mobile": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3334,7 +3252,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3344,7 +3262,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3360,7 +3278,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"web_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_web`, `continue_web`, or `redirect_web` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3374,7 +3292,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_web": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3417,14 +3335,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_web": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3437,7 +3355,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3447,7 +3365,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3461,7 +3379,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect_web": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block_web` and `continue_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3503,7 +3421,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 										},
 										"domain_matcher_choice": schema.SingleNestedAttribute{
 											Description:         "Domain Matcher This defines domain matcher.",
-											MarkdownDescription: "Domain Matcher This defines domain matcher.",
+											MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -3516,7 +3434,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"any_domain": schema.BoolAttribute{
 													Description:         "Any domain Any Domain",
-													MarkdownDescription: "Any domain Any Domain",
+													MarkdownDescription: "Any domain Any Domain<br>Conflicts with `domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3526,14 +3444,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"domain": schema.SingleNestedAttribute{
 													Description:         "Domain Select Domain matcher",
-													MarkdownDescription: "Domain Select Domain matcher",
+													MarkdownDescription: "Domain Select Domain matcher<br>Conflicts with `any_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"domain_choice": schema.SingleNestedAttribute{
 															Description:         "Domain choice Method to specify domain part",
-															MarkdownDescription: "Domain choice Method to specify domain part",
+															MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3547,7 +3465,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_value": schema.StringAttribute{
 																	Description:         "exact value Exact domain name.",
-																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3561,7 +3479,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"regex_value": schema.StringAttribute{
 																	Description:         "regex values of Domains Regular Expression value for the domain name",
-																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3571,7 +3489,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"suffix_value": schema.StringAttribute{
 																	Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3598,6 +3516,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"METHOD_ANY", "METHOD_DELETE", "METHOD_GET", "METHOD_GET_DOCUMENT", "METHOD_PATCH", "METHOD_POST", "METHOD_PUT"}...)),
+												listvalidator.SizeBetween(1, 4),
+												listvalidator.UniqueValues(),
 											},
 										},
 										"metadata": schema.SingleNestedAttribute{
@@ -3701,7 +3621,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_source_choice": schema.SingleNestedAttribute{
 											Description:         "Client Identifier Client identifier that should be used for the client rule",
-											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule",
+											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `http_header` or `ip_prefix` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -3714,7 +3634,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"http_header": schema.SingleNestedAttribute{
 													Description:         "HTTP Header Request header name and value pairs",
-													MarkdownDescription: "HTTP Header Request header name and value pairs",
+													MarkdownDescription: "HTTP Header Request header name and value pairs<br>Conflicts with `ip_prefix`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3746,7 +3666,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	},
 																	"value_match_choice": schema.SingleNestedAttribute{
 																		Description:         "value_match The variants of matching a header value",
-																		MarkdownDescription: "value_match The variants of matching a header value",
+																		MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3759,7 +3679,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		Attributes: map[string]schema.Attribute{
 																			"exact": schema.StringAttribute{
 																				Description:         "exact Header value to match exactly",
-																				MarkdownDescription: "exact Header value to match exactly",
+																				MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3770,7 +3690,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			},
 																			"regex": schema.StringAttribute{
 																				Description:         "regex Regex match of the header value in re2 format",
-																				MarkdownDescription: "regex Regex match of the header value in re2 format",
+																				MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3788,13 +3708,13 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"ip_prefix": schema.StringAttribute{
 													Description:         "ip prefix IP prefix string",
-													MarkdownDescription: "ip prefix IP prefix string",
+													MarkdownDescription: "ip prefix IP prefix string<br>Conflicts with `http_header`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Validators: []validator.String{
 														stringvalidator.RegexMatches(
-															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 															"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 														),
 													},
@@ -3841,14 +3761,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"cloudfront": schema.SingleNestedAttribute{
 						Description:         "Amazon Cloudfront Configure Amazon CloudFront connector properties",
-						MarkdownDescription: "Amazon Cloudfront Configure Amazon CloudFront connector properties",
+						MarkdownDescription: "Amazon Cloudfront Configure Amazon CloudFront connector properties<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"aws_configuration_type_choice": schema.SingleNestedAttribute{
 								Description:         "AWS Configuration Choice AWS Configuration options",
-								MarkdownDescription: "AWS Configuration Choice AWS Configuration options",
+								MarkdownDescription: "AWS Configuration Choice AWS Configuration options<br>Exactly one of `aws_configuration_id_selector`, `aws_configuration_tag_selector`, or `disable_aws_configuration` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3862,7 +3782,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 								Attributes: map[string]schema.Attribute{
 									"aws_configuration_id_selector": schema.SingleNestedAttribute{
 										Description:         "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs",
-										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs",
+										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs<br>Conflicts with `aws_configuration_tag_selector` and `disable_aws_configuration`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3888,7 +3808,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"aws_configuration_tag_selector": schema.SingleNestedAttribute{
 										Description:         "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector",
-										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector",
+										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector<br>Conflicts with `aws_configuration_id_selector` and `disable_aws_configuration`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3908,7 +3828,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"disable_aws_configuration": schema.BoolAttribute{
 										Description:         "Disable AWS Configuration Check this box if you would prefer to manage distribution manaully",
-										MarkdownDescription: "Disable AWS Configuration Check this box if you would prefer to manage distribution manaully",
+										MarkdownDescription: "Disable AWS Configuration Check this box if you would prefer to manage distribution manaully<br>Conflicts with `aws_configuration_id_selector` and `aws_configuration_tag_selector`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3946,7 +3866,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"java_script_choice": schema.SingleNestedAttribute{
 								Description:         "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
-								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
+								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.<br>Exactly one of `disable_js_insert`, `js_insertion_rules`, or `manual_js_insert` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3960,7 +3880,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 								Attributes: map[string]schema.Attribute{
 									"disable_js_insert": schema.BoolAttribute{
 										Description:         "disable_js_insert No web endpoints",
-										MarkdownDescription: "disable_js_insert No web endpoints",
+										MarkdownDescription: "disable_js_insert No web endpoints<br>Conflicts with `js_insertion_rules` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3970,7 +3890,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"js_insertion_rules": schema.SingleNestedAttribute{
 										Description:         "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
-										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
+										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript<br>Conflicts with `disable_js_insert` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3989,20 +3909,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4012,14 +3935,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -4033,7 +3956,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4047,7 +3970,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4057,7 +3980,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4117,7 +4040,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"path_match_choice": schema.SingleNestedAttribute{
 																	Description:         "path_match A specification of path match",
-																	MarkdownDescription: "path_match A specification of path match",
+																	MarkdownDescription: "path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -4131,7 +4054,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"path": schema.StringAttribute{
 																			Description:         "exact Exact path value to match",
-																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4145,7 +4068,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"prefix": schema.StringAttribute{
 																			Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4159,7 +4082,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regular expression of path match (e.g. the value .* will match on all paths)",
-																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
+																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4226,20 +4149,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4249,14 +4175,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -4270,7 +4196,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4284,7 +4210,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4294,7 +4220,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4347,7 +4273,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"uri_path_choice": schema.SingleNestedAttribute{
 															Description:         "Path URI path matcher.",
-															MarkdownDescription: "Path URI path matcher.",
+															MarkdownDescription: "Path URI path matcher.<br>Exactly one of `exact_path`, `glob`, or `prefix` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4361,7 +4287,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_path": schema.StringAttribute{
 																	Description:         "path Exact path value to match",
-																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `glob` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4375,7 +4301,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"glob": schema.StringAttribute{
 																	Description:         "glob Accepts wildcards * to match multiple characters or ? to match a single character",
-																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character",
+																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character<br>Conflicts with `exact_path` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4389,7 +4315,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"prefix": schema.StringAttribute{
 																	Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `exact_path` and `glob`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4410,7 +4336,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"manual_js_insert": schema.SingleNestedAttribute{
 										Description:         "manual_js_insert Insert JavaScript manually",
-										MarkdownDescription: "manual_js_insert Insert JavaScript manually",
+										MarkdownDescription: "manual_js_insert Insert JavaScript manually<br>Conflicts with `disable_js_insert` and `js_insertion_rules`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4460,20 +4386,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"mobile_sdk_choice": schema.SingleNestedAttribute{
 								Description:         "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.<br>Exactly one of `disable_mobile_sdk` or `mobile_sdk_config` must be specified when `mobile_sdk_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_mobile_sdk",
 										"mobile_sdk_config",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_mobile_sdk": schema.BoolAttribute{
 										Description:         "Disable Mobile SDK",
-										MarkdownDescription: "Disable Mobile SDK",
+										MarkdownDescription: "Disable Mobile SDK<br>Conflicts with `mobile_sdk_config`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4483,7 +4412,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"mobile_sdk_config": schema.SingleNestedAttribute{
 										Description:         "Mobile SDK configuration",
-										MarkdownDescription: "Mobile SDK configuration",
+										MarkdownDescription: "Mobile SDK configuration<br>Conflicts with `disable_mobile_sdk`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4522,7 +4451,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"value_match_choice": schema.SingleNestedAttribute{
 																	Description:         "value_match The variants of matching a header value",
-																	MarkdownDescription: "value_match The variants of matching a header value",
+																	MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4535,7 +4464,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"exact": schema.StringAttribute{
 																			Description:         "exact Header value to match exactly",
-																			MarkdownDescription: "exact Header value to match exactly",
+																			MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4546,7 +4475,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regex match of the header value in re2 format",
-																			MarkdownDescription: "regex Regex match of the header value in re2 format",
+																			MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4580,7 +4509,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_type_choice": schema.SingleNestedAttribute{
 											Description:         "Client Type Select type of client(s) that will access this endpoint",
-											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint",
+											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint<br>Exactly one of `mobile_client`, `web_client`, or `web_mobile_client` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -4594,14 +4523,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"mobile_client": schema.SingleNestedAttribute{
 													Description:         "Mobile Client Mobile traffic channel.",
-													MarkdownDescription: "Mobile Client Mobile traffic channel.",
+													MarkdownDescription: "Mobile Client Mobile traffic channel.<br>Conflicts with `web_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block` or `continue` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4614,7 +4543,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4656,14 +4585,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4676,7 +4605,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4686,7 +4615,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4704,14 +4633,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_client": schema.SingleNestedAttribute{
 													Description:         "Web Client Web traffic",
-													MarkdownDescription: "Web Client Web traffic",
+													MarkdownDescription: "Web Client Web traffic<br>Conflicts with `mobile_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block`, `continue`, or `redirect` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4725,7 +4654,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4768,14 +4697,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4788,7 +4717,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4798,7 +4727,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4812,7 +4741,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block` and `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4852,14 +4781,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_mobile_client": schema.SingleNestedAttribute{
 													Description:         "WebMobileTrafficChannel Web and mobile traffic channel.",
-													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.",
+													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.<br>Conflicts with `mobile_client` and `web_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mobile_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_mobile` or `continue_mobile` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4872,7 +4801,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_mobile": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4914,14 +4843,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_mobile": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4934,7 +4863,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4944,7 +4873,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4960,7 +4889,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"web_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_web`, `continue_web`, or `redirect_web` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4974,7 +4903,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_web": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5017,14 +4946,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_web": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5037,7 +4966,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5047,7 +4976,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5061,7 +4990,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect_web": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block_web` and `continue_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5103,7 +5032,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 										},
 										"domain_matcher_choice": schema.SingleNestedAttribute{
 											Description:         "Domain Matcher This defines domain matcher.",
-											MarkdownDescription: "Domain Matcher This defines domain matcher.",
+											MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -5116,7 +5045,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"any_domain": schema.BoolAttribute{
 													Description:         "Any domain Any Domain",
-													MarkdownDescription: "Any domain Any Domain",
+													MarkdownDescription: "Any domain Any Domain<br>Conflicts with `domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5126,14 +5055,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"domain": schema.SingleNestedAttribute{
 													Description:         "Domain Select Domain matcher",
-													MarkdownDescription: "Domain Select Domain matcher",
+													MarkdownDescription: "Domain Select Domain matcher<br>Conflicts with `any_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"domain_choice": schema.SingleNestedAttribute{
 															Description:         "Domain choice Method to specify domain part",
-															MarkdownDescription: "Domain choice Method to specify domain part",
+															MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5147,7 +5076,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_value": schema.StringAttribute{
 																	Description:         "exact value Exact domain name.",
-																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5161,7 +5090,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"regex_value": schema.StringAttribute{
 																	Description:         "regex values of Domains Regular Expression value for the domain name",
-																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5171,7 +5100,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"suffix_value": schema.StringAttribute{
 																	Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5191,7 +5120,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 										},
 										"flow_label_choice": schema.SingleNestedAttribute{
 											Description:         "Flow label Endpoint label category",
-											MarkdownDescription: "Flow label Endpoint label category",
+											MarkdownDescription: "Flow label Endpoint label category<br>Exactly one of `flow_label` or `undefined_flow_label` must be specified when `flow_label_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -5204,14 +5133,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"flow_label": schema.SingleNestedAttribute{
 													Description:         "flow_label",
-													MarkdownDescription: "flow_label",
+													MarkdownDescription: "flow_label<br>Conflicts with `undefined_flow_label`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"flow_label_choice": schema.SingleNestedAttribute{
 															Description:         "Flow label category Select flow label category",
-															MarkdownDescription: "Flow label category Select flow label category",
+															MarkdownDescription: "Flow label category Select flow label category<br>Exactly one of `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, `search`, or `shopping_gift_cards` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5229,14 +5158,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"account_management": schema.SingleNestedAttribute{
 																	Description:         "Account Management",
-																	MarkdownDescription: "Account Management",
+																	MarkdownDescription: "Account Management<br>Conflicts with `authentication`, `financial_services`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `create` or `password_reset` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5249,7 +5178,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"create": schema.BoolAttribute{
 																					Description:         "Create",
-																					MarkdownDescription: "Create",
+																					MarkdownDescription: "Create<br>Conflicts with `password_reset`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5259,7 +5188,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"password_reset": schema.BoolAttribute{
 																					Description:         "Password Reset",
-																					MarkdownDescription: "Password Reset",
+																					MarkdownDescription: "Password Reset<br>Conflicts with `create`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5273,14 +5202,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"authentication": schema.SingleNestedAttribute{
 																	Description:         "Authentication",
-																	MarkdownDescription: "Authentication",
+																	MarkdownDescription: "Authentication<br>Conflicts with `account_management`, `financial_services`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `login`, `login_mfa`, `login_partner`, `logout`, or `token_refresh` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5294,160 +5223,19 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				),
 																			},
 																			Attributes: map[string]schema.Attribute{
-																				"login": schema.SingleNestedAttribute{
+																				"login": schema.BoolAttribute{
 																					Description:         "Login",
-																					MarkdownDescription: "Login",
+																					MarkdownDescription: "Login<br>Conflicts with `login_mfa`, `login_partner`, `logout`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
-																					Attributes: map[string]schema.Attribute{
-																						"transaction_result_choice": schema.SingleNestedAttribute{
-																							Description:         "Transaction result Transaction Result",
-																							MarkdownDescription: "Transaction result Transaction Result",
-																							Required:            false,
-																							Optional:            true,
-																							Computed:            false,
-																							Validators: []validator.Object{
-																								exactlyoneofvalidator.ExactlyOneOf(
-																									"disable_transaction_result",
-																									"transaction_result",
-																								),
-																							},
-																							Attributes: map[string]schema.Attribute{
-																								"disable_transaction_result": schema.BoolAttribute{
-																									Description:         "Disable Disable collection of transaction result.",
-																									MarkdownDescription: "Disable Disable collection of transaction result.",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Validators: []validator.Bool{
-																										boolvalidator.Equals(true),
-																									},
-																								},
-																								"transaction_result": schema.SingleNestedAttribute{
-																									Description:         "Transaction result Collect transaction result.",
-																									MarkdownDescription: "Transaction result Collect transaction result.",
-																									Required:            false,
-																									Optional:            true,
-																									Computed:            false,
-																									Attributes: map[string]schema.Attribute{
-																										"failure_conditions": schema.ListNestedAttribute{
-																											Description:         "Failure Conditions Failure Conditions",
-																											MarkdownDescription: "Failure Conditions Failure Conditions",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.List{
-																												listvalidator.SizeAtMost(3),
-																												listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
-																											},
-																											NestedObject: schema.NestedAttributeObject{
-																												Attributes: map[string]schema.Attribute{
-																													"name": schema.StringAttribute{
-																														Description:         "name A case-insensitive HTTP header name.",
-																														MarkdownDescription: "name A case-insensitive HTTP header name.",
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.String{
-																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+\-.^_`+"`"+`|~]+$`),
-																																"must be a valid HTTP header field name",
-																															),
-																															bytesvalidator.BytesAtMost(256),
-																														},
-																													},
-																													"regex_values": schema.ListAttribute{
-																														Description:         "regex values A list of regular expressions to match the input against.",
-																														MarkdownDescription: "regex values A list of regular expressions to match the input against.",
-																														ElementType:         types.StringType,
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.SizeAtMost(16),
-																															listvalidator.ValueStringsAre(bytesvalidator.BytesAtMost(256)),
-																															listvalidator.UniqueValues(),
-																														},
-																													},
-																													"status": schema.ListAttribute{
-																														Description:         "HTTP Status code for response HTTP Status code",
-																														MarkdownDescription: "HTTP Status code for response HTTP Status code<br>**Allowed Values (choose one):** `['Accepted', 'AlreadyReported', 'BadGateway', 'BadRequest', 'Conflict', 'Continue', 'Created', 'EmptyStatusCode', 'ExpectationFailed', 'FailedDependency', 'Forbidden', 'Found', 'GatewayTimeout', 'Gone', 'HTTPVersionNotSupported', 'IMUsed', 'InsufficientStorage', 'InternalServerError', 'LengthRequired', 'Locked', 'LoopDetected', 'MethodNotAllowed', 'MisdirectedRequest', 'MovedPermanently', 'MultiStatus', 'MultipleChoices', 'NetworkAuthenticationRequired', 'NoContent', 'NonAuthoritativeInformation', 'NotAcceptable', 'NotExtended', 'NotFound', 'NotImplemented', 'NotModified', 'OK', 'PartialContent', 'PayloadTooLarge', 'PaymentRequired', 'PermanentRedirect', 'PreconditionFailed', 'PreconditionRequired', 'ProxyAuthenticationRequired', 'RangeNotSatisfiable', 'RequestHeaderFieldsTooLarge', 'RequestTimeout', 'ResetContent', 'SeeOther', 'ServiceUnavailable', 'TemporaryRedirect', 'TooManyRequests', 'URITooLong', 'Unauthorized', 'UnprocessableEntity', 'UnsupportedMediaType', 'UpgradeRequired', 'UseProxy', 'VariantAlsoNegotiates']`",
-																														ElementType:         types.StringType,
-																														Required:            true,
-																														Optional:            false,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Accepted", "AlreadyReported", "BadGateway", "BadRequest", "Conflict", "Continue", "Created", "EmptyStatusCode", "ExpectationFailed", "FailedDependency", "Forbidden", "Found", "GatewayTimeout", "Gone", "HTTPVersionNotSupported", "IMUsed", "InsufficientStorage", "InternalServerError", "LengthRequired", "Locked", "LoopDetected", "MethodNotAllowed", "MisdirectedRequest", "MovedPermanently", "MultiStatus", "MultipleChoices", "NetworkAuthenticationRequired", "NoContent", "NonAuthoritativeInformation", "NotAcceptable", "NotExtended", "NotFound", "NotImplemented", "NotModified", "OK", "PartialContent", "PayloadTooLarge", "PaymentRequired", "PermanentRedirect", "PreconditionFailed", "PreconditionRequired", "ProxyAuthenticationRequired", "RangeNotSatisfiable", "RequestHeaderFieldsTooLarge", "RequestTimeout", "ResetContent", "SeeOther", "ServiceUnavailable", "TemporaryRedirect", "TooManyRequests", "URITooLong", "Unauthorized", "UnprocessableEntity", "UnsupportedMediaType", "UpgradeRequired", "UseProxy", "VariantAlsoNegotiates"}...)),
-																															listvalidator.SizeAtMost(1),
-																														},
-																													},
-																												},
-																											},
-																										},
-																										"success_conditions": schema.ListNestedAttribute{
-																											Description:         "Success Conditions Success Conditions",
-																											MarkdownDescription: "Success Conditions Success Conditions",
-																											Required:            false,
-																											Optional:            true,
-																											Computed:            false,
-																											Validators: []validator.List{
-																												listvalidator.SizeAtMost(3),
-																												listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
-																											},
-																											NestedObject: schema.NestedAttributeObject{
-																												Attributes: map[string]schema.Attribute{
-																													"name": schema.StringAttribute{
-																														Description:         "name A case-insensitive HTTP header name.",
-																														MarkdownDescription: "name A case-insensitive HTTP header name.",
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.String{
-																															stringvalidator.RegexMatches(
-																																regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+\-.^_`+"`"+`|~]+$`),
-																																"must be a valid HTTP header field name",
-																															),
-																															bytesvalidator.BytesAtMost(256),
-																														},
-																													},
-																													"regex_values": schema.ListAttribute{
-																														Description:         "regex values A list of regular expressions to match the input against.",
-																														MarkdownDescription: "regex values A list of regular expressions to match the input against.",
-																														ElementType:         types.StringType,
-																														Required:            false,
-																														Optional:            true,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.SizeAtMost(16),
-																															listvalidator.ValueStringsAre(bytesvalidator.BytesAtMost(256)),
-																															listvalidator.UniqueValues(),
-																														},
-																													},
-																													"status": schema.ListAttribute{
-																														Description:         "HTTP Status code for response HTTP Status code",
-																														MarkdownDescription: "HTTP Status code for response HTTP Status code<br>**Allowed Values (choose one):** `['Accepted', 'AlreadyReported', 'BadGateway', 'BadRequest', 'Conflict', 'Continue', 'Created', 'EmptyStatusCode', 'ExpectationFailed', 'FailedDependency', 'Forbidden', 'Found', 'GatewayTimeout', 'Gone', 'HTTPVersionNotSupported', 'IMUsed', 'InsufficientStorage', 'InternalServerError', 'LengthRequired', 'Locked', 'LoopDetected', 'MethodNotAllowed', 'MisdirectedRequest', 'MovedPermanently', 'MultiStatus', 'MultipleChoices', 'NetworkAuthenticationRequired', 'NoContent', 'NonAuthoritativeInformation', 'NotAcceptable', 'NotExtended', 'NotFound', 'NotImplemented', 'NotModified', 'OK', 'PartialContent', 'PayloadTooLarge', 'PaymentRequired', 'PermanentRedirect', 'PreconditionFailed', 'PreconditionRequired', 'ProxyAuthenticationRequired', 'RangeNotSatisfiable', 'RequestHeaderFieldsTooLarge', 'RequestTimeout', 'ResetContent', 'SeeOther', 'ServiceUnavailable', 'TemporaryRedirect', 'TooManyRequests', 'URITooLong', 'Unauthorized', 'UnprocessableEntity', 'UnsupportedMediaType', 'UpgradeRequired', 'UseProxy', 'VariantAlsoNegotiates']`",
-																														ElementType:         types.StringType,
-																														Required:            true,
-																														Optional:            false,
-																														Computed:            false,
-																														Validators: []validator.List{
-																															listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Accepted", "AlreadyReported", "BadGateway", "BadRequest", "Conflict", "Continue", "Created", "EmptyStatusCode", "ExpectationFailed", "FailedDependency", "Forbidden", "Found", "GatewayTimeout", "Gone", "HTTPVersionNotSupported", "IMUsed", "InsufficientStorage", "InternalServerError", "LengthRequired", "Locked", "LoopDetected", "MethodNotAllowed", "MisdirectedRequest", "MovedPermanently", "MultiStatus", "MultipleChoices", "NetworkAuthenticationRequired", "NoContent", "NonAuthoritativeInformation", "NotAcceptable", "NotExtended", "NotFound", "NotImplemented", "NotModified", "OK", "PartialContent", "PayloadTooLarge", "PaymentRequired", "PermanentRedirect", "PreconditionFailed", "PreconditionRequired", "ProxyAuthenticationRequired", "RangeNotSatisfiable", "RequestHeaderFieldsTooLarge", "RequestTimeout", "ResetContent", "SeeOther", "ServiceUnavailable", "TemporaryRedirect", "TooManyRequests", "URITooLong", "Unauthorized", "UnprocessableEntity", "UnsupportedMediaType", "UpgradeRequired", "UseProxy", "VariantAlsoNegotiates"}...)),
-																															listvalidator.SizeAtMost(1),
-																														},
-																													},
-																												},
-																											},
-																										},
-																									},
-																								},
-																							},
-																						},
+																					Validators: []validator.Bool{
+																						boolvalidator.Equals(true),
 																					},
 																				},
 																				"login_mfa": schema.BoolAttribute{
 																					Description:         "LoginMFA",
-																					MarkdownDescription: "LoginMFA",
+																					MarkdownDescription: "LoginMFA<br>Conflicts with `login`, `login_partner`, `logout`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5457,7 +5245,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"login_partner": schema.BoolAttribute{
 																					Description:         "login_partner",
-																					MarkdownDescription: "login_partner",
+																					MarkdownDescription: "login_partner<br>Conflicts with `login`, `login_mfa`, `logout`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5467,7 +5255,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"logout": schema.BoolAttribute{
 																					Description:         "logout",
-																					MarkdownDescription: "logout",
+																					MarkdownDescription: "logout<br>Conflicts with `login`, `login_mfa`, `login_partner`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5477,7 +5265,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"token_refresh": schema.BoolAttribute{
 																					Description:         "token_refresh",
-																					MarkdownDescription: "token_refresh",
+																					MarkdownDescription: "token_refresh<br>Conflicts with `login`, `login_mfa`, `login_partner`, and `logout`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5491,14 +5279,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"financial_services": schema.SingleNestedAttribute{
 																	Description:         "Financial Services",
-																	MarkdownDescription: "Financial Services",
+																	MarkdownDescription: "Financial Services<br>Conflicts with `account_management`, `authentication`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `apply` or `money_transfer` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5511,7 +5299,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"apply": schema.BoolAttribute{
 																					Description:         "apply",
-																					MarkdownDescription: "apply",
+																					MarkdownDescription: "apply<br>Conflicts with `money_transfer`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5521,7 +5309,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"money_transfer": schema.BoolAttribute{
 																					Description:         "money_transfer",
-																					MarkdownDescription: "money_transfer",
+																					MarkdownDescription: "money_transfer<br>Conflicts with `apply`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5535,21 +5323,24 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"flight": schema.SingleNestedAttribute{
 																	Description:         "Flight",
-																	MarkdownDescription: "Flight",
+																	MarkdownDescription: "Flight<br>Conflicts with `account_management`, `authentication`, `financial_services`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>`checkin` must be specified when `label_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"checkin",
 																				),
+																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																			Attributes: map[string]schema.Attribute{
 																				"checkin": schema.BoolAttribute{
@@ -5568,14 +5359,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"profile_management": schema.SingleNestedAttribute{
 																	Description:         "Profile Management",
-																	MarkdownDescription: "Profile Management",
+																	MarkdownDescription: "Profile Management<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `create`, `update`, or `view` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5589,7 +5380,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"create": schema.BoolAttribute{
 																					Description:         "Create",
-																					MarkdownDescription: "Create",
+																					MarkdownDescription: "Create<br>Conflicts with `update` and `view`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5599,7 +5390,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"update": schema.BoolAttribute{
 																					Description:         "update",
-																					MarkdownDescription: "update",
+																					MarkdownDescription: "update<br>Conflicts with `create` and `view`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5609,7 +5400,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"view": schema.BoolAttribute{
 																					Description:         "view",
-																					MarkdownDescription: "view",
+																					MarkdownDescription: "view<br>Conflicts with `create` and `update`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5623,14 +5414,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"search": schema.SingleNestedAttribute{
 																	Description:         "Search",
-																	MarkdownDescription: "Search",
+																	MarkdownDescription: "Search<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `flight_search`, `product_search`, `reservation_search`, or `room_search` must be specified when `label_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5645,7 +5436,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"flight_search": schema.BoolAttribute{
 																					Description:         "flight_search",
-																					MarkdownDescription: "flight_search",
+																					MarkdownDescription: "flight_search<br>Conflicts with `product_search`, `reservation_search`, and `room_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5655,7 +5446,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"product_search": schema.BoolAttribute{
 																					Description:         "product_search",
-																					MarkdownDescription: "product_search",
+																					MarkdownDescription: "product_search<br>Conflicts with `flight_search`, `reservation_search`, and `room_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5665,7 +5456,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"reservation_search": schema.BoolAttribute{
 																					Description:         "reservation_search",
-																					MarkdownDescription: "reservation_search",
+																					MarkdownDescription: "reservation_search<br>Conflicts with `flight_search`, `product_search`, and `room_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5675,7 +5466,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"room_search": schema.BoolAttribute{
 																					Description:         "room_search",
-																					MarkdownDescription: "room_search",
+																					MarkdownDescription: "room_search<br>Conflicts with `flight_search`, `product_search`, and `reservation_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5689,14 +5480,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"shopping_gift_cards": schema.SingleNestedAttribute{
 																	Description:         "Shopping",
-																	MarkdownDescription: "Shopping",
+																	MarkdownDescription: "Shopping<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, and `search`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
-																			Description:         "Flow label Flow label category",
-																			MarkdownDescription: "Flow label Flow label category",
+																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, or `shop_update_quantity` must be specified when `label_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5719,7 +5510,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"gift_card_make_purchase_with_gift_card": schema.BoolAttribute{
 																					Description:         "Purchase with Gift Card",
-																					MarkdownDescription: "Purchase with Gift Card",
+																					MarkdownDescription: "Purchase with Gift Card<br>Conflicts with `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5729,7 +5520,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"gift_card_validation": schema.BoolAttribute{
 																					Description:         "Gift Card Validation",
-																					MarkdownDescription: "Gift Card Validation",
+																					MarkdownDescription: "Gift Card Validation<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5739,7 +5530,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_add_to_cart": schema.BoolAttribute{
 																					Description:         "add_to_cart",
-																					MarkdownDescription: "add_to_cart",
+																					MarkdownDescription: "add_to_cart<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5749,7 +5540,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_checkout": schema.BoolAttribute{
 																					Description:         "checkout",
-																					MarkdownDescription: "checkout",
+																					MarkdownDescription: "checkout<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5759,7 +5550,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_choose_seat": schema.BoolAttribute{
 																					Description:         "Select Seat(s)",
-																					MarkdownDescription: "Select Seat(s)",
+																					MarkdownDescription: "Select Seat(s)<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5769,7 +5560,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_enter_drawing_submission": schema.BoolAttribute{
 																					Description:         "Enter Drawing Submission",
-																					MarkdownDescription: "Enter Drawing Submission",
+																					MarkdownDescription: "Enter Drawing Submission<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5779,7 +5570,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_make_payment": schema.BoolAttribute{
 																					Description:         "make_payment",
-																					MarkdownDescription: "make_payment",
+																					MarkdownDescription: "make_payment<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5789,7 +5580,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_order": schema.BoolAttribute{
 																					Description:         "order",
-																					MarkdownDescription: "order",
+																					MarkdownDescription: "order<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5799,7 +5590,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_price_inquiry": schema.BoolAttribute{
 																					Description:         "price_inquiry",
-																					MarkdownDescription: "price_inquiry",
+																					MarkdownDescription: "price_inquiry<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5809,7 +5600,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_promo_code_validation": schema.BoolAttribute{
 																					Description:         "promo_code_validation",
-																					MarkdownDescription: "promo_code_validation",
+																					MarkdownDescription: "promo_code_validation<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5819,7 +5610,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_purchase_gift_card": schema.BoolAttribute{
 																					Description:         "shop_purchase_gift_card",
-																					MarkdownDescription: "shop_purchase_gift_card",
+																					MarkdownDescription: "shop_purchase_gift_card<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5829,7 +5620,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_update_quantity": schema.BoolAttribute{
 																					Description:         "Update Quantity",
-																					MarkdownDescription: "Update Quantity",
+																					MarkdownDescription: "Update Quantity<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, and `shop_purchase_gift_card`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5847,7 +5638,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"undefined_flow_label": schema.BoolAttribute{
 													Description:         "undefined",
-													MarkdownDescription: "undefined",
+													MarkdownDescription: "undefined<br>Conflicts with `flow_label`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5866,6 +5657,8 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"METHOD_ANY", "METHOD_DELETE", "METHOD_GET", "METHOD_GET_DOCUMENT", "METHOD_PATCH", "METHOD_POST", "METHOD_PUT"}...)),
+												listvalidator.SizeBetween(1, 4),
+												listvalidator.UniqueValues(),
 											},
 										},
 										"metadata": schema.SingleNestedAttribute{
@@ -5952,7 +5745,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_source_choice": schema.SingleNestedAttribute{
 											Description:         "Client Identifier Client identifier that should be used for the client rule",
-											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule",
+											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `http_header` or `ip_prefix` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -5965,7 +5758,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"http_header": schema.SingleNestedAttribute{
 													Description:         "HTTP Header Request header name and value pairs",
-													MarkdownDescription: "HTTP Header Request header name and value pairs",
+													MarkdownDescription: "HTTP Header Request header name and value pairs<br>Conflicts with `ip_prefix`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5997,7 +5790,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	},
 																	"value_match_choice": schema.SingleNestedAttribute{
 																		Description:         "value_match The variants of matching a header value",
-																		MarkdownDescription: "value_match The variants of matching a header value",
+																		MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6010,7 +5803,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		Attributes: map[string]schema.Attribute{
 																			"exact": schema.StringAttribute{
 																				Description:         "exact Header value to match exactly",
-																				MarkdownDescription: "exact Header value to match exactly",
+																				MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6021,7 +5814,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			},
 																			"regex": schema.StringAttribute{
 																				Description:         "regex Regex match of the header value in re2 format",
-																				MarkdownDescription: "regex Regex match of the header value in re2 format",
+																				MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6039,13 +5832,13 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"ip_prefix": schema.StringAttribute{
 													Description:         "ip prefix IP prefix string",
-													MarkdownDescription: "ip prefix IP prefix string",
+													MarkdownDescription: "ip prefix IP prefix string<br>Conflicts with `http_header`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Validators: []validator.String{
 														stringvalidator.RegexMatches(
-															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+															regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 															"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 														),
 													},
@@ -6092,7 +5885,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"custom_connector": schema.BoolAttribute{
 						Description:         "Custom template connector Get credentials needed to configure on other connectors.",
-						MarkdownDescription: "Custom template connector Get credentials needed to configure on other connectors.",
+						MarkdownDescription: "Custom template connector Get credentials needed to configure on other connectors.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6102,7 +5895,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"f5_big_ip": schema.BoolAttribute{
 						Description:         "F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.",
-						MarkdownDescription: "F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.",
+						MarkdownDescription: "F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6112,7 +5905,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"salesforce_commerce_connector": schema.BoolAttribute{
 						Description:         "Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.",
-						MarkdownDescription: "Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.",
+						MarkdownDescription: "Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, and `f5_big_ip`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6199,9 +5992,17 @@ func (r *ResourceF5XCProtectedApplication) ModifyPlan(ctx context.Context, req r
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCProtectedApplicationModel
 
 	// Read Terraform plan data into the model
@@ -6282,7 +6083,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource modelToSpecRoot OneOfField --> ConnectorTypeChoice
 	if !data.ConnectorTypeChoice.IsNull() && !data.ConnectorTypeChoice.IsUnknown() {
 		connectorTypeChoiceModel := ProtectedAppConnectorTypeChoice{}
 		response.Diagnostics.Append(data.ConnectorTypeChoice.As(ctx, &connectorTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6313,6 +6114,9 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 			}
 			cloudflareOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.CreateSpecType_Cloudflare{}
 			cloudflareOneOfSpec.Cloudflare = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType{}
+			cloudflareOneOfSpec.Cloudflare.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudflareOneOfSpec
 
 			// resource modelToSpecNested StringField --> ContinueMitigationActionHdr
@@ -6365,10 +6169,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6547,10 +6354,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6716,7 +6526,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudflareModel.MobileSdkChoice.IsNull() && !protectedAppCloudflareModel.MobileSdkChoice.IsUnknown() {
 				cloudflareMobileSdkChoiceModel := ProtectedAppMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudflareModel.MobileSdkChoice.As(ctx, &cloudflareMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7638,6 +7448,9 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 			}
 			cloudfrontOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.CreateSpecType_Cloudfront{}
 			cloudfrontOneOfSpec.Cloudfront = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType{}
+			cloudfrontOneOfSpec.Cloudfront.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudfrontOneOfSpec
 
 			// resource modelToSpecNested RequiredOneOfField --> AwsConfigurationTypeChoice
@@ -7761,10 +7574,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppJavaScriptExclusionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7967,10 +7783,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppCloudfrontJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8160,7 +7979,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudfrontModel.MobileSdkChoice.IsNull() && !protectedAppCloudfrontModel.MobileSdkChoice.IsUnknown() {
 				cloudfrontMobileSdkChoiceModel := ProtectedAppCloudfrontTypeMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudfrontModel.MobileSdkChoice.As(ctx, &cloudfrontMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8940,177 +8759,14 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											return
 										}
 
-										// resource modelToSpecNested PointerOfOneOfField --> Login
+										// resource modelToSpecNested BoolOfOneOfPointerField --> Login
 										if !authenticationLabelChoiceModel.Login.IsNull() && !authenticationLabelChoiceModel.Login.IsUnknown() {
-											var protectedAppLoginModel ProtectedAppLogin
-											response.Diagnostics.Append(authenticationLabelChoiceModel.Login.As(ctx, &protectedAppLoginModel, basetypes.ObjectAsOptions{})...)
-											if response.Diagnostics.HasError() {
-												return
+											loginSpecBool := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
+											loginSpecBool.Login = &ves_io_schema.BotDefenseTransactionResult{}
+											loginSpecBool.Login.TransactionResultChoice = &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{
+												DisableTransactionResult: &ves_io_schema.Empty{},
 											}
-											loginOneOfSpec := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
-											loginOneOfSpec.Login = &ves_io_schema.BotDefenseTransactionResult{}
-											authenticationOneOfSpec.Authentication.LabelChoice = loginOneOfSpec
-
-											// resource modelToSpecNested OneOfField --> TransactionResultChoice
-											if !protectedAppLoginModel.TransactionResultChoice.IsNull() && !protectedAppLoginModel.TransactionResultChoice.IsUnknown() {
-												loginTransactionResultChoiceModel := ProtectedAppTransactionResultChoice{}
-												response.Diagnostics.Append(protectedAppLoginModel.TransactionResultChoice.As(ctx, &loginTransactionResultChoiceModel, basetypes.ObjectAsOptions{})...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// resource modelToSpecNested BoolOfOneOfPointerField --> DisableTransactionResult
-												if !loginTransactionResultChoiceModel.DisableTransactionResult.IsNull() && !loginTransactionResultChoiceModel.DisableTransactionResult.IsUnknown() {
-													disableTransactionResultSpecBool := &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{}
-													disableTransactionResultSpecBool.DisableTransactionResult = &ves_io_schema.Empty{}
-													loginOneOfSpec.Login.TransactionResultChoice = disableTransactionResultSpecBool
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> TransactionResult
-												if !loginTransactionResultChoiceModel.TransactionResult.IsNull() && !loginTransactionResultChoiceModel.TransactionResult.IsUnknown() {
-													var protectedAppTransactionResultModel ProtectedAppTransactionResult
-													response.Diagnostics.Append(loginTransactionResultChoiceModel.TransactionResult.As(ctx, &protectedAppTransactionResultModel, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													transactionResultOneOfSpec := &ves_io_schema.BotDefenseTransactionResult_TransactionResult{}
-													transactionResultOneOfSpec.TransactionResult = &ves_io_schema.BotDefenseTransactionResultType{}
-													loginOneOfSpec.Login.TransactionResultChoice = transactionResultOneOfSpec
-
-													// resource modelToSpecNested ArrayOfPointerField --> FailureConditions
-													if !protectedAppTransactionResultModel.FailureConditions.IsNull() && !protectedAppTransactionResultModel.FailureConditions.IsUnknown() && len(protectedAppTransactionResultModel.FailureConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var failureConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.FailureConditions.ElementsAs(ctx, &failureConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														failureConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(failureConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.FailureConditions = failureConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, failureConditionsElement := range failureConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.FailureConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !failureConditionsElement.Name.IsNull() && !failureConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].Name = string(failureConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !failureConditionsElement.RegexValues.IsNull() && !failureConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(failureConditionsElement.RegexValues.Elements()))
-																	diags = failureConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !failureConditionsElement.Status.IsNull() && !failureConditionsElement.Status.IsUnknown() && len(failureConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = failureConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		failureConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-													// resource modelToSpecNested ArrayOfPointerField --> SuccessConditions
-													if !protectedAppTransactionResultModel.SuccessConditions.IsNull() && !protectedAppTransactionResultModel.SuccessConditions.IsUnknown() && len(protectedAppTransactionResultModel.SuccessConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var successConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.SuccessConditions.ElementsAs(ctx, &successConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														successConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(successConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.SuccessConditions = successConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, successConditionsElement := range successConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !successConditionsElement.Name.IsNull() && !successConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].Name = string(successConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !successConditionsElement.RegexValues.IsNull() && !successConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(successConditionsElement.RegexValues.Elements()))
-																	diags = successConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !successConditionsElement.Status.IsNull() && !successConditionsElement.Status.IsUnknown() && len(successConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = successConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		successConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-												}
-
-											}
-
+											authenticationOneOfSpec.Authentication.LabelChoice = loginSpecBool
 										}
 
 										// resource modelToSpecNested BoolOfOneOfPointerField --> LoginMfa
@@ -9191,9 +8847,12 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 									}
 									flightOneOfSpec := &ves_io_schema.BotDefenseFlowLabelCategoriesChoiceType_Flight{}
 									flightOneOfSpec.Flight = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType{}
+									flightOneOfSpec.Flight.LabelChoice = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType_Checkin{
+										Checkin: &ves_io_schema.Empty{},
+									}
 									flowLabelOneOfSpec.FlowLabel.FlowLabelChoice = flightOneOfSpec
 
-									// resource modelToSpecNested RequiredOneOfField --> LabelChoice
+									// resource modelToSpecNested OneOfField --> LabelChoice
 									if !protectedAppFlightModel.LabelChoice.IsNull() && !protectedAppFlightModel.LabelChoice.IsUnknown() {
 										flightLabelChoiceModel := ProtectedAppBotDefenseFlowLabelFlightChoiceTypeLabelChoice{}
 										response.Diagnostics.Append(protectedAppFlightModel.LabelChoice.As(ctx, &flightLabelChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9644,6 +9303,10 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 			spec.ConnectorTypeChoice = salesforceCommerceConnectorSpecBool
 		}
 
+	} else {
+		spec.ConnectorTypeChoice = &ves_io_schema_shape_bot_defense_protected_application.CreateSpecType_BigIpIapp{
+			BigIpIapp: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredEnumField --> Region
@@ -9674,7 +9337,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -9697,7 +9360,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "protected_application", err),
 		)
 		return
 	}
@@ -9887,7 +9550,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource SpecToModelRoot OneOfField --> ConnectorTypeChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -9939,8 +9602,8 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var connectorTypeChoiceChoices interface{}
 		if v := rawSpecMap["connector_type_choice"]; v != nil {
 			connectorTypeChoiceChoices = v
@@ -10068,8 +9731,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppJavaScriptExclusionRuleModel := ProtectedAppJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -10171,6 +9833,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -10200,6 +9863,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -10311,6 +9975,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -10382,8 +10047,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppJavaScriptInsertionRuleModel := ProtectedAppJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -10485,6 +10149,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -10514,6 +10179,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -10617,6 +10283,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -10693,6 +10360,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -10712,8 +10380,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudflareElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -10828,6 +10495,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -10893,6 +10561,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -11074,6 +10743,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11103,6 +10773,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -11274,6 +10945,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11348,6 +11020,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -11519,6 +11192,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11548,6 +11222,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -11698,6 +11373,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -11772,6 +11448,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -11801,6 +11478,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -11906,6 +11584,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -11935,6 +11614,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -12160,6 +11840,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -12217,6 +11898,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -12422,6 +12104,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontAwsConfigurationTypeChoiceModelAttributeMap)
 				}
 
@@ -12489,8 +12172,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppCloudfrontJavaScriptExclusionRuleModel := ProtectedAppCloudfrontJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -12592,6 +12274,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -12621,6 +12304,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -12732,6 +12416,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -12819,8 +12504,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppCloudfrontJavaScriptInsertionRuleModel := ProtectedAppCloudfrontJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -12922,6 +12606,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -12951,6 +12636,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -13054,6 +12740,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -13146,6 +12833,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -13165,8 +12853,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudfrontElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -13281,6 +12968,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -13346,6 +13034,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -13527,6 +13216,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -13556,6 +13246,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -13727,6 +13418,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -13801,6 +13493,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -13972,6 +13665,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -14001,6 +13695,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -14151,6 +13846,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -14225,6 +13921,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -14254,6 +13951,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -14359,6 +14057,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -14388,6 +14087,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -14508,6 +14208,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													accountManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													accountManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAccountManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -14545,226 +14246,26 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 
 													// Process nested choices, populating the temporary attribute map
 
-													// resource specToModelNested PointerOfOneOfField --> Login
-													// CreateSpecType
-													// true
-													{
-														loginOptionsWrapper, isLogin := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
-														loginAttributeMap := make(map[string]attr.Value)
+													// resource specToModelNested BoolOfOneOfPointerField --> Login
+													var loginInMap bool
 
-														if isLogin && loginOptionsWrapper != nil && loginOptionsWrapper.Login != nil {
-															loginElement := loginOptionsWrapper.Login
-
-															// resource specToModelNested OneOfField --> TransactionResultChoice
-															// CreateSpecType: GetTransactionResultChoice() returns the oneof interface value.
-															if loginElement.GetTransactionResultChoice() != nil {
-																// Create a temporary attribute map for the choices within this OneOf
-																logintransactionResultChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																// Define a variable for the spec choices to be passed down to nested templates.
-																// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																logintransactionResultChoiceChoices := loginElement.GetTransactionResultChoice()
-
-																// Process nested choices, populating the temporary attribute map
-
-																// resource specToModelNested BoolOfOneOfPointerField --> DisableTransactionResult
-																var disableTransactionResultInMap bool
-
-																if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-																	if _, found := gcSpec["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																if !disableTransactionResultInMap {
-																	if _, found := rawSpecMap["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																_, isDisableTransactionResultForBool := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult)
-																if disableTransactionResultInMap || isDisableTransactionResultForBool {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolValue(true)
-																} else {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolNull()
-																}
-
-																// resource specToModelNested PointerOfOneOfField --> TransactionResult
-																// CreateSpecType
-																// true
-																{
-																	transactionResultOptionsWrapper, isTransactionResult := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_TransactionResult)
-																	transactionResultAttributeMap := make(map[string]attr.Value)
-
-																	if isTransactionResult && transactionResultOptionsWrapper != nil && transactionResultOptionsWrapper.TransactionResult != nil {
-																		transactionResultElement := transactionResultOptionsWrapper.TransactionResult
-
-																		// resource specToModelNested ArrayOfPointerField --> FailureConditions
-																		if len(transactionResultElement.GetFailureConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			failureConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetFailureConditions()))
-																			for _, failureConditionsElement := range transactionResultElement.GetFailureConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if failureConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(failureConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(failureConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, failureConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if failureConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(failureConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				failureConditionsElements = append(failureConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			failureConditionsListValue, failureConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap}, failureConditionsElements)
-																			response.Diagnostics.Append(failureConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["failure_conditions"] = failureConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["failure_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap})
-																		}
-
-																		// resource specToModelNested ArrayOfPointerField --> SuccessConditions
-																		if len(transactionResultElement.GetSuccessConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			successConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetSuccessConditions()))
-																			for _, successConditionsElement := range transactionResultElement.GetSuccessConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if successConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(successConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(successConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, successConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if successConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(successConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				successConditionsElements = append(successConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			successConditionsListValue, successConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap}, successConditionsElements)
-																			response.Diagnostics.Append(successConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["success_conditions"] = successConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["success_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap})
-																		}
-
-																		transactionResultObj, transactionResultObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap, transactionResultAttributeMap)
-																		response.Diagnostics.Append(transactionResultObjDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
-																		}
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = transactionResultObj
-																	} else {
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap)
-																	}
-																}
-
-																// --- End of Choices ---
-
-																// Create the final ObjectValue for this OneOf field
-																finalObj, logintransactionResultChoiceChoicesObjDiags := types.ObjectValue(
-																	ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-																	logintransactionResultChoiceChoicesAttributeMap,
-																)
-																response.Diagnostics.Append(logintransactionResultChoiceChoicesObjDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																loginAttributeMap["transaction_result_choice"] = finalObj
-															} else {
-																loginAttributeMap["transaction_result_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap)
-															}
-
-															loginObj, loginObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap, loginAttributeMap)
-															response.Diagnostics.Append(loginObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															authenticationlabelChoiceChoicesAttributeMap["login"] = loginObj
-														} else {
-															authenticationlabelChoiceChoicesAttributeMap["login"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap)
+													if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+														if _, found := gcSpec["login"]; found {
+															loginInMap = true
 														}
+													}
+
+													if !loginInMap {
+														if _, found := rawSpecMap["login"]; found {
+															loginInMap = true
+														}
+													}
+
+													_, isLoginForBool := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
+													if loginInMap || isLoginForBool {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolValue(true)
+													} else {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolNull()
 													}
 
 													// resource specToModelNested BoolOfOneOfPointerField --> LoginMfa
@@ -14870,6 +14371,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													authenticationAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													authenticationAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap)
 												}
 
@@ -14966,6 +14468,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													financialServicesAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													financialServicesAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFinancialServicesLabelChoiceModelAttributeMap)
 												}
 
@@ -14990,8 +14493,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											if isFlight && flightOptionsWrapper != nil && flightOptionsWrapper.Flight != nil {
 												flightElement := flightOptionsWrapper.Flight
 
-												// resource specToModelNested RequiredOneOfField --> LabelChoice
-												// CreateSpecType
+												// resource specToModelNested OneOfField --> LabelChoice
 												// CreateSpecType: GetLabelChoice() returns the oneof interface value.
 												if flightElement.GetLabelChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
@@ -15040,6 +14542,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													flightAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													flightAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap)
 												}
 
@@ -15158,6 +14661,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													profileManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													profileManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceProfileManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -15297,6 +14801,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													searchAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													searchAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceSearchLabelChoiceModelAttributeMap)
 												}
 
@@ -15612,6 +15117,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													shoppingGiftCardsAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													shoppingGiftCardsAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceShoppingGiftCardsLabelChoiceModelAttributeMap)
 												}
 
@@ -15641,6 +15147,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										flowLabelAttributeMap["flow_label_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										flowLabelAttributeMap["flow_label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceModelAttributeMap)
 									}
 
@@ -15692,6 +15199,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
 						}
 
@@ -15888,6 +15396,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -15945,6 +15454,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -16165,20 +15675,19 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_shape_bot_defense_protected_application.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "protected_application", err),
 		)
 		return
 	}
@@ -16362,7 +15871,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource SpecToModelRoot OneOfField --> ConnectorTypeChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -16414,8 +15923,8 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var connectorTypeChoiceChoices interface{}
 		if v := rawSpecMap["connector_type_choice"]; v != nil {
 			connectorTypeChoiceChoices = v
@@ -16543,8 +16052,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppJavaScriptExclusionRuleModel := ProtectedAppJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -16646,6 +16154,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -16675,7 +16184,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -16786,6 +16299,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -16857,8 +16371,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppJavaScriptInsertionRuleModel := ProtectedAppJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -16960,6 +16473,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -16989,7 +16503,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -17092,6 +16610,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -17168,6 +16687,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -17187,8 +16707,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudflareElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -17303,6 +16822,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -17368,7 +16888,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
-					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_mobile_sdk": types.BoolValue(true),
+						"mobile_sdk_config":  types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> ProtectedEndpoints
@@ -17549,6 +17073,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -17578,6 +17103,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -17749,6 +17275,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -17823,6 +17350,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -17994,6 +17522,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -18023,6 +17552,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -18173,6 +17703,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -18247,6 +17778,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -18276,6 +17808,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -18381,6 +17914,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -18410,6 +17944,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -18635,6 +18170,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -18692,6 +18228,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -18897,6 +18434,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontAwsConfigurationTypeChoiceModelAttributeMap)
 				}
 
@@ -18964,8 +18502,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppCloudfrontJavaScriptExclusionRuleModel := ProtectedAppCloudfrontJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -19067,6 +18604,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -19096,7 +18634,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -19207,6 +18749,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -19294,8 +18837,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppCloudfrontJavaScriptInsertionRuleModel := ProtectedAppCloudfrontJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -19397,6 +18939,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -19426,7 +18969,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
-										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap, map[string]attr.Value{
+											"any_domain": types.BoolValue(true),
+											"domain":     types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainModelAttributeMap),
+										})
 									}
 
 									// resource specToModelNested RequiredPointerField --> Metadata
@@ -19529,6 +19076,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -19621,6 +19169,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -19640,8 +19189,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudfrontElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -19756,6 +19304,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -19821,7 +19370,11 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
-					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap, map[string]attr.Value{
+						"disable_mobile_sdk": types.BoolValue(true),
+						"mobile_sdk_config":  types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredArrayOfPointerField --> ProtectedEndpoints
@@ -20002,6 +19555,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20031,6 +19585,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -20202,6 +19757,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20276,6 +19832,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -20447,6 +20004,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20476,6 +20034,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -20626,6 +20185,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -20700,6 +20260,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -20729,6 +20290,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -20834,6 +20396,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -20863,6 +20426,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -20983,6 +20547,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													accountManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													accountManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAccountManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -21020,226 +20585,26 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 
 													// Process nested choices, populating the temporary attribute map
 
-													// resource specToModelNested PointerOfOneOfField --> Login
-													// CreateSpecType
-													// true
-													{
-														loginOptionsWrapper, isLogin := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
-														loginAttributeMap := make(map[string]attr.Value)
+													// resource specToModelNested BoolOfOneOfPointerField --> Login
+													var loginInMap bool
 
-														if isLogin && loginOptionsWrapper != nil && loginOptionsWrapper.Login != nil {
-															loginElement := loginOptionsWrapper.Login
-
-															// resource specToModelNested OneOfField --> TransactionResultChoice
-															// CreateSpecType: GetTransactionResultChoice() returns the oneof interface value.
-															if loginElement.GetTransactionResultChoice() != nil {
-																// Create a temporary attribute map for the choices within this OneOf
-																logintransactionResultChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																// Define a variable for the spec choices to be passed down to nested templates.
-																// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																logintransactionResultChoiceChoices := loginElement.GetTransactionResultChoice()
-
-																// Process nested choices, populating the temporary attribute map
-
-																// resource specToModelNested BoolOfOneOfPointerField --> DisableTransactionResult
-																var disableTransactionResultInMap bool
-
-																if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-																	if _, found := gcSpec["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																if !disableTransactionResultInMap {
-																	if _, found := rawSpecMap["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																_, isDisableTransactionResultForBool := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult)
-																if disableTransactionResultInMap || isDisableTransactionResultForBool {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolValue(true)
-																} else {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolNull()
-																}
-
-																// resource specToModelNested PointerOfOneOfField --> TransactionResult
-																// CreateSpecType
-																// true
-																{
-																	transactionResultOptionsWrapper, isTransactionResult := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_TransactionResult)
-																	transactionResultAttributeMap := make(map[string]attr.Value)
-
-																	if isTransactionResult && transactionResultOptionsWrapper != nil && transactionResultOptionsWrapper.TransactionResult != nil {
-																		transactionResultElement := transactionResultOptionsWrapper.TransactionResult
-
-																		// resource specToModelNested ArrayOfPointerField --> FailureConditions
-																		if len(transactionResultElement.GetFailureConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			failureConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetFailureConditions()))
-																			for _, failureConditionsElement := range transactionResultElement.GetFailureConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if failureConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(failureConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(failureConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, failureConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if failureConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(failureConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				failureConditionsElements = append(failureConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			failureConditionsListValue, failureConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap}, failureConditionsElements)
-																			response.Diagnostics.Append(failureConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["failure_conditions"] = failureConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["failure_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap})
-																		}
-
-																		// resource specToModelNested ArrayOfPointerField --> SuccessConditions
-																		if len(transactionResultElement.GetSuccessConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			successConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetSuccessConditions()))
-																			for _, successConditionsElement := range transactionResultElement.GetSuccessConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if successConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(successConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(successConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, successConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if successConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(successConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				successConditionsElements = append(successConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			successConditionsListValue, successConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap}, successConditionsElements)
-																			response.Diagnostics.Append(successConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["success_conditions"] = successConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["success_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap})
-																		}
-
-																		transactionResultObj, transactionResultObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap, transactionResultAttributeMap)
-																		response.Diagnostics.Append(transactionResultObjDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
-																		}
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = transactionResultObj
-																	} else {
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap)
-																	}
-																}
-
-																// --- End of Choices ---
-
-																// Create the final ObjectValue for this OneOf field
-																finalObj, logintransactionResultChoiceChoicesObjDiags := types.ObjectValue(
-																	ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-																	logintransactionResultChoiceChoicesAttributeMap,
-																)
-																response.Diagnostics.Append(logintransactionResultChoiceChoicesObjDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																loginAttributeMap["transaction_result_choice"] = finalObj
-															} else {
-																loginAttributeMap["transaction_result_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap)
-															}
-
-															loginObj, loginObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap, loginAttributeMap)
-															response.Diagnostics.Append(loginObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															authenticationlabelChoiceChoicesAttributeMap["login"] = loginObj
-														} else {
-															authenticationlabelChoiceChoicesAttributeMap["login"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap)
+													if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+														if _, found := gcSpec["login"]; found {
+															loginInMap = true
 														}
+													}
+
+													if !loginInMap {
+														if _, found := rawSpecMap["login"]; found {
+															loginInMap = true
+														}
+													}
+
+													_, isLoginForBool := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
+													if loginInMap || isLoginForBool {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolValue(true)
+													} else {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolNull()
 													}
 
 													// resource specToModelNested BoolOfOneOfPointerField --> LoginMfa
@@ -21345,6 +20710,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													authenticationAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													authenticationAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap)
 												}
 
@@ -21441,6 +20807,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													financialServicesAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													financialServicesAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFinancialServicesLabelChoiceModelAttributeMap)
 												}
 
@@ -21465,8 +20832,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											if isFlight && flightOptionsWrapper != nil && flightOptionsWrapper.Flight != nil {
 												flightElement := flightOptionsWrapper.Flight
 
-												// resource specToModelNested RequiredOneOfField --> LabelChoice
-												// CreateSpecType
+												// resource specToModelNested OneOfField --> LabelChoice
 												// CreateSpecType: GetLabelChoice() returns the oneof interface value.
 												if flightElement.GetLabelChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
@@ -21515,7 +20881,10 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													flightAttributeMap["label_choice"] = finalObj
 												} else {
-													flightAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap)
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
+													flightAttributeMap["label_choice"] = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap, map[string]attr.Value{
+														"checkin": types.BoolValue(true),
+													})
 												}
 
 												flightObj, flightObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightModelAttributeMap, flightAttributeMap)
@@ -21633,6 +21002,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													profileManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													profileManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceProfileManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -21772,6 +21142,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													searchAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													searchAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceSearchLabelChoiceModelAttributeMap)
 												}
 
@@ -22087,6 +21458,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													shoppingGiftCardsAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													shoppingGiftCardsAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceShoppingGiftCardsLabelChoiceModelAttributeMap)
 												}
 
@@ -22116,6 +21488,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										flowLabelAttributeMap["flow_label_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										flowLabelAttributeMap["flow_label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceModelAttributeMap)
 									}
 
@@ -22167,6 +21540,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
 						}
 
@@ -22363,6 +21737,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -22420,6 +21795,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -22577,7 +21953,18 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.ConnectorTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceModelAttributeMap)
+
+		if data.ConnectorTypeChoice.IsNull() || data.ConnectorTypeChoice.IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["adobe_commerce_connector"].IsNull() || data.ConnectorTypeChoice.Attributes()["adobe_commerce_connector"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["big_ip_iapp"].IsNull() || data.ConnectorTypeChoice.Attributes()["big_ip_iapp"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsUnknown())))) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["loglevel"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["loglevel"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsUnknown()))))) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["protected_endpoints"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["protected_endpoints"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["timeout"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["timeout"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["trusted_clients"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudflare"].(types.Object).Attributes()["trusted_clients"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).Attributes()["ids"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_id_selector"].(types.Object).Attributes()["ids"].IsUnknown())) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).Attributes()["tags"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["aws_configuration_tag_selector"].(types.Object).Attributes()["tags"].IsUnknown())) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["disable_aws_configuration"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["aws_configuration_type_choice"].(types.Object).Attributes()["disable_aws_configuration"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["continue_mitigation_action_hdr"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["data_sample"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["data_sample"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["disable_js_insert"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["exclude_list"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_location"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_mode"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["javascript_mode"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["js_download_path"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["js_insertion_rules"].(types.Object).Attributes()["rules"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["javascript_mode"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["javascript_mode"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["java_script_choice"].(types.Object).Attributes()["manual_js_insert"].(types.Object).Attributes()["js_download_path"].IsUnknown()))))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["loglevel"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["loglevel"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).IsUnknown() || ((data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["disable_mobile_sdk"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).IsUnknown() || (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["mobile_sdk_choice"].(types.Object).Attributes()["mobile_sdk_config"].(types.Object).Attributes()["mobile_identifier"].(types.Object).Attributes()["headers"].IsUnknown()))))) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["protected_endpoints"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["protected_endpoints"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["timeout"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["timeout"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["trusted_clients"].IsNull() || data.ConnectorTypeChoice.Attributes()["cloudfront"].(types.Object).Attributes()["trusted_clients"].IsUnknown()))) && (data.ConnectorTypeChoice.Attributes()["custom_connector"].IsNull() || data.ConnectorTypeChoice.Attributes()["custom_connector"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["f5_big_ip"].IsNull() || data.ConnectorTypeChoice.Attributes()["f5_big_ip"].IsUnknown()) && (data.ConnectorTypeChoice.Attributes()["salesforce_commerce_connector"].IsNull() || data.ConnectorTypeChoice.Attributes()["salesforce_commerce_connector"].IsUnknown())) {
+			data.ConnectorTypeChoice = types.ObjectValueMust(ProtectedApplicationConnectorTypeChoiceModelAttributeMap, map[string]attr.Value{
+				"adobe_commerce_connector":      types.BoolNull(),
+				"big_ip_iapp":                   types.BoolValue(true),
+				"cloudflare":                    types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareModelAttributeMap),
+				"cloudfront":                    types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontModelAttributeMap),
+				"custom_connector":              types.BoolNull(),
+				"f5_big_ip":                     types.BoolNull(),
+				"salesforce_commerce_connector": types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredEnumField --> Region
@@ -22606,6 +21993,12 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 }
 
 func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCProtectedApplicationModel
@@ -22706,7 +22099,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource modelToSpecRoot OneOfField --> ConnectorTypeChoice
 	if !data.ConnectorTypeChoice.IsNull() && !data.ConnectorTypeChoice.IsUnknown() {
 		connectorTypeChoiceModel := ProtectedAppConnectorTypeChoice{}
 		response.Diagnostics.Append(data.ConnectorTypeChoice.As(ctx, &connectorTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22737,6 +22130,9 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 			}
 			cloudflareOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.ReplaceSpecType_Cloudflare{}
 			cloudflareOneOfSpec.Cloudflare = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType{}
+			cloudflareOneOfSpec.Cloudflare.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudflareOneOfSpec
 
 			// resource modelToSpecNested StringField --> ContinueMitigationActionHdr
@@ -22789,10 +22185,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22971,10 +22370,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23140,7 +22542,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudflareModel.MobileSdkChoice.IsNull() && !protectedAppCloudflareModel.MobileSdkChoice.IsUnknown() {
 				cloudflareMobileSdkChoiceModel := ProtectedAppMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudflareModel.MobileSdkChoice.As(ctx, &cloudflareMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24062,6 +23464,9 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 			}
 			cloudfrontOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.ReplaceSpecType_Cloudfront{}
 			cloudfrontOneOfSpec.Cloudfront = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType{}
+			cloudfrontOneOfSpec.Cloudfront.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudfrontOneOfSpec
 
 			// resource modelToSpecNested RequiredOneOfField --> AwsConfigurationTypeChoice
@@ -24185,10 +23590,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppJavaScriptExclusionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24391,10 +23799,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppCloudfrontJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24584,7 +23995,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudfrontModel.MobileSdkChoice.IsNull() && !protectedAppCloudfrontModel.MobileSdkChoice.IsUnknown() {
 				cloudfrontMobileSdkChoiceModel := ProtectedAppCloudfrontTypeMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudfrontModel.MobileSdkChoice.As(ctx, &cloudfrontMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25364,177 +24775,14 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											return
 										}
 
-										// resource modelToSpecNested PointerOfOneOfField --> Login
+										// resource modelToSpecNested BoolOfOneOfPointerField --> Login
 										if !authenticationLabelChoiceModel.Login.IsNull() && !authenticationLabelChoiceModel.Login.IsUnknown() {
-											var protectedAppLoginModel ProtectedAppLogin
-											response.Diagnostics.Append(authenticationLabelChoiceModel.Login.As(ctx, &protectedAppLoginModel, basetypes.ObjectAsOptions{})...)
-											if response.Diagnostics.HasError() {
-												return
+											loginSpecBool := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
+											loginSpecBool.Login = &ves_io_schema.BotDefenseTransactionResult{}
+											loginSpecBool.Login.TransactionResultChoice = &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{
+												DisableTransactionResult: &ves_io_schema.Empty{},
 											}
-											loginOneOfSpec := &ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login{}
-											loginOneOfSpec.Login = &ves_io_schema.BotDefenseTransactionResult{}
-											authenticationOneOfSpec.Authentication.LabelChoice = loginOneOfSpec
-
-											// resource modelToSpecNested OneOfField --> TransactionResultChoice
-											if !protectedAppLoginModel.TransactionResultChoice.IsNull() && !protectedAppLoginModel.TransactionResultChoice.IsUnknown() {
-												loginTransactionResultChoiceModel := ProtectedAppTransactionResultChoice{}
-												response.Diagnostics.Append(protectedAppLoginModel.TransactionResultChoice.As(ctx, &loginTransactionResultChoiceModel, basetypes.ObjectAsOptions{})...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// resource modelToSpecNested BoolOfOneOfPointerField --> DisableTransactionResult
-												if !loginTransactionResultChoiceModel.DisableTransactionResult.IsNull() && !loginTransactionResultChoiceModel.DisableTransactionResult.IsUnknown() {
-													disableTransactionResultSpecBool := &ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult{}
-													disableTransactionResultSpecBool.DisableTransactionResult = &ves_io_schema.Empty{}
-													loginOneOfSpec.Login.TransactionResultChoice = disableTransactionResultSpecBool
-												}
-
-												// resource modelToSpecNested PointerOfOneOfField --> TransactionResult
-												if !loginTransactionResultChoiceModel.TransactionResult.IsNull() && !loginTransactionResultChoiceModel.TransactionResult.IsUnknown() {
-													var protectedAppTransactionResultModel ProtectedAppTransactionResult
-													response.Diagnostics.Append(loginTransactionResultChoiceModel.TransactionResult.As(ctx, &protectedAppTransactionResultModel, basetypes.ObjectAsOptions{})...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													transactionResultOneOfSpec := &ves_io_schema.BotDefenseTransactionResult_TransactionResult{}
-													transactionResultOneOfSpec.TransactionResult = &ves_io_schema.BotDefenseTransactionResultType{}
-													loginOneOfSpec.Login.TransactionResultChoice = transactionResultOneOfSpec
-
-													// resource modelToSpecNested ArrayOfPointerField --> FailureConditions
-													if !protectedAppTransactionResultModel.FailureConditions.IsNull() && !protectedAppTransactionResultModel.FailureConditions.IsUnknown() && len(protectedAppTransactionResultModel.FailureConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var failureConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.FailureConditions.ElementsAs(ctx, &failureConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														failureConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(failureConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.FailureConditions = failureConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, failureConditionsElement := range failureConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.FailureConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !failureConditionsElement.Name.IsNull() && !failureConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].Name = string(failureConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !failureConditionsElement.RegexValues.IsNull() && !failureConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(failureConditionsElement.RegexValues.Elements()))
-																	diags = failureConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.FailureConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !failureConditionsElement.Status.IsNull() && !failureConditionsElement.Status.IsUnknown() && len(failureConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = failureConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		failureConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-													// resource modelToSpecNested ArrayOfPointerField --> SuccessConditions
-													if !protectedAppTransactionResultModel.SuccessConditions.IsNull() && !protectedAppTransactionResultModel.SuccessConditions.IsUnknown() && len(protectedAppTransactionResultModel.SuccessConditions.Elements()) > 0 {
-														// 1. Convert the types.List into a slice of the model's Go struct
-														var successConditionsElements []ProtectedAppBotDefenseTransactionResultCondition
-														response.Diagnostics.Append(protectedAppTransactionResultModel.SuccessConditions.ElementsAs(ctx, &successConditionsElements, false)...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-
-														// 2. Initialize the spec slice
-														successConditionsSpec := make([]*ves_io_schema.BotDefenseTransactionResultCondition, len(successConditionsElements))
-														transactionResultOneOfSpec.TransactionResult.SuccessConditions = successConditionsSpec
-
-														// 3. Iterate over the converted Go slice
-														for ii, successConditionsElement := range successConditionsElements {
-															// Initialize the spec struct for the current element
-															transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii] = &ves_io_schema.BotDefenseTransactionResultCondition{}
-
-															// Recursively process nested elements
-
-															// resource modelToSpecNested StringField --> Name
-															if !successConditionsElement.Name.IsNull() && !successConditionsElement.Name.IsUnknown() {
-																transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].Name = string(successConditionsElement.Name.ValueString())
-															}
-
-															// resource modelToSpecNested ArrayOfStringField --> RegexValues
-															if !successConditionsElement.RegexValues.IsNull() && !successConditionsElement.RegexValues.IsUnknown() {
-																{
-																	elements := make([]string, 0, len(successConditionsElement.RegexValues.Elements()))
-																	diags = successConditionsElement.RegexValues.ElementsAs(ctx, &elements, false)
-																	response.Diagnostics.Append(diags...)
-																	if response.Diagnostics.HasError() {
-																		return
-																	}
-																	transactionResultOneOfSpec.TransactionResult.SuccessConditions[ii].RegexValues = elements
-																}
-															}
-
-															// resource modelToSpecNested RequiredEnumField --> Status
-															if !successConditionsElement.Status.IsNull() && !successConditionsElement.Status.IsUnknown() && len(successConditionsElement.Status.Elements()) > 0 {
-																var statusTfStrings []types.String
-																diags = successConditionsElement.Status.ElementsAs(ctx, &statusTfStrings, false)
-																response.Diagnostics.Append(diags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																if len(statusTfStrings) > 0 {
-																	valStr := statusTfStrings[0].ValueString()
-
-																	if v, ok := ves_io_schema.HttpStatusCode_value[valStr]; ok {
-																		successConditionsSpec[ii].Status = ves_io_schema.HttpStatusCode(v)
-																	} else {
-																		response.Diagnostics.AddError(
-																			"Invalid Enum Value",
-																			fmt.Sprintf("Value '%s' is not valid for enum Status", valStr),
-																		)
-																		return
-																	}
-																}
-															}
-
-														}
-													}
-
-												}
-
-											}
-
+											authenticationOneOfSpec.Authentication.LabelChoice = loginSpecBool
 										}
 
 										// resource modelToSpecNested BoolOfOneOfPointerField --> LoginMfa
@@ -25615,9 +24863,12 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 									}
 									flightOneOfSpec := &ves_io_schema.BotDefenseFlowLabelCategoriesChoiceType_Flight{}
 									flightOneOfSpec.Flight = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType{}
+									flightOneOfSpec.Flight.LabelChoice = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType_Checkin{
+										Checkin: &ves_io_schema.Empty{},
+									}
 									flowLabelOneOfSpec.FlowLabel.FlowLabelChoice = flightOneOfSpec
 
-									// resource modelToSpecNested RequiredOneOfField --> LabelChoice
+									// resource modelToSpecNested OneOfField --> LabelChoice
 									if !protectedAppFlightModel.LabelChoice.IsNull() && !protectedAppFlightModel.LabelChoice.IsUnknown() {
 										flightLabelChoiceModel := ProtectedAppBotDefenseFlowLabelFlightChoiceTypeLabelChoice{}
 										response.Diagnostics.Append(protectedAppFlightModel.LabelChoice.As(ctx, &flightLabelChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26068,12 +25319,16 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 			spec.ConnectorTypeChoice = salesforceCommerceConnectorSpecBool
 		}
 
+	} else {
+		spec.ConnectorTypeChoice = &ves_io_schema_shape_bot_defense_protected_application.ReplaceSpecType_BigIpIapp{
+			BigIpIapp: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -26081,15 +25336,11 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "protected_application", err),
 		)
 		return
 	}
@@ -26098,13 +25349,15 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "protected_application", err),
 		)
 		return
 	}
@@ -26210,34 +25463,27 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -26266,17 +25512,23 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -26288,7 +25540,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource SpecToModelRoot OneOfField --> ConnectorTypeChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -26340,8 +25592,8 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var connectorTypeChoiceChoices interface{}
 		if v := rawSpecMap["connector_type_choice"]; v != nil {
 			connectorTypeChoiceChoices = v
@@ -26469,8 +25721,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppJavaScriptExclusionRuleModel := ProtectedAppJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -26572,6 +25823,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -26601,6 +25853,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -26712,6 +25965,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -26783,8 +26037,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppJavaScriptInsertionRuleModel := ProtectedAppJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -26886,6 +26139,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -26915,6 +26169,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -27018,6 +26273,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -27094,6 +26350,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -27113,8 +26370,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudflareElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -27229,6 +26485,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -27294,6 +26551,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudflareAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudflareAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -27475,6 +26733,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -27504,6 +26763,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -27675,6 +26935,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -27749,6 +27010,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -27920,6 +27182,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -27949,6 +27212,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -28099,6 +27363,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -28173,6 +27438,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -28202,6 +27468,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -28307,6 +27574,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -28336,6 +27604,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -28561,6 +27830,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -28618,6 +27888,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudflareTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -28823,6 +28094,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["aws_configuration_type_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontAwsConfigurationTypeChoiceModelAttributeMap)
 				}
 
@@ -28890,8 +28162,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppCloudfrontJavaScriptExclusionRuleModel := ProtectedAppCloudfrontJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -28993,6 +28264,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -29022,6 +28294,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptExclusionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -29133,6 +28406,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppPathMatcherTypeModel.PathMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppPathMatcherTypeModel.PathMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListPathPathMatchModelAttributeMap)
 										}
 
@@ -29220,8 +28494,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppCloudfrontJavaScriptInsertionRuleModel := ProtectedAppCloudfrontJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -29323,6 +28596,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													domainAttributeMap["domain_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 												}
 
@@ -29352,6 +28626,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap)
 									}
 
@@ -29455,6 +28730,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										protectedAppCloudfrontJavaScriptInsertionRuleModel.UriPathChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesUriPathModelAttributeMap)
 									}
 
@@ -29547,6 +28823,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["java_script_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["java_script_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceModelAttributeMap)
 				}
 
@@ -29566,8 +28843,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudfrontElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -29682,6 +28958,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceMobileSdkConfigMobileIdentifierHeadersValueMatchModelAttributeMap)
 										}
 
@@ -29747,6 +29024,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					cloudfrontAttributeMap["mobile_sdk_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					cloudfrontAttributeMap["mobile_sdk_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap)
 				}
 
@@ -29928,6 +29206,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -29957,6 +29236,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										mobileClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										mobileClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceMobileClientMitigationModelAttributeMap)
 									}
 
@@ -30128,6 +29408,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationContinueAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -30202,6 +29483,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webClientAttributeMap["mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webClientAttributeMap["mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebClientMitigationModelAttributeMap)
 									}
 
@@ -30373,6 +29655,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueMobileAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueMobileAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationContinueMobileAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -30402,6 +29685,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["mobile_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientMobileMitigationModelAttributeMap)
 									}
 
@@ -30552,6 +29836,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													continueWebAttributeMap["add_header_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													continueWebAttributeMap["add_header_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationContinueWebAddHeaderChoiceModelAttributeMap)
 												}
 
@@ -30626,6 +29911,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										webMobileClientAttributeMap["web_mitigation_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										webMobileClientAttributeMap["web_mitigation_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceWebMobileClientWebMitigationModelAttributeMap)
 									}
 
@@ -30655,6 +29941,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.ClientTypeChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsClientTypeChoiceModelAttributeMap)
 						}
 
@@ -30760,6 +30047,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										domainAttributeMap["domain_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										domainAttributeMap["domain_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceDomainDomainChoiceModelAttributeMap)
 									}
 
@@ -30789,6 +30077,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.DomainMatcherChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsDomainMatcherChoiceModelAttributeMap)
 						}
 
@@ -30909,6 +30198,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													accountManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													accountManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAccountManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -30946,226 +30236,26 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 
 													// Process nested choices, populating the temporary attribute map
 
-													// resource specToModelNested PointerOfOneOfField --> Login
-													// CreateSpecType
-													// true
-													{
-														loginOptionsWrapper, isLogin := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
-														loginAttributeMap := make(map[string]attr.Value)
+													// resource specToModelNested BoolOfOneOfPointerField --> Login
+													var loginInMap bool
 
-														if isLogin && loginOptionsWrapper != nil && loginOptionsWrapper.Login != nil {
-															loginElement := loginOptionsWrapper.Login
-
-															// resource specToModelNested OneOfField --> TransactionResultChoice
-															// CreateSpecType: GetTransactionResultChoice() returns the oneof interface value.
-															if loginElement.GetTransactionResultChoice() != nil {
-																// Create a temporary attribute map for the choices within this OneOf
-																logintransactionResultChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-																// Define a variable for the spec choices to be passed down to nested templates.
-																// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-																logintransactionResultChoiceChoices := loginElement.GetTransactionResultChoice()
-
-																// Process nested choices, populating the temporary attribute map
-
-																// resource specToModelNested BoolOfOneOfPointerField --> DisableTransactionResult
-																var disableTransactionResultInMap bool
-
-																if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-																	if _, found := gcSpec["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																if !disableTransactionResultInMap {
-																	if _, found := rawSpecMap["disable_transaction_result"]; found {
-																		disableTransactionResultInMap = true
-																	}
-																}
-
-																_, isDisableTransactionResultForBool := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_DisableTransactionResult)
-																if disableTransactionResultInMap || isDisableTransactionResultForBool {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolValue(true)
-																} else {
-																	logintransactionResultChoiceChoicesAttributeMap["disable_transaction_result"] = types.BoolNull()
-																}
-
-																// resource specToModelNested PointerOfOneOfField --> TransactionResult
-																// CreateSpecType
-																// true
-																{
-																	transactionResultOptionsWrapper, isTransactionResult := logintransactionResultChoiceChoices.(*ves_io_schema.BotDefenseTransactionResult_TransactionResult)
-																	transactionResultAttributeMap := make(map[string]attr.Value)
-
-																	if isTransactionResult && transactionResultOptionsWrapper != nil && transactionResultOptionsWrapper.TransactionResult != nil {
-																		transactionResultElement := transactionResultOptionsWrapper.TransactionResult
-
-																		// resource specToModelNested ArrayOfPointerField --> FailureConditions
-																		if len(transactionResultElement.GetFailureConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			failureConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetFailureConditions()))
-																			for _, failureConditionsElement := range transactionResultElement.GetFailureConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if failureConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(failureConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(failureConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, failureConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if failureConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(failureConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				failureConditionsElements = append(failureConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			failureConditionsListValue, failureConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap}, failureConditionsElements)
-																			response.Diagnostics.Append(failureConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["failure_conditions"] = failureConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["failure_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultFailureConditionsModelAttributeMap})
-																		}
-
-																		// resource specToModelNested ArrayOfPointerField --> SuccessConditions
-																		if len(transactionResultElement.GetSuccessConditions()) > 0 {
-																			// Step 1: Always create a slice of model structs from the spec data.
-																			// This slice serves as an intermediate representation.
-																			successConditionsElements := make([]ProtectedAppBotDefenseTransactionResultCondition, 0, len(transactionResultElement.GetSuccessConditions()))
-																			for _, successConditionsElement := range transactionResultElement.GetSuccessConditions() {
-																				protectedAppBotDefenseTransactionResultConditionModel := ProtectedAppBotDefenseTransactionResultCondition{}
-
-																				// resource specToModelNested StringField --> Name
-																				if successConditionsElement.GetName() != "" {
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringValue(successConditionsElement.GetName())
-																				} else {
-																					// Empty string, set to null
-																					protectedAppBotDefenseTransactionResultConditionModel.Name = types.StringNull()
-																				}
-
-																				// resource specToModelNested ArrayOfStringField --> RegexValues
-																				{
-																					if len(successConditionsElement.GetRegexValues()) > 0 {
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, successConditionsElement.GetRegexValues())
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.RegexValues = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				// resource specToModelNested RequiredEnumField --> Status
-																				{
-																					if successConditionsElement.GetStatus().String() != "" {
-																						stringValue := types.StringValue(successConditionsElement.GetStatus().String())
-																						stringSlice := []types.String{stringValue}
-																						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-																						response.Diagnostics.Append(listDiags...)
-																						if response.Diagnostics.HasError() {
-																							return
-																						}
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = listValue
-																					} else {
-																						protectedAppBotDefenseTransactionResultConditionModel.Status = types.ListNull(types.StringType)
-																					}
-																				}
-
-																				successConditionsElements = append(successConditionsElements, protectedAppBotDefenseTransactionResultConditionModel)
-																			}
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// The intermediate slice of structs must be converted to a `types.ListValue`.
-																			successConditionsListValue, successConditionsListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap}, successConditionsElements)
-																			response.Diagnostics.Append(successConditionsListDiags...)
-																			if response.Diagnostics.HasError() {
-																				return
-																			}
-																			transactionResultAttributeMap["success_conditions"] = successConditionsListValue
-
-																		} else {
-																			// The source list is empty or nil.
-																			// CASE 1: The target field is a `types.List` or an attribute map.
-																			// Assign a null `types.ListValue`.
-																			transactionResultAttributeMap["success_conditions"] = types.ListNull(types.ObjectType{AttrTypes: ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultSuccessConditionsModelAttributeMap})
-																		}
-
-																		transactionResultObj, transactionResultObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap, transactionResultAttributeMap)
-																		response.Diagnostics.Append(transactionResultObjDiags...)
-																		if response.Diagnostics.HasError() {
-																			return
-																		}
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = transactionResultObj
-																	} else {
-																		logintransactionResultChoiceChoicesAttributeMap["transaction_result"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceTransactionResultModelAttributeMap)
-																	}
-																}
-
-																// --- End of Choices ---
-
-																// Create the final ObjectValue for this OneOf field
-																finalObj, logintransactionResultChoiceChoicesObjDiags := types.ObjectValue(
-																	ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-																	logintransactionResultChoiceChoicesAttributeMap,
-																)
-																response.Diagnostics.Append(logintransactionResultChoiceChoicesObjDiags...)
-																if response.Diagnostics.HasError() {
-																	return
-																}
-
-																// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																loginAttributeMap["transaction_result_choice"] = finalObj
-															} else {
-																loginAttributeMap["transaction_result_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginTransactionResultChoiceModelAttributeMap)
-															}
-
-															loginObj, loginObjDiags := types.ObjectValue(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap, loginAttributeMap)
-															response.Diagnostics.Append(loginObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															authenticationlabelChoiceChoicesAttributeMap["login"] = loginObj
-														} else {
-															authenticationlabelChoiceChoicesAttributeMap["login"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceLoginModelAttributeMap)
+													if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+														if _, found := gcSpec["login"]; found {
+															loginInMap = true
 														}
+													}
+
+													if !loginInMap {
+														if _, found := rawSpecMap["login"]; found {
+															loginInMap = true
+														}
+													}
+
+													_, isLoginForBool := authenticationlabelChoiceChoices.(*ves_io_schema.BotDefenseFlowLabelAuthenticationChoiceType_Login)
+													if loginInMap || isLoginForBool {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolValue(true)
+													} else {
+														authenticationlabelChoiceChoicesAttributeMap["login"] = types.BoolNull()
 													}
 
 													// resource specToModelNested BoolOfOneOfPointerField --> LoginMfa
@@ -31271,6 +30361,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													authenticationAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													authenticationAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceAuthenticationLabelChoiceModelAttributeMap)
 												}
 
@@ -31367,6 +30458,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													financialServicesAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													financialServicesAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFinancialServicesLabelChoiceModelAttributeMap)
 												}
 
@@ -31391,8 +30483,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											if isFlight && flightOptionsWrapper != nil && flightOptionsWrapper.Flight != nil {
 												flightElement := flightOptionsWrapper.Flight
 
-												// resource specToModelNested RequiredOneOfField --> LabelChoice
-												// CreateSpecType
+												// resource specToModelNested OneOfField --> LabelChoice
 												// CreateSpecType: GetLabelChoice() returns the oneof interface value.
 												if flightElement.GetLabelChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
@@ -31441,6 +30532,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													flightAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													flightAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap)
 												}
 
@@ -31559,6 +30651,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													profileManagementAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													profileManagementAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceProfileManagementLabelChoiceModelAttributeMap)
 												}
 
@@ -31698,6 +30791,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													searchAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													searchAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceSearchLabelChoiceModelAttributeMap)
 												}
 
@@ -32013,6 +31107,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
 													shoppingGiftCardsAttributeMap["label_choice"] = finalObj
 												} else {
+													// The OneOf field is nil in the source spec, so set the Terraform object to null.
 													shoppingGiftCardsAttributeMap["label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceShoppingGiftCardsLabelChoiceModelAttributeMap)
 												}
 
@@ -32042,6 +31137,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										flowLabelAttributeMap["flow_label_choice"] = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										flowLabelAttributeMap["flow_label_choice"] = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceModelAttributeMap)
 									}
 
@@ -32093,6 +31189,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontProtectedEndpointTypeModel.FlowLabelChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceModelAttributeMap)
 						}
 
@@ -32289,6 +31386,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												protectedAppCloudfrontHeaderMatcherTypeModel.ValueMatchChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceHttpHeaderHeadersValueMatchModelAttributeMap)
 											}
 
@@ -32346,6 +31444,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = finalObj
 						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							protectedAppCloudfrontClientBypassRuleModel.ClientSourceChoice = types.ObjectNull(ProtectedApplicationConnectorTypeChoiceCloudfrontTrustedClientsClientSourceChoiceModelAttributeMap)
 						}
 
@@ -32595,7 +31694,7 @@ func (r *ResourceF5XCProtectedApplication) Delete(ctx context.Context, request r
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "protected_application", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "protected_application", err),
 		)
 		return
 	}

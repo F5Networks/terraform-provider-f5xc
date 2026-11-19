@@ -33,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -116,8 +117,8 @@ func (r *ResourceF5XCVirtualK8S) Metadata(ctx context.Context, request resource.
 func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a virtual_k8s This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_k8s) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a virtual_k8s This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_k8s) etc. can be fetched",
+		MarkdownDescription: "Virtual K8s object exposes a Kubernetes API endpoint in the namespace that operates on all the physical Kubernetes clusters in each of<br>the sites that are selected by the virtual-site referred to in the object.<br><br>Virtual K8s supports only a subset of Kubernetes APIs related to application management.<br><br>Read and write operations are currently supported on the following Kubernetes API resources:<br>1. Deployment v1 apps<br>2. StatefulSet v1 apps<br>3. DaemonSet v1 apps<br>4. Job v1 batch<br>5. CronJob v1beta1 batch<br>6. Service v1 core with type ClusterIP<br>7. Secret v1 core<br>8. ConfigMap v1 core<br>9. ServiceAccount v1 core<br>10. PersistentVolumeClaim v1 core<br><br>Only delete is supported on Pod v1 core.<br><br>Read only operations are currently supported on the following Kubernetes API resources:<br>1. Pod v1 core<br>2. ReplicaSet v1 apps<br>3. Endpoints v1 core<br>4. Node v1 core<br>5. Namespace v1 core<br>6. PersistentVolume v1 core<br>7. Event v1 core<br><br>The semantics of using Kubernetes APIs on a Virtual K8s object are different compared to those on a single Kubernetes cluster since the<br>Kubernetes resource objects created using the Virtual K8s API will be instantiated in all the physical Kubernetes clusters in each<br>of the sites selected by the virtual-site referred to in the object. In a single Kubernetes cluster, when a Deployment resource is created<br>with Replicas set to 3, the expectation is that 3 Pods will be created on the Kubernetes cluster. On the Virtual K8S API, when a Deployment<br>resource is created with Replicas set to 3, the total number of Pods created is equal to the number of Replicas times the number of physical<br>clusters in each of the sites selected by the referred to virtual-site. For example, if the virtual-site associated with Virtual K8s object<br>selects 3 sites each having 1 physical Kubernetes cluster, then the total number of Pods created will be 9.<br><br>Kubernetes API resource objects can also be created with the annotation ves.io/virtual-sites=<virtual-site-namespace>/<virtual-site-name><br>and those objects will be instantiated in all physical Kubernetes clusters in each of the sites selected by the virtual-site specified in the<br>annotation only and not using the virtual-site specified in the Virtual K8s object. This provides an override mechanism to select different<br>virtual-sites for the Kubernetes API resource to be instantiated on. The virtual-site referred to in the Virtual K8s can hence be thought<br>of as the default virtual-site for all the Kubernetes API resource objects created on the Virtual K8s API without the above annotation.",
+		Description:         "Virtual K8s object exposes a Kubernetes API endpoint in the namespace that operates on all the physical Kubernetes clusters in each of the sites that are selected by the virtual-site referred to in the object. Virtual K8s supports only a subset of Kubernetes APIs related to application management. Read and write operations are currently supported on the following Kubernetes API resources: 1. Deployment v1 apps 2. StatefulSet v1 apps 3. DaemonSet v1 apps 4. Job v1 batch 5. CronJob v1beta1 batch 6. Service v1 core with type ClusterIP 7. Secret v1 core 8. ConfigMap v1 core 9. ServiceAccount v1 core 10. PersistentVolumeClaim v1 core Only delete is supported on Pod v1 core. Read only operations are currently supported on the following Kubernetes API resources: 1. Pod v1 core 2. ReplicaSet v1 apps 3. Endpoints v1 core 4. Node v1 core 5. Namespace v1 core 6. PersistentVolume v1 core 7. Event v1 core The semantics of using Kubernetes APIs on a Virtual K8s object are different compared to those on a single Kubernetes cluster since the Kubernetes resource objects created using the Virtual K8s API will be instantiated in all the physical Kubernetes clusters in each of the sites selected by the virtual-site referred to in the object. In a single Kubernetes cluster, when a Deployment resource is created with Replicas set to 3, the expectation is that 3 Pods will be created on the Kubernetes cluster. On the Virtual K8S API, when a Deployment resource is created with Replicas set to 3, the total number of Pods created is equal to the number of Replicas times the number of physical clusters in each of the sites selected by the referred to virtual-site. For example, if the virtual-site associated with Virtual K8s object selects 3 sites each having 1 physical Kubernetes cluster, then the total number of Pods created will be 9. Kubernetes API resource objects can also be created with the annotation ves.io/virtual-sites=<virtual-site-namespace>/<virtual-site-name> and those objects will be instantiated in all physical Kubernetes clusters in each of the sites selected by the virtual-site specified in the annotation only and not using the virtual-site specified in the Virtual K8s object. This provides an override mechanism to select different virtual-sites for the Kubernetes API resource to be instantiated on. The virtual-site referred to in the Virtual K8s can hence be thought of as the default virtual-site for all the Kubernetes API resource objects created on the Virtual K8s API without the above annotation.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -211,14 +212,14 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 						Optional:            false,
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+							stringplanmodifier.UseNonNullStateForUnknown(),
 						},
 					},
 				},
 			},
 			"service_isolation_choice": schema.SingleNestedAttribute{
 				Description:         "service_isolation_choice Service isolation choice",
-				MarkdownDescription: "service_isolation_choice Service isolation choice",
+				MarkdownDescription: "service_isolation_choice Service isolation choice<br>Exactly one of `disabled` or `isolated` must be specified when `service_isolation_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -231,7 +232,7 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"disabled": schema.BoolAttribute{
 						Description:         "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
-						MarkdownDescription: "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
+						MarkdownDescription: "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true<br>Conflicts with `isolated`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -241,7 +242,7 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 					},
 					"isolated": schema.BoolAttribute{
 						Description:         "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
-						MarkdownDescription: "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
+						MarkdownDescription: "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false<br>Conflicts with `disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -256,7 +257,7 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 				MarkdownDescription: "vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(32),
 				},
@@ -283,7 +284,7 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -351,9 +352,17 @@ func (r *ResourceF5XCVirtualK8S) ModifyPlan(ctx context.Context, req resource.Mo
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCVirtualK8SModel
 
 	// Read Terraform plan data into the model
@@ -519,7 +528,7 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -542,7 +551,7 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_virtual_k8s.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "virtual_k8s", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "virtual_k8s", err),
 		)
 		return
 	}
@@ -834,14 +843,12 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
 		}
 		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		var priorValVsiteRefs types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("vsite_refs"), &priorValVsiteRefs)
-		if !priorValVsiteRefs.IsNull() && !priorValVsiteRefs.IsUnknown() {
-			data.VsiteRefs = priorValVsiteRefs
+		if !data.VsiteRefs.IsNull() && !data.VsiteRefs.IsUnknown() && len(data.VsiteRefs.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VsiteRefs = basetypes.NewListValueMust(vsiteRefsObjectType, nil)
 		} else {
 			data.VsiteRefs = nullVsiteRefsList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -887,14 +894,10 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "virtual_k8s", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "virtual_k8s", err),
 		)
 		return
 	}
@@ -1158,14 +1161,12 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
 		}
 		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		var priorValVsiteRefs types.List
-		_ = request.State.GetAttribute(ctx, path.Root("vsite_refs"), &priorValVsiteRefs)
-		if !priorValVsiteRefs.IsNull() && !priorValVsiteRefs.IsUnknown() {
-			data.VsiteRefs = priorValVsiteRefs
+		if !data.VsiteRefs.IsNull() && !data.VsiteRefs.IsUnknown() && len(data.VsiteRefs.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VsiteRefs = basetypes.NewListValueMust(vsiteRefsObjectType, nil)
 		} else {
 			data.VsiteRefs = nullVsiteRefsList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1177,6 +1178,12 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 }
 
 func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCVirtualK8SModel
@@ -1362,7 +1369,7 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1370,24 +1377,20 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_k8s.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_k8s.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "virtual_k8s", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "virtual_k8s", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "virtual_k8s", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "virtual_k8s", err),
 		)
 		return
 	}
@@ -1650,14 +1653,12 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
 		}
 		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		var priorValVsiteRefs types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("vsite_refs"), &priorValVsiteRefs)
-		if !priorValVsiteRefs.IsNull() && !priorValVsiteRefs.IsUnknown() {
-			data.VsiteRefs = priorValVsiteRefs
+		if !data.VsiteRefs.IsNull() && !data.VsiteRefs.IsUnknown() && len(data.VsiteRefs.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.VsiteRefs = basetypes.NewListValueMust(vsiteRefsObjectType, nil)
 		} else {
 			data.VsiteRefs = nullVsiteRefsList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -1732,7 +1733,7 @@ func (r *ResourceF5XCVirtualK8S) Delete(ctx context.Context, request resource.De
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "virtual_k8s", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "virtual_k8s", err),
 		)
 		return
 	}

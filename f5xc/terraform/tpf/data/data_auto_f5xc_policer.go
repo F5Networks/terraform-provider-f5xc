@@ -58,8 +58,8 @@ func (d *DataSourceF5XCPolicer) Metadata(ctx context.Context, request datasource
 func (r *DataSourceF5XCPolicer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a policer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policer) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a policer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policer) etc. can be fetched",
+		MarkdownDescription: "* Policer objects enforces traffic rate limits<br>* network_policy_rule and fast_acl_rule can refer to a policer. Packets<br>matching those rules will be subjected to the traffic contract specified in<br>the policer",
+		Description:         "Policer objects enforces traffic rate limits network_policy_rule and fast_acl_rule can refer to a policer. Packets matching those rules will be subjected to the traffic contract specified in the policer",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -183,7 +183,7 @@ func (d *DataSourceF5XCPolicer) Read(ctx context.Context, request datasource.Rea
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "policer", err))
 		return
 	}
 

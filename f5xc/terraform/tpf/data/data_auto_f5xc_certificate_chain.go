@@ -31,7 +31,7 @@ type DataSourceF5XCCertificateChain struct {
 	client *client.APIClient
 }
 
-type CertificateChainCertInfoType struct {
+type CertChainCertInfoType struct {
 	CommonName              types.String      `tfsdk:"common_name"`
 	Expiry                  timetypes.RFC3339 `tfsdk:"expiry"`
 	Issuer                  types.String      `tfsdk:"issuer"`
@@ -81,8 +81,8 @@ func (d *DataSourceF5XCCertificateChain) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCCertificateChain) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a certificate_chain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of certificate_chain) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a certificate_chain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of certificate_chain) etc. can be fetched",
+		MarkdownDescription: "Certificate chain is list of certificates used to establish chain of trust from server or client certificate to trusted CA root certificates.",
+		Description:         "Certificate chain is list of certificates used to establish chain of trust from server or client certificate to trusted CA root certificates.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -234,7 +234,7 @@ func (d *DataSourceF5XCCertificateChain) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_certificate_chain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "certificate_chain", err))
 		return
 	}
 
@@ -305,48 +305,48 @@ func (d *DataSourceF5XCCertificateChain) Read(ctx context.Context, request datas
 
 	// data SpecToModelRoot ArrayOfPointerField --> Infos
 	if len(specData.GetInfos()) > 0 {
-		infosElements := make([]CertificateChainCertInfoType, 0, len(specData.GetInfos()))
+		infosElements := make([]CertChainCertInfoType, 0, len(specData.GetInfos()))
 
 		for _, infosElement := range specData.GetInfos() {
-			certificateChainCertInfoTypeModel := CertificateChainCertInfoType{}
+			certChainCertInfoTypeModel := CertChainCertInfoType{}
 
 			// data specToModelNested StringField --> CommonName
 			if infosElement.GetCommonName() != "" {
-				certificateChainCertInfoTypeModel.CommonName = types.StringValue(infosElement.GetCommonName())
+				certChainCertInfoTypeModel.CommonName = types.StringValue(infosElement.GetCommonName())
 			} else {
 				// Empty string, set to null
-				certificateChainCertInfoTypeModel.CommonName = types.StringNull()
+				certChainCertInfoTypeModel.CommonName = types.StringNull()
 			}
 
 			// data specToModelNested TimeStampField --> Expiry
 			if infosElement.GetExpiry() != nil {
-				certificateChainCertInfoTypeModel.Expiry = timetypes.NewRFC3339ProtobufPointerValue(infosElement.GetExpiry())
+				certChainCertInfoTypeModel.Expiry = timetypes.NewRFC3339ProtobufPointerValue(infosElement.GetExpiry())
 			} else {
-				certificateChainCertInfoTypeModel.Expiry = timetypes.NewRFC3339Null()
+				certChainCertInfoTypeModel.Expiry = timetypes.NewRFC3339Null()
 			}
 
 			// data specToModelNested StringField --> Issuer
 			if infosElement.GetIssuer() != "" {
-				certificateChainCertInfoTypeModel.Issuer = types.StringValue(infosElement.GetIssuer())
+				certChainCertInfoTypeModel.Issuer = types.StringValue(infosElement.GetIssuer())
 			} else {
 				// Empty string, set to null
-				certificateChainCertInfoTypeModel.Issuer = types.StringNull()
+				certChainCertInfoTypeModel.Issuer = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> Organization
 			if infosElement.GetOrganization() != "" {
-				certificateChainCertInfoTypeModel.Organization = types.StringValue(infosElement.GetOrganization())
+				certChainCertInfoTypeModel.Organization = types.StringValue(infosElement.GetOrganization())
 			} else {
 				// Empty string, set to null
-				certificateChainCertInfoTypeModel.Organization = types.StringNull()
+				certChainCertInfoTypeModel.Organization = types.StringNull()
 			}
 
 			// data specToModelNested StringField --> PublicKeyAlgorithm
 			if infosElement.GetPublicKeyAlgorithm() != "" {
-				certificateChainCertInfoTypeModel.PublicKeyAlgorithm = types.StringValue(infosElement.GetPublicKeyAlgorithm())
+				certChainCertInfoTypeModel.PublicKeyAlgorithm = types.StringValue(infosElement.GetPublicKeyAlgorithm())
 			} else {
 				// Empty string, set to null
-				certificateChainCertInfoTypeModel.PublicKeyAlgorithm = types.StringNull()
+				certChainCertInfoTypeModel.PublicKeyAlgorithm = types.StringNull()
 			}
 
 			// data specToModelNested ArrayOfStringField --> SubjectAlternativeNames
@@ -356,12 +356,12 @@ func (d *DataSourceF5XCCertificateChain) Read(ctx context.Context, request datas
 				if response.Diagnostics.HasError() {
 					return
 				}
-				certificateChainCertInfoTypeModel.SubjectAlternativeNames = listValue
+				certChainCertInfoTypeModel.SubjectAlternativeNames = listValue
 			} else {
-				certificateChainCertInfoTypeModel.SubjectAlternativeNames = types.ListNull(types.StringType)
+				certChainCertInfoTypeModel.SubjectAlternativeNames = types.ListNull(types.StringType)
 			}
 
-			infosElements = append(infosElements, certificateChainCertInfoTypeModel)
+			infosElements = append(infosElements, certChainCertInfoTypeModel)
 		}
 
 		{

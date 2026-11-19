@@ -25,7 +25,6 @@ import (
 
 func TestAccResourceAutoF5XCBotInfrastructure_basic(t *testing.T) {
 	t.Parallel()
-	t.Skip("resource f5xc_bot_infrastructure acceptance test is temporarily skipped")
 
 	namespace := acctest.DefaultNamespace()
 	name := "tf-bot-" + acctest.RandString(t, 8)
@@ -39,20 +38,20 @@ func TestAccResourceAutoF5XCBotInfrastructure_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -61,7 +60,6 @@ func TestAccResourceAutoF5XCBotInfrastructure_basic(t *testing.T) {
 
 func TestAccResourceAutoF5XCBotInfrastructure_withEnvironmentTypeTransition(t *testing.T) {
 	t.Parallel()
-	t.Skip("resource f5xc_bot_infrastructure acceptance test is temporarily skipped")
 
 	namespace := acctest.DefaultNamespace()
 	name := "tf-bot-" + acctest.RandString(t, 8)
@@ -75,20 +73,20 @@ func TestAccResourceAutoF5XCBotInfrastructure_withEnvironmentTypeTransition(t *t
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withEnvironmentType(name, namespace, "PRODUCTION"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withEnvironmentType(name, namespace, "TESTING"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +95,6 @@ func TestAccResourceAutoF5XCBotInfrastructure_withEnvironmentTypeTransition(t *t
 
 func TestAccResourceAutoF5XCBotInfrastructure_withTrafficAndDeploymentTransition(t *testing.T) {
 	t.Parallel()
-	t.Skip("resource f5xc_bot_infrastructure acceptance test is temporarily skipped")
 
 	namespace := acctest.DefaultNamespace()
 	name := "tf-bot-" + acctest.RandString(t, 8)
@@ -111,20 +108,20 @@ func TestAccResourceAutoF5XCBotInfrastructure_withTrafficAndDeploymentTransition
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withTrafficAndDeployment(name, namespace, "WEB", "REVERSE_PROXY"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withTrafficAndDeployment(name, namespace, "MOBILE", "API_MODE"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +130,6 @@ func TestAccResourceAutoF5XCBotInfrastructure_withTrafficAndDeploymentTransition
 
 func TestAccResourceAutoF5XCBotInfrastructure_withBotInfraChoiceTransition(t *testing.T) {
 	t.Parallel()
-	t.Skip("resource f5xc_bot_infrastructure acceptance test is temporarily skipped")
 
 	namespace := acctest.DefaultNamespace()
 	name := "tf-bot-" + acctest.RandString(t, 8)
@@ -147,30 +143,30 @@ func TestAccResourceAutoF5XCBotInfrastructure_withBotInfraChoiceTransition(t *te
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withBotInfraChoice(name, namespace, "physical_hosted"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withBotInfraChoice(name, namespace, "on_prem"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withBotInfraChoice(name, namespace, "kubernetes"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -179,7 +175,6 @@ func TestAccResourceAutoF5XCBotInfrastructure_withBotInfraChoiceTransition(t *te
 
 func TestAccResourceAutoF5XCBotInfrastructure_withCreateChoiceTransition(t *testing.T) {
 	t.Parallel()
-	t.Skip("resource f5xc_bot_infrastructure acceptance test is temporarily skipped")
 
 	namespace := acctest.DefaultNamespace()
 	name := "tf-bot-" + acctest.RandString(t, 8)
@@ -193,20 +188,20 @@ func TestAccResourceAutoF5XCBotInfrastructure_withCreateChoiceTransition(t *test
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withCreateChoice(name, namespace, "production"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCBotInfrastructureConfig_withCreateChoice(name, namespace, "testing"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -215,43 +210,46 @@ func TestAccResourceAutoF5XCBotInfrastructure_withCreateChoiceTransition(t *test
 
 func TestAccResourceAutoF5XCBotInfrastructure_full(t *testing.T) {
 	t.Parallel()
-	t.Skip("resource f5xc_bot_infrastructure acceptance test is temporarily skipped")
 
 	namespace := acctest.DefaultNamespace()
 	name := "tf-bot-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_bot_infrastructure", botInfrastructureSchema.ObjectType, "bot infrastructure"),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCBotInfrastructureConfig_full(name, namespace, "test", "owner-a"),
+				Config: testAccResourceAutoF5XCBotInfrastructureConfig_full(name, namespace, "example", "example-owner"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCBotInfrastructureConfig_full(name, namespace, "prod", "owner-b"),
+				Config: testAccResourceAutoF5XCBotInfrastructureConfig_full(name, namespace, "example", "example-owner-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_bot_infrastructure.test",
+				ResourceName:                         "f5xc_bot_infrastructure.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_bot_infrastructure.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCBotInfrastructureConfig_full("example", "default", "example", "example-owner"),
+		})
 }
 
 func testAccResourceAutoF5XCBotInfrastructureConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bot_infrastructure" "test" {
+resource "f5xc_bot_infrastructure" "example" {
   name      = %q
   namespace = %q
 
@@ -264,12 +262,17 @@ resource "f5xc_bot_infrastructure" "test" {
 	create_bot_infra_choice = {
 		create_cloud_hosted = {
 			type_choice = {
-				production = {
-					region_1 = "US_WEST_2"
-					region_2 = "US_EAST_1"
+				testing_v2 = {
+					type_choice_testing_choice = {
+						single_active_region = {
+							region_1 = "US_WEST_2"
+						}
+					}
 				}
 			}
-			ip_addresses = ["192.0.2.11"]
+			ip_address_list = {
+				ip_addresses = ["192.0.2.11/32"]
+			}
 		}
 	}
 }
@@ -278,7 +281,7 @@ resource "f5xc_bot_infrastructure" "test" {
 
 func testAccResourceAutoF5XCBotInfrastructureConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bot_infrastructure" "test" {
+resource "f5xc_bot_infrastructure" "example" {
   name        = %q
   namespace   = %q
   description = "updated bot infrastructure"
@@ -292,12 +295,17 @@ resource "f5xc_bot_infrastructure" "test" {
 	create_bot_infra_choice = {
 		create_cloud_hosted = {
 			type_choice = {
-				production = {
-					region_1 = "US_WEST_2"
-					region_2 = "US_EAST_1"
+				testing_v2 = {
+					type_choice_testing_choice = {
+						single_active_region = {
+							region_1 = "US_WEST_2"
+						}
+					}
 				}
 			}
-			ip_addresses = ["192.0.2.11"]
+			ip_address_list = {
+				ip_addresses = ["192.0.2.11/32"]
+			}
 		}
 	}
 
@@ -308,7 +316,7 @@ resource "f5xc_bot_infrastructure" "test" {
 
 func testAccResourceAutoF5XCBotInfrastructureConfig_withEnvironmentType(name, namespace, environmentType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bot_infrastructure" "test" {
+resource "f5xc_bot_infrastructure" "example" {
   name             = %q
   namespace        = %q
   environment_type = [%q]
@@ -322,12 +330,17 @@ resource "f5xc_bot_infrastructure" "test" {
 	create_bot_infra_choice = {
 		create_cloud_hosted = {
 			type_choice = {
-				production = {
-					region_1 = "US_WEST_2"
-					region_2 = "US_EAST_1"
+				testing_v2 = {
+					type_choice_testing_choice = {
+						single_active_region = {
+							region_1 = "US_WEST_2"
+						}
+					}
 				}
 			}
-			ip_addresses = ["192.0.2.11"]
+			ip_address_list = {
+				ip_addresses = ["192.0.2.11/32"]
+			}
 		}
 	}
 }
@@ -336,7 +349,7 @@ resource "f5xc_bot_infrastructure" "test" {
 
 func testAccResourceAutoF5XCBotInfrastructureConfig_withTrafficAndDeployment(name, namespace, trafficType, deploymentMode string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bot_infrastructure" "test" {
+resource "f5xc_bot_infrastructure" "example" {
   name            = %q
   namespace       = %q
   traffic_type    = [%q]
@@ -351,12 +364,17 @@ resource "f5xc_bot_infrastructure" "test" {
 	create_bot_infra_choice = {
 		create_cloud_hosted = {
 			type_choice = {
-				production = {
-					region_1 = "US_WEST_2"
-					region_2 = "US_EAST_1"
+				testing_v2 = {
+					type_choice_testing_choice = {
+						single_active_region = {
+							region_1 = "US_WEST_2"
+						}
+					}
 				}
 			}
-			ip_addresses = ["192.0.2.11"]
+			ip_address_list = {
+				ip_addresses = ["192.0.2.11/32"]
+			}
 		}
 	}
 }
@@ -380,7 +398,7 @@ func testAccResourceAutoF5XCBotInfrastructureConfig_withBotInfraChoice(name, nam
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_bot_infrastructure" "test" {
+resource "f5xc_bot_infrastructure" "example" {
   name      = %q
   namespace = %q
 
@@ -391,12 +409,17 @@ resource "f5xc_bot_infrastructure" "test" {
 	create_bot_infra_choice = {
 		create_cloud_hosted = {
 			type_choice = {
-				production = {
-					region_1 = "US_WEST_2"
-					region_2 = "US_EAST_1"
+				testing_v2 = {
+					type_choice_testing_choice = {
+						single_active_region = {
+							region_1 = "US_WEST_2"
+						}
+					}
 				}
 			}
-			ip_addresses = ["192.0.2.11"]
+			ip_address_list = {
+				ip_addresses = ["192.0.2.11/32"]
+			}
 		}
 	}
 }
@@ -404,26 +427,36 @@ resource "f5xc_bot_infrastructure" "test" {
 }
 
 func testAccResourceAutoF5XCBotInfrastructureConfig_withCreateChoice(name, namespace, typeChoice string) string {
-	createChoice := `production = {
-          region_1 = "US_WEST_2"
-          region_2 = "US_EAST_1"
-        }`
+	createChoice := `production_v2 = {
+					type_choice_production_choice = {
+						active_active_region = {
+							region_1 = "US_WEST_2"
+							region_2 = "US_EAST_1"
+						}
+					}
+				}`
 
 	if typeChoice == "testing" {
-		createChoice = `testing = {
-          region_1 = "US_WEST_2"
+		createChoice = `testing_v2 = {
+					type_choice_testing_choice = {
+						single_active_region = {
+							region_1 = "US_WEST_2"
+						}
+					}
         }`
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_bot_infrastructure" "test" {
+resource "f5xc_bot_infrastructure" "example" {
   name      = %q
   namespace = %q
 
   bot_infra_choice = {
     cloud_hosted = {
       infra_host_name = "infra.example.com"
-      ip_addresses    = ["192.0.2.10"]
+			active_regions  = ["US_WEST_2"]
+			passive_regions = ["US_EAST_1"]
+			ip_addresses    = ["192.0.2.10/32"]
     }
   }
 
@@ -432,7 +465,9 @@ resource "f5xc_bot_infrastructure" "test" {
       type_choice = {
         %s
       }
-      ip_addresses = ["192.0.2.11"]
+      ip_address_list = {
+		ip_addresses = ["192.0.2.11/32"]
+	  }
     }
   }
 }
@@ -441,7 +476,7 @@ resource "f5xc_bot_infrastructure" "test" {
 
 func testAccResourceAutoF5XCBotInfrastructureConfig_full(name, namespace, env, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_bot_infrastructure" "test" {
+resource "f5xc_bot_infrastructure" "example" {
   name             = %q
   namespace        = %q
   description      = "bot infrastructure full"
@@ -458,10 +493,6 @@ resource "f5xc_bot_infrastructure" "test" {
   annotations = {
     owner = %q
     team  = "bot-defense"
-  }
-
-  bot_ti_package_information = {
-    name = "standard"
   }
 
   bot_endpoint_policy_metadata = {
@@ -484,19 +515,27 @@ resource "f5xc_bot_infrastructure" "test" {
       infra_host_name  = "infra.example.com"
       firmware_version = "1.0.0"
       host_names       = ["app.example.com"]
-      ip_addresses     = ["192.0.2.10"]
+			active_regions   = ["US_WEST_2"]
+			passive_regions  = ["US_EAST_1"]
+			ip_addresses     = ["192.0.2.10/32"]
     }
   }
 
 	create_bot_infra_choice = {
 		create_cloud_hosted = {
 			type_choice = {
-				production = {
-					region_1 = "US_WEST_2"
-					region_2 = "US_EAST_1"
+				production_v2 = {
+					type_choice_production_choice = {
+						active_active_region = {
+							region_1 = "US_WEST_2"
+							region_2 = "US_EAST_1"
+						}
+					}
 				}
 			}
-			ip_addresses = ["192.0.2.11"]
+			ip_address_list = {
+				ip_addresses = ["192.0.2.11/32"]
+			}
 		}
 	}
 }

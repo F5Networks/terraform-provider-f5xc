@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -27,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -296,7 +297,7 @@ var PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesModelAttrib
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DestinationChoice
+// Attribute map for OneOfField --> DestinationChoice
 var PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"all_destinations": types.BoolType,
@@ -345,7 +346,7 @@ var PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestination
 	"suffix_value": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PathChoice
+// Attribute map for OneOfField --> PathChoice
 var PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_path":          types.BoolType,
@@ -621,8 +622,8 @@ func (r *ResourceF5XCPolicyBasedRouting) Metadata(ctx context.Context, request r
 func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a policy_based_routing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policy_based_routing) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a policy_based_routing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of policy_based_routing) etc. can be fetched",
+		MarkdownDescription: "Policy based routing is used to control how different classes of traffic is forwarded and QOS is<br>applied over WAN interfaces in SDWAN scenarios.",
+		Description:         "Policy based routing is used to control how different classes of traffic is forwarded and QOS is applied over WAN interfaces in SDWAN scenarios.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -720,7 +721,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -728,7 +729,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 			},
 			"policy_choice": schema.SingleNestedAttribute{
 				Description:         "Policy Type Select policy type at networking layer (L3/L4) or Forward proxy layer(L7)",
-				MarkdownDescription: "Policy Type Select policy type at networking layer (L3/L4) or Forward proxy layer(L7)",
+				MarkdownDescription: "Policy Type Select policy type at networking layer (L3/L4) or Forward proxy layer(L7)<br>Exactly one of `forward_proxy_pbr` or `network_pbr` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -741,7 +742,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 				Attributes: map[string]schema.Attribute{
 					"forward_proxy_pbr": schema.SingleNestedAttribute{
 						Description:         "Forward Proxy PBR Forward Proxy (L7) Policy based routing policy",
-						MarkdownDescription: "Forward Proxy PBR Forward Proxy (L7) Policy based routing policy",
+						MarkdownDescription: "Forward Proxy PBR Forward Proxy (L7) Policy based routing policy<br>Conflicts with `network_pbr`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -759,21 +760,24 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 									Attributes: map[string]schema.Attribute{
 										"destination_choice": schema.SingleNestedAttribute{
 											Description:         "Destination Choice Destinations of the proxy connections",
-											MarkdownDescription: "Destination Choice Destinations of the proxy connections",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Destination Choice Destinations of the proxy connections<br>Exactly one of `all_destinations`, `http_list`, or `tls_list` must be specified when `destination_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"all_destinations",
 													"http_list",
 													"tls_list",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"all_destinations": schema.BoolAttribute{
 													Description:         "All Destinations Match on all destinations",
-													MarkdownDescription: "All Destinations Match on all destinations",
+													MarkdownDescription: "All Destinations Match on all destinations<br>Conflicts with `http_list` and `tls_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -783,7 +787,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"http_list": schema.SingleNestedAttribute{
 													Description:         "HTTP URLs URLs for HTTP connections",
-													MarkdownDescription: "HTTP URLs URLs for HTTP connections",
+													MarkdownDescription: "HTTP URLs URLs for HTTP connections<br>Conflicts with `all_destinations` and `tls_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -802,7 +806,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																Attributes: map[string]schema.Attribute{
 																	"domain_choice": schema.SingleNestedAttribute{
 																		Description:         "Select Domain Domain part of the URL",
-																		MarkdownDescription: "Select Domain Domain part of the URL",
+																		MarkdownDescription: "Select Domain Domain part of the URL<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -816,7 +820,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																		Attributes: map[string]schema.Attribute{
 																			"exact_value": schema.StringAttribute{
 																				Description:         "exact value Exact domain name",
-																				MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -830,7 +834,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																			},
 																			"regex_value": schema.StringAttribute{
 																				Description:         "regex value of Domains Regular Expression value for the domain name",
-																				MarkdownDescription: "regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -840,7 +844,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																			},
 																			"suffix_value": schema.StringAttribute{
 																				Description:         "suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'",
-																				MarkdownDescription: "suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -856,22 +860,25 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																	},
 																	"path_choice": schema.SingleNestedAttribute{
 																		Description:         "Select Path for Domain Path part of the URL",
-																		MarkdownDescription: "Select Path for Domain Path part of the URL",
-																		Required:            true,
-																		Optional:            false,
-																		Computed:            false,
+																		MarkdownDescription: "Select Path for Domain Path part of the URL<br>Exactly one of `any_path`, `path_exact_value`, `path_prefix_value`, or `path_regex_value` must be specified when `path_choice` is configured.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            true,
 																		Validators: []validator.Object{
-																			exactlyoneofvalidator.RequiredExactlyOneOf(
+																			exactlyoneofvalidator.ExactlyOneOf(
 																				"any_path",
 																				"path_exact_value",
 																				"path_prefix_value",
 																				"path_regex_value",
 																			),
 																		},
+																		PlanModifiers: []planmodifier.Object{
+																			objectplanmodifier.UseNonNullStateForUnknown(),
+																		},
 																		Attributes: map[string]schema.Attribute{
 																			"any_path": schema.BoolAttribute{
 																				Description:         "Any Path All paths are considered match",
-																				MarkdownDescription: "Any Path All paths are considered match",
+																				MarkdownDescription: "Any Path All paths are considered match<br>Conflicts with `path_exact_value`, `path_prefix_value`, and `path_regex_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -881,7 +888,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																			},
 																			"path_exact_value": schema.StringAttribute{
 																				Description:         "exact value Exact Path to match.",
-																				MarkdownDescription: "exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_prefix_value`, and `path_regex_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -895,7 +902,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																			},
 																			"path_prefix_value": schema.StringAttribute{
 																				Description:         "Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'",
-																				MarkdownDescription: "Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_regex_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -909,7 +916,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																			},
 																			"path_regex_value": schema.StringAttribute{
 																				Description:         "regex value of Paths Regular Expression value for the Path to match",
-																				MarkdownDescription: "regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_prefix_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -926,7 +933,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"tls_list": schema.SingleNestedAttribute{
 													Description:         "TLS Domains Domains in SNI for TLS connections",
-													MarkdownDescription: "TLS Domains Domains in SNI for TLS connections",
+													MarkdownDescription: "TLS Domains Domains in SNI for TLS connections<br>Conflicts with `all_destinations` and `http_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -945,7 +952,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																Attributes: map[string]schema.Attribute{
 																	"domain_choice": schema.SingleNestedAttribute{
 																		Description:         "Domain choice Method to specify domain part",
-																		MarkdownDescription: "Domain choice Method to specify domain part",
+																		MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -959,7 +966,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																		Attributes: map[string]schema.Attribute{
 																			"exact_value": schema.StringAttribute{
 																				Description:         "exact value Exact domain name.",
-																				MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -973,7 +980,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																			},
 																			"regex_value": schema.StringAttribute{
 																				Description:         "regex values of Domains Regular Expression value for the domain name",
-																				MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -983,7 +990,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																			},
 																			"suffix_value": schema.StringAttribute{
 																				Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																				MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																				MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -1036,7 +1043,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 														Optional:            false,
 														Computed:            true,
 														PlanModifiers: []planmodifier.String{
-															stringplanmodifier.UseStateForUnknown(),
+															stringplanmodifier.UseNonNullStateForUnknown(),
 														},
 													},
 												},
@@ -1077,7 +1084,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 										},
 										"source_choice": schema.SingleNestedAttribute{
 											Description:         "Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints.",
-											MarkdownDescription: "Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints.",
+											MarkdownDescription: "Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints.<br>Exactly one of `all_sources`, `ip_prefix_set`, `label_selector`, or `prefix_list` must be specified when `source_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1092,7 +1099,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 											Attributes: map[string]schema.Attribute{
 												"all_sources": schema.BoolAttribute{
 													Description:         "All Sources Any source that matches 0/0 ip prefix",
-													MarkdownDescription: "All Sources Any source that matches 0/0 ip prefix",
+													MarkdownDescription: "All Sources Any source that matches 0/0 ip prefix<br>Conflicts with `ip_prefix_set`, `label_selector`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1102,7 +1109,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "IP Prefix Set All ip prefixes that are in a given ip prefix set.",
-													MarkdownDescription: "IP Prefix Set All ip prefixes that are in a given ip prefix set.",
+													MarkdownDescription: "IP Prefix Set All ip prefixes that are in a given ip prefix set.<br>Conflicts with `all_sources`, `label_selector`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1128,14 +1135,14 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
 												},
 												"label_selector": schema.SingleNestedAttribute{
 													Description:         "Source Label selector Sources is set of prefixes determined by label selector expression",
-													MarkdownDescription: "Source Label selector Sources is set of prefixes determined by label selector expression",
+													MarkdownDescription: "Source Label selector Sources is set of prefixes determined by label selector expression<br>Conflicts with `all_sources`, `ip_prefix_set`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1156,7 +1163,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"prefix_list": schema.SingleNestedAttribute{
 													Description:         "ipv4 prefix list list of ip prefixes that are representing source of traffic seen by proxy",
-													MarkdownDescription: "ipv4 prefix list list of ip prefixes that are representing source of traffic seen by proxy",
+													MarkdownDescription: "ipv4 prefix list list of ip prefixes that are representing source of traffic seen by proxy<br>Conflicts with `all_sources`, `ip_prefix_set`, and `label_selector`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1171,7 +1178,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1204,7 +1211,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 					},
 					"network_pbr": schema.SingleNestedAttribute{
 						Description:         "Network PBR Network(L3/L4) Policy based routing policy",
-						MarkdownDescription: "Network PBR Network(L3/L4) Policy based routing policy",
+						MarkdownDescription: "Network PBR Network(L3/L4) Policy based routing policy<br>Conflicts with `forward_proxy_pbr`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1222,7 +1229,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 									Attributes: map[string]schema.Attribute{
 										"destination_choice": schema.SingleNestedAttribute{
 											Description:         "Destination Select Destination of traffic to match",
-											MarkdownDescription: "Destination Select Destination of traffic to match",
+											MarkdownDescription: "Destination Select Destination of traffic to match<br>Exactly one of `any`, `dns_name`, `ip_prefix_set`, or `prefix_list` must be specified when `destination_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1237,7 +1244,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 											Attributes: map[string]schema.Attribute{
 												"any": schema.BoolAttribute{
 													Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-													MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+													MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `dns_name`, `ip_prefix_set`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1247,7 +1254,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"dns_name": schema.StringAttribute{
 													Description:         "DNS names Resolve hostname to get the IP",
-													MarkdownDescription: "DNS names Resolve hostname to get the IP",
+													MarkdownDescription: "DNS names Resolve hostname to get the IP<br>Conflicts with `any`, `ip_prefix_set`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1260,7 +1267,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "ip prefix set Reference to object which represents List of IP prefixes that will be referred as remote endpoint",
-													MarkdownDescription: "ip prefix set Reference to object which represents List of IP prefixes that will be referred as remote endpoint",
+													MarkdownDescription: "ip prefix set Reference to object which represents List of IP prefixes that will be referred as remote endpoint<br>Conflicts with `any`, `dns_name`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1297,7 +1304,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1307,7 +1314,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"prefix_list": schema.SingleNestedAttribute{
 													Description:         "ipv4 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
-													MarkdownDescription: "ipv4 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
+													MarkdownDescription: "ipv4 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.<br>Conflicts with `any`, `dns_name`, and `ip_prefix_set`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1322,7 +1329,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1380,7 +1387,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 														Optional:            false,
 														Computed:            true,
 														PlanModifiers: []planmodifier.String{
-															stringplanmodifier.UseStateForUnknown(),
+															stringplanmodifier.UseNonNullStateForUnknown(),
 														},
 													},
 												},
@@ -1421,7 +1428,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 										},
 										"traffic_choice": schema.SingleNestedAttribute{
 											Description:         "Traffic Type Select type of traffic to match",
-											MarkdownDescription: "Traffic Type Select type of traffic to match",
+											MarkdownDescription: "Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1437,7 +1444,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 											Attributes: map[string]schema.Attribute{
 												"all_tcp_traffic": schema.BoolAttribute{
 													Description:         "All TCP Traffic Select all TCP traffic to match",
-													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match",
+													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1447,7 +1454,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"all_traffic": schema.BoolAttribute{
 													Description:         "All Traffic Select all traffic to match",
-													MarkdownDescription: "All Traffic Select all traffic to match",
+													MarkdownDescription: "All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1457,7 +1464,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"all_udp_traffic": schema.BoolAttribute{
 													Description:         "All UDP Traffic Select all UDP traffic to match",
-													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match",
+													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1467,19 +1474,18 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"applications": schema.SingleNestedAttribute{
 													Description:         "Specific Applications Select Application traffic to match",
-													MarkdownDescription: "Specific Applications Select Application traffic to match",
+													MarkdownDescription: "Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"applications": schema.ListAttribute{
 															Description:         "Applications Application protocols like HTTP, SNMP",
-															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`",
+															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("APPLICATION_HTTP")),
+															Computed:            false,
 															Validators: []validator.List{
 																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPLICATION_DNS", "APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP"}...)),
 															},
@@ -1488,7 +1494,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												},
 												"protocol_port_range": schema.SingleNestedAttribute{
 													Description:         "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1510,7 +1516,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 														},
 														"protocol": schema.StringAttribute{
 															Description:         "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`",
+															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`",
 															Required:            false,
 															Optional:            true,
 															Computed:            true,
@@ -1528,7 +1534,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 							},
 							"source_choice": schema.SingleNestedAttribute{
 								Description:         "Source Source classifier for this traffic Traffic is connection initiated by this class of sources",
-								MarkdownDescription: "Source Source classifier for this traffic Traffic is connection initiated by this class of sources",
+								MarkdownDescription: "Source Source classifier for this traffic Traffic is connection initiated by this class of sources<br>Exactly one of `any`, `label_selector`, or `prefix_list` must be specified when `source_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1542,7 +1548,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 								Attributes: map[string]schema.Attribute{
 									"any": schema.BoolAttribute{
 										Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-										MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+										MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `label_selector` and `prefix_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1552,7 +1558,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 									},
 									"label_selector": schema.SingleNestedAttribute{
 										Description:         "prefix Label selector local end point is set of prefixes determined by label selector expression",
-										MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+										MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any` and `prefix_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1573,7 +1579,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 									},
 									"prefix_list": schema.SingleNestedAttribute{
 										Description:         "ipv4 prefix list list of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
-										MarkdownDescription: "ipv4 prefix list list of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
+										MarkdownDescription: "ipv4 prefix list list of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.<br>Conflicts with `any` and `label_selector`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1588,7 +1594,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Schema(ctx context.Context, request res
 												Validators: []validator.List{
 													listvalidator.SizeAtMost(128),
 													listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-														regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+														regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 														"must be a valid IPv6 prefix",
 													)),
 													listvalidator.UniqueValues(),
@@ -1680,9 +1686,17 @@ func (r *ResourceF5XCPolicyBasedRouting) ModifyPlan(ctx context.Context, req res
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCPolicyBasedRoutingModel
 
 	// Read Terraform plan data into the model
@@ -1827,10 +1841,13 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 				for i, forwardProxyPbrRulesElement := range forwardProxyPbrRulesElements {
 					// Initialize the spec struct for the current element
 					forwardProxyPbrOneOfSpec.ForwardProxyPbr.ForwardProxyPbrRules[i] = &ves_io_schema_views_policy_based_routing.ForwardProxyPBRRuleType{}
+					forwardProxyPbrOneOfSpec.ForwardProxyPbr.ForwardProxyPbrRules[i].DestinationChoice = &ves_io_schema_views_policy_based_routing.ForwardProxyPBRRuleType_AllDestinations{
+						AllDestinations: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredOneOfField --> DestinationChoice
+					// resource modelToSpecNested OneOfField --> DestinationChoice
 					if !forwardProxyPbrRulesElement.DestinationChoice.IsNull() && !forwardProxyPbrRulesElement.DestinationChoice.IsUnknown() {
 						forwardProxyPbrRulesDestinationChoiceModel := PolicyBasedRoutingDestChoice{}
 						response.Diagnostics.Append(forwardProxyPbrRulesElement.DestinationChoice.As(ctx, &forwardProxyPbrRulesDestinationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1873,6 +1890,9 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 								for ii, httpListElement := range httpListElements {
 									// Initialize the spec struct for the current element
 									httpListOneOfSpec.HttpList.HttpList[ii] = &ves_io_schema_views_forward_proxy_policy.URLType{}
+									httpListOneOfSpec.HttpList.HttpList[ii].PathChoice = &ves_io_schema_views_forward_proxy_policy.URLType_AnyPath{
+										AnyPath: &ves_io_schema.Empty{},
+									}
 
 									// Recursively process nested elements
 
@@ -1907,7 +1927,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> PathChoice
+									// resource modelToSpecNested OneOfField --> PathChoice
 									if !httpListElement.PathChoice.IsNull() && !httpListElement.PathChoice.IsUnknown() {
 										httpListPathChoiceModel := PolicyBasedRoutingPathChoice{}
 										response.Diagnostics.Append(httpListElement.PathChoice.As(ctx, &httpListPathChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2570,7 +2590,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2593,7 +2613,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "policy_based_routing", err),
 		)
 		return
 	}
@@ -2789,8 +2809,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 					for _, forwardProxyPbrRulesElement := range forwardProxyPbrElement.GetForwardProxyPbrRules() {
 						policyBasedRoutingForwardProxyPBRRuleTypeModel := PolicyBasedRoutingForwardProxyPBRRuleType{}
 
-						// resource specToModelNested RequiredOneOfField --> DestinationChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DestinationChoice
 						if forwardProxyPbrRulesElement.GetDestinationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							forwardProxyPbrRulesdestinationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2887,8 +2906,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Create(ctx context.Context, request res
 												policyBasedRoutingURLTypeModel.DomainChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap)
 											}
 
-											// resource specToModelNested RequiredOneOfField --> PathChoice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> PathChoice
 											if httpListElement.GetPathChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												httpListpathChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4033,14 +4051,10 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "policy_based_routing", err),
 		)
 		return
 	}
@@ -4236,8 +4250,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 					for _, forwardProxyPbrRulesElement := range forwardProxyPbrElement.GetForwardProxyPbrRules() {
 						policyBasedRoutingForwardProxyPBRRuleTypeModel := PolicyBasedRoutingForwardProxyPBRRuleType{}
 
-						// resource specToModelNested RequiredOneOfField --> DestinationChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> DestinationChoice
 						if forwardProxyPbrRulesElement.GetDestinationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							forwardProxyPbrRulesdestinationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4334,8 +4347,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 												policyBasedRoutingURLTypeModel.DomainChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap)
 											}
 
-											// resource specToModelNested RequiredOneOfField --> PathChoice
-											// <no value>
+											// resource specToModelNested OneOfField --> PathChoice
 											if httpListElement.GetPathChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												httpListpathChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4400,7 +4412,12 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 												policyBasedRoutingURLTypeModel.PathChoice = finalObj
 											} else {
 												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												policyBasedRoutingURLTypeModel.PathChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap)
+												policyBasedRoutingURLTypeModel.PathChoice = types.ObjectValueMust(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListPathChoiceModelAttributeMap, map[string]attr.Value{
+													"any_path":          types.BoolValue(true),
+													"path_exact_value":  types.StringNull(),
+													"path_prefix_value": types.StringNull(),
+													"path_regex_value":  types.StringNull(),
+												})
 											}
 
 											httpListElements = append(httpListElements, policyBasedRoutingURLTypeModel)
@@ -4555,7 +4572,11 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceModelAttributeMap)
+							policyBasedRoutingForwardProxyPBRRuleTypeModel.DestinationChoice = types.ObjectValueMust(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceModelAttributeMap, map[string]attr.Value{
+								"all_destinations": types.BoolValue(true),
+								"http_list":        types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListModelAttributeMap),
+								"tls_list":         types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceTlsListModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested RequiredArrayOfPointerField --> ForwardingClassList
@@ -5446,6 +5467,12 @@ func (r *ResourceF5XCPolicyBasedRouting) Read(ctx context.Context, request resou
 }
 
 func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCPolicyBasedRoutingModel
@@ -5610,10 +5637,13 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 				for i, forwardProxyPbrRulesElement := range forwardProxyPbrRulesElements {
 					// Initialize the spec struct for the current element
 					forwardProxyPbrOneOfSpec.ForwardProxyPbr.ForwardProxyPbrRules[i] = &ves_io_schema_views_policy_based_routing.ForwardProxyPBRRuleType{}
+					forwardProxyPbrOneOfSpec.ForwardProxyPbr.ForwardProxyPbrRules[i].DestinationChoice = &ves_io_schema_views_policy_based_routing.ForwardProxyPBRRuleType_AllDestinations{
+						AllDestinations: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredOneOfField --> DestinationChoice
+					// resource modelToSpecNested OneOfField --> DestinationChoice
 					if !forwardProxyPbrRulesElement.DestinationChoice.IsNull() && !forwardProxyPbrRulesElement.DestinationChoice.IsUnknown() {
 						forwardProxyPbrRulesDestinationChoiceModel := PolicyBasedRoutingDestChoice{}
 						response.Diagnostics.Append(forwardProxyPbrRulesElement.DestinationChoice.As(ctx, &forwardProxyPbrRulesDestinationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5656,6 +5686,9 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 								for ii, httpListElement := range httpListElements {
 									// Initialize the spec struct for the current element
 									httpListOneOfSpec.HttpList.HttpList[ii] = &ves_io_schema_views_forward_proxy_policy.URLType{}
+									httpListOneOfSpec.HttpList.HttpList[ii].PathChoice = &ves_io_schema_views_forward_proxy_policy.URLType_AnyPath{
+										AnyPath: &ves_io_schema.Empty{},
+									}
 
 									// Recursively process nested elements
 
@@ -5690,7 +5723,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> PathChoice
+									// resource modelToSpecNested OneOfField --> PathChoice
 									if !httpListElement.PathChoice.IsNull() && !httpListElement.PathChoice.IsUnknown() {
 										httpListPathChoiceModel := PolicyBasedRoutingPathChoice{}
 										response.Diagnostics.Append(httpListElement.PathChoice.As(ctx, &httpListPathChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6353,7 +6386,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6361,24 +6394,20 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "policy_based_routing", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_policy_based_routing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "policy_based_routing", err),
 		)
 		return
 	}
@@ -6573,8 +6602,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 					for _, forwardProxyPbrRulesElement := range forwardProxyPbrElement.GetForwardProxyPbrRules() {
 						policyBasedRoutingForwardProxyPBRRuleTypeModel := PolicyBasedRoutingForwardProxyPBRRuleType{}
 
-						// resource specToModelNested RequiredOneOfField --> DestinationChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DestinationChoice
 						if forwardProxyPbrRulesElement.GetDestinationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							forwardProxyPbrRulesdestinationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6671,8 +6699,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Update(ctx context.Context, request res
 												policyBasedRoutingURLTypeModel.DomainChoice = types.ObjectNull(PolicyBasedRoutingPolicyChoiceForwardProxyPbrForwardProxyPbrRulesDestinationChoiceHttpListHttpListDomainChoiceModelAttributeMap)
 											}
 
-											// resource specToModelNested RequiredOneOfField --> PathChoice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> PathChoice
 											if httpListElement.GetPathChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												httpListpathChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7846,7 +7873,7 @@ func (r *ResourceF5XCPolicyBasedRouting) Delete(ctx context.Context, request res
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "policy_based_routing", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "policy_based_routing", err),
 		)
 		return
 	}

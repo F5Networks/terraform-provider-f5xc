@@ -29,9 +29,9 @@ func TestAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfo_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckGcpVpcSiteSetCloudSiteInfoDestroyProducer(t),
@@ -43,14 +43,18 @@ func TestAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfo_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfoConfig_withPublicPrivateTransition(name, namespace, "35.20.20.20", "10.20.20.20"),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfoConfig_basic(name, namespace),
+		})
 }
 
 func TestAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfo_withMultipleIPs(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -71,7 +75,7 @@ func TestAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfo_withPublicIPTransition(t 
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -92,7 +96,7 @@ func TestAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfo_withPrivateIPTransition(t
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -113,7 +117,7 @@ func TestAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfo_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
+	name := "example-gcp-vpc-cloud-info-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -167,7 +171,7 @@ resource "f5xc_gcp_vpc_site" "site" {
 
 	deployment_choice = {
 		cloud_credentials = {
-			name      = "tf-acc-gcp-cred"
+			name      = "example-gcp-cred"
 			namespace = %q
 		}
 	}
@@ -198,7 +202,7 @@ func testAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfoConfig_basic(name, namespa
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_gcp_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_gcp_vpc_site_set_cloud_site_info" "example" {
 	name      = f5xc_gcp_vpc_site.site.name
   namespace = %q
 
@@ -214,7 +218,7 @@ func testAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfoConfig_withPublicPrivateTr
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_gcp_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_gcp_vpc_site_set_cloud_site_info" "example" {
 	name      = f5xc_gcp_vpc_site.site.name
   namespace = %q
 
@@ -230,7 +234,7 @@ func testAccResourceAutoF5XCGcpVpcSiteSetCloudSiteInfoConfig_withMultipleIPs(nam
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_gcp_vpc_site_set_cloud_site_info" "test" {
+resource "f5xc_gcp_vpc_site_set_cloud_site_info" "example" {
 	name      = f5xc_gcp_vpc_site.site.name
   namespace = %q
 

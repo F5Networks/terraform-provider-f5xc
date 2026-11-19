@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_cdn_loadbalancer.example"
+	to = f5xc_cdn_loadbalancer.example
 }

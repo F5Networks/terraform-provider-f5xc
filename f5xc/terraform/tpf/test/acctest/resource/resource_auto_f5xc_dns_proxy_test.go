@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCDnsProxy_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-dnsproxy-" + acctest.RandString(t, 8)
+	name := "example-dns-proxy-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,121 @@ func TestAccResourceAutoF5XCDnsProxy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsProxyConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_proxy.test",
+				ResourceName:                         "f5xc_dns_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsProxyConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_proxy.test",
+				ResourceName:                         "f5xc_dns_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCDnsProxy_withTransportTypeTransition(t *testing.T) {
+	t.Parallel()
+
+	name := "example-dns-proxy-" + acctest.RandString(t, 8)
+	namespace := acctest.DefaultNamespace()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: testAccResourceAutoF5XCDnsProxyConfig_withTransportType(name, namespace, "TCP")},
+			{
+				ResourceName:                         "f5xc_dns_proxy.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{Config: testAccResourceAutoF5XCDnsProxyConfig_withTransportType(name, namespace, "UDP")},
+			{
+				ResourceName:                         "f5xc_dns_proxy.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{Config: testAccResourceAutoF5XCDnsProxyConfig_withTransportType(name, namespace, "BothTCPAndUDP")},
+			{
+				ResourceName:                         "f5xc_dns_proxy.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCDnsProxy_withCacheProfileTransition(t *testing.T) {
+	t.Parallel()
+
+	name := "example-dns-proxy-" + acctest.RandString(t, 8)
+	namespace := acctest.DefaultNamespace()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: testAccResourceAutoF5XCDnsProxyConfig_withDisableCacheProfile(name, namespace)},
+			{
+				ResourceName:                         "f5xc_dns_proxy.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{Config: testAccResourceAutoF5XCDnsProxyConfig_withCacheSize(name, namespace, 256)},
+			{
+				ResourceName:                         "f5xc_dns_proxy.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCDnsProxy_withDdosProfileTransition(t *testing.T) {
+	t.Parallel()
+
+	name := "example-dns-proxy-" + acctest.RandString(t, 8)
+	namespace := acctest.DefaultNamespace()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsProxyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: testAccResourceAutoF5XCDnsProxyConfig_withDisableDdosMitigation(name, namespace)},
+			{
+				ResourceName:                         "f5xc_dns_proxy.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+			{Config: testAccResourceAutoF5XCDnsProxyConfig_withEnableDdosMitigation(name, namespace)},
+			{
+				ResourceName:                         "f5xc_dns_proxy.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,10 +163,10 @@ func TestAccResourceAutoF5XCDnsProxy_basic(t *testing.T) {
 func TestAccResourceAutoF5XCDnsProxy_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-dnsproxy-" + acctest.RandString(t, 8)
+	name := "example-dns-proxy-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsProxyDestroyProducer(t),
@@ -74,23 +175,26 @@ func TestAccResourceAutoF5XCDnsProxy_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsProxyConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_proxy.test",
+				ResourceName:                         "f5xc_dns_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsProxyConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_proxy.test",
+				ResourceName:                         "f5xc_dns_proxy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_proxy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsProxyConfig_full(name, "default"),
 	})
 }
 
@@ -100,7 +204,7 @@ func testAccCheckDnsProxyDestroyProducer(t *testing.T) func(*terraform.State) er
 
 func testAccResourceAutoF5XCDnsProxyConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_proxy" "test" {
+resource "f5xc_dns_proxy" "example" {
 	name      = "%s"
 	namespace = "%s"
 
@@ -136,14 +240,14 @@ resource "f5xc_dns_proxy" "test" {
 		}]
 	}
 
-  description = "Acceptance test DNS proxy"
+  description = "DNS proxy example"
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCDnsProxyConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_proxy" "test" {
+resource "f5xc_dns_proxy" "example" {
 	name      = "%s"
 	namespace = "%s"
 
@@ -179,14 +283,229 @@ resource "f5xc_dns_proxy" "test" {
 		}]
 	}
 
-  description = "Acceptance test DNS proxy updated"
+  description = "DNS proxy example updated"
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCDnsProxyConfig_withTransportType(name, namespace, transportType string) string {
+	return fmt.Sprintf(`
+resource "f5xc_dns_proxy" "example" {
+	name      = "%s"
+	namespace = "%s"
+
+	transport_type = [%q]
+
+	cache_profile = {
+		cache_profile_choice = {
+			disable_cache_profile = true
+		}
+	}
+
+	ddos_profile = {
+		ddos_mitigation_choice = {
+			disable_ddos_mitigation = true
+		}
+	}
+
+	origin_servers = {
+		health_checks = {
+			health_check = [{
+				choice = {
+					icmp_health_check = true
+				}
+			}]
+		}
+
+		origin_servers = [{
+			choice = {
+				public_name = {
+					dns_name = "example.com"
+				}
+			}
+		}]
+	}
+
+  description = "DNS proxy example"
+}
+`, name, namespace, transportType)
+}
+
+func testAccResourceAutoF5XCDnsProxyConfig_withDisableCacheProfile(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_dns_proxy" "example" {
+	name      = "%s"
+	namespace = "%s"
+
+	transport_type = ["TCP"]
+
+	cache_profile = {
+		cache_profile_choice = {
+			disable_cache_profile = true
+		}
+	}
+
+	ddos_profile = {
+		ddos_mitigation_choice = {
+			disable_ddos_mitigation = true
+		}
+	}
+
+	origin_servers = {
+		health_checks = {
+			health_check = [{
+				choice = {
+					icmp_health_check = true
+				}
+			}]
+		}
+
+		origin_servers = [{
+			choice = {
+				public_name = {
+					dns_name = "example.com"
+				}
+			}
+		}]
+	}
+
+  description = "DNS proxy example"
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCDnsProxyConfig_withCacheSize(name, namespace string, cacheSize int) string {
+	return fmt.Sprintf(`
+resource "f5xc_dns_proxy" "example" {
+	name      = "%s"
+	namespace = "%s"
+
+	transport_type = ["TCP"]
+
+	cache_profile = {
+		cache_profile_choice = {
+			cache_size = %d
+		}
+	}
+
+	ddos_profile = {
+		ddos_mitigation_choice = {
+			disable_ddos_mitigation = true
+		}
+	}
+
+	origin_servers = {
+		health_checks = {
+			health_check = [{
+				choice = {
+					icmp_health_check = true
+				}
+			}]
+		}
+
+		origin_servers = [{
+			choice = {
+				public_name = {
+					dns_name = "example.com"
+				}
+			}
+		}]
+	}
+
+  description = "DNS proxy example with cache profile"
+}
+`, name, namespace, cacheSize)
+}
+
+func testAccResourceAutoF5XCDnsProxyConfig_withDisableDdosMitigation(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_dns_proxy" "example" {
+	name      = "%s"
+	namespace = "%s"
+
+	transport_type = ["TCP"]
+
+	cache_profile = {
+		cache_profile_choice = {
+			disable_cache_profile = true
+		}
+	}
+
+	ddos_profile = {
+		ddos_mitigation_choice = {
+			disable_ddos_mitigation = true
+		}
+	}
+
+	origin_servers = {
+		health_checks = {
+			health_check = [{
+				choice = {
+					icmp_health_check = true
+				}
+			}]
+		}
+
+		origin_servers = [{
+			choice = {
+				public_name = {
+					dns_name = "example.com"
+				}
+			}
+		}]
+	}
+
+  description = "DNS proxy example"
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCDnsProxyConfig_withEnableDdosMitigation(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_dns_proxy" "example" {
+	name      = "%s"
+	namespace = "%s"
+
+	transport_type = ["TCP"]
+
+	cache_profile = {
+		cache_profile_choice = {
+			disable_cache_profile = true
+		}
+	}
+
+	ddos_profile = {
+		ddos_mitigation_choice = {
+			enable_ddos_mitigation = true
+		}
+	}
+
+	origin_servers = {
+		health_checks = {
+			health_check = [{
+				choice = {
+					icmp_health_check = true
+				}
+			}]
+		}
+
+		origin_servers = [{
+			choice = {
+				public_name = {
+					dns_name = "example.com"
+				}
+			}
+		}]
+	}
+
+  description = "DNS proxy example with DDoS mitigation"
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCDnsProxyConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_proxy" "test" {
+resource "f5xc_dns_proxy" "example" {
 	name      = "%s"
 	namespace = "%s"
 
@@ -222,10 +541,10 @@ resource "f5xc_dns_proxy" "test" {
 		}]
 	}
 
-  description = "Full DNS proxy"
+  description = "DNS proxy full example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -237,7 +556,7 @@ resource "f5xc_dns_proxy" "test" {
 
 func testAccResourceAutoF5XCDnsProxyConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_proxy" "test" {
+resource "f5xc_dns_proxy" "example" {
 	name      = "%s"
 	namespace = "%s"
 
@@ -273,10 +592,10 @@ resource "f5xc_dns_proxy" "test" {
 		}]
 	}
 
-  description = "Full DNS proxy updated"
+  description = "DNS proxy full example updated"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "network"
   }
 

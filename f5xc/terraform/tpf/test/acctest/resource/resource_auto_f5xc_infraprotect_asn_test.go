@@ -61,7 +61,7 @@ func TestAccResourceAutoF5XCInfraprotectAsn_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-iasn-" + testAccRunSuffix(t)
+	name := "example-iasn-" + testAccRunSuffix(t)
 	asn := testAccInfraprotectAsnForName(name, 0)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -72,18 +72,18 @@ func TestAccResourceAutoF5XCInfraprotectAsn_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_basic(name, namespace, asn)},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withDescription(name, namespace, asn, "infraprotect asn updated")},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withDescription(name, namespace, asn, "Updated infraprotect ASN example")},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -94,7 +94,7 @@ func TestAccResourceAutoF5XCInfraprotectAsn_withBgpSessionDisabled(t *testing.T)
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-iasn-" + testAccRunSuffix(t)
+	name := "example-iasn-" + testAccRunSuffix(t)
 	asn := testAccInfraprotectAsnForName(name, 1)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -105,18 +105,18 @@ func TestAccResourceAutoF5XCInfraprotectAsn_withBgpSessionDisabled(t *testing.T)
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withBgpSession(name, namespace, asn, "bgp_session_disabled")},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withBgpSessionAndDescription(name, namespace, asn, "bgp_session_disabled", "downstream ASN")},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withBgpSessionAndDescription(name, namespace, asn, "bgp_session_disabled", "Downstream ASN example")},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -127,7 +127,7 @@ func TestAccResourceAutoF5XCInfraprotectAsn_withLabels(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-iasn-" + testAccRunSuffix(t)
+	name := "example-iasn-" + testAccRunSuffix(t)
 	asn := testAccInfraprotectAsnForName(name, 2)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -136,20 +136,20 @@ func TestAccResourceAutoF5XCInfraprotectAsn_withLabels(t *testing.T) {
 		CheckDestroy:             testAccCheckInfraprotectAsnDestroyProducer(t),
 		ErrorCheck:               testAccSkipKnownInfraprotectASNCreateError(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withLabels(name, namespace, asn, map[string]string{"env": "test"})},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withLabels(name, namespace, asn, map[string]string{"env": "example"})},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withLabels(name, namespace, asn, map[string]string{"env": "prod", "tier": "shared"})},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withLabels(name, namespace, asn, map[string]string{"env": "example", "tier": "shared"})},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -160,7 +160,7 @@ func TestAccResourceAutoF5XCInfraprotectAsn_withAnnotations(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-iasn-" + testAccRunSuffix(t)
+	name := "example-iasn-" + testAccRunSuffix(t)
 	asn := testAccInfraprotectAsnForName(name, 3)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -169,20 +169,20 @@ func TestAccResourceAutoF5XCInfraprotectAsn_withAnnotations(t *testing.T) {
 		CheckDestroy:             testAccCheckInfraprotectAsnDestroyProducer(t),
 		ErrorCheck:               testAccSkipKnownInfraprotectASNCreateError(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withAnnotations(name, namespace, asn, map[string]string{"owner": "platform"})},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withAnnotations(name, namespace, asn, map[string]string{"owner": "platform-team"})},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withAnnotations(name, namespace, asn, map[string]string{"owner": "security", "team": "netsec"})},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_withAnnotations(name, namespace, asn, map[string]string{"owner": "netsec-team", "team": "netsec"})},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -193,33 +193,38 @@ func TestAccResourceAutoF5XCInfraprotectAsn_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-iasn-" + testAccRunSuffix(t)
+	name := "example-iasn-" + testAccRunSuffix(t)
 	asn := testAccInfraprotectAsnForName(name, 4)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckInfraprotectAsnDestroyProducer(t),
 		ErrorCheck:               testAccSkipKnownInfraprotectASNCreateError(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_full(name, namespace, asn, "infraprotect asn full", map[string]string{"env": "test"}, map[string]string{"owner": "platform"})},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_full(name, namespace, asn, "Full infraprotect ASN example", map[string]string{"env": "example"}, map[string]string{"owner": "platform-team"})},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_full(name, namespace, asn, "infraprotect asn full updated", map[string]string{"env": "prod", "tier": "shared"}, map[string]string{"owner": "security"})},
+			{Config: testAccResourceAutoF5XCInfraprotectAsnConfig_full(name, namespace, asn, "Updated full infraprotect ASN example", map[string]string{"env": "example", "tier": "shared"}, map[string]string{"owner": "netsec-team"})},
 			{
-				ResourceName:                         "f5xc_infraprotect_asn.test",
+				ResourceName:                         "f5xc_infraprotect_asn.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_infraprotect_asn.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig: testAccResourceAutoF5XCInfraprotectAsnConfig_full("example-iasn", namespace, testAccInfraprotectAsnForName("example-iasn", 4),
+				"Full infraprotect ASN example", map[string]string{"env": "example"}, map[string]string{"owner": "platform-team"}),
+		})
 }
 
 func testAccCheckInfraprotectAsnDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -239,7 +244,7 @@ func testAccResourceAutoF5XCInfraprotectAsnConfig_basic(name, namespace string, 
 
 func testAccResourceAutoF5XCInfraprotectAsnConfig_withBgpSession(name, namespace string, asn int, bgpField string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_asn" "test" {
+resource "f5xc_infraprotect_asn" "example" {
   name      = %q
   namespace = %q
   asn       = %d
@@ -253,7 +258,7 @@ resource "f5xc_infraprotect_asn" "test" {
 
 func testAccResourceAutoF5XCInfraprotectAsnConfig_withDescription(name, namespace string, asn int, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_asn" "test" {
+resource "f5xc_infraprotect_asn" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -268,7 +273,7 @@ resource "f5xc_infraprotect_asn" "test" {
 
 func testAccResourceAutoF5XCInfraprotectAsnConfig_withBgpSessionAndDescription(name, namespace string, asn int, bgpField, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_asn" "test" {
+resource "f5xc_infraprotect_asn" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -283,7 +288,7 @@ resource "f5xc_infraprotect_asn" "test" {
 
 func testAccResourceAutoF5XCInfraprotectAsnConfig_withLabels(name, namespace string, asn int, labels map[string]string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_asn" "test" {
+resource "f5xc_infraprotect_asn" "example" {
   name      = %q
   namespace = %q
   asn       = %d
@@ -299,7 +304,7 @@ resource "f5xc_infraprotect_asn" "test" {
 
 func testAccResourceAutoF5XCInfraprotectAsnConfig_withAnnotations(name, namespace string, asn int, annotations map[string]string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_asn" "test" {
+resource "f5xc_infraprotect_asn" "example" {
   name      = %q
   namespace = %q
   asn       = %d
@@ -315,7 +320,7 @@ resource "f5xc_infraprotect_asn" "test" {
 
 func testAccResourceAutoF5XCInfraprotectAsnConfig_full(name, namespace string, asn int, description string, labels, annotations map[string]string) string {
 	return fmt.Sprintf(`
-resource "f5xc_infraprotect_asn" "test" {
+resource "f5xc_infraprotect_asn" "example" {
   name        = %q
   namespace   = %q
   description = %q

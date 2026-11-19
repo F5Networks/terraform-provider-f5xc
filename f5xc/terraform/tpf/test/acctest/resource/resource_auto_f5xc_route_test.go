@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCRoute_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-route-" + testAccRunSuffix(t)
+	name := "example-route-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,22 +39,50 @@ func TestAccResourceAutoF5XCRoute_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCRouteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCRouteConfig_withDescription(name, namespace, "route basic updated"),
+				Config: testAccResourceAutoF5XCRouteConfig_withDescription(name, namespace, "Updated basic route example"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCRoute_stateHealingHeaderCookieSecrets(t *testing.T) {
+	t.Parallel()
+
+	name := "example-route-secret-" + testAccRunSuffix(t)
+	namespace := acctest.DefaultNamespace()
+	secretURL := "string:///dGVzdC1zZWNyZXQ="
+	config := testAccResourceAutoF5XCRouteConfigWithHeaderCookieSecrets(name, namespace, secretURL)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckRouteDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: config},
+			{
+				RefreshState: true,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_route.example", "routes.0.request_cookies_to_add.0.value_choice.secret_value.secret_info_choice.clear_secret_info.url", secretURL),
+					resource.TestCheckResourceAttr("f5xc_route.example", "routes.0.request_headers_to_add.0.value_choice.secret_value.secret_info_choice.clear_secret_info.url", secretURL),
+					resource.TestCheckResourceAttr("f5xc_route.example", "routes.0.response_cookies_to_add.0.value_choice.secret_value.secret_info_choice.clear_secret_info.url", secretURL),
+					resource.TestCheckResourceAttr("f5xc_route.example", "routes.0.response_headers_to_add.0.value_choice.secret_value.secret_info_choice.clear_secret_info.url", secretURL),
+				),
+			},
+			{Config: config, PlanOnly: true, ExpectNonEmptyPlan: false},
 		},
 	})
 }
@@ -63,7 +91,7 @@ func TestAccResourceAutoF5XCRoute_withProtoRedirectTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-route-" + testAccRunSuffix(t)
+	name := "example-route-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +102,20 @@ func TestAccResourceAutoF5XCRoute_withProtoRedirectTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCRouteConfig_withProtoRedirect(name, namespace, "http"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRouteConfig_withProtoRedirect(name, namespace, "https"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +126,7 @@ func TestAccResourceAutoF5XCRoute_withHttpMethodTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-route-" + testAccRunSuffix(t)
+	name := "example-route-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +137,20 @@ func TestAccResourceAutoF5XCRoute_withHttpMethodTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCRouteConfig_withHttpMethod(name, namespace, "GET"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRouteConfig_withHttpMethod(name, namespace, "POST"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +161,7 @@ func TestAccResourceAutoF5XCRoute_withPathMatchChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-route-" + testAccRunSuffix(t)
+	name := "example-route-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +172,20 @@ func TestAccResourceAutoF5XCRoute_withPathMatchChoiceTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCRouteConfig_withPathPrefix(name, namespace, "/api"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRouteConfig_withPathRegex(name, namespace, ".*"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +196,7 @@ func TestAccResourceAutoF5XCRoute_withRouteActionChoiceTransition(t *testing.T) 
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-route-" + testAccRunSuffix(t)
+	name := "example-route-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +207,20 @@ func TestAccResourceAutoF5XCRoute_withRouteActionChoiceTransition(t *testing.T) 
 				Config: testAccResourceAutoF5XCRouteConfig_withProtoRedirect(name, namespace, "https"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRouteConfig_withDirectResponse(name, namespace, 200),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,35 +231,39 @@ func TestAccResourceAutoF5XCRoute_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-route-" + testAccRunSuffix(t)
+	name := "example-route-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCRouteConfig_full(name, namespace, "test", "platform", "owner-a", "GET", "https"),
+				Config: testAccResourceAutoF5XCRouteConfig_full(name, namespace, "example", "platform", "example-owner", "GET", "https"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCRouteConfig_full(name, namespace, "prod", "security", "owner-b", "POST", "http"),
+				Config: testAccResourceAutoF5XCRouteConfig_full(name, namespace, "example", "security", "example-owner-alt", "POST", "http"),
 			},
 			{
-				ResourceName:                         "f5xc_route.test",
+				ResourceName:                         "f5xc_route.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_route.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCRouteConfig_full("example-route", "default", "example", "platform", "example-owner", "GET", "https"),
+		})
 }
 
 func testAccCheckRouteDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -240,7 +272,7 @@ func testAccCheckRouteDestroyProducer(t *testing.T) func(*terraform.State) error
 
 func testAccResourceAutoF5XCRouteConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name      = %q
   namespace = %q
 
@@ -258,7 +290,7 @@ resource "f5xc_route" "test" {
       ]
       route_action_choice = {
         route_redirect = {
-          response_code = 301
+          response_code  = 301
           proto_redirect = "https"
           redirect_path_choice = {
             path_redirect = "/new"
@@ -274,9 +306,32 @@ resource "f5xc_route" "test" {
 `, name, namespace)
 }
 
+func testAccResourceAutoF5XCRouteConfigWithHeaderCookieSecrets(name, namespace, secretURL string) string {
+	return fmt.Sprintf(`
+resource "f5xc_route" "example" {
+	name      = %q
+	namespace = %q
+	routes = [{
+		match = [{ path = { path_match_choice = { prefix = "/" } }, http_method = ["GET"] }]
+		route_action_choice = {
+			route_redirect = {
+				response_code = 301
+				proto_redirect = "https"
+				redirect_path_choice = { path_redirect = "/new" }
+			}
+		}
+		request_cookies_to_add = [{ name = "state-req-cookie", value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+		request_headers_to_add = [{ name = "x-state-request", append = false, value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+		response_cookies_to_add = [{ name = "state-resp-cookie", value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+		response_headers_to_add = [{ name = "x-state-response", append = false, value_choice = { secret_value = { secret_info_choice = { clear_secret_info = { url = %q } } } } }]
+	}]
+}
+`, name, namespace, secretURL, secretURL, secretURL, secretURL)
+}
+
 func testAccResourceAutoF5XCRouteConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -285,7 +340,7 @@ resource "f5xc_route" "test" {
     {
       route_action_choice = {
         route_redirect = {
-          response_code = 301
+          response_code  = 301
           proto_redirect = "https"
           redirect_path_choice = {
             path_redirect = "/new"
@@ -300,7 +355,7 @@ resource "f5xc_route" "test" {
 
 func testAccResourceAutoF5XCRouteConfig_withProtoRedirect(name, namespace, protoRedirect string) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name      = %q
   namespace = %q
 
@@ -308,7 +363,7 @@ resource "f5xc_route" "test" {
     {
       route_action_choice = {
         route_redirect = {
-          response_code = 301
+          response_code  = 301
           proto_redirect = %q
           redirect_path_choice = {
             path_redirect = "/moved"
@@ -323,7 +378,7 @@ resource "f5xc_route" "test" {
 
 func testAccResourceAutoF5XCRouteConfig_withHttpMethod(name, namespace, method string) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name      = %q
   namespace = %q
 
@@ -341,7 +396,7 @@ resource "f5xc_route" "test" {
       ]
       route_action_choice = {
         route_redirect = {
-          response_code = 302
+          response_code  = 302
           proto_redirect = "https"
           redirect_path_choice = {
             path_redirect = "/new-api"
@@ -356,7 +411,7 @@ resource "f5xc_route" "test" {
 
 func testAccResourceAutoF5XCRouteConfig_withPathPrefix(name, namespace, prefix string) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name      = %q
   namespace = %q
 
@@ -373,7 +428,7 @@ resource "f5xc_route" "test" {
       ]
       route_action_choice = {
         route_redirect = {
-          response_code = 301
+          response_code  = 301
           proto_redirect = "https"
         }
       }
@@ -385,7 +440,7 @@ resource "f5xc_route" "test" {
 
 func testAccResourceAutoF5XCRouteConfig_withPathRegex(name, namespace, regex string) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name      = %q
   namespace = %q
 
@@ -402,7 +457,7 @@ resource "f5xc_route" "test" {
       ]
       route_action_choice = {
         route_redirect = {
-          response_code = 301
+          response_code  = 301
           proto_redirect = "https"
         }
       }
@@ -414,7 +469,7 @@ resource "f5xc_route" "test" {
 
 func testAccResourceAutoF5XCRouteConfig_withDirectResponse(name, namespace string, code int64) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name      = %q
   namespace = %q
 
@@ -422,7 +477,7 @@ resource "f5xc_route" "test" {
     {
       route_action_choice = {
         route_direct_response = {
-          response_code = %d
+          response_code         = %d
           response_body_encoded = "string:///SGVsbG8="
         }
       }
@@ -434,10 +489,10 @@ resource "f5xc_route" "test" {
 
 func testAccResourceAutoF5XCRouteConfig_full(name, namespace, env, team, owner, method, protoRedirect string) string {
 	return fmt.Sprintf(`
-resource "f5xc_route" "test" {
+resource "f5xc_route" "example" {
   name        = %q
   namespace   = %q
-  description = "route full"
+  description = "Full route example"
 
   labels = {
     env  = %q
@@ -461,7 +516,7 @@ resource "f5xc_route" "test" {
             {
               name = "x-env"
               value_match_choice = {
-                exact = "test"
+                exact = "example"
               }
             }
           ]
@@ -470,7 +525,7 @@ resource "f5xc_route" "test" {
       ]
       route_action_choice = {
         route_redirect = {
-          response_code = 302
+          response_code  = 302
           proto_redirect = %q
           redirect_path_choice = {
             prefix_rewrite = "/v2"

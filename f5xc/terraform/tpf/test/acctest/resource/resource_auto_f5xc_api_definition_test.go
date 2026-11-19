@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCApiDefinition_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-api-definition-" + acctest.RandString(t, 8)
+	name := "example-api-def-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCApiDefinition_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withStrategy(name, namespace, "mixed_schema_origin"),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCApiDefinition_withSwaggerSpecs(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-api-definition-" + acctest.RandString(t, 8)
+	name := "example-api-def-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCApiDefinition_withSwaggerSpecs(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withInlineSwaggerSpecs(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withInlineSwaggerSpecs(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,9 +98,9 @@ func TestAccResourceAutoF5XCApiDefinition_withInclusionList(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-api-definition-" + acctest.RandString(t, 8)
+	name := "example-api-def-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiDefinitionDestroyProducer(t),
@@ -109,33 +109,37 @@ func TestAccResourceAutoF5XCApiDefinition_withInclusionList(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withInclusionList(name, namespace, "GET", "/v1/orders/{order_id}"),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withInclusionList(name, namespace, "POST", "/v1/orders"),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiDefinitionConfig_withInclusionList("example-api-definition", "shared", "GET", "/v1/orders/{order_id}"),
+		})
 }
 
 func TestAccResourceAutoF5XCApiDefinition_withExclusionList(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-api-definition-" + acctest.RandString(t, 8)
+	name := "example-api-def-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiDefinitionDestroyProducer(t),
@@ -144,31 +148,35 @@ func TestAccResourceAutoF5XCApiDefinition_withExclusionList(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withExclusionListAndSpecs(name, namespace, "GET", "/2.0/repositories/{username}"),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withExclusionListAndSpecs(name, namespace, "POST", "/2.0/repositories/{username}/{slug}/pullrequests/{pid}/merge"),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiDefinitionConfig_withExclusionListAndSpecs("example-api-definition", "shared", "GET", "/2.0/repositories/{username}"),
+		})
 }
 
 func TestAccResourceAutoF5XCApiDefinition_withNonAPIEndpoints(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-api-definition-" + acctest.RandString(t, 8)
+	name := "example-api-def-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +187,20 @@ func TestAccResourceAutoF5XCApiDefinition_withNonAPIEndpoints(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withNonAPIEndpoints(name, namespace, "HEAD", "/status"),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_withNonAPIEndpoints(name, namespace, "OPTIONS", "/assets/app.js"),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,7 +211,7 @@ func TestAccResourceAutoF5XCApiDefinition_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "shared"
-	name := "tf-acc-api-definition-" + acctest.RandString(t, 8)
+	name := "example-api-def-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -214,20 +222,20 @@ func TestAccResourceAutoF5XCApiDefinition_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_fullWithInlineSpecs(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCApiDefinitionConfig_fullWithInlineSpecs(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_definition.test",
+				ResourceName:                         "f5xc_api_definition.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_definition.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -307,10 +315,10 @@ func testAccResourceAutoF5XCApiDefinitionConfig_full(name, namespace string) str
     }
   ]
 `
-	metadata := `  description = "API definition full"
+	metadata := `  description = "API definition example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -343,7 +351,7 @@ func testAccResourceAutoF5XCApiDefinitionConfig_fullUpdated(name, namespace stri
     }
   ]
 `
-	metadata := `  description = "API definition full updated"
+	metadata := `  description = "API definition example updated"
 
   labels = {
     env = "stage"
@@ -367,7 +375,7 @@ resource "f5xc_api_definition_uploader" "spec" {
   string_value = %q
 }
 
-resource "f5xc_api_definition" "test" {
+resource "f5xc_api_definition" "example" {
   name      = %q
   namespace = %q
 
@@ -391,7 +399,7 @@ resource "f5xc_api_definition_uploader" "spec" {
   string_value = %q
 }
 
-resource "f5xc_api_definition" "test" {
+resource "f5xc_api_definition" "example" {
   name      = %q
   namespace = %q
 
@@ -422,7 +430,7 @@ resource "f5xc_api_definition_uploader" "spec" {
   string_value = %q
 }
 
-resource "f5xc_api_definition" "test" {
+resource "f5xc_api_definition" "example" {
   name      = %q
   namespace = %q
 
@@ -446,10 +454,10 @@ resource "f5xc_api_definition" "test" {
     }
   ]
 
-  description = "API definition full"
+	description = "API definition example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -465,7 +473,7 @@ resource "f5xc_api_definition" "test" {
 
 func testAccResourceAutoF5XCApiDefinitionConfig(name, namespace, metadata, swaggerSpecs, lists, extra, strategy string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_definition" "test" {
+resource "f5xc_api_definition" "example" {
   name      = %q
   namespace = %q
 

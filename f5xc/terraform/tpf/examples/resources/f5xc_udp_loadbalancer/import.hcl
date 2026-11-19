@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_udp_loadbalancer.example"
+	to = f5xc_udp_loadbalancer.example
 }

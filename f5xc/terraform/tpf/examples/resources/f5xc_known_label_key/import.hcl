@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<key>"
-	to = "f5xc_known_label_key.example"
+	to = f5xc_known_label_key.example
 }

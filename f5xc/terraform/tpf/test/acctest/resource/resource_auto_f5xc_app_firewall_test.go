@@ -44,7 +44,7 @@ func TestAccResourceAutoF5XCAppFirewall_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-app-fw-" + testAccRunSuffix(t)
+	name := "example-app-firewall-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -55,20 +55,20 @@ func TestAccResourceAutoF5XCAppFirewall_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppFirewallConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -79,7 +79,7 @@ func TestAccResourceAutoF5XCAppFirewall_withEnforcementModeTransition(t *testing
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-app-fw-" + testAccRunSuffix(t)
+	name := "example-app-firewall-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -90,20 +90,20 @@ func TestAccResourceAutoF5XCAppFirewall_withEnforcementModeTransition(t *testing
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withEnforcementMode(name, namespace, "monitoring"),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withEnforcementMode(name, namespace, "blocking"),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -114,7 +114,7 @@ func TestAccResourceAutoF5XCAppFirewall_withDetectionSettingsTransition(t *testi
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-app-fw-" + testAccRunSuffix(t)
+	name := "example-app-firewall-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -125,40 +125,40 @@ func TestAccResourceAutoF5XCAppFirewall_withDetectionSettingsTransition(t *testi
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withDefaultDetection(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withCustomDetectionDisableStaging(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withCustomDetectionStageNewSignatures(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withCustomDetectionStageNewAndUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -169,7 +169,7 @@ func TestAccResourceAutoF5XCAppFirewall_withAnonymizationTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-app-fw-" + testAccRunSuffix(t)
+	name := "example-app-firewall-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -180,40 +180,40 @@ func TestAccResourceAutoF5XCAppFirewall_withAnonymizationTransition(t *testing.T
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withDefaultAnonymization(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withCustomAnonymizationHeader(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withCustomAnonymizationCookie(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withDisableAnonymization(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -224,7 +224,7 @@ func TestAccResourceAutoF5XCAppFirewall_withBlockingPageAndResponseCodes(t *test
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-app-fw-" + testAccRunSuffix(t)
+	name := "example-app-firewall-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -235,30 +235,30 @@ func TestAccResourceAutoF5XCAppFirewall_withBlockingPageAndResponseCodes(t *test
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withDefaultBlockingPage(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withCustomBlockingPage(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppFirewallConfig_withCustomResponseCodes(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -269,9 +269,9 @@ func TestAccResourceAutoF5XCAppFirewall_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-app-fw-" + testAccRunSuffix(t)
+	name := "example-app-firewall-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAppFirewallDestroyProducer(t),
@@ -280,10 +280,10 @@ func TestAccResourceAutoF5XCAppFirewall_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppFirewallConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAppFirewallFullImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -291,12 +291,56 @@ func TestAccResourceAutoF5XCAppFirewall_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppFirewallConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_firewall.test",
+				ResourceName:                         "f5xc_app_firewall.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_firewall.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCAppFirewallFullImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAppFirewallConfig_full("example-app-firewall", "default"),
+		})
+}
+
+func TestAccResourceAutoF5XCAppFirewall_signatureProtectionChoiceTransition(t *testing.T) {
+	t.Parallel()
+
+	namespace := acctest.DefaultNamespace()
+	name := "example-app-firewall-signature-" + acctest.RandString(t, 8)
+	basePath := "detection_setting_choice.detection_settings.signature_selection_setting.signature_protection_choice"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckAppFirewallDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCAppFirewallConfig_defaultDetection(name, namespace),
+			},
+			{
+				Config: testAccResourceAutoF5XCAppFirewallConfig_detectionSettings(name, namespace, ""),
+				Check: resource.TestCheckResourceAttrSet(
+					"f5xc_app_firewall.example",
+					basePath+".signature_settings_by_accuracy.high_accuracy_action.0",
+				),
+			},
+			{
+				Config: testAccResourceAutoF5XCAppFirewallConfig_detectionSettings(name, namespace, `signature_protection_choice = {
+          signature_settings_by_accuracy = {
+            high_accuracy_action   = ["SIG_REPORT"]
+            low_accuracy_action    = ["SIG_IGNORE"]
+            medium_accuracy_action = ["SIG_BLOCK"]
+          }
+        }`),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_app_firewall.example", basePath+".signature_settings_by_accuracy.high_accuracy_action.0", "SIG_REPORT"),
+					resource.TestCheckResourceAttr("f5xc_app_firewall.example", basePath+".signature_settings_by_accuracy.low_accuracy_action.0", "SIG_IGNORE"),
+					resource.TestCheckResourceAttr("f5xc_app_firewall.example", basePath+".signature_settings_by_accuracy.medium_accuracy_action.0", "SIG_BLOCK"),
+				),
 			},
 		},
 	})
@@ -310,7 +354,7 @@ func testAccCheckAppFirewallDestroyProducer(t *testing.T) func(*terraform.State)
 
 func testAccResourceAutoF5XCAppFirewallConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -343,10 +387,10 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name        = %q
   namespace   = %q
-  description = "App firewall updated"
+  description = "App firewall example updated"
 
   enforcement_mode_choice = {
     monitoring = true
@@ -378,7 +422,7 @@ resource "f5xc_app_firewall" "test" {
 func testAccResourceAutoF5XCAppFirewallConfig_withEnforcementMode(name, namespace, mode string) string {
 	modeBlock := fmt.Sprintf("%s = true", mode)
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -411,7 +455,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withDefaultDetection(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -444,7 +488,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withCustomDetectionDisableStaging(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -491,7 +535,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withCustomDetectionStageNewSignatures(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -540,7 +584,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withCustomDetectionStageNewAndUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -589,7 +633,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withDefaultAnonymization(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -622,7 +666,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withCustomAnonymizationHeader(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -665,7 +709,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withCustomAnonymizationCookie(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -708,7 +752,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withDisableAnonymization(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -741,7 +785,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withDefaultBlockingPage(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -774,7 +818,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withCustomBlockingPage(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -810,7 +854,7 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_withCustomResponseCodes(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name      = %q
   namespace = %q
 
@@ -845,13 +889,13 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name        = %q
   namespace   = %q
-  description = "App firewall full"
+  description = "App firewall example"
 
   labels = {
-    env  = "test"
+    env  = "example"
     team = "security"
   }
 
@@ -944,10 +988,10 @@ resource "f5xc_app_firewall" "test" {
 
 func testAccResourceAutoF5XCAppFirewallConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_firewall" "test" {
+resource "f5xc_app_firewall" "example" {
   name        = %q
   namespace   = %q
-  description = "App firewall full updated"
+  description = "App firewall example updated"
 
   labels = {
     env  = "stage"
@@ -1025,4 +1069,93 @@ resource "f5xc_app_firewall" "test" {
   }
 }
 `, name, namespace)
+}
+
+func testAccResourceAutoF5XCAppFirewallConfig_defaultDetection(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_app_firewall" "example" {
+  name      = %q
+  namespace = %q
+
+  enforcement_mode_choice = {
+    blocking = true
+  }
+
+  detection_setting_choice = {
+    default_detection_settings = true
+  }
+
+  allowed_response_codes_choice = {
+    allow_all_response_codes = true
+  }
+
+  anonymization_setting_choice = {
+    default_anonymization = true
+  }
+
+  blocking_page_choice = {
+    use_default_blocking_page = true
+  }
+
+  enhance_with_ai_choice = {
+    disable_ai_enhancements = true
+  }
+}
+`, name, namespace)
+}
+
+func testAccResourceAutoF5XCAppFirewallConfig_detectionSettings(name, namespace, signatureProtectionChoice string) string {
+	return fmt.Sprintf(`
+resource "f5xc_app_firewall" "example" {
+  name      = %q
+  namespace = %q
+
+  allowed_response_codes_choice = {
+    allow_all_response_codes = true
+  }
+
+  anonymization_setting_choice = {
+    default_anonymization = true
+  }
+
+  blocking_page_choice = {
+    use_default_blocking_page = true
+  }
+
+  enforcement_mode_choice = {
+    blocking = true
+  }
+
+  enhance_with_ai_choice = {
+    disable_ai_enhancements = true
+  }
+
+  detection_setting_choice = {
+    detection_settings = {
+      bot_protection_choice = {
+        default_bot_setting = true
+      }
+
+      false_positive_suppression_choice = {
+        disable_suppression = true
+      }
+
+      threat_campaign_choice = {
+        disable_threat_campaigns = true
+      }
+
+      signature_selection_setting = {
+        %s
+        attack_type_setting_choice = {
+          default_attack_type_settings = true
+        }
+
+        signature_selection_by_accuracy_choice = {
+          high_medium_low_accuracy_signatures = true
+        }
+      }
+    }
+  }
+}
+`, name, namespace, signatureProtectionChoice)
 }

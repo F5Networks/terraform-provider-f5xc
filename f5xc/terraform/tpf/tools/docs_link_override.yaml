@@ -1,0 +1,26 @@
+resources:
+  allowed_domain: https://docs.cloud.f5.com/docs-v2/api/shape-client-side-defense-allowed-domain
+  api_crawler: https://docs.cloud.f5.com/docs-v2/api/api-sec-api-crawler
+  api_discovery: https://docs.cloud.f5.com/docs-v2/api/api-sec-api-discovery
+  api_testing: https://docs.cloud.f5.com/docs-v2/api/api-sec-api-testing
+  api_definition_uploader: https://docs.cloud.f5.com/docs-v2/api/stored-object
+  bot_infrastructure: https://docs.cloud.f5.com/docs-v2/api/shape-bot-defense-bot-infrastructure
+  code_base_integration: https://docs.cloud.f5.com/docs-v2/api/api-sec-code-base-integration
+  dns_zone_record: https://docs.cloud.f5.com/docs-v2/api/dns-zone-rrset
+  irule: https://docs.cloud.f5.com/docs-v2/api/bigcne-irule
+  mitigated_domain: https://docs.cloud.f5.com/docs-v2/api/shape-client-side-defense-mitigated-domain
+  mobile_base_config: https://docs.cloud.f5.com/docs-v2/api/shape-bot-defense-mobile-base-config
+  nginx_service_discovery: https://docs.cloud.f5.com/docs-v2/api/nginx-one-nginx-service-discovery
+  protected_application: https://docs.cloud.f5.com/docs-v2/api/shape-bot-defense-protected-application
+  protected_domain: https://docs.cloud.f5.com/docs-v2/api/shape-client-side-defense-protected-domain
+  v1_dns_monitor: https://docs.cloud.f5.com/docs-v2/api/observability-synthetic-monitor-v1-dns-monitor
+  v1_http_monitor: https://docs.cloud.f5.com/docs-v2/api/observability-synthetic-monitor-v1-http-monitor
+  registration_approval: https://docs.cloud.f5.com/docs-v2/api/registration#operation/ves.io.schema.registration.CustomAPI.RegistrationApprove
+  http_loadbalancer_service_policy_attachments: https://docs.cloud.f5.com/docs-v2/api/views-http-loadbalancer
+  tcp_loadbalancer_service_policy_attachments: https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer
+  securemesh_site_v2_enhanced_firewall_policy_attachments: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
+  securemesh_site_v2_forward_proxy_policy_attachments: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
+  k8s_cluster: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster
+  k8s_cluster_role: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster-role
+  k8s_cluster_role_binding: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster-role-binding
+  k8s_pod_security_admission: https://docs.cloud.f5.com/docs-v2/api/k8s-pod-security-admission

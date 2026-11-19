@@ -19,13 +19,15 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -36,6 +38,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -82,6 +85,7 @@ type CertSecretType struct {
 type CertSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type CertBlindfoldSecretInfo struct {
@@ -93,6 +97,42 @@ type CertBlindfoldSecretInfo struct {
 type CertClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
+}
+
+type CertProvChoice struct {
+	AutoCert types.Object `tfsdk:"auto_cert"`
+	Manual   types.Bool   `tfsdk:"manual"`
+}
+
+type CertAutoCert struct {
+	ChallengeChoice types.Object `tfsdk:"challenge_choice"`
+	Domains         types.List   `tfsdk:"domains"`
+	IssuerChoice    types.Object `tfsdk:"issuer_choice"`
+	KeyAlgorithm    types.List   `tfsdk:"key_algorithm"`
+	RenewBeforeDays types.Int64  `tfsdk:"renew_before_days"`
+}
+
+type CertChallengeChoice struct {
+	Dns_01       types.Object `tfsdk:"dns_01"`
+	PreValidated types.Bool   `tfsdk:"pre_validated"`
+}
+
+type CertDns_01 struct {
+	DnsProviderChoice types.Object `tfsdk:"dns_provider_choice"`
+}
+
+type CertDnsProvChoice struct {
+	CnameDelegation types.Bool `tfsdk:"cname_delegation"`
+	Delegated       types.Bool `tfsdk:"delegated"`
+}
+
+type CertIssuerChoice struct {
+	CustomIssuer types.Object `tfsdk:"custom_issuer"`
+	Default      types.Bool   `tfsdk:"default"`
+}
+
+type CertCustomIssuer struct {
+	IssuerRef types.List `tfsdk:"issuer_ref"`
 }
 
 // ResourceF5XCCertificateModel describes the resource data model.
@@ -109,6 +149,7 @@ type ResourceF5XCCertificateModel struct {
 	Infos              types.List     `tfsdk:"infos"`
 	OcspStaplingChoice types.Object   `tfsdk:"ocsp_stapling_choice"`
 	PrivateKey         types.Object   `tfsdk:"private_key"`
+	ProviderChoice     types.Object   `tfsdk:"provider_choice"`
 	TcpLoadbalancers   types.List     `tfsdk:"tcp_loadbalancers"`
 	Timeouts           timeouts.Value `tfsdk:"timeouts"`
 }
@@ -170,7 +211,7 @@ var CertificateOcspStaplingChoiceCustomHashAlgorithmsModelAttributeMap = map[str
 	},
 }
 
-// Attribute map for RequiredPointerField --> PrivateKey
+// Attribute map for PointerField --> PrivateKey
 var CertificatePrivateKeyModelAttributeMap = map[string]attr.Type{
 
 	"secret_info_choice": types.ObjectType{
@@ -187,6 +228,7 @@ var CertificatePrivateKeySecretInfoOneofModelAttributeMap = map[string]attr.Type
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CertificatePrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -202,6 +244,89 @@ var CertificatePrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[s
 
 	"provider": types.StringType,
 	"url":      types.StringType,
+}
+
+// Attribute map for OneOfField --> Provider
+var CertificateProviderModelAttributeMap = map[string]attr.Type{
+
+	"auto_cert": types.ObjectType{
+		AttrTypes: CertificateProviderAutoCertModelAttributeMap,
+	},
+	"manual": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> AutoCert
+var CertificateProviderAutoCertModelAttributeMap = map[string]attr.Type{
+
+	"challenge_choice": types.ObjectType{
+		AttrTypes: CertificateProviderAutoCertChallengeChoiceModelAttributeMap,
+	},
+	"domains": types.ListType{
+		ElemType: types.StringType,
+	},
+	"issuer_choice": types.ObjectType{
+		AttrTypes: CertificateProviderAutoCertIssuerChoiceModelAttributeMap,
+	},
+	"key_algorithm": types.ListType{
+		ElemType: types.StringType,
+	},
+	"renew_before_days": types.Int64Type,
+}
+
+// Attribute map for OneOfField --> ChallengeChoice
+var CertificateProviderAutoCertChallengeChoiceModelAttributeMap = map[string]attr.Type{
+
+	"dns_01": types.ObjectType{
+		AttrTypes: CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap,
+	},
+	"pre_validated": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> Dns_01
+var CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap = map[string]attr.Type{
+
+	"dns_provider_choice": types.ObjectType{
+		AttrTypes: CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> DnsProviderChoice
+var CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap = map[string]attr.Type{
+
+	"cname_delegation": types.BoolType,
+	"delegated":        types.BoolType,
+}
+
+// Attribute map for OneOfField --> IssuerChoice
+var CertificateProviderAutoCertIssuerChoiceModelAttributeMap = map[string]attr.Type{
+
+	"custom_issuer": types.ObjectType{
+		AttrTypes: CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap,
+	},
+	"default": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> CustomIssuer
+var CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap = map[string]attr.Type{
+
+	"issuer_ref": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> IssuerRef
+var CertificateIssuerRefObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> TcpLoadbalancers
@@ -223,8 +348,8 @@ func (r *ResourceF5XCCertificate) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a certificate This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of certificate) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a certificate This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of certificate) etc. can be fetched",
+		MarkdownDescription: "Certificate represents a client or server certificate.",
+		Description:         "Certificate represents a client or server certificate.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -318,46 +443,47 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 						Optional:            false,
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+							stringplanmodifier.UseNonNullStateForUnknown(),
 						},
 					},
 				},
 			},
 			"certificate_url": schema.StringAttribute{
-				Description:         "certificate_url Certificate. Certificate or certificate chain in PEM format including the PEM headers.",
-				MarkdownDescription: "certificate_url Certificate. Certificate or certificate chain in PEM format including the PEM headers.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				Description:         "certificate_url Certificate. Certificate or certificate chain in PEM format including the PEM headers. Required unless this is an Automatic type certificate (certificate URL will be added once provisioned).",
+				MarkdownDescription: "certificate_url Certificate. Certificate or certificate chain in PEM format including the PEM headers. Required unless this is an Automatic type certificate (certificate URL will be added once provisioned).<br>**Default:** ``",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^(string:///|https?://|file:///)`),
 						"must match pattern `^(string:///|https?://|file:///)`",
 					),
-					bytesvalidator.BytesBetween(1, 131072),
+					bytesvalidator.BytesAtMost(131072),
 				},
 			},
 			"http_loadbalancers": schema.ListNestedAttribute{
 				Description:         "HTTP Loadbalancers HTTP Loadbalancers using this certificate.",
 				MarkdownDescription: "HTTP Loadbalancers HTTP Loadbalancers using this certificate.",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
@@ -365,9 +491,6 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 					},
 				},
@@ -376,63 +499,60 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 				Description:         "Information Information about this certificate.",
 				MarkdownDescription: "Information Information about this certificate.",
 				Required:            false,
-				Optional:            true,
+				Optional:            false,
 				Computed:            true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"common_name": schema.StringAttribute{
 							Description:         "Common Name Common Name (CN) of this certificate.",
 							MarkdownDescription: "Common Name Common Name (CN) of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"expiry": schema.StringAttribute{
 							Description:         "Expiry Timestamp Expiry timestamp of this certificate.",
 							MarkdownDescription: "Expiry Timestamp Expiry timestamp of this certificate.",
 							CustomType:          timetypes.RFC3339Type{},
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"issuer": schema.StringAttribute{
 							Description:         "Issuer Issuer of this certificate.",
 							MarkdownDescription: "Issuer Issuer of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"organization": schema.StringAttribute{
 							Description:         "Organization Organization of this certificate.",
 							MarkdownDescription: "Organization Organization of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"public_key_algorithm": schema.StringAttribute{
 							Description:         "Public Key Algorithm Public Key Algorithm of this certificate.",
 							MarkdownDescription: "Public Key Algorithm Public Key Algorithm of this certificate.",
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 						"subject_alternative_names": schema.ListAttribute{
 							Description:         "Subject Alternative Names Subject Alternative Names of this certificate.",
 							MarkdownDescription: "Subject Alternative Names Subject Alternative Names of this certificate.",
 							ElementType:         types.StringType,
 							Required:            false,
-							Optional:            true,
-							Computed:            false,
+							Optional:            false,
+							Computed:            true,
 						},
 					},
 				},
 			},
 			"ocsp_stapling_choice": schema.SingleNestedAttribute{
 				Description:         "OCSP Response choice OCSP Stapling choice",
-				MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+				MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -446,7 +566,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"custom_hash_algorithms": schema.SingleNestedAttribute{
 						Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-						MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+						MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -460,13 +580,15 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 								Computed:            false,
 								Validators: []validator.List{
 									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA1", "SHA256"}...)),
+									listvalidator.SizeBetween(1, 4),
+									listvalidator.UniqueValues(),
 								},
 							},
 						},
 					},
 					"disable_ocsp_stapling": schema.BoolAttribute{
 						Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-						MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+						MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -476,7 +598,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 					},
 					"use_system_defaults": schema.BoolAttribute{
 						Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-						MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+						MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -487,15 +609,15 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 				},
 			},
 			"private_key": schema.SingleNestedAttribute{
-				Description:         "private_key Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. Key has to match the accompanying certificate.",
-				MarkdownDescription: "private_key Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. Key has to match the accompanying certificate.",
-				Required:            true,
-				Optional:            false,
+				Description:         "private_key Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. Key has to match the accompanying certificate. Required unless this is an Automatic type certificate (private key will be generated).",
+				MarkdownDescription: "private_key Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. Key has to match the accompanying certificate. Required unless this is an Automatic type certificate (private key will be generated).",
+				Required:            false,
+				Optional:            true,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
 					"secret_info_choice": schema.SingleNestedAttribute{
 						Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -503,12 +625,13 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 							exactlyoneofvalidator.RequiredExactlyOneOf(
 								"blindfold_secret_info",
 								"clear_secret_info",
+								"none",
 							),
 						},
 						Attributes: map[string]schema.Attribute{
 							"blindfold_secret_info": schema.SingleNestedAttribute{
 								Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -526,6 +649,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
+										WriteOnly:           true,
 										Validators: []validator.String{
 											stringvalidator.RegexMatches(
 												regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -547,7 +671,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 							},
 							"clear_secret_info": schema.SingleNestedAttribute{
 								Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -580,6 +704,232 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 									},
 								},
 							},
+							"none": schema.BoolAttribute{
+								Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+						},
+					},
+				},
+			},
+			"provider_choice": schema.SingleNestedAttribute{
+				Description:         "Provider How this certificate is provisioned and managed.",
+				MarkdownDescription: "Provider How this certificate is provisioned and managed.<br>Exactly one of `auto_cert` or `manual` must be specified when `provider_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.ExactlyOneOf(
+						"auto_cert",
+						"manual",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"auto_cert": schema.SingleNestedAttribute{
+						Description:         "Automatic Automated certificate issuance and renewal using the ACME protocol.",
+						MarkdownDescription: "Automatic Automated certificate issuance and renewal using the ACME protocol.<br>Conflicts with `manual`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"challenge_choice": schema.SingleNestedAttribute{
+								Description:         "Challenge Method Selected ACME challenge method for domain validation. No challenge is performed for a domain that the certificate authority reports as already validated.",
+								MarkdownDescription: "Challenge Method Selected ACME challenge method for domain validation. No challenge is performed for a domain that the certificate authority reports as already validated.<br>Exactly one of `dns_01` or `pre_validated` must be specified when `challenge_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Object{
+									exactlyoneofvalidator.ExactlyOneOf(
+										"dns_01",
+										"pre_validated",
+									),
+								},
+								Attributes: map[string]schema.Attribute{
+									"dns_01": schema.SingleNestedAttribute{
+										Description:         "DNS-01 Challenge DNS-01 challenge validation is performed when required to prove domain control. A TXT record is created at _acme-challenge.<domain>. This method works for all domain types. Domains reported as already validated are skipped.",
+										MarkdownDescription: "DNS-01 Challenge DNS-01 challenge validation is performed when required to prove domain control. A TXT record is created at _acme-challenge.<domain>. This method works for all domain types. Domains reported as already validated are skipped.<br>Conflicts with `pre_validated`.",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Attributes: map[string]schema.Attribute{
+											"dns_provider_choice": schema.SingleNestedAttribute{
+												Description:         "DNS Provider Choice Method used to manage DNS-01 challenge TXT records.",
+												MarkdownDescription: "DNS Provider Choice Method used to manage DNS-01 challenge TXT records.<br>Exactly one of `cname_delegation` or `delegated` must be specified.",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.Object{
+													exactlyoneofvalidator.RequiredExactlyOneOf(
+														"cname_delegation",
+														"delegated",
+													),
+												},
+												Attributes: map[string]schema.Attribute{
+													"cname_delegation": schema.BoolAttribute{
+														Description:         "Non-Managed DNS (CNAME Delegation) DNS-01 validation for domains not managed by F5 Distributed Cloud is performed through CNAME delegation. When validation is required, _acme-challenge.<domain> must point to the target provided in the certificate status. Challenge TXT records are created automatically at the CNAME target.",
+														MarkdownDescription: "Non-Managed DNS (CNAME Delegation) DNS-01 validation for domains not managed by F5 Distributed Cloud is performed through CNAME delegation. When validation is required, _acme-challenge.<domain> must point to the target provided in the certificate status. Challenge TXT records are created automatically at the CNAME target.<br>Conflicts with `delegated`.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
+														},
+													},
+													"delegated": schema.BoolAttribute{
+														Description:         "Managed DNS F5 Distributed Cloud managed DNS zones provide DNS-01 challenge validation. The system automatically resolves which dns_zone(s) cover domains that require validation. Each zone must have 'Allow Application Managed Records' enabled.",
+														MarkdownDescription: "Managed DNS F5 Distributed Cloud managed DNS zones provide DNS-01 challenge validation. The system automatically resolves which dns_zone(s) cover domains that require validation. Each zone must have 'Allow Application Managed Records' enabled.<br>Conflicts with `cname_delegation`.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
+														},
+													},
+												},
+											},
+										},
+									},
+									"pre_validated": schema.BoolAttribute{
+										Description:         "Pre-Validated Domains Domains are validated directly with the certificate authority. No challenge method is configured. All domains must remain validated for initial issuance and renewal. If any domain requires validation, issuance cannot continue.",
+										MarkdownDescription: "Pre-Validated Domains Domains are validated directly with the certificate authority. No challenge method is configured. All domains must remain validated for initial issuance and renewal. If any domain requires validation, issuance cannot continue.<br>Conflicts with `dns_01`.",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.Bool{
+											boolvalidator.Equals(true),
+										},
+									},
+								},
+							},
+							"domains": schema.ListAttribute{
+								Description:         "Domains Domains this certificate covers. These are used as Subject Alternative Names (SANs) in the ACME certificate order. At least one domain is required.",
+								MarkdownDescription: "Domains Domains this certificate covers. These are used as Subject Alternative Names (SANs) in the ACME certificate order. At least one domain is required.",
+								ElementType:         types.StringType,
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 100),
+									listvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 253)),
+									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+										regexp.MustCompile(`^(\*\.)?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(:\d+)?$`),
+										"must be a valid virtual host domain",
+									)),
+									listvalidator.UniqueValues(),
+								},
+							},
+							"issuer_choice": schema.SingleNestedAttribute{
+								Description:         "Select Issuer Select the ACME issuer used to issue and renew this certificate.",
+								MarkdownDescription: "Select Issuer Select the ACME issuer used to issue and renew this certificate.<br>Exactly one of `custom_issuer` or `default` must be specified when `issuer_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Object{
+									exactlyoneofvalidator.ExactlyOneOf(
+										"custom_issuer",
+										"default",
+									),
+								},
+								Attributes: map[string]schema.Attribute{
+									"custom_issuer": schema.SingleNestedAttribute{
+										Description:         "Custom Issuer Use a custom ACME issuer.",
+										MarkdownDescription: "Custom Issuer Use a custom ACME issuer.<br>Conflicts with `default`.",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Attributes: map[string]schema.Attribute{
+											"issuer_ref": schema.ListNestedAttribute{
+												Description:         "Issuer Reference Select an existing ACME issuer or create a new one.",
+												MarkdownDescription: "Issuer Reference Select an existing ACME issuer or create a new one.",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.List{
+													listvalidator.SizeBetween(1, 1),
+												},
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description:         "",
+															MarkdownDescription: "",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
+														},
+														"namespace": schema.StringAttribute{
+															Description:         "",
+															MarkdownDescription: "",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
+														},
+														"tenant": schema.StringAttribute{
+															Description:         "",
+															MarkdownDescription: "",
+															Required:            false,
+															Optional:            false,
+															Computed:            true,
+															PlanModifiers: []planmodifier.String{
+																stringplanmodifier.UseNonNullStateForUnknown(),
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"default": schema.BoolAttribute{
+										Description:         "Default Use the built-in Let's Encrypt issuer managed by F5 Distributed Cloud.",
+										MarkdownDescription: "Default Use the built-in Let's Encrypt issuer managed by F5 Distributed Cloud.<br>Conflicts with `custom_issuer`.",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.Bool{
+											boolvalidator.Equals(true),
+										},
+									},
+								},
+							},
+							"key_algorithm": schema.ListAttribute{
+								Description:         "Key Algorithm Preferred key algorithm for certificate key pair generation.",
+								MarkdownDescription: "Key Algorithm Preferred key algorithm for certificate key pair generation.<br>**Allowed Values (choose one):** `['ECDSA_P256', 'ECDSA_P384', 'RSA_2048', 'RSA_4096']`<br>**Default:** `RSA_2048`",
+								ElementType:         types.StringType,
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("RSA_2048")),
+								Validators: []validator.List{
+									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ECDSA_P256", "ECDSA_P384", "RSA_2048", "RSA_4096"}...)),
+									listvalidator.SizeAtMost(1),
+								},
+							},
+							"renew_before_days": schema.Int64Attribute{
+								Description:         "Renew Before Days Days before certificate expiration to trigger renewal. Recommended: two-thirds of the certificate lifespan. If this value is greater than or nearly equal to the certificate's actual lifetime, such that renewal would occur less than 24 hours after its validity begins, renewal will default to two-thirds through its actual lifetime.",
+								MarkdownDescription: "Renew Before Days Days before certificate expiration to trigger renewal. Recommended: two-thirds of the certificate lifespan. If this value is greater than or nearly equal to the certificate's actual lifetime, such that renewal would occur less than 24 hours after its validity begins, renewal will default to two-thirds through its actual lifetime.<br>**Default:** `15`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(15),
+								Validators: []validator.Int64{
+									int64validator.Between(1, 90),
+								},
+							},
+						},
+					},
+					"manual": schema.BoolAttribute{
+						Description:         "Custom Certificate PEM and private key are uploaded by the user.",
+						MarkdownDescription: "Custom Certificate PEM and private key are uploaded by the user.<br>Conflicts with `auto_cert`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
 						},
 					},
 				},
@@ -588,23 +938,23 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 				Description:         "TCP Loadbalancers TCP Loadbalancers using this certificate.",
 				MarkdownDescription: "TCP Loadbalancers TCP Loadbalancers using this certificate.",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
@@ -612,9 +962,6 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 					},
 				},
@@ -681,9 +1028,17 @@ func (r *ResourceF5XCCertificate) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCertificateModel
 
 	// Read Terraform plan data into the model
@@ -691,6 +1046,17 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCCertificateModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.PrivateKey.IsNull() && !configData.PrivateKey.IsUnknown() {
+		data.PrivateKey = configData.PrivateKey
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -791,8 +1157,10 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 		}
 	}
 
-	// resource modelToSpecRoot RequiredStringField --> CertificateUrl
-	spec.CertificateUrl = string(data.CertificateUrl.ValueString())
+	// resource modelToSpecRoot StringField --> CertificateUrl
+	if !data.CertificateUrl.IsNull() && !data.CertificateUrl.IsUnknown() {
+		spec.CertificateUrl = string(data.CertificateUrl.ValueString())
+	}
 
 	// resource modelToSpecRoot OneOfField --> OcspStaplingChoice
 	if !data.OcspStaplingChoice.IsNull() && !data.OcspStaplingChoice.IsUnknown() {
@@ -855,7 +1223,7 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 	}
 
 	{
-		// resource modelToSpecRoot RequiredPointerField --> PrivateKey
+		// resource modelToSpecRoot PointerField --> PrivateKey
 		if !data.PrivateKey.IsNull() && !data.PrivateKey.IsUnknown() {
 			privateKeySpec := &ves_io_schema.SecretType{}
 			spec.PrivateKey = privateKeySpec
@@ -927,15 +1295,211 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> None
+				if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+					noneSpecBool := &ves_io_schema.SecretType_None{}
+					noneSpecBool.None = &ves_io_schema.Empty{}
+					privateKeySpec.SecretInfoOneof = noneSpecBool
+				}
+
 			}
 
 		}
 	}
 
+	// resource modelToSpecRoot OneOfField --> Provider
+	if !data.ProviderChoice.IsNull() && !data.ProviderChoice.IsUnknown() {
+		providerChoiceModel := CertProvChoice{}
+		response.Diagnostics.Append(data.ProviderChoice.As(ctx, &providerChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> AutoCert
+		if !providerChoiceModel.AutoCert.IsNull() && !providerChoiceModel.AutoCert.IsUnknown() {
+			var certAutoCertModel CertAutoCert
+			response.Diagnostics.Append(providerChoiceModel.AutoCert.As(ctx, &certAutoCertModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			autoCertOneOfSpec := &ves_io_schema_certificate.CreateSpecType_AutoCert{}
+			autoCertOneOfSpec.AutoCert = &ves_io_schema_certificate.AutoCertConfig{}
+			spec.Provider = autoCertOneOfSpec
+
+			// resource modelToSpecNested OneOfField --> ChallengeChoice
+			if !certAutoCertModel.ChallengeChoice.IsNull() && !certAutoCertModel.ChallengeChoice.IsUnknown() {
+				autoCertChallengeChoiceModel := CertChallengeChoice{}
+				response.Diagnostics.Append(certAutoCertModel.ChallengeChoice.As(ctx, &autoCertChallengeChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Dns_01
+				if !autoCertChallengeChoiceModel.Dns_01.IsNull() && !autoCertChallengeChoiceModel.Dns_01.IsUnknown() {
+					var certDns_01Model CertDns_01
+					response.Diagnostics.Append(autoCertChallengeChoiceModel.Dns_01.As(ctx, &certDns_01Model, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					dns01OneOfSpec := &ves_io_schema_certificate.AutoCertConfig_Dns_01{}
+					dns01OneOfSpec.Dns_01 = &ves_io_schema_certificate.DNS01ChallengeConfig{}
+					autoCertOneOfSpec.AutoCert.ChallengeChoice = dns01OneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> DnsProviderChoice
+					if !certDns_01Model.DnsProviderChoice.IsNull() && !certDns_01Model.DnsProviderChoice.IsUnknown() {
+						dns01DnsProviderChoiceModel := CertDnsProvChoice{}
+						response.Diagnostics.Append(certDns_01Model.DnsProviderChoice.As(ctx, &dns01DnsProviderChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> CnameDelegation
+						if !dns01DnsProviderChoiceModel.CnameDelegation.IsNull() && !dns01DnsProviderChoiceModel.CnameDelegation.IsUnknown() {
+							cnameDelegationSpecBool := &ves_io_schema_certificate.DNS01ChallengeConfig_CnameDelegation{}
+							cnameDelegationSpecBool.CnameDelegation = &ves_io_schema.Empty{}
+							dns01OneOfSpec.Dns_01.DnsProviderChoice = cnameDelegationSpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Delegated
+						if !dns01DnsProviderChoiceModel.Delegated.IsNull() && !dns01DnsProviderChoiceModel.Delegated.IsUnknown() {
+							delegatedSpecBool := &ves_io_schema_certificate.DNS01ChallengeConfig_Delegated{}
+							delegatedSpecBool.Delegated = &ves_io_schema.Empty{}
+							dns01OneOfSpec.Dns_01.DnsProviderChoice = delegatedSpecBool
+						}
+
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> PreValidated
+				if !autoCertChallengeChoiceModel.PreValidated.IsNull() && !autoCertChallengeChoiceModel.PreValidated.IsUnknown() {
+					preValidatedSpecBool := &ves_io_schema_certificate.AutoCertConfig_PreValidated{}
+					preValidatedSpecBool.PreValidated = &ves_io_schema_certificate.PreValidatedConfig{}
+					autoCertOneOfSpec.AutoCert.ChallengeChoice = preValidatedSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested RequiredArrayOfStringField --> Domains
+			{
+				elements := make([]string, 0, len(certAutoCertModel.Domains.Elements()))
+				diags = certAutoCertModel.Domains.ElementsAs(ctx, &elements, false)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				autoCertOneOfSpec.AutoCert.Domains = elements
+			}
+
+			// resource modelToSpecNested OneOfField --> IssuerChoice
+			if !certAutoCertModel.IssuerChoice.IsNull() && !certAutoCertModel.IssuerChoice.IsUnknown() {
+				autoCertIssuerChoiceModel := CertIssuerChoice{}
+				response.Diagnostics.Append(certAutoCertModel.IssuerChoice.As(ctx, &autoCertIssuerChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> CustomIssuer
+				if !autoCertIssuerChoiceModel.CustomIssuer.IsNull() && !autoCertIssuerChoiceModel.CustomIssuer.IsUnknown() {
+					var certCustomIssuerModel CertCustomIssuer
+					response.Diagnostics.Append(autoCertIssuerChoiceModel.CustomIssuer.As(ctx, &certCustomIssuerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					customIssuerOneOfSpec := &ves_io_schema_certificate.AutoCertConfig_CustomIssuer{}
+					customIssuerOneOfSpec.CustomIssuer = &ves_io_schema_certificate.CustomIssuer{}
+					autoCertOneOfSpec.AutoCert.IssuerChoice = customIssuerOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfPointerField --> IssuerRef
+					if !certCustomIssuerModel.IssuerRef.IsNull() && !certCustomIssuerModel.IssuerRef.IsUnknown() && len(certCustomIssuerModel.IssuerRef.Elements()) > 0 {
+						// 1. Convert the types.List into a slice of the model's Go struct
+						var issuerRefElements []ObjectRefTypeModel
+						response.Diagnostics.Append(certCustomIssuerModel.IssuerRef.ElementsAs(ctx, &issuerRefElements, false)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// 2. Initialize the spec slice
+						issuerRefSpec := make([]*ves_io_schema.ObjectRefType, len(issuerRefElements))
+						customIssuerOneOfSpec.CustomIssuer.IssuerRef = issuerRefSpec
+
+						// 3. Iterate over the converted Go slice
+						for i, issuerRefElement := range issuerRefElements {
+							// Initialize the spec struct for the current element
+							customIssuerOneOfSpec.CustomIssuer.IssuerRef[i] = &ves_io_schema.ObjectRefType{}
+
+							// Recursively process nested elements
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !issuerRefElement.Name.IsNull() && !issuerRefElement.Name.IsUnknown() {
+								customIssuerOneOfSpec.CustomIssuer.IssuerRef[i].Name = string(issuerRefElement.Name.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Namespace
+							if !issuerRefElement.Namespace.IsNull() && !issuerRefElement.Namespace.IsUnknown() {
+								customIssuerOneOfSpec.CustomIssuer.IssuerRef[i].Namespace = string(issuerRefElement.Namespace.ValueString())
+							}
+
+						}
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Default
+				if !autoCertIssuerChoiceModel.Default.IsNull() && !autoCertIssuerChoiceModel.Default.IsUnknown() {
+					defaultSpecBool := &ves_io_schema_certificate.AutoCertConfig_Default{}
+					defaultSpecBool.Default = &ves_io_schema.Empty{}
+					autoCertOneOfSpec.AutoCert.IssuerChoice = defaultSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested EnumField --> KeyAlgorithm
+			if !certAutoCertModel.KeyAlgorithm.IsNull() && !certAutoCertModel.KeyAlgorithm.IsUnknown() {
+				var keyAlgorithmTfStrings []types.String
+				diags = certAutoCertModel.KeyAlgorithm.ElementsAs(ctx, &keyAlgorithmTfStrings, false)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				if len(keyAlgorithmTfStrings) > 0 {
+					valStr := keyAlgorithmTfStrings[0].ValueString()
+					if v, ok := ves_io_schema_certificate.KeyAlgorithm_value[valStr]; ok {
+						autoCertOneOfSpec.AutoCert.KeyAlgorithm = ves_io_schema_certificate.KeyAlgorithm(v)
+					} else {
+						response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for KeyAlgorithm", valStr))
+						return
+					}
+				}
+			} else {
+				if v, ok := ves_io_schema_certificate.KeyAlgorithm_value["RSA_2048"]; ok {
+					autoCertOneOfSpec.AutoCert.KeyAlgorithm = ves_io_schema_certificate.KeyAlgorithm(v)
+				}
+			}
+
+			// resource modelToSpecNested UintField --> RenewBeforeDays
+			if !certAutoCertModel.RenewBeforeDays.IsNull() && !certAutoCertModel.RenewBeforeDays.IsUnknown() {
+				autoCertOneOfSpec.AutoCert.RenewBeforeDays = uint32(uint32(certAutoCertModel.RenewBeforeDays.ValueInt64()))
+			} else {
+				autoCertOneOfSpec.AutoCert.RenewBeforeDays = uint32(15)
+			}
+
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Manual
+		if !providerChoiceModel.Manual.IsNull() && !providerChoiceModel.Manual.IsUnknown() {
+			manualSpecBool := &ves_io_schema_certificate.CreateSpecType_Manual{}
+			manualSpecBool.Manual = &ves_io_schema.Empty{}
+			spec.Provider = manualSpecBool
+		}
+
+	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -958,7 +1522,7 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_certificate.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "certificate", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "certificate", err),
 		)
 		return
 	}
@@ -1119,13 +1683,9 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 		data.CertificateChain = types.ObjectNull(CertificateCertificateChainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredStringField --> CertificateUrl
-	if specData.GetCertificateUrl() != "" {
-		data.CertificateUrl = types.StringValue(specData.GetCertificateUrl())
-	} else {
-		// Empty string, set to null
-		data.CertificateUrl = types.StringNull()
-	}
+	// resource SpecToModelRoot StringField --> CertificateUrl
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.CertificateUrl = types.StringValue(specData.GetCertificateUrl())
 
 	// resource SpecToModelRoot ArrayOfPointerField --> HttpLoadbalancers
 	if len(specData.GetHttpLoadbalancers()) > 0 {
@@ -1179,14 +1739,12 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 			AttrTypes: CertificateHttpLoadbalancersObjectRefModelAttributeMap,
 		}
 		nullHttpLoadbalancersList := basetypes.NewListNull(httpLoadbalancersObjectType)
-		var priorValHttpLoadbalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("http_loadbalancers"), &priorValHttpLoadbalancers)
-		if !priorValHttpLoadbalancers.IsNull() && !priorValHttpLoadbalancers.IsUnknown() {
-			data.HttpLoadbalancers = priorValHttpLoadbalancers
+		if !data.HttpLoadbalancers.IsNull() && !data.HttpLoadbalancers.IsUnknown() && len(data.HttpLoadbalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HttpLoadbalancers = basetypes.NewListValueMust(httpLoadbalancersObjectType, nil)
 		} else {
 			data.HttpLoadbalancers = nullHttpLoadbalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Infos
@@ -1270,14 +1828,12 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 			AttrTypes: CertificateInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	// resource SpecToModelRoot OneOfField --> OcspStaplingChoice
@@ -1372,7 +1928,7 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 		data.OcspStaplingChoice = types.ObjectNull(CertificateOcspStaplingChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredPointerField --> PrivateKey
+	// resource SpecToModelRoot PointerField --> PrivateKey
 	if specData.GetPrivateKey() != nil {
 		var certSecretTypeModel = &CertSecretType{}
 		privateKeyElement := specData.GetPrivateKey()
@@ -1470,6 +2026,15 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -1501,6 +2066,318 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 		data.PrivateKey = privateKeyObj
 	} else {
 		data.PrivateKey = types.ObjectNull(CertificatePrivateKeyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> Provider
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetProvider() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		providerChoiceChoices := specData.GetProvider()
+
+		// The model struct that will be populated by the nested template.
+		var providerChoiceChoicesModel = &CertProvChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> AutoCert
+		// GlobalSpecType
+		// false
+		{
+			autoCertOptionsWrapper, isAutoCert := providerChoiceChoices.(*ves_io_schema_certificate.GlobalSpecType_AutoCert)
+			autoCertAttributeMap := make(map[string]attr.Value)
+
+			if isAutoCert && autoCertOptionsWrapper != nil && autoCertOptionsWrapper.AutoCert != nil {
+				autoCertElement := autoCertOptionsWrapper.AutoCert
+
+				// resource specToModelNested OneOfField --> ChallengeChoice
+				if autoCertElement.GetChallengeChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					autoCertchallengeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					autoCertchallengeChoiceChoices := autoCertElement.GetChallengeChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> Dns_01
+					// GlobalSpecType
+					// false
+					{
+						dns01OptionsWrapper, isDns_01 := autoCertchallengeChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_Dns_01)
+						dns01AttributeMap := make(map[string]attr.Value)
+
+						if isDns_01 && dns01OptionsWrapper != nil && dns01OptionsWrapper.Dns_01 != nil {
+							dns01Element := dns01OptionsWrapper.Dns_01
+
+							// resource specToModelNested RequiredOneOfField --> DnsProviderChoice
+							// GlobalSpecType
+							if dns01Element.GetDnsProviderChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								dns01dnsProviderChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								dns01dnsProviderChoiceChoices := dns01Element.GetDnsProviderChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> CnameDelegation
+								_, isCnameDelegation := dns01dnsProviderChoiceChoices.(*ves_io_schema_certificate.DNS01ChallengeConfig_CnameDelegation)
+
+								if isCnameDelegation {
+									dns01dnsProviderChoiceChoicesAttributeMap["cname_delegation"] = types.BoolValue(true)
+								} else {
+									dns01dnsProviderChoiceChoicesAttributeMap["cname_delegation"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> Delegated
+								_, isDelegated := dns01dnsProviderChoiceChoices.(*ves_io_schema_certificate.DNS01ChallengeConfig_Delegated)
+
+								if isDelegated {
+									dns01dnsProviderChoiceChoicesAttributeMap["delegated"] = types.BoolValue(true)
+								} else {
+									dns01dnsProviderChoiceChoicesAttributeMap["delegated"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, dns01dnsProviderChoiceChoicesObjDiags := types.ObjectValue(
+									CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									dns01dnsProviderChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(dns01dnsProviderChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								dns01AttributeMap["dns_provider_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								dns01AttributeMap["dns_provider_choice"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap)
+							}
+
+							dns01Obj, dns01ObjDiags := types.ObjectValue(CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap, dns01AttributeMap)
+							response.Diagnostics.Append(dns01ObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							autoCertchallengeChoiceChoicesAttributeMap["dns_01"] = dns01Obj
+						} else {
+							autoCertchallengeChoiceChoicesAttributeMap["dns_01"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> PreValidated
+					_, isPreValidated := autoCertchallengeChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_PreValidated)
+
+					if isPreValidated {
+						autoCertchallengeChoiceChoicesAttributeMap["pre_validated"] = types.BoolValue(true)
+					} else {
+						autoCertchallengeChoiceChoicesAttributeMap["pre_validated"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, autoCertchallengeChoiceChoicesObjDiags := types.ObjectValue(
+						CertificateProviderAutoCertChallengeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						autoCertchallengeChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(autoCertchallengeChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					autoCertAttributeMap["challenge_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					autoCertAttributeMap["challenge_choice"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredArrayOfStringField --> Domains
+				{
+					if len(autoCertElement.GetDomains()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, autoCertElement.GetDomains())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						autoCertAttributeMap["domains"] = listValue
+					} else {
+						autoCertAttributeMap["domains"] = types.ListNull(types.StringType)
+					}
+				}
+
+				// resource specToModelNested OneOfField --> IssuerChoice
+				if autoCertElement.GetIssuerChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					autoCertissuerChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					autoCertissuerChoiceChoices := autoCertElement.GetIssuerChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> CustomIssuer
+					// GlobalSpecType
+					// false
+					{
+						customIssuerOptionsWrapper, isCustomIssuer := autoCertissuerChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_CustomIssuer)
+						customIssuerAttributeMap := make(map[string]attr.Value)
+
+						if isCustomIssuer && customIssuerOptionsWrapper != nil && customIssuerOptionsWrapper.CustomIssuer != nil {
+							customIssuerElement := customIssuerOptionsWrapper.CustomIssuer
+
+							// resource specToModelNested RequiredArrayOfPointerField --> IssuerRef
+							if len(customIssuerElement.GetIssuerRef()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								issuerRefElements := make([]ObjectRefTypeModel, 0, len(customIssuerElement.GetIssuerRef()))
+								for _, issuerRefElement := range customIssuerElement.GetIssuerRef() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if issuerRefElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(issuerRefElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if issuerRefElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(issuerRefElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if issuerRefElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(issuerRefElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									issuerRefElements = append(issuerRefElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								issuerRefListValue, issuerRefListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateIssuerRefObjectRefModelAttributeMap}, issuerRefElements)
+								response.Diagnostics.Append(issuerRefListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								customIssuerAttributeMap["issuer_ref"] = issuerRefListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								customIssuerAttributeMap["issuer_ref"] = types.ListNull(types.ObjectType{AttrTypes: CertificateIssuerRefObjectRefModelAttributeMap})
+							}
+
+							customIssuerObj, customIssuerObjDiags := types.ObjectValue(CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap, customIssuerAttributeMap)
+							response.Diagnostics.Append(customIssuerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							autoCertissuerChoiceChoicesAttributeMap["custom_issuer"] = customIssuerObj
+						} else {
+							autoCertissuerChoiceChoicesAttributeMap["custom_issuer"] = types.ObjectNull(CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> Default
+					_, isDefault := autoCertissuerChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_Default)
+
+					if isDefault {
+						autoCertissuerChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+					} else {
+						autoCertissuerChoiceChoicesAttributeMap["default"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, autoCertissuerChoiceChoicesObjDiags := types.ObjectValue(
+						CertificateProviderAutoCertIssuerChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						autoCertissuerChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(autoCertissuerChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					autoCertAttributeMap["issuer_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					autoCertAttributeMap["issuer_choice"] = types.ObjectNull(CertificateProviderAutoCertIssuerChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested EnumField --> KeyAlgorithm
+				{
+					if autoCertElement.GetKeyAlgorithm().String() != "" {
+						stringValue := types.StringValue(autoCertElement.GetKeyAlgorithm().String())
+						stringSlice := []types.String{stringValue}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						autoCertAttributeMap["key_algorithm"] = listValue
+					} else {
+						autoCertAttributeMap["key_algorithm"] = types.ListNull(types.StringType)
+					}
+				}
+
+				// resource specToModelNested UintField --> RenewBeforeDays
+				autoCertAttributeMap["renew_before_days"] = types.Int64Value(int64(autoCertElement.GetRenewBeforeDays()))
+
+				autoCertObj, autoCertObjDiags := types.ObjectValue(CertificateProviderAutoCertModelAttributeMap, autoCertAttributeMap)
+				response.Diagnostics.Append(autoCertObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				providerChoiceChoicesModel.AutoCert = autoCertObj
+			} else {
+				providerChoiceChoicesModel.AutoCert = types.ObjectNull(CertificateProviderAutoCertModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Manual
+		_, isManual := providerChoiceChoices.(*ves_io_schema_certificate.GlobalSpecType_Manual)
+
+		if isManual {
+			providerChoiceChoicesModel.Manual = types.BoolValue(true)
+		} else {
+			providerChoiceChoicesModel.Manual = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			providerChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				CertificateProviderModelAttributeMap,
+				providerChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ProviderChoice = providerChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.ProviderChoice = types.ObjectNull(CertificateProviderModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> TcpLoadbalancers
@@ -1555,14 +2432,12 @@ func (r *ResourceF5XCCertificate) Create(ctx context.Context, request resource.C
 			AttrTypes: CertificateTcpLoadbalancersObjectRefModelAttributeMap,
 		}
 		nullTcpLoadbalancersList := basetypes.NewListNull(tcpLoadbalancersObjectType)
-		var priorValTcpLoadbalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("tcp_loadbalancers"), &priorValTcpLoadbalancers)
-		if !priorValTcpLoadbalancers.IsNull() && !priorValTcpLoadbalancers.IsUnknown() {
-			data.TcpLoadbalancers = priorValTcpLoadbalancers
+		if !data.TcpLoadbalancers.IsNull() && !data.TcpLoadbalancers.IsUnknown() && len(data.TcpLoadbalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.TcpLoadbalancers = basetypes.NewListValueMust(tcpLoadbalancersObjectType, nil)
 		} else {
 			data.TcpLoadbalancers = nullTcpLoadbalancersList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1609,14 +2484,10 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 	defer cancel()
 	priorPrivateKey := data.PrivateKey
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "certificate", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "certificate", err),
 		)
 		return
 	}
@@ -1777,13 +2648,9 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 		data.CertificateChain = types.ObjectNull(CertificateCertificateChainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredStringField --> CertificateUrl
-	if specData.GetCertificateUrl() != "" {
-		data.CertificateUrl = types.StringValue(specData.GetCertificateUrl())
-	} else {
-		// Empty string, set to null
-		data.CertificateUrl = types.StringNull()
-	}
+	// resource SpecToModelRoot StringField --> CertificateUrl
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.CertificateUrl = types.StringValue(specData.GetCertificateUrl())
 
 	// resource SpecToModelRoot ArrayOfPointerField --> HttpLoadbalancers
 	if len(specData.GetHttpLoadbalancers()) > 0 {
@@ -1837,14 +2704,12 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 			AttrTypes: CertificateHttpLoadbalancersObjectRefModelAttributeMap,
 		}
 		nullHttpLoadbalancersList := basetypes.NewListNull(httpLoadbalancersObjectType)
-		var priorValHttpLoadbalancers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("http_loadbalancers"), &priorValHttpLoadbalancers)
-		if !priorValHttpLoadbalancers.IsNull() && !priorValHttpLoadbalancers.IsUnknown() {
-			data.HttpLoadbalancers = priorValHttpLoadbalancers
+		if !data.HttpLoadbalancers.IsNull() && !data.HttpLoadbalancers.IsUnknown() && len(data.HttpLoadbalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HttpLoadbalancers = basetypes.NewListValueMust(httpLoadbalancersObjectType, nil)
 		} else {
 			data.HttpLoadbalancers = nullHttpLoadbalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Infos
@@ -1928,14 +2793,12 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 			AttrTypes: CertificateInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.State.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	// resource SpecToModelRoot OneOfField --> OcspStaplingChoice
@@ -2030,7 +2893,7 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 		data.OcspStaplingChoice = types.ObjectNull(CertificateOcspStaplingChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredPointerField --> PrivateKey
+	// resource SpecToModelRoot PointerField --> PrivateKey
 	if specData.GetPrivateKey() != nil {
 		var certSecretTypeModel = &CertSecretType{}
 		privateKeyElement := specData.GetPrivateKey()
@@ -2128,6 +2991,15 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -2185,6 +3057,318 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 		}
 	}
 
+	// resource SpecToModelRoot OneOfField --> Provider
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetProvider() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		providerChoiceChoices := specData.GetProvider()
+
+		// The model struct that will be populated by the nested template.
+		var providerChoiceChoicesModel = &CertProvChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> AutoCert
+		// <no value>
+		// false
+		{
+			autoCertOptionsWrapper, isAutoCert := providerChoiceChoices.(*ves_io_schema_certificate.GlobalSpecType_AutoCert)
+			autoCertAttributeMap := make(map[string]attr.Value)
+
+			if isAutoCert && autoCertOptionsWrapper != nil && autoCertOptionsWrapper.AutoCert != nil {
+				autoCertElement := autoCertOptionsWrapper.AutoCert
+
+				// resource specToModelNested OneOfField --> ChallengeChoice
+				if autoCertElement.GetChallengeChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					autoCertchallengeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					autoCertchallengeChoiceChoices := autoCertElement.GetChallengeChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> Dns_01
+					// <no value>
+					// false
+					{
+						dns01OptionsWrapper, isDns_01 := autoCertchallengeChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_Dns_01)
+						dns01AttributeMap := make(map[string]attr.Value)
+
+						if isDns_01 && dns01OptionsWrapper != nil && dns01OptionsWrapper.Dns_01 != nil {
+							dns01Element := dns01OptionsWrapper.Dns_01
+
+							// resource specToModelNested RequiredOneOfField --> DnsProviderChoice
+							// <no value>
+							if dns01Element.GetDnsProviderChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								dns01dnsProviderChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								dns01dnsProviderChoiceChoices := dns01Element.GetDnsProviderChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> CnameDelegation
+								_, isCnameDelegation := dns01dnsProviderChoiceChoices.(*ves_io_schema_certificate.DNS01ChallengeConfig_CnameDelegation)
+
+								if isCnameDelegation {
+									dns01dnsProviderChoiceChoicesAttributeMap["cname_delegation"] = types.BoolValue(true)
+								} else {
+									dns01dnsProviderChoiceChoicesAttributeMap["cname_delegation"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> Delegated
+								_, isDelegated := dns01dnsProviderChoiceChoices.(*ves_io_schema_certificate.DNS01ChallengeConfig_Delegated)
+
+								if isDelegated {
+									dns01dnsProviderChoiceChoicesAttributeMap["delegated"] = types.BoolValue(true)
+								} else {
+									dns01dnsProviderChoiceChoicesAttributeMap["delegated"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, dns01dnsProviderChoiceChoicesObjDiags := types.ObjectValue(
+									CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									dns01dnsProviderChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(dns01dnsProviderChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								dns01AttributeMap["dns_provider_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								dns01AttributeMap["dns_provider_choice"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap)
+							}
+
+							dns01Obj, dns01ObjDiags := types.ObjectValue(CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap, dns01AttributeMap)
+							response.Diagnostics.Append(dns01ObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							autoCertchallengeChoiceChoicesAttributeMap["dns_01"] = dns01Obj
+						} else {
+							autoCertchallengeChoiceChoicesAttributeMap["dns_01"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> PreValidated
+					_, isPreValidated := autoCertchallengeChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_PreValidated)
+
+					if isPreValidated {
+						autoCertchallengeChoiceChoicesAttributeMap["pre_validated"] = types.BoolValue(true)
+					} else {
+						autoCertchallengeChoiceChoicesAttributeMap["pre_validated"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, autoCertchallengeChoiceChoicesObjDiags := types.ObjectValue(
+						CertificateProviderAutoCertChallengeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						autoCertchallengeChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(autoCertchallengeChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					autoCertAttributeMap["challenge_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					autoCertAttributeMap["challenge_choice"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredArrayOfStringField --> Domains
+				{
+					if len(autoCertElement.GetDomains()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, autoCertElement.GetDomains())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						autoCertAttributeMap["domains"] = listValue
+					} else {
+						autoCertAttributeMap["domains"] = types.ListNull(types.StringType)
+					}
+				}
+
+				// resource specToModelNested OneOfField --> IssuerChoice
+				if autoCertElement.GetIssuerChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					autoCertissuerChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					autoCertissuerChoiceChoices := autoCertElement.GetIssuerChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> CustomIssuer
+					// <no value>
+					// false
+					{
+						customIssuerOptionsWrapper, isCustomIssuer := autoCertissuerChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_CustomIssuer)
+						customIssuerAttributeMap := make(map[string]attr.Value)
+
+						if isCustomIssuer && customIssuerOptionsWrapper != nil && customIssuerOptionsWrapper.CustomIssuer != nil {
+							customIssuerElement := customIssuerOptionsWrapper.CustomIssuer
+
+							// resource specToModelNested RequiredArrayOfPointerField --> IssuerRef
+							if len(customIssuerElement.GetIssuerRef()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								issuerRefElements := make([]ObjectRefTypeModel, 0, len(customIssuerElement.GetIssuerRef()))
+								for _, issuerRefElement := range customIssuerElement.GetIssuerRef() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if issuerRefElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(issuerRefElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if issuerRefElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(issuerRefElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if issuerRefElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(issuerRefElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									issuerRefElements = append(issuerRefElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								issuerRefListValue, issuerRefListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateIssuerRefObjectRefModelAttributeMap}, issuerRefElements)
+								response.Diagnostics.Append(issuerRefListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								customIssuerAttributeMap["issuer_ref"] = issuerRefListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								customIssuerAttributeMap["issuer_ref"] = types.ListNull(types.ObjectType{AttrTypes: CertificateIssuerRefObjectRefModelAttributeMap})
+							}
+
+							customIssuerObj, customIssuerObjDiags := types.ObjectValue(CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap, customIssuerAttributeMap)
+							response.Diagnostics.Append(customIssuerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							autoCertissuerChoiceChoicesAttributeMap["custom_issuer"] = customIssuerObj
+						} else {
+							autoCertissuerChoiceChoicesAttributeMap["custom_issuer"] = types.ObjectNull(CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> Default
+					_, isDefault := autoCertissuerChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_Default)
+
+					if isDefault {
+						autoCertissuerChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+					} else {
+						autoCertissuerChoiceChoicesAttributeMap["default"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, autoCertissuerChoiceChoicesObjDiags := types.ObjectValue(
+						CertificateProviderAutoCertIssuerChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						autoCertissuerChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(autoCertissuerChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					autoCertAttributeMap["issuer_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					autoCertAttributeMap["issuer_choice"] = types.ObjectNull(CertificateProviderAutoCertIssuerChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested EnumField --> KeyAlgorithm
+				{
+					if autoCertElement.GetKeyAlgorithm().String() != "" {
+						stringValue := types.StringValue(autoCertElement.GetKeyAlgorithm().String())
+						stringSlice := []types.String{stringValue}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						autoCertAttributeMap["key_algorithm"] = listValue
+					} else {
+						autoCertAttributeMap["key_algorithm"] = types.ListNull(types.StringType)
+					}
+				}
+
+				// resource specToModelNested UintField --> RenewBeforeDays
+				autoCertAttributeMap["renew_before_days"] = types.Int64Value(int64(autoCertElement.GetRenewBeforeDays()))
+
+				autoCertObj, autoCertObjDiags := types.ObjectValue(CertificateProviderAutoCertModelAttributeMap, autoCertAttributeMap)
+				response.Diagnostics.Append(autoCertObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				providerChoiceChoicesModel.AutoCert = autoCertObj
+			} else {
+				providerChoiceChoicesModel.AutoCert = types.ObjectNull(CertificateProviderAutoCertModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Manual
+		_, isManual := providerChoiceChoices.(*ves_io_schema_certificate.GlobalSpecType_Manual)
+
+		if isManual {
+			providerChoiceChoicesModel.Manual = types.BoolValue(true)
+		} else {
+			providerChoiceChoicesModel.Manual = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			providerChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				CertificateProviderModelAttributeMap,
+				providerChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ProviderChoice = providerChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.ProviderChoice = types.ObjectNull(CertificateProviderModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot ArrayOfPointerField --> TcpLoadbalancers
 	if len(specData.GetTcpLoadbalancers()) > 0 {
 		tcpLoadbalancersElements := make([]ObjectRefTypeModel, 0, len(specData.GetTcpLoadbalancers()))
@@ -2237,14 +3421,12 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 			AttrTypes: CertificateTcpLoadbalancersObjectRefModelAttributeMap,
 		}
 		nullTcpLoadbalancersList := basetypes.NewListNull(tcpLoadbalancersObjectType)
-		var priorValTcpLoadbalancers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("tcp_loadbalancers"), &priorValTcpLoadbalancers)
-		if !priorValTcpLoadbalancers.IsNull() && !priorValTcpLoadbalancers.IsUnknown() {
-			data.TcpLoadbalancers = priorValTcpLoadbalancers
+		if !data.TcpLoadbalancers.IsNull() && !data.TcpLoadbalancers.IsUnknown() && len(data.TcpLoadbalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.TcpLoadbalancers = basetypes.NewListValueMust(tcpLoadbalancersObjectType, nil)
 		} else {
 			data.TcpLoadbalancers = nullTcpLoadbalancersList
 		}
-
 	}
 
 	// Restore prior state for PrivateKey. The API redacts sensitive fields
@@ -2262,6 +3444,12 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCertificateModel
@@ -2271,6 +3459,7 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planPrivateKey := data.PrivateKey
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -2290,7 +3479,11 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planPrivateKey := data.PrivateKey
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.PrivateKey.IsNull() && !configData.PrivateKey.IsUnknown() {
+		data.PrivateKey = configData.PrivateKey
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -2390,8 +3583,10 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 		}
 	}
 
-	// resource modelToSpecRoot RequiredStringField --> CertificateUrl
-	spec.CertificateUrl = string(data.CertificateUrl.ValueString())
+	// resource modelToSpecRoot StringField --> CertificateUrl
+	if !data.CertificateUrl.IsNull() && !data.CertificateUrl.IsUnknown() {
+		spec.CertificateUrl = string(data.CertificateUrl.ValueString())
+	}
 
 	// resource modelToSpecRoot OneOfField --> OcspStaplingChoice
 	if !data.OcspStaplingChoice.IsNull() && !data.OcspStaplingChoice.IsUnknown() {
@@ -2454,7 +3649,7 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 	}
 
 	{
-		// resource modelToSpecRoot RequiredPointerField --> PrivateKey
+		// resource modelToSpecRoot PointerField --> PrivateKey
 		if !data.PrivateKey.IsNull() && !data.PrivateKey.IsUnknown() {
 			privateKeySpec := &ves_io_schema.SecretType{}
 			spec.PrivateKey = privateKeySpec
@@ -2526,15 +3721,211 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> None
+				if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+					noneSpecBool := &ves_io_schema.SecretType_None{}
+					noneSpecBool.None = &ves_io_schema.Empty{}
+					privateKeySpec.SecretInfoOneof = noneSpecBool
+				}
+
 			}
 
 		}
 	}
 
+	// resource modelToSpecRoot OneOfField --> Provider
+	if !data.ProviderChoice.IsNull() && !data.ProviderChoice.IsUnknown() {
+		providerChoiceModel := CertProvChoice{}
+		response.Diagnostics.Append(data.ProviderChoice.As(ctx, &providerChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> AutoCert
+		if !providerChoiceModel.AutoCert.IsNull() && !providerChoiceModel.AutoCert.IsUnknown() {
+			var certAutoCertModel CertAutoCert
+			response.Diagnostics.Append(providerChoiceModel.AutoCert.As(ctx, &certAutoCertModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			autoCertOneOfSpec := &ves_io_schema_certificate.ReplaceSpecType_AutoCert{}
+			autoCertOneOfSpec.AutoCert = &ves_io_schema_certificate.AutoCertConfig{}
+			spec.Provider = autoCertOneOfSpec
+
+			// resource modelToSpecNested OneOfField --> ChallengeChoice
+			if !certAutoCertModel.ChallengeChoice.IsNull() && !certAutoCertModel.ChallengeChoice.IsUnknown() {
+				autoCertChallengeChoiceModel := CertChallengeChoice{}
+				response.Diagnostics.Append(certAutoCertModel.ChallengeChoice.As(ctx, &autoCertChallengeChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Dns_01
+				if !autoCertChallengeChoiceModel.Dns_01.IsNull() && !autoCertChallengeChoiceModel.Dns_01.IsUnknown() {
+					var certDns_01Model CertDns_01
+					response.Diagnostics.Append(autoCertChallengeChoiceModel.Dns_01.As(ctx, &certDns_01Model, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					dns01OneOfSpec := &ves_io_schema_certificate.AutoCertConfig_Dns_01{}
+					dns01OneOfSpec.Dns_01 = &ves_io_schema_certificate.DNS01ChallengeConfig{}
+					autoCertOneOfSpec.AutoCert.ChallengeChoice = dns01OneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> DnsProviderChoice
+					if !certDns_01Model.DnsProviderChoice.IsNull() && !certDns_01Model.DnsProviderChoice.IsUnknown() {
+						dns01DnsProviderChoiceModel := CertDnsProvChoice{}
+						response.Diagnostics.Append(certDns_01Model.DnsProviderChoice.As(ctx, &dns01DnsProviderChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> CnameDelegation
+						if !dns01DnsProviderChoiceModel.CnameDelegation.IsNull() && !dns01DnsProviderChoiceModel.CnameDelegation.IsUnknown() {
+							cnameDelegationSpecBool := &ves_io_schema_certificate.DNS01ChallengeConfig_CnameDelegation{}
+							cnameDelegationSpecBool.CnameDelegation = &ves_io_schema.Empty{}
+							dns01OneOfSpec.Dns_01.DnsProviderChoice = cnameDelegationSpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Delegated
+						if !dns01DnsProviderChoiceModel.Delegated.IsNull() && !dns01DnsProviderChoiceModel.Delegated.IsUnknown() {
+							delegatedSpecBool := &ves_io_schema_certificate.DNS01ChallengeConfig_Delegated{}
+							delegatedSpecBool.Delegated = &ves_io_schema.Empty{}
+							dns01OneOfSpec.Dns_01.DnsProviderChoice = delegatedSpecBool
+						}
+
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> PreValidated
+				if !autoCertChallengeChoiceModel.PreValidated.IsNull() && !autoCertChallengeChoiceModel.PreValidated.IsUnknown() {
+					preValidatedSpecBool := &ves_io_schema_certificate.AutoCertConfig_PreValidated{}
+					preValidatedSpecBool.PreValidated = &ves_io_schema_certificate.PreValidatedConfig{}
+					autoCertOneOfSpec.AutoCert.ChallengeChoice = preValidatedSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested RequiredArrayOfStringField --> Domains
+			{
+				elements := make([]string, 0, len(certAutoCertModel.Domains.Elements()))
+				diags = certAutoCertModel.Domains.ElementsAs(ctx, &elements, false)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				autoCertOneOfSpec.AutoCert.Domains = elements
+			}
+
+			// resource modelToSpecNested OneOfField --> IssuerChoice
+			if !certAutoCertModel.IssuerChoice.IsNull() && !certAutoCertModel.IssuerChoice.IsUnknown() {
+				autoCertIssuerChoiceModel := CertIssuerChoice{}
+				response.Diagnostics.Append(certAutoCertModel.IssuerChoice.As(ctx, &autoCertIssuerChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> CustomIssuer
+				if !autoCertIssuerChoiceModel.CustomIssuer.IsNull() && !autoCertIssuerChoiceModel.CustomIssuer.IsUnknown() {
+					var certCustomIssuerModel CertCustomIssuer
+					response.Diagnostics.Append(autoCertIssuerChoiceModel.CustomIssuer.As(ctx, &certCustomIssuerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					customIssuerOneOfSpec := &ves_io_schema_certificate.AutoCertConfig_CustomIssuer{}
+					customIssuerOneOfSpec.CustomIssuer = &ves_io_schema_certificate.CustomIssuer{}
+					autoCertOneOfSpec.AutoCert.IssuerChoice = customIssuerOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfPointerField --> IssuerRef
+					if !certCustomIssuerModel.IssuerRef.IsNull() && !certCustomIssuerModel.IssuerRef.IsUnknown() && len(certCustomIssuerModel.IssuerRef.Elements()) > 0 {
+						// 1. Convert the types.List into a slice of the model's Go struct
+						var issuerRefElements []ObjectRefTypeModel
+						response.Diagnostics.Append(certCustomIssuerModel.IssuerRef.ElementsAs(ctx, &issuerRefElements, false)...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// 2. Initialize the spec slice
+						issuerRefSpec := make([]*ves_io_schema.ObjectRefType, len(issuerRefElements))
+						customIssuerOneOfSpec.CustomIssuer.IssuerRef = issuerRefSpec
+
+						// 3. Iterate over the converted Go slice
+						for i, issuerRefElement := range issuerRefElements {
+							// Initialize the spec struct for the current element
+							customIssuerOneOfSpec.CustomIssuer.IssuerRef[i] = &ves_io_schema.ObjectRefType{}
+
+							// Recursively process nested elements
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !issuerRefElement.Name.IsNull() && !issuerRefElement.Name.IsUnknown() {
+								customIssuerOneOfSpec.CustomIssuer.IssuerRef[i].Name = string(issuerRefElement.Name.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Namespace
+							if !issuerRefElement.Namespace.IsNull() && !issuerRefElement.Namespace.IsUnknown() {
+								customIssuerOneOfSpec.CustomIssuer.IssuerRef[i].Namespace = string(issuerRefElement.Namespace.ValueString())
+							}
+
+						}
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Default
+				if !autoCertIssuerChoiceModel.Default.IsNull() && !autoCertIssuerChoiceModel.Default.IsUnknown() {
+					defaultSpecBool := &ves_io_schema_certificate.AutoCertConfig_Default{}
+					defaultSpecBool.Default = &ves_io_schema.Empty{}
+					autoCertOneOfSpec.AutoCert.IssuerChoice = defaultSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested EnumField --> KeyAlgorithm
+			if !certAutoCertModel.KeyAlgorithm.IsNull() && !certAutoCertModel.KeyAlgorithm.IsUnknown() {
+				var keyAlgorithmTfStrings []types.String
+				diags = certAutoCertModel.KeyAlgorithm.ElementsAs(ctx, &keyAlgorithmTfStrings, false)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				if len(keyAlgorithmTfStrings) > 0 {
+					valStr := keyAlgorithmTfStrings[0].ValueString()
+					if v, ok := ves_io_schema_certificate.KeyAlgorithm_value[valStr]; ok {
+						autoCertOneOfSpec.AutoCert.KeyAlgorithm = ves_io_schema_certificate.KeyAlgorithm(v)
+					} else {
+						response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for KeyAlgorithm", valStr))
+						return
+					}
+				}
+			} else {
+				if v, ok := ves_io_schema_certificate.KeyAlgorithm_value["RSA_2048"]; ok {
+					autoCertOneOfSpec.AutoCert.KeyAlgorithm = ves_io_schema_certificate.KeyAlgorithm(v)
+				}
+			}
+
+			// resource modelToSpecNested UintField --> RenewBeforeDays
+			if !certAutoCertModel.RenewBeforeDays.IsNull() && !certAutoCertModel.RenewBeforeDays.IsUnknown() {
+				autoCertOneOfSpec.AutoCert.RenewBeforeDays = uint32(uint32(certAutoCertModel.RenewBeforeDays.ValueInt64()))
+			} else {
+				autoCertOneOfSpec.AutoCert.RenewBeforeDays = uint32(15)
+			}
+
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Manual
+		if !providerChoiceModel.Manual.IsNull() && !providerChoiceModel.Manual.IsUnknown() {
+			manualSpecBool := &ves_io_schema_certificate.ReplaceSpecType_Manual{}
+			manualSpecBool.Manual = &ves_io_schema.Empty{}
+			spec.Provider = manualSpecBool
+		}
+
+	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2542,24 +3933,20 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_certificate.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_certificate.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "certificate", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "certificate", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "certificate", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "certificate", err),
 		)
 		return
 	}
@@ -2719,13 +4106,9 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 		data.CertificateChain = types.ObjectNull(CertificateCertificateChainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredStringField --> CertificateUrl
-	if specData.GetCertificateUrl() != "" {
-		data.CertificateUrl = types.StringValue(specData.GetCertificateUrl())
-	} else {
-		// Empty string, set to null
-		data.CertificateUrl = types.StringNull()
-	}
+	// resource SpecToModelRoot StringField --> CertificateUrl
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.CertificateUrl = types.StringValue(specData.GetCertificateUrl())
 
 	// resource SpecToModelRoot ArrayOfPointerField --> HttpLoadbalancers
 	if len(specData.GetHttpLoadbalancers()) > 0 {
@@ -2779,14 +4162,12 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 			AttrTypes: CertificateHttpLoadbalancersObjectRefModelAttributeMap,
 		}
 		nullHttpLoadbalancersList := basetypes.NewListNull(httpLoadbalancersObjectType)
-		var priorValHttpLoadbalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("http_loadbalancers"), &priorValHttpLoadbalancers)
-		if !priorValHttpLoadbalancers.IsNull() && !priorValHttpLoadbalancers.IsUnknown() {
-			data.HttpLoadbalancers = priorValHttpLoadbalancers
+		if !data.HttpLoadbalancers.IsNull() && !data.HttpLoadbalancers.IsUnknown() && len(data.HttpLoadbalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HttpLoadbalancers = basetypes.NewListValueMust(httpLoadbalancersObjectType, nil)
 		} else {
 			data.HttpLoadbalancers = nullHttpLoadbalancersList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Infos
@@ -2870,14 +4251,12 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 			AttrTypes: CertificateInfosModelAttributeMap,
 		}
 		nullInfosList := basetypes.NewListNull(infosObjectType)
-		var priorValInfos types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("infos"), &priorValInfos)
-		if !priorValInfos.IsNull() && !priorValInfos.IsUnknown() {
-			data.Infos = priorValInfos
+		if !data.Infos.IsNull() && !data.Infos.IsUnknown() && len(data.Infos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Infos = basetypes.NewListValueMust(infosObjectType, nil)
 		} else {
 			data.Infos = nullInfosList
 		}
-
 	}
 
 	// resource SpecToModelRoot OneOfField --> OcspStaplingChoice
@@ -2972,7 +4351,7 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 		data.OcspStaplingChoice = types.ObjectNull(CertificateOcspStaplingChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredPointerField --> PrivateKey
+	// resource SpecToModelRoot PointerField --> PrivateKey
 	if specData.GetPrivateKey() != nil {
 		var certSecretTypeModel = &CertSecretType{}
 		privateKeyElement := specData.GetPrivateKey()
@@ -3070,6 +4449,15 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -3101,6 +4489,318 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 		data.PrivateKey = privateKeyObj
 	} else {
 		data.PrivateKey = types.ObjectNull(CertificatePrivateKeyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot OneOfField --> Provider
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetProvider() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		providerChoiceChoices := specData.GetProvider()
+
+		// The model struct that will be populated by the nested template.
+		var providerChoiceChoicesModel = &CertProvChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> AutoCert
+		// GlobalSpecType
+		// false
+		{
+			autoCertOptionsWrapper, isAutoCert := providerChoiceChoices.(*ves_io_schema_certificate.GlobalSpecType_AutoCert)
+			autoCertAttributeMap := make(map[string]attr.Value)
+
+			if isAutoCert && autoCertOptionsWrapper != nil && autoCertOptionsWrapper.AutoCert != nil {
+				autoCertElement := autoCertOptionsWrapper.AutoCert
+
+				// resource specToModelNested OneOfField --> ChallengeChoice
+				if autoCertElement.GetChallengeChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					autoCertchallengeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					autoCertchallengeChoiceChoices := autoCertElement.GetChallengeChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> Dns_01
+					// GlobalSpecType
+					// false
+					{
+						dns01OptionsWrapper, isDns_01 := autoCertchallengeChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_Dns_01)
+						dns01AttributeMap := make(map[string]attr.Value)
+
+						if isDns_01 && dns01OptionsWrapper != nil && dns01OptionsWrapper.Dns_01 != nil {
+							dns01Element := dns01OptionsWrapper.Dns_01
+
+							// resource specToModelNested RequiredOneOfField --> DnsProviderChoice
+							// GlobalSpecType
+							if dns01Element.GetDnsProviderChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								dns01dnsProviderChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								dns01dnsProviderChoiceChoices := dns01Element.GetDnsProviderChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> CnameDelegation
+								_, isCnameDelegation := dns01dnsProviderChoiceChoices.(*ves_io_schema_certificate.DNS01ChallengeConfig_CnameDelegation)
+
+								if isCnameDelegation {
+									dns01dnsProviderChoiceChoicesAttributeMap["cname_delegation"] = types.BoolValue(true)
+								} else {
+									dns01dnsProviderChoiceChoicesAttributeMap["cname_delegation"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> Delegated
+								_, isDelegated := dns01dnsProviderChoiceChoices.(*ves_io_schema_certificate.DNS01ChallengeConfig_Delegated)
+
+								if isDelegated {
+									dns01dnsProviderChoiceChoicesAttributeMap["delegated"] = types.BoolValue(true)
+								} else {
+									dns01dnsProviderChoiceChoicesAttributeMap["delegated"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, dns01dnsProviderChoiceChoicesObjDiags := types.ObjectValue(
+									CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									dns01dnsProviderChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(dns01dnsProviderChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								dns01AttributeMap["dns_provider_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								dns01AttributeMap["dns_provider_choice"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceDns_01DnsProviderChoiceModelAttributeMap)
+							}
+
+							dns01Obj, dns01ObjDiags := types.ObjectValue(CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap, dns01AttributeMap)
+							response.Diagnostics.Append(dns01ObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							autoCertchallengeChoiceChoicesAttributeMap["dns_01"] = dns01Obj
+						} else {
+							autoCertchallengeChoiceChoicesAttributeMap["dns_01"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceDns_01ModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> PreValidated
+					_, isPreValidated := autoCertchallengeChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_PreValidated)
+
+					if isPreValidated {
+						autoCertchallengeChoiceChoicesAttributeMap["pre_validated"] = types.BoolValue(true)
+					} else {
+						autoCertchallengeChoiceChoicesAttributeMap["pre_validated"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, autoCertchallengeChoiceChoicesObjDiags := types.ObjectValue(
+						CertificateProviderAutoCertChallengeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						autoCertchallengeChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(autoCertchallengeChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					autoCertAttributeMap["challenge_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					autoCertAttributeMap["challenge_choice"] = types.ObjectNull(CertificateProviderAutoCertChallengeChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested RequiredArrayOfStringField --> Domains
+				{
+					if len(autoCertElement.GetDomains()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, autoCertElement.GetDomains())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						autoCertAttributeMap["domains"] = listValue
+					} else {
+						autoCertAttributeMap["domains"] = types.ListNull(types.StringType)
+					}
+				}
+
+				// resource specToModelNested OneOfField --> IssuerChoice
+				if autoCertElement.GetIssuerChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					autoCertissuerChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					autoCertissuerChoiceChoices := autoCertElement.GetIssuerChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> CustomIssuer
+					// GlobalSpecType
+					// false
+					{
+						customIssuerOptionsWrapper, isCustomIssuer := autoCertissuerChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_CustomIssuer)
+						customIssuerAttributeMap := make(map[string]attr.Value)
+
+						if isCustomIssuer && customIssuerOptionsWrapper != nil && customIssuerOptionsWrapper.CustomIssuer != nil {
+							customIssuerElement := customIssuerOptionsWrapper.CustomIssuer
+
+							// resource specToModelNested RequiredArrayOfPointerField --> IssuerRef
+							if len(customIssuerElement.GetIssuerRef()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								issuerRefElements := make([]ObjectRefTypeModel, 0, len(customIssuerElement.GetIssuerRef()))
+								for _, issuerRefElement := range customIssuerElement.GetIssuerRef() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if issuerRefElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(issuerRefElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if issuerRefElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(issuerRefElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if issuerRefElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(issuerRefElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									issuerRefElements = append(issuerRefElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								issuerRefListValue, issuerRefListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CertificateIssuerRefObjectRefModelAttributeMap}, issuerRefElements)
+								response.Diagnostics.Append(issuerRefListDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								customIssuerAttributeMap["issuer_ref"] = issuerRefListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								customIssuerAttributeMap["issuer_ref"] = types.ListNull(types.ObjectType{AttrTypes: CertificateIssuerRefObjectRefModelAttributeMap})
+							}
+
+							customIssuerObj, customIssuerObjDiags := types.ObjectValue(CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap, customIssuerAttributeMap)
+							response.Diagnostics.Append(customIssuerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							autoCertissuerChoiceChoicesAttributeMap["custom_issuer"] = customIssuerObj
+						} else {
+							autoCertissuerChoiceChoicesAttributeMap["custom_issuer"] = types.ObjectNull(CertificateProviderAutoCertIssuerChoiceCustomIssuerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested BoolOfOneOfPointerField --> Default
+					_, isDefault := autoCertissuerChoiceChoices.(*ves_io_schema_certificate.AutoCertConfig_Default)
+
+					if isDefault {
+						autoCertissuerChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+					} else {
+						autoCertissuerChoiceChoicesAttributeMap["default"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, autoCertissuerChoiceChoicesObjDiags := types.ObjectValue(
+						CertificateProviderAutoCertIssuerChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						autoCertissuerChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(autoCertissuerChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					autoCertAttributeMap["issuer_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					autoCertAttributeMap["issuer_choice"] = types.ObjectNull(CertificateProviderAutoCertIssuerChoiceModelAttributeMap)
+				}
+
+				// resource specToModelNested EnumField --> KeyAlgorithm
+				{
+					if autoCertElement.GetKeyAlgorithm().String() != "" {
+						stringValue := types.StringValue(autoCertElement.GetKeyAlgorithm().String())
+						stringSlice := []types.String{stringValue}
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						autoCertAttributeMap["key_algorithm"] = listValue
+					} else {
+						autoCertAttributeMap["key_algorithm"] = types.ListNull(types.StringType)
+					}
+				}
+
+				// resource specToModelNested UintField --> RenewBeforeDays
+				autoCertAttributeMap["renew_before_days"] = types.Int64Value(int64(autoCertElement.GetRenewBeforeDays()))
+
+				autoCertObj, autoCertObjDiags := types.ObjectValue(CertificateProviderAutoCertModelAttributeMap, autoCertAttributeMap)
+				response.Diagnostics.Append(autoCertObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				providerChoiceChoicesModel.AutoCert = autoCertObj
+			} else {
+				providerChoiceChoicesModel.AutoCert = types.ObjectNull(CertificateProviderAutoCertModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Manual
+		_, isManual := providerChoiceChoices.(*ves_io_schema_certificate.GlobalSpecType_Manual)
+
+		if isManual {
+			providerChoiceChoicesModel.Manual = types.BoolValue(true)
+		} else {
+			providerChoiceChoicesModel.Manual = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			providerChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				CertificateProviderModelAttributeMap,
+				providerChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ProviderChoice = providerChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.ProviderChoice = types.ObjectNull(CertificateProviderModelAttributeMap)
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> TcpLoadbalancers
@@ -3155,14 +4855,12 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 			AttrTypes: CertificateTcpLoadbalancersObjectRefModelAttributeMap,
 		}
 		nullTcpLoadbalancersList := basetypes.NewListNull(tcpLoadbalancersObjectType)
-		var priorValTcpLoadbalancers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("tcp_loadbalancers"), &priorValTcpLoadbalancers)
-		if !priorValTcpLoadbalancers.IsNull() && !priorValTcpLoadbalancers.IsUnknown() {
-			data.TcpLoadbalancers = priorValTcpLoadbalancers
+		if !data.TcpLoadbalancers.IsNull() && !data.TcpLoadbalancers.IsUnknown() && len(data.TcpLoadbalancers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.TcpLoadbalancers = basetypes.NewListValueMust(tcpLoadbalancersObjectType, nil)
 		} else {
 			data.TcpLoadbalancers = nullTcpLoadbalancersList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -3192,7 +4890,7 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 	}
 	// Restore plan value for PrivateKey. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.PrivateKey = planPrivateKey
+	data.PrivateKey = utils.ResolveUnknowns(planPrivateKey, data.PrivateKey)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -3240,7 +4938,7 @@ func (r *ResourceF5XCCertificate) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "certificate", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "certificate", err),
 		)
 		return
 	}

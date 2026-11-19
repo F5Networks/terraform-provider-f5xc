@@ -8,7 +8,7 @@ resource "f5xc_origin_pool" "example" {
   endpoint_selection     = ["LOCAL_PREFERRED"]
 
   labels = {
-    "env"     = "acceptance-test"
+    "env"     = "example"
     "version" = "v2"
   }
 

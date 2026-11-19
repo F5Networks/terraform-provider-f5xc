@@ -20,7 +20,6 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -29,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -37,6 +37,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -48,6 +49,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_bgp "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/bgp"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -96,6 +98,7 @@ type BgpEbgpMultihopChoice struct {
 }
 
 type BgpEnableChoice struct {
+	Disable         types.Bool   `tfsdk:"disable"`
 	RoutingPolicies types.Object `tfsdk:"routing_policies"`
 }
 
@@ -151,6 +154,7 @@ type BgpExternal struct {
 type BgpAddrChoice struct {
 	Address           types.String `tfsdk:"address"`
 	DefaultGateway    types.Bool   `tfsdk:"default_gateway"`
+	Disable           types.Bool   `tfsdk:"disable"`
 	ExternalConnector types.Bool   `tfsdk:"external_connector"`
 	FromSite          types.Bool   `tfsdk:"from_site"`
 	SubnetBeginOffset types.Int64  `tfsdk:"subnet_begin_offset"`
@@ -176,7 +180,8 @@ type BgpFamilyInet struct {
 }
 
 type BgpFamilyInetEnableChoice struct {
-	Enable types.Object `tfsdk:"enable"`
+	Disable types.Bool   `tfsdk:"disable"`
+	Enable  types.Object `tfsdk:"enable"`
 }
 
 type BgpEnable struct {
@@ -201,7 +206,8 @@ type BgpFamilyInet6 struct {
 }
 
 type BgpFamilyInet6EnableChoice struct {
-	Enable types.Object `tfsdk:"enable"`
+	Disable types.Bool   `tfsdk:"disable"`
+	Enable  types.Object `tfsdk:"enable"`
 }
 
 type BgpFamilyInet6Enable struct {
@@ -232,25 +238,11 @@ type BgpRefOrSelectorChoice struct {
 }
 
 type BgpSite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
-}
-
-type BgpInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
+	Ref types.List `tfsdk:"ref"`
 }
 
 type BgpVirtualSite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
-}
-
-type BgpVSiteRefTypeInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
+	Ref types.List `tfsdk:"ref"`
 }
 
 // ResourceF5XCBgpModel describes the resource data model.
@@ -286,7 +278,7 @@ var BgpBgpParametersModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> RouterIdChoice
+// Attribute map for OneOfField --> RouterIdChoice
 var BgpBgpParametersRouterIdChoiceModelAttributeMap = map[string]attr.Type{
 
 	"from_site":     types.BoolType,
@@ -319,7 +311,7 @@ var BgpPeersModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> BfdChoice
+// Attribute map for OneOfField --> BfdChoice
 var BgpPeersBfdChoiceModelAttributeMap = map[string]attr.Type{
 
 	"bfd_disabled": types.BoolType,
@@ -343,9 +335,10 @@ var BgpPeersEbgpMultihopChoiceModelAttributeMap = map[string]attr.Type{
 	"ebgp_multihop_enabled":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> EnableChoice
+// Attribute map for OneOfField --> EnableChoice
 var BgpPeersEnableChoiceModelAttributeMap = map[string]attr.Type{
 
+	"disable": types.BoolType,
 	"routing_policies": types.ObjectType{
 		AttrTypes: BgpPeersEnableChoiceRoutingPoliciesModelAttributeMap,
 	},
@@ -439,7 +432,7 @@ var BgpPeersMetadataModelAttributeMap = map[string]attr.Type{
 	"name":        types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PassiveChoice
+// Attribute map for OneOfField --> PassiveChoice
 var BgpPeersPassiveChoiceModelAttributeMap = map[string]attr.Type{
 
 	"passive_mode_disabled": types.BoolType,
@@ -488,13 +481,14 @@ var BgpPeersTypeChoiceExternalAddressChoiceModelAttributeMap = map[string]attr.T
 
 	"address":             types.StringType,
 	"default_gateway":     types.BoolType,
+	"disable":             types.BoolType,
 	"external_connector":  types.BoolType,
 	"from_site":           types.BoolType,
 	"subnet_begin_offset": types.Int64Type,
 	"subnet_end_offset":   types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> AddressChoiceV6
+// Attribute map for OneOfField --> AddressChoiceV6
 var BgpPeersTypeChoiceExternalAddressChoiceV6ModelAttributeMap = map[string]attr.Type{
 
 	"address_ipv6":           types.StringType,
@@ -523,6 +517,7 @@ var BgpPeersTypeChoiceExternalFamilyInetModelAttributeMap = map[string]attr.Type
 // Attribute map for RequiredOneOfField --> EnableChoice
 var BgpPeersTypeChoiceExternalFamilyInetEnableChoiceModelAttributeMap = map[string]attr.Type{
 
+	"disable": types.BoolType,
 	"enable": types.ObjectType{
 		AttrTypes: BgpPeersTypeChoiceExternalFamilyInetEnableChoiceEnableModelAttributeMap,
 	},
@@ -575,7 +570,7 @@ var BgpPeersTypeChoiceExternalFamilyInetEnableChoiceEnableAggregationOptionsMode
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AggregationChoice
+// Attribute map for OneOfField --> AggregationChoice
 var BgpPeersTypeChoiceExternalFamilyInetEnableChoiceEnableAggregationOptionsAggregationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"summary_only": types.BoolType,
@@ -589,9 +584,10 @@ var BgpPeersTypeChoiceExternalFamilyInetV6ModelAttributeMap = map[string]attr.Ty
 	},
 }
 
-// Attribute map for RequiredOneOfField --> EnableChoice
+// Attribute map for OneOfField --> EnableChoice
 var BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceModelAttributeMap = map[string]attr.Type{
 
+	"disable": types.BoolType,
 	"enable": types.ObjectType{
 		AttrTypes: BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceEnableModelAttributeMap,
 	},
@@ -644,7 +640,7 @@ var BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceEnableAggregationOptionsMo
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AggregationChoice
+// Attribute map for OneOfField --> AggregationChoice
 var BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceEnableAggregationOptionsAggregationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"summary_only": types.BoolType,
@@ -714,12 +710,6 @@ var BgpWhereRefOrSelectorModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> Site
 var BgpWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap,
-	},
-	"network_type": types.ListType{
-		ElemType: types.StringType,
-	},
 	"ref": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -730,13 +720,6 @@ var BgpWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Ref
@@ -750,12 +733,6 @@ var BgpRefObjectRefModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> VirtualSite
 var BgpWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap,
-	},
-	"network_type": types.ListType{
-		ElemType: types.StringType,
-	},
 	"ref": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -766,13 +743,6 @@ var BgpWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
 }
 
 func NewResourceF5XCBgp() resource.Resource {
@@ -786,8 +756,8 @@ func (r *ResourceF5XCBgp) Metadata(ctx context.Context, request resource.Metadat
 func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bgp This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bgp) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bgp This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bgp) etc. can be fetched",
+		MarkdownDescription: "BGP object represents configuration of bgp protocol on given network interface on customer edge site.<br>It is template configuration that can be applied on a set of sites represented by list of sites or virtual sites.<br>BGP can be primarily used to advertise a common Virtual IP (VIP) for all nodes in a cluster for given site.<br>It can be used on outside interface or inside interface.<br>BGP peer address for this object can be a template and values are provided per site object.",
+		Description:         "BGP object represents configuration of bgp protocol on given network interface on customer edge site. It is template configuration that can be applied on a set of sites represented by list of sites or virtual sites. BGP can be primarily used to advertise a common Virtual IP (VIP) for all nodes in a cluster for given site. It can be used on outside interface or inside interface. BGP peer address for this object can be a template and values are provided per site object.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -843,7 +813,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -875,21 +845,24 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 					},
 					"router_id_choice": schema.SingleNestedAttribute{
 						Description:         "router_id_choice Select the Router ID.",
-						MarkdownDescription: "router_id_choice Select the Router ID.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "router_id_choice Select the Router ID.<br>Exactly one of `from_site`, `ip_address`, or `local_address` must be specified when `router_id_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"from_site",
 								"ip_address",
 								"local_address",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"from_site": schema.BoolAttribute{
 								Description:         "from_site Use the Router ID field from the site object.",
-								MarkdownDescription: "from_site Use the Router ID field from the site object.",
+								MarkdownDescription: "from_site Use the Router ID field from the site object.<br>Conflicts with `ip_address` and `local_address`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -899,7 +872,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 							},
 							"ip_address": schema.StringAttribute{
 								Description:         "ip_address Use the configured IPv4 Address as Router ID.",
-								MarkdownDescription: "ip_address Use the configured IPv4 Address as Router ID.",
+								MarkdownDescription: "ip_address Use the configured IPv4 Address as Router ID.<br>Conflicts with `from_site` and `local_address`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -912,7 +885,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 							},
 							"local_address": schema.BoolAttribute{
 								Description:         "local_address Use an interface address of the site as the Router ID.",
-								MarkdownDescription: "local_address Use an interface address of the site as the Router ID.",
+								MarkdownDescription: "local_address Use an interface address of the site as the Router ID.<br>Conflicts with `from_site` and `ip_address`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -937,20 +910,23 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 					Attributes: map[string]schema.Attribute{
 						"bfd_choice": schema.SingleNestedAttribute{
 							Description:         "bdf_enable_choice Enable/Disable BFD for BGP Peer.",
-							MarkdownDescription: "bdf_enable_choice Enable/Disable BFD for BGP Peer.",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "bdf_enable_choice Enable/Disable BFD for BGP Peer.<br>Exactly one of `bfd_disabled` or `bfd_enabled` must be specified when `bfd_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"bfd_disabled",
 									"bfd_enabled",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"bfd_disabled": schema.BoolAttribute{
 									Description:         "bfd_disabled",
-									MarkdownDescription: "bfd_disabled",
+									MarkdownDescription: "bfd_disabled<br>Conflicts with `bfd_enabled`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -960,7 +936,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 								},
 								"bfd_enabled": schema.SingleNestedAttribute{
 									Description:         "bfd_enabled",
-									MarkdownDescription: "bfd_enabled",
+									MarkdownDescription: "bfd_enabled<br>Conflicts with `bfd_disabled`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1004,7 +980,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 						},
 						"ebgp_multihop_choice": schema.SingleNestedAttribute{
 							Description:         "ebgp_multihop_choice Control eBGP multihop for this peer. When multihop is enabled (default), the BGP speaker permits non-directly-connected peers (TTL > 1) and BFD runs in multihop mode (RFC 5883, port 4784). When disabled, single-hop BFD (RFC 5881, port 3784) is used and ebgp-multihop is not configured on the BGP speaker.",
-							MarkdownDescription: "ebgp_multihop_choice Control eBGP multihop for this peer. When multihop is enabled (default), the BGP speaker permits non-directly-connected peers (TTL > 1) and BFD runs in multihop mode (RFC 5883, port 4784). When disabled, single-hop BFD (RFC 5881, port 3784) is used and ebgp-multihop is not configured on the BGP speaker.",
+							MarkdownDescription: "ebgp_multihop_choice Control eBGP multihop for this peer. When multihop is enabled (default), the BGP speaker permits non-directly-connected peers (TTL > 1) and BFD runs in multihop mode (RFC 5883, port 4784). When disabled, single-hop BFD (RFC 5881, port 3784) is used and ebgp-multihop is not configured on the BGP speaker.<br>Exactly one of `ebgp_multihop_disabled` or `ebgp_multihop_enabled` must be specified when `ebgp_multihop_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -1017,7 +993,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 							Attributes: map[string]schema.Attribute{
 								"ebgp_multihop_disabled": schema.BoolAttribute{
 									Description:         "ebgp_multihop_disabled eBGP multihop is disabled. Single-hop BFD (port 3784) is used and ebgp-multihop is not configured on the BGP speaker.",
-									MarkdownDescription: "ebgp_multihop_disabled eBGP multihop is disabled. Single-hop BFD (port 3784) is used and ebgp-multihop is not configured on the BGP speaker.",
+									MarkdownDescription: "ebgp_multihop_disabled eBGP multihop is disabled. Single-hop BFD (port 3784) is used and ebgp-multihop is not configured on the BGP speaker.<br>Conflicts with `ebgp_multihop_enabled`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1027,7 +1003,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 								},
 								"ebgp_multihop_enabled": schema.BoolAttribute{
 									Description:         "ebgp_multihop_enabled eBGP multihop is enabled (default). The BGP speaker allows non-directly-connected peers and BFD runs in multihop mode (port 4784).",
-									MarkdownDescription: "ebgp_multihop_enabled eBGP multihop is enabled (default). The BGP speaker allows non-directly-connected peers and BFD runs in multihop mode (port 4784).",
+									MarkdownDescription: "ebgp_multihop_enabled eBGP multihop is enabled (default). The BGP speaker allows non-directly-connected peers and BFD runs in multihop mode (port 4784).<br>Conflicts with `ebgp_multihop_disabled`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1039,19 +1015,33 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 						},
 						"enable_choice": schema.SingleNestedAttribute{
 							Description:         "bgp_routing_policy Enable or disable the rule",
-							MarkdownDescription: "bgp_routing_policy Enable or disable the rule",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "bgp_routing_policy Enable or disable the rule<br>Exactly one of `disable` or `routing_policies` must be specified when `enable_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
+									"disable",
 									"routing_policies",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
+								"disable": schema.BoolAttribute{
+									Description:         "disable Disables the BGP routing policy",
+									MarkdownDescription: "disable Disables the BGP routing policy<br>Conflicts with `routing_policies`.",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Validators: []validator.Bool{
+										boolvalidator.Equals(true),
+									},
+								},
 								"routing_policies": schema.SingleNestedAttribute{
 									Description:         "routing_policies BGP Routing policies are enabled, created policies need to be referenced with a direction inbound or outbound and specify the node or nodes that this policy applies to",
-									MarkdownDescription: "routing_policies BGP Routing policies are enabled, created policies need to be referenced with a direction inbound or outbound and specify the node or nodes that this policy applies to",
+									MarkdownDescription: "routing_policies BGP Routing policies are enabled, created policies need to be referenced with a direction inbound or outbound and specify the node or nodes that this policy applies to<br>Conflicts with `disable`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1069,7 +1059,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												Attributes: map[string]schema.Attribute{
 													"direction_choice": schema.SingleNestedAttribute{
 														Description:         "direction Select direction on which to apply route policy.",
-														MarkdownDescription: "direction Select direction on which to apply route policy.",
+														MarkdownDescription: "direction Select direction on which to apply route policy.<br>Exactly one of `inbound` or `outbound` must be specified when `direction_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1082,7 +1072,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 														Attributes: map[string]schema.Attribute{
 															"inbound": schema.BoolAttribute{
 																Description:         "inbound Apply policy on routes being imported",
-																MarkdownDescription: "inbound Apply policy on routes being imported",
+																MarkdownDescription: "inbound Apply policy on routes being imported<br>Conflicts with `outbound`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1092,7 +1082,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 															},
 															"outbound": schema.BoolAttribute{
 																Description:         "outbound Apply policy on routes being exported",
-																MarkdownDescription: "outbound Apply policy on routes being exported",
+																MarkdownDescription: "outbound Apply policy on routes being exported<br>Conflicts with `inbound`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1104,7 +1094,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 													},
 													"node_choice": schema.SingleNestedAttribute{
 														Description:         "node_choice Select BGP Session on which policy will be applied.",
-														MarkdownDescription: "node_choice Select BGP Session on which policy will be applied.",
+														MarkdownDescription: "node_choice Select BGP Session on which policy will be applied.<br>Exactly one of `all_nodes` or `node_name` must be specified when `node_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1117,7 +1107,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 														Attributes: map[string]schema.Attribute{
 															"all_nodes": schema.BoolAttribute{
 																Description:         "all Apply filter on all nodes where Peer is valid",
-																MarkdownDescription: "all Apply filter on all nodes where Peer is valid",
+																MarkdownDescription: "all Apply filter on all nodes where Peer is valid<br>Conflicts with `node_name`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1127,7 +1117,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 															},
 															"node_name": schema.SingleNestedAttribute{
 																Description:         "node_name Select nodes where BGP routing policy has to be applied",
-																MarkdownDescription: "node_name Select nodes where BGP routing policy has to be applied",
+																MarkdownDescription: "node_name Select nodes where BGP routing policy has to be applied<br>Conflicts with `all_nodes`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1176,7 +1166,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -1231,20 +1221,23 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 						},
 						"passive_choice": schema.SingleNestedAttribute{
 							Description:         "passive_choice Do not attempt to actively connect to the peer if passive mode is enabled.",
-							MarkdownDescription: "passive_choice Do not attempt to actively connect to the peer if passive mode is enabled.",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "passive_choice Do not attempt to actively connect to the peer if passive mode is enabled.<br>Exactly one of `passive_mode_disabled` or `passive_mode_enabled` must be specified when `passive_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"passive_mode_disabled",
 									"passive_mode_enabled",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"passive_mode_disabled": schema.BoolAttribute{
 									Description:         "passive_mode_disabled",
-									MarkdownDescription: "passive_mode_disabled",
+									MarkdownDescription: "passive_mode_disabled<br>Conflicts with `passive_mode_enabled`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1254,7 +1247,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 								},
 								"passive_mode_enabled": schema.BoolAttribute{
 									Description:         "passive_mode_enabled",
-									MarkdownDescription: "passive_mode_enabled",
+									MarkdownDescription: "passive_mode_enabled<br>Conflicts with `passive_mode_disabled`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1266,7 +1259,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 						},
 						"type_choice": schema.SingleNestedAttribute{
 							Description:         "type_choice Select the type of peer.",
-							MarkdownDescription: "type_choice Select the type of peer.",
+							MarkdownDescription: "type_choice Select the type of peer.<br>`external` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -1285,7 +1278,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 									Attributes: map[string]schema.Attribute{
 										"address_choice": schema.SingleNestedAttribute{
 											Description:         "address_choice Peer address configuration.",
-											MarkdownDescription: "address_choice Peer address configuration.",
+											MarkdownDescription: "address_choice Peer address configuration.<br>Exactly one of `address`, `default_gateway`, `disable`, `external_connector`, `from_site`, `subnet_begin_offset`, or `subnet_end_offset` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -1293,6 +1286,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												exactlyoneofvalidator.RequiredExactlyOneOf(
 													"address",
 													"default_gateway",
+													"disable",
 													"external_connector",
 													"from_site",
 													"subnet_begin_offset",
@@ -1302,7 +1296,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 											Attributes: map[string]schema.Attribute{
 												"address": schema.StringAttribute{
 													Description:         "address Specify IPV4 peer address.",
-													MarkdownDescription: "address Specify IPV4 peer address.",
+													MarkdownDescription: "address Specify IPV4 peer address.<br>Conflicts with `default_gateway`, `disable`, `external_connector`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1315,7 +1309,17 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"default_gateway": schema.BoolAttribute{
 													Description:         "default_gateway Use the default gateway address.",
-													MarkdownDescription: "default_gateway Use the default gateway address.",
+													MarkdownDescription: "default_gateway Use the default gateway address.<br>Conflicts with `address`, `disable`, `external_connector`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Validators: []validator.Bool{
+														boolvalidator.Equals(true),
+													},
+												},
+												"disable": schema.BoolAttribute{
+													Description:         "disable No Peer Ipv4 Address.",
+													MarkdownDescription: "disable No Peer Ipv4 Address.<br>Conflicts with `address`, `default_gateway`, `external_connector`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1325,7 +1329,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"external_connector": schema.BoolAttribute{
 													Description:         "external_connector Pick Peer Address from External connector interface remote address.",
-													MarkdownDescription: "external_connector Pick Peer Address from External connector interface remote address.",
+													MarkdownDescription: "external_connector Pick Peer Address from External connector interface remote address.<br>Conflicts with `address`, `default_gateway`, `disable`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1335,7 +1339,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"from_site": schema.BoolAttribute{
 													Description:         "from_site Use the address specified in the site object.",
-													MarkdownDescription: "from_site Use the address specified in the site object.",
+													MarkdownDescription: "from_site Use the address specified in the site object.<br>Conflicts with `address`, `default_gateway`, `disable`, `external_connector`, `subnet_begin_offset`, and `subnet_end_offset`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1345,7 +1349,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"subnet_begin_offset": schema.Int64Attribute{
 													Description:         "subnet_begin_offset Calculate peer address using offset from the beginning of the subnet.",
-													MarkdownDescription: "subnet_begin_offset Calculate peer address using offset from the beginning of the subnet.",
+													MarkdownDescription: "subnet_begin_offset Calculate peer address using offset from the beginning of the subnet.<br>Conflicts with `address`, `default_gateway`, `disable`, `external_connector`, `from_site`, and `subnet_end_offset`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1355,7 +1359,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"subnet_end_offset": schema.Int64Attribute{
 													Description:         "subnet_end_offset Calculate peer address using offset from the end of the subnet.",
-													MarkdownDescription: "subnet_end_offset Calculate peer address using offset from the end of the subnet.",
+													MarkdownDescription: "subnet_end_offset Calculate peer address using offset from the end of the subnet.<br>Conflicts with `address`, `default_gateway`, `disable`, `external_connector`, `from_site`, and `subnet_begin_offset`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1367,12 +1371,12 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 										},
 										"address_choice_v6_choice": schema.SingleNestedAttribute{
 											Description:         "address_choice_v6 Peer address configuration.",
-											MarkdownDescription: "address_choice_v6 Peer address configuration.",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "address_choice_v6 Peer address configuration.<br>Exactly one of `address_ipv6`, `default_gateway_v6`, `disable_v6`, `from_site_v6`, `subnet_begin_offset_v6`, or `subnet_end_offset_v6` must be specified when `address_choice_v6_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"address_ipv6",
 													"default_gateway_v6",
 													"disable_v6",
@@ -1381,10 +1385,13 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 													"subnet_end_offset_v6",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"address_ipv6": schema.StringAttribute{
 													Description:         "address_ipv6 Specify peer IPv6 address.",
-													MarkdownDescription: "address_ipv6 Specify peer IPv6 address.",
+													MarkdownDescription: "address_ipv6 Specify peer IPv6 address.<br>Conflicts with `default_gateway_v6`, `disable_v6`, `from_site_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1397,7 +1404,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"default_gateway_v6": schema.BoolAttribute{
 													Description:         "default_gateway_v6 Use the default gateway address.",
-													MarkdownDescription: "default_gateway_v6 Use the default gateway address.",
+													MarkdownDescription: "default_gateway_v6 Use the default gateway address.<br>Conflicts with `address_ipv6`, `disable_v6`, `from_site_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1407,7 +1414,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"disable_v6": schema.BoolAttribute{
 													Description:         "disable_v6 No Peer IPv6 Address.",
-													MarkdownDescription: "disable_v6 No Peer IPv6 Address.",
+													MarkdownDescription: "disable_v6 No Peer IPv6 Address.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `from_site_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1417,7 +1424,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"from_site_v6": schema.BoolAttribute{
 													Description:         "from_site_v6 Use the address specified in the site object.",
-													MarkdownDescription: "from_site_v6 Use the address specified in the site object.",
+													MarkdownDescription: "from_site_v6 Use the address specified in the site object.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `disable_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1427,7 +1434,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"subnet_begin_offset_v6": schema.Int64Attribute{
 													Description:         "subnet_begin_offset_v6 Calculate peer address using offset from the beginning of the subnet.",
-													MarkdownDescription: "subnet_begin_offset_v6 Calculate peer address using offset from the beginning of the subnet.",
+													MarkdownDescription: "subnet_begin_offset_v6 Calculate peer address using offset from the beginning of the subnet.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `disable_v6`, `from_site_v6`, and `subnet_end_offset_v6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1437,7 +1444,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"subnet_end_offset_v6": schema.Int64Attribute{
 													Description:         "subnet_end_offset_v6 Calculate peer address using offset from the end of the subnet.",
-													MarkdownDescription: "subnet_end_offset_v6 Calculate peer address using offset from the end of the subnet.",
+													MarkdownDescription: "subnet_end_offset_v6 Calculate peer address using offset from the end of the subnet.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `disable_v6`, `from_site_v6`, and `subnet_begin_offset_v6`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1459,7 +1466,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 										},
 										"auth_choice": schema.SingleNestedAttribute{
 											Description:         "auth_choice Select BGP Session Authentication parameters.",
-											MarkdownDescription: "auth_choice Select BGP Session Authentication parameters.",
+											MarkdownDescription: "auth_choice Select BGP Session Authentication parameters.<br>Exactly one of `md5_auth_key` or `no_authentication` must be specified when `auth_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1472,7 +1479,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 											Attributes: map[string]schema.Attribute{
 												"md5_auth_key": schema.StringAttribute{
 													Description:         "md5_auth_key MD5 key for protecting BGP Sessions (RFC 2385)",
-													MarkdownDescription: "md5_auth_key MD5 key for protecting BGP Sessions (RFC 2385)",
+													MarkdownDescription: "md5_auth_key MD5 key for protecting BGP Sessions (RFC 2385)<br>Conflicts with `no_authentication`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1480,7 +1487,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 												},
 												"no_authentication": schema.BoolAttribute{
 													Description:         "no_authentication No Authentication of BGP session",
-													MarkdownDescription: "no_authentication No Authentication of BGP session",
+													MarkdownDescription: "no_authentication No Authentication of BGP session<br>Conflicts with `md5_auth_key`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1499,19 +1506,30 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 											Attributes: map[string]schema.Attribute{
 												"enable_choice": schema.SingleNestedAttribute{
 													Description:         "enable_choice Enable/Disable IPv4 family of routes exchange with peer i.e. AFI 1 and SAFI 1.",
-													MarkdownDescription: "enable_choice Enable/Disable IPv4 family of routes exchange with peer i.e. AFI 1 and SAFI 1.",
+													MarkdownDescription: "enable_choice Enable/Disable IPv4 family of routes exchange with peer i.e. AFI 1 and SAFI 1.<br>Exactly one of `disable` or `enable` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 													Validators: []validator.Object{
 														exactlyoneofvalidator.RequiredExactlyOneOf(
+															"disable",
 															"enable",
 														),
 													},
 													Attributes: map[string]schema.Attribute{
+														"disable": schema.BoolAttribute{
+															Description:         "disable Disable IPv4 family Route Exchange.",
+															MarkdownDescription: "disable Disable IPv4 family Route Exchange.<br>Conflicts with `enable`.",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.Bool{
+																boolvalidator.Equals(true),
+															},
+														},
 														"enable": schema.SingleNestedAttribute{
 															Description:         "enable Enable IPv4 family Route Exchange.",
-															MarkdownDescription: "enable Enable IPv4 family Route Exchange.",
+															MarkdownDescription: "enable Enable IPv4 family Route Exchange.<br>Conflicts with `disable`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1553,14 +1571,17 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 																					Attributes: map[string]schema.Attribute{
 																						"aggregation_choice": schema.SingleNestedAttribute{
 																							Description:         "aggregation_choice",
-																							MarkdownDescription: "aggregation_choice",
-																							Required:            true,
-																							Optional:            false,
-																							Computed:            false,
+																							MarkdownDescription: "aggregation_choice<br>`summary_only` must be specified when `aggregation_choice` is configured.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            true,
 																							Validators: []validator.Object{
-																								exactlyoneofvalidator.RequiredExactlyOneOf(
+																								exactlyoneofvalidator.ExactlyOneOf(
 																									"summary_only",
 																								),
+																							},
+																							PlanModifiers: []planmodifier.Object{
+																								objectplanmodifier.UseNonNullStateForUnknown(),
 																							},
 																							Attributes: map[string]schema.Attribute{
 																								"summary_only": schema.BoolAttribute{
@@ -1596,19 +1617,33 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 											Attributes: map[string]schema.Attribute{
 												"enable_choice": schema.SingleNestedAttribute{
 													Description:         "enable_choice Enable/Disable IPv6 family of routes exchange with peer i.e. AFI 2 and SAFI 1.",
-													MarkdownDescription: "enable_choice Enable/Disable IPv6 family of routes exchange with peer i.e. AFI 2 and SAFI 1.",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "enable_choice Enable/Disable IPv6 family of routes exchange with peer i.e. AFI 2 and SAFI 1.<br>Exactly one of `disable` or `enable` must be specified when `enable_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
+															"disable",
 															"enable",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
+														"disable": schema.BoolAttribute{
+															Description:         "disable Disable IPv6 family Route Exchange.",
+															MarkdownDescription: "disable Disable IPv6 family Route Exchange.<br>Conflicts with `enable`.",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.Bool{
+																boolvalidator.Equals(true),
+															},
+														},
 														"enable": schema.SingleNestedAttribute{
 															Description:         "enable Enable IPv6 family Route Exchange.",
-															MarkdownDescription: "enable Enable IPv6 family Route Exchange.",
+															MarkdownDescription: "enable Enable IPv6 family Route Exchange.<br>Conflicts with `disable`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1632,7 +1667,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 																				Computed:            false,
 																				Validators: []validator.String{
 																					stringvalidator.RegexMatches(
-																						regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																						regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																						"must be a valid IPv6 prefix (CIDR notation)",
 																					),
 																				},
@@ -1650,14 +1685,17 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 																					Attributes: map[string]schema.Attribute{
 																						"aggregation_choice": schema.SingleNestedAttribute{
 																							Description:         "aggregation_choice",
-																							MarkdownDescription: "aggregation_choice",
-																							Required:            true,
-																							Optional:            false,
-																							Computed:            false,
+																							MarkdownDescription: "aggregation_choice<br>`summary_only` must be specified when `aggregation_choice` is configured.",
+																							Required:            false,
+																							Optional:            true,
+																							Computed:            true,
 																							Validators: []validator.Object{
-																								exactlyoneofvalidator.RequiredExactlyOneOf(
+																								exactlyoneofvalidator.ExactlyOneOf(
 																									"summary_only",
 																								),
+																							},
+																							PlanModifiers: []planmodifier.Object{
+																								objectplanmodifier.UseNonNullStateForUnknown(),
 																							},
 																							Attributes: map[string]schema.Attribute{
 																								"summary_only": schema.BoolAttribute{
@@ -1686,7 +1724,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 										},
 										"interface_choice": schema.SingleNestedAttribute{
 											Description:         "interface_choice Peer interface configuration.",
-											MarkdownDescription: "interface_choice Peer interface configuration.",
+											MarkdownDescription: "interface_choice Peer interface configuration.<br>Exactly one of `interface` or `interface_list` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -1699,7 +1737,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 											Attributes: map[string]schema.Attribute{
 												"interface": schema.SingleNestedAttribute{
 													Description:         "interface Specify interface.",
-													MarkdownDescription: "interface Specify interface.",
+													MarkdownDescription: "interface Specify interface.<br>Conflicts with `interface_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1725,14 +1763,14 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 															Optional:            false,
 															Computed:            true,
 															PlanModifiers: []planmodifier.String{
-																stringplanmodifier.UseStateForUnknown(),
+																stringplanmodifier.UseNonNullStateForUnknown(),
 															},
 														},
 													},
 												},
 												"interface_list": schema.SingleNestedAttribute{
 													Description:         "interface_list List of network interfaces.",
-													MarkdownDescription: "interface_list List of network interfaces.",
+													MarkdownDescription: "interface_list List of network interfaces.<br>Conflicts with `interface`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1770,7 +1808,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1807,7 +1845,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 				Attributes: map[string]schema.Attribute{
 					"ref_or_selector_choice": schema.SingleNestedAttribute{
 						Description:         "ref_or_selector One of following",
-						MarkdownDescription: "ref_or_selector One of following",
+						MarkdownDescription: "ref_or_selector One of following<br>Exactly one of `site` or `virtual_site` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -1820,59 +1858,11 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 						Attributes: map[string]schema.Attribute{
 							"site": schema.SingleNestedAttribute{
 								Description:         "site Direct reference to site object",
-								MarkdownDescription: "site Direct reference to site object",
+								MarkdownDescription: "site Direct reference to site object<br>Conflicts with `virtual_site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description:         "Internet VIP Choice Internet VIP Choice",
-										MarkdownDescription: "Internet VIP Choice Internet VIP Choice",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
-												"disable_internet_vip",
-												"enable_internet_vip",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description:         "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description:         "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-										},
-									},
-									"network_type": schema.ListAttribute{
-										Description:         "network_type The type of network on the referred site",
-										MarkdownDescription: "network_type The type of network on the referred site<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`",
-										ElementType:         types.StringType,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("VIRTUAL_NETWORK_SITE_LOCAL")),
-										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SITE_SERVICE"}...)),
-											listvalidator.SizeAtMost(1),
-										},
-									},
 									"ref": schema.ListNestedAttribute{
 										Description:         "ref A site direct reference",
 										MarkdownDescription: "ref A site direct reference",
@@ -1905,7 +1895,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -1915,59 +1905,11 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 							},
 							"virtual_site": schema.SingleNestedAttribute{
 								Description:         "virtual_site Direct reference to virtual site object",
-								MarkdownDescription: "virtual_site Direct reference to virtual site object",
+								MarkdownDescription: "virtual_site Direct reference to virtual site object<br>Conflicts with `site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description:         "Internet VIP Choice Internet VIP Choice",
-										MarkdownDescription: "Internet VIP Choice Internet VIP Choice",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
-												"disable_internet_vip",
-												"enable_internet_vip",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description:         "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description:         "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-										},
-									},
-									"network_type": schema.ListAttribute{
-										Description:         "network_type The type of network on the referred virtual_site",
-										MarkdownDescription: "network_type The type of network on the referred virtual_site<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`",
-										ElementType:         types.StringType,
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("VIRTUAL_NETWORK_SITE_LOCAL")),
-										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SITE_SERVICE"}...)),
-											listvalidator.SizeAtMost(1),
-										},
-									},
 									"ref": schema.ListNestedAttribute{
 										Description:         "ref A virtual_site direct reference",
 										MarkdownDescription: "ref A virtual_site direct reference",
@@ -2000,7 +1942,7 @@ func (r *ResourceF5XCBgp) Schema(ctx context.Context, request resource.SchemaReq
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -2074,9 +2016,17 @@ func (r *ResourceF5XCBgp) ModifyPlan(ctx context.Context, req resource.ModifyPla
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCBgpModel
 
 	// Read Terraform plan data into the model
@@ -2161,6 +2111,9 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 		// resource modelToSpecRoot RequiredPointerField --> BgpParameters
 		if !data.BgpParameters.IsNull() && !data.BgpParameters.IsUnknown() {
 			bgpParametersSpec := &ves_io_schema_bgp.BgpParameters{}
+			bgpParametersSpec.RouterIdChoice = &ves_io_schema_bgp.BgpParameters_LocalAddress{
+				LocalAddress: &ves_io_schema.Empty{},
+			}
 			spec.BgpParameters = bgpParametersSpec
 			var bgpParametersModel BgpBgpParameters
 
@@ -2174,7 +2127,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 			// resource modelToSpecNested RequiredUintField --> Asn
 			bgpParametersSpec.Asn = uint32(uint32(bgpParametersModel.Asn.ValueInt64()))
 
-			// resource modelToSpecNested RequiredOneOfField --> RouterIdChoice
+			// resource modelToSpecNested OneOfField --> RouterIdChoice
 			if !bgpParametersModel.RouterIdChoice.IsNull() && !bgpParametersModel.RouterIdChoice.IsUnknown() {
 				bgpParametersRouterIdChoiceModel := BgpRouterIdChoice{}
 				response.Diagnostics.Append(bgpParametersModel.RouterIdChoice.As(ctx, &bgpParametersRouterIdChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2220,8 +2173,17 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 
 		for i, peersElement := range peersElementsModelToSpec {
 			peersSpec[i] = &ves_io_schema_bgp.Peer{}
+			peersSpec[i].BfdChoice = &ves_io_schema_bgp.Peer_BfdDisabled{
+				BfdDisabled: &ves_io_schema.Empty{},
+			}
+			peersSpec[i].EnableChoice = &ves_io_schema_bgp.Peer_Disable{
+				Disable: &ves_io_schema.Empty{},
+			}
+			peersSpec[i].PassiveChoice = &ves_io_schema_bgp.Peer_PassiveModeDisabled{
+				PassiveModeDisabled: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> BfdChoice
+			// resource modelToSpecNested OneOfField --> BfdChoice
 			if !peersElement.BfdChoice.IsNull() && !peersElement.BfdChoice.IsUnknown() {
 				peersBfdChoiceModel := BgpBfdChoice{}
 				response.Diagnostics.Append(peersElement.BfdChoice.As(ctx, &peersBfdChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2284,12 +2246,19 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> EnableChoice
+			// resource modelToSpecNested OneOfField --> EnableChoice
 			if !peersElement.EnableChoice.IsNull() && !peersElement.EnableChoice.IsUnknown() {
 				peersEnableChoiceModel := BgpEnableChoice{}
 				response.Diagnostics.Append(peersElement.EnableChoice.As(ctx, &peersEnableChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !peersEnableChoiceModel.Disable.IsNull() && !peersEnableChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_bgp.Peer_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					peersSpec[i].EnableChoice = disableSpecBool
 				}
 
 				// resource modelToSpecNested PointerOfOneOfField --> RoutingPolicies
@@ -2458,7 +2427,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PassiveChoice
+			// resource modelToSpecNested OneOfField --> PassiveChoice
 			if !peersElement.PassiveChoice.IsNull() && !peersElement.PassiveChoice.IsUnknown() {
 				peersPassiveChoiceModel := BgpPassiveChoice{}
 				response.Diagnostics.Append(peersElement.PassiveChoice.As(ctx, &peersPassiveChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2499,6 +2468,9 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 					}
 					externalOneOfSpec := &ves_io_schema_bgp.Peer_External{}
 					externalOneOfSpec.External = &ves_io_schema_bgp.PeerExternal{}
+					externalOneOfSpec.External.AddressChoiceV6 = &ves_io_schema_bgp.PeerExternal_DisableV6{
+						DisableV6: &ves_io_schema.Empty{},
+					}
 					peersSpec[i].TypeChoice = externalOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> AddressChoice
@@ -2521,6 +2493,13 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 							defaultGatewaySpecBool := &ves_io_schema_bgp.PeerExternal_DefaultGateway{}
 							defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
 							externalOneOfSpec.External.AddressChoice = defaultGatewaySpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+						if !externalAddressChoiceModel.Disable.IsNull() && !externalAddressChoiceModel.Disable.IsUnknown() {
+							disableSpecBool := &ves_io_schema_bgp.PeerExternal_Disable{}
+							disableSpecBool.Disable = &ves_io_schema.Empty{}
+							externalOneOfSpec.External.AddressChoice = disableSpecBool
 						}
 
 						// resource modelToSpecNested BoolOfOneOfPointerField --> ExternalConnector
@@ -2553,7 +2532,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> AddressChoiceV6
+					// resource modelToSpecNested OneOfField --> AddressChoiceV6
 					if !bgpExternalModel.AddressChoiceV6Choice.IsNull() && !bgpExternalModel.AddressChoiceV6Choice.IsUnknown() {
 						externalAddressChoiceV6ChoiceModel := BgpAddrChoiceV6Choice{}
 						response.Diagnostics.Append(bgpExternalModel.AddressChoiceV6Choice.As(ctx, &externalAddressChoiceV6ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2651,6 +2630,13 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 								return
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+							if !familyInetEnableChoiceModel.Disable.IsNull() && !familyInetEnableChoiceModel.Disable.IsUnknown() {
+								disableSpecBool := &ves_io_schema_bgp.FamilyInet_Disable{}
+								disableSpecBool.Disable = &ves_io_schema.Empty{}
+								familyInetSpec.EnableChoice = disableSpecBool
+							}
+
 							// resource modelToSpecNested PointerOfOneOfField --> Enable
 							if !familyInetEnableChoiceModel.Enable.IsNull() && !familyInetEnableChoiceModel.Enable.IsUnknown() {
 								var bgpEnableModel BgpEnable
@@ -2704,10 +2690,13 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 											for iii, optionsElement := range optionsElements {
 												// Initialize the spec struct for the current element
 												enableOneOfSpec.Enable.Aggregation[ii].Options[iii] = &ves_io_schema_bgp.AggregationOption{}
+												enableOneOfSpec.Enable.Aggregation[ii].Options[iii].AggregationChoice = &ves_io_schema_bgp.AggregationOption_SummaryOnly{
+													SummaryOnly: &ves_io_schema.Empty{},
+												}
 
 												// Recursively process nested elements
 
-												// resource modelToSpecNested RequiredOneOfField --> AggregationChoice
+												// resource modelToSpecNested OneOfField --> AggregationChoice
 												if !optionsElement.AggregationChoice.IsNull() && !optionsElement.AggregationChoice.IsUnknown() {
 													optionsAggregationChoiceModel := BgpAggregationChoice{}
 													response.Diagnostics.Append(optionsElement.AggregationChoice.As(ctx, &optionsAggregationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2745,14 +2734,24 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 						}
 
 						familyInetV6Spec := &ves_io_schema_bgp.FamilyInet6{}
+						familyInetV6Spec.EnableChoice = &ves_io_schema_bgp.FamilyInet6_Disable{
+							Disable: &ves_io_schema.Empty{},
+						}
 						externalOneOfSpec.External.FamilyInetV6 = familyInetV6Spec
 
-						// resource modelToSpecNested RequiredOneOfField --> EnableChoice
+						// resource modelToSpecNested OneOfField --> EnableChoice
 						if !familyInetV6Model.EnableChoice.IsNull() && !familyInetV6Model.EnableChoice.IsUnknown() {
 							familyInetV6EnableChoiceModel := BgpFamilyInet6EnableChoice{}
 							response.Diagnostics.Append(familyInetV6Model.EnableChoice.As(ctx, &familyInetV6EnableChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+							if !familyInetV6EnableChoiceModel.Disable.IsNull() && !familyInetV6EnableChoiceModel.Disable.IsUnknown() {
+								disableSpecBool := &ves_io_schema_bgp.FamilyInet6_Disable{}
+								disableSpecBool.Disable = &ves_io_schema.Empty{}
+								familyInetV6Spec.EnableChoice = disableSpecBool
 							}
 
 							// resource modelToSpecNested PointerOfOneOfField --> Enable
@@ -2808,10 +2807,13 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 											for iii, optionsElement := range optionsElements {
 												// Initialize the spec struct for the current element
 												enableOneOfSpec.Enable.Aggregation[ii].Options[iii] = &ves_io_schema_bgp.AggregationOption{}
+												enableOneOfSpec.Enable.Aggregation[ii].Options[iii].AggregationChoice = &ves_io_schema_bgp.AggregationOption_SummaryOnly{
+													SummaryOnly: &ves_io_schema.Empty{},
+												}
 
 												// Recursively process nested elements
 
-												// resource modelToSpecNested RequiredOneOfField --> AggregationChoice
+												// resource modelToSpecNested OneOfField --> AggregationChoice
 												if !optionsElement.AggregationChoice.IsNull() && !optionsElement.AggregationChoice.IsUnknown() {
 													optionsAggregationChoiceModel := BgpAggregationChoice{}
 													response.Diagnostics.Append(optionsElement.AggregationChoice.As(ctx, &optionsAggregationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2966,55 +2968,10 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 					}
 					siteOneOfSpec := &ves_io_schema.SiteVirtualSiteRefSelector_Site{}
 					siteOneOfSpec.Site = &ves_io_schema.SiteRefType{}
+					siteOneOfSpec.Site.InternetVipChoice = &ves_io_schema.SiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = siteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !bgpSiteModel.InternetVipChoice.IsNull() && !bgpSiteModel.InternetVipChoice.IsUnknown() {
-						siteInternetVipChoiceModel := BgpInternetVipChoice{}
-						response.Diagnostics.Append(bgpSiteModel.InternetVipChoice.As(ctx, &siteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !siteInternetVipChoiceModel.DisableInternetVip.IsNull() && !siteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.SiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !siteInternetVipChoiceModel.EnableInternetVip.IsNull() && !siteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.SiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = enableInternetVipSpecBool
-						}
-
-					}
-
-					// resource modelToSpecNested EnumField --> NetworkType
-					if !bgpSiteModel.NetworkType.IsNull() && !bgpSiteModel.NetworkType.IsUnknown() {
-						var networkTypeTfStrings []types.String
-						diags = bgpSiteModel.NetworkType.ElementsAs(ctx, &networkTypeTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(networkTypeTfStrings) > 0 {
-							valStr := networkTypeTfStrings[0].ValueString()
-							if v, ok := ves_io_schema.VirtualNetworkType_value[valStr]; ok {
-								siteOneOfSpec.Site.NetworkType = ves_io_schema.VirtualNetworkType(v)
-							} else {
-								response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for NetworkType", valStr))
-								return
-							}
-						}
-					} else {
-						if v, ok := ves_io_schema.VirtualNetworkType_value["VIRTUAL_NETWORK_SITE_LOCAL"]; ok {
-							siteOneOfSpec.Site.NetworkType = ves_io_schema.VirtualNetworkType(v)
-						}
-					}
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> Ref
 					if !bgpSiteModel.Ref.IsNull() && !bgpSiteModel.Ref.IsUnknown() && len(bgpSiteModel.Ref.Elements()) > 0 {
@@ -3060,55 +3017,10 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 					}
 					virtualSiteOneOfSpec := &ves_io_schema.SiteVirtualSiteRefSelector_VirtualSite{}
 					virtualSiteOneOfSpec.VirtualSite = &ves_io_schema.VSiteRefType{}
+					virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = &ves_io_schema.VSiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = virtualSiteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !bgpVirtualSiteModel.InternetVipChoice.IsNull() && !bgpVirtualSiteModel.InternetVipChoice.IsUnknown() {
-						virtualSiteInternetVipChoiceModel := BgpVSiteRefTypeInternetVipChoice{}
-						response.Diagnostics.Append(bgpVirtualSiteModel.InternetVipChoice.As(ctx, &virtualSiteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.VSiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.VSiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = enableInternetVipSpecBool
-						}
-
-					}
-
-					// resource modelToSpecNested EnumField --> NetworkType
-					if !bgpVirtualSiteModel.NetworkType.IsNull() && !bgpVirtualSiteModel.NetworkType.IsUnknown() {
-						var networkTypeTfStrings []types.String
-						diags = bgpVirtualSiteModel.NetworkType.ElementsAs(ctx, &networkTypeTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(networkTypeTfStrings) > 0 {
-							valStr := networkTypeTfStrings[0].ValueString()
-							if v, ok := ves_io_schema.VirtualNetworkType_value[valStr]; ok {
-								virtualSiteOneOfSpec.VirtualSite.NetworkType = ves_io_schema.VirtualNetworkType(v)
-							} else {
-								response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for NetworkType", valStr))
-								return
-							}
-						}
-					} else {
-						if v, ok := ves_io_schema.VirtualNetworkType_value["VIRTUAL_NETWORK_SITE_LOCAL"]; ok {
-							virtualSiteOneOfSpec.VirtualSite.NetworkType = ves_io_schema.VirtualNetworkType(v)
-						}
-					}
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> Ref
 					if !bgpVirtualSiteModel.Ref.IsNull() && !bgpVirtualSiteModel.Ref.IsUnknown() && len(bgpVirtualSiteModel.Ref.Elements()) > 0 {
@@ -3153,7 +3065,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3176,7 +3088,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_bgp.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "bgp", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "bgp", err),
 		)
 		return
 	}
@@ -3302,8 +3214,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 		// resource specToModelNested RequiredUintField --> Asn
 		bgpBgpParametersModel.Asn = types.Int64Value(int64(bgpParametersElement.GetAsn()))
 
-		// resource specToModelNested RequiredOneOfField --> RouterIdChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> RouterIdChoice
 		if bgpParametersElement.GetRouterIdChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			bgpParametersrouterIdChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3381,8 +3292,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 		for _, peersElement := range specData.GetPeers() {
 			bgpPeerModel := BgpPeer{}
 
-			// resource specToModelNested RequiredOneOfField --> BfdChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> BfdChoice
 			if peersElement.GetBfdChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peersbfdChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3497,8 +3407,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 				bgpPeerModel.EbgpMultihopChoice = types.ObjectNull(BgpPeersEbgpMultihopChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> EnableChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> EnableChoice
 			if peersElement.GetEnableChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peersenableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3507,6 +3416,15 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 				peersenableChoiceChoices := peersElement.GetEnableChoice()
 
 				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Disable
+				_, isDisable := peersenableChoiceChoices.(*ves_io_schema_bgp.Peer_Disable)
+
+				if isDisable {
+					peersenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+				} else {
+					peersenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+				}
 
 				// resource specToModelNested PointerOfOneOfField --> RoutingPolicies
 				// GlobalSpecType
@@ -3794,8 +3712,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 				bgpPeerModel.Metadata = types.ObjectNull(BgpPeersMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> PassiveChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> PassiveChoice
 			if peersElement.GetPassiveChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peerspassiveChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3893,6 +3810,15 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 								externaladdressChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> Disable
+							_, isDisable := externaladdressChoiceChoices.(*ves_io_schema_bgp.PeerExternal_Disable)
+
+							if isDisable {
+								externaladdressChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+							} else {
+								externaladdressChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+							}
+
 							// resource specToModelNested BoolOfOneOfPointerField --> ExternalConnector
 							_, isExternalConnector := externaladdressChoiceChoices.(*ves_io_schema_bgp.PeerExternal_ExternalConnector)
 
@@ -3950,8 +3876,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 							externalAttributeMap["address_choice"] = types.ObjectNull(BgpPeersTypeChoiceExternalAddressChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> AddressChoiceV6
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> AddressChoiceV6
 						if externalElement.GetAddressChoiceV6() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							externaladdressChoiceV6ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4123,6 +4048,15 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 
 								// Process nested choices, populating the temporary attribute map
 
+								// resource specToModelNested BoolOfOneOfPointerField --> Disable
+								_, isDisable := familyInetenableChoiceChoices.(*ves_io_schema_bgp.FamilyInet_Disable)
+
+								if isDisable {
+									familyInetenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+								} else {
+									familyInetenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+								}
+
 								// resource specToModelNested PointerOfOneOfField --> Enable
 								// GlobalSpecType
 								// false
@@ -4157,8 +4091,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 													for _, optionsElement := range aggregationElement.GetOptions() {
 														bgpAggregationOptionModel := BgpAggregationOption{}
 
-														// resource specToModelNested RequiredOneOfField --> AggregationChoice
-														// GlobalSpecType
+														// resource specToModelNested OneOfField --> AggregationChoice
 														if optionsElement.GetAggregationChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
 															optionsaggregationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4288,8 +4221,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> EnableChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> EnableChoice
 							if familyInetV6Element.GetEnableChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								familyInetV6enableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4298,6 +4230,15 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 								familyInetV6enableChoiceChoices := familyInetV6Element.GetEnableChoice()
 
 								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> Disable
+								_, isDisable := familyInetV6enableChoiceChoices.(*ves_io_schema_bgp.FamilyInet6_Disable)
+
+								if isDisable {
+									familyInetV6enableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+								} else {
+									familyInetV6enableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+								}
 
 								// resource specToModelNested PointerOfOneOfField --> Enable
 								// GlobalSpecType
@@ -4333,8 +4274,7 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 													for _, optionsElement := range aggregationElement.GetOptions() {
 														bgpAggregationOptionModel := BgpAggregationOption{}
 
-														// resource specToModelNested RequiredOneOfField --> AggregationChoice
-														// GlobalSpecType
+														// resource specToModelNested OneOfField --> AggregationChoice
 														if optionsElement.GetAggregationChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
 															optionsaggregationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4679,70 +4619,6 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested EnumField --> NetworkType
-					{
-						if siteElement.GetNetworkType().String() != "" {
-							stringValue := types.StringValue(siteElement.GetNetworkType().String())
-							stringSlice := []types.String{stringValue}
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							siteAttributeMap["network_type"] = listValue
-						} else {
-							siteAttributeMap["network_type"] = types.ListNull(types.StringType)
-						}
-					}
-
 					// resource specToModelNested RequiredArrayOfPointerField --> Ref
 					if len(siteElement.GetRef()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
@@ -4813,70 +4689,6 @@ func (r *ResourceF5XCBgp) Create(ctx context.Context, request resource.CreateReq
 
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
-
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested EnumField --> NetworkType
-					{
-						if virtualSiteElement.GetNetworkType().String() != "" {
-							stringValue := types.StringValue(virtualSiteElement.GetNetworkType().String())
-							stringSlice := []types.String{stringValue}
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							virtualSiteAttributeMap["network_type"] = listValue
-						} else {
-							virtualSiteAttributeMap["network_type"] = types.ListNull(types.StringType)
-						}
-					}
 
 					// resource specToModelNested RequiredArrayOfPointerField --> Ref
 					if len(virtualSiteElement.GetRef()) > 0 {
@@ -5014,16 +4826,11 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	priorPeers := data.Peers
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "bgp", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "bgp", err),
 		)
 		return
 	}
@@ -5149,8 +4956,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 		// resource specToModelNested RequiredUintField --> Asn
 		bgpBgpParametersModel.Asn = types.Int64Value(int64(bgpParametersElement.GetAsn()))
 
-		// resource specToModelNested RequiredOneOfField --> RouterIdChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> RouterIdChoice
 		if bgpParametersElement.GetRouterIdChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			bgpParametersrouterIdChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5204,7 +5010,11 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 			bgpBgpParametersModel.RouterIdChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			bgpBgpParametersModel.RouterIdChoice = types.ObjectNull(BgpBgpParametersRouterIdChoiceModelAttributeMap)
+			bgpBgpParametersModel.RouterIdChoice = types.ObjectValueMust(BgpBgpParametersRouterIdChoiceModelAttributeMap, map[string]attr.Value{
+				"from_site":     types.BoolNull(),
+				"ip_address":    types.StringNull(),
+				"local_address": types.BoolValue(true),
+			})
 		}
 
 		bgpParametersObj, bgpParametersDiags := utils.GoStructToObjectValue(
@@ -5228,8 +5038,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 		for _, peersElement := range specData.GetPeers() {
 			bgpPeerModel := BgpPeer{}
 
-			// resource specToModelNested RequiredOneOfField --> BfdChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> BfdChoice
 			if peersElement.GetBfdChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peersbfdChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5294,7 +5103,10 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 				bgpPeerModel.BfdChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				bgpPeerModel.BfdChoice = types.ObjectNull(BgpPeersBfdChoiceModelAttributeMap)
+				bgpPeerModel.BfdChoice = types.ObjectValueMust(BgpPeersBfdChoiceModelAttributeMap, map[string]attr.Value{
+					"bfd_disabled": types.BoolValue(true),
+					"bfd_enabled":  types.ObjectNull(BgpPeersBfdChoiceBfdEnabledModelAttributeMap),
+				})
 			}
 
 			// resource specToModelNested OneOfField --> EbgpMultihopChoice
@@ -5344,8 +5156,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 				bgpPeerModel.EbgpMultihopChoice = types.ObjectNull(BgpPeersEbgpMultihopChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> EnableChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> EnableChoice
 			if peersElement.GetEnableChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peersenableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5354,6 +5165,15 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 				peersenableChoiceChoices := peersElement.GetEnableChoice()
 
 				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Disable
+				_, isDisable := peersenableChoiceChoices.(*ves_io_schema_bgp.Peer_Disable)
+
+				if isDisable {
+					peersenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+				} else {
+					peersenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+				}
 
 				// resource specToModelNested PointerOfOneOfField --> RoutingPolicies
 				// <no value>
@@ -5588,7 +5408,10 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 				bgpPeerModel.EnableChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				bgpPeerModel.EnableChoice = types.ObjectNull(BgpPeersEnableChoiceModelAttributeMap)
+				bgpPeerModel.EnableChoice = types.ObjectValueMust(BgpPeersEnableChoiceModelAttributeMap, map[string]attr.Value{
+					"disable":          types.BoolValue(true),
+					"routing_policies": types.ObjectNull(BgpPeersEnableChoiceRoutingPoliciesModelAttributeMap),
+				})
 			}
 
 			// resource specToModelNested StringField --> Label
@@ -5641,8 +5464,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 				bgpPeerModel.Metadata = types.ObjectNull(BgpPeersMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> PassiveChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> PassiveChoice
 			if peersElement.GetPassiveChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peerspassiveChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5686,7 +5508,10 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 				bgpPeerModel.PassiveChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				bgpPeerModel.PassiveChoice = types.ObjectNull(BgpPeersPassiveChoiceModelAttributeMap)
+				bgpPeerModel.PassiveChoice = types.ObjectValueMust(BgpPeersPassiveChoiceModelAttributeMap, map[string]attr.Value{
+					"passive_mode_disabled": types.BoolValue(true),
+					"passive_mode_enabled":  types.BoolNull(),
+				})
 			}
 
 			// resource specToModelNested RequiredOneOfField --> TypeChoice
@@ -5738,6 +5563,15 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 								externaladdressChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
 							} else {
 								externaladdressChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+							}
+
+							// resource specToModelNested BoolOfOneOfPointerField --> Disable
+							_, isDisable := externaladdressChoiceChoices.(*ves_io_schema_bgp.PeerExternal_Disable)
+
+							if isDisable {
+								externaladdressChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+							} else {
+								externaladdressChoiceChoicesAttributeMap["disable"] = types.BoolNull()
 							}
 
 							// resource specToModelNested BoolOfOneOfPointerField --> ExternalConnector
@@ -5797,8 +5631,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 							externalAttributeMap["address_choice"] = types.ObjectNull(BgpPeersTypeChoiceExternalAddressChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> AddressChoiceV6
-						// <no value>
+						// resource specToModelNested OneOfField --> AddressChoiceV6
 						if externalElement.GetAddressChoiceV6() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							externaladdressChoiceV6ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5881,7 +5714,14 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 							externalAttributeMap["address_choice_v6_choice"] = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							externalAttributeMap["address_choice_v6_choice"] = types.ObjectNull(BgpPeersTypeChoiceExternalAddressChoiceV6ModelAttributeMap)
+							externalAttributeMap["address_choice_v6_choice"] = types.ObjectValueMust(BgpPeersTypeChoiceExternalAddressChoiceV6ModelAttributeMap, map[string]attr.Value{
+								"address_ipv6":           types.StringNull(),
+								"default_gateway_v6":     types.BoolNull(),
+								"disable_v6":             types.BoolValue(true),
+								"from_site_v6":           types.BoolNull(),
+								"subnet_begin_offset_v6": types.Int64Null(),
+								"subnet_end_offset_v6":   types.Int64Null(),
+							})
 						}
 
 						// resource specToModelNested RequiredUintField --> Asn
@@ -5970,6 +5810,15 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 
 								// Process nested choices, populating the temporary attribute map
 
+								// resource specToModelNested BoolOfOneOfPointerField --> Disable
+								_, isDisable := familyInetenableChoiceChoices.(*ves_io_schema_bgp.FamilyInet_Disable)
+
+								if isDisable {
+									familyInetenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+								} else {
+									familyInetenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+								}
+
 								// resource specToModelNested PointerOfOneOfField --> Enable
 								// <no value>
 								// false
@@ -6004,8 +5853,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 													for _, optionsElement := range aggregationElement.GetOptions() {
 														bgpAggregationOptionModel := BgpAggregationOption{}
 
-														// resource specToModelNested RequiredOneOfField --> AggregationChoice
-														// <no value>
+														// resource specToModelNested OneOfField --> AggregationChoice
 														if optionsElement.GetAggregationChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
 															optionsaggregationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6040,7 +5888,9 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 															bgpAggregationOptionModel.AggregationChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															bgpAggregationOptionModel.AggregationChoice = types.ObjectNull(BgpPeersTypeChoiceExternalFamilyInetEnableChoiceEnableAggregationOptionsAggregationChoiceModelAttributeMap)
+															bgpAggregationOptionModel.AggregationChoice = types.ObjectValueMust(BgpPeersTypeChoiceExternalFamilyInetEnableChoiceEnableAggregationOptionsAggregationChoiceModelAttributeMap, map[string]attr.Value{
+																"summary_only": types.BoolValue(true),
+															})
 														}
 
 														optionsElements = append(optionsElements, bgpAggregationOptionModel)
@@ -6135,8 +5985,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> EnableChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> EnableChoice
 							if familyInetV6Element.GetEnableChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								familyInetV6enableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6145,6 +5994,15 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 								familyInetV6enableChoiceChoices := familyInetV6Element.GetEnableChoice()
 
 								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> Disable
+								_, isDisable := familyInetV6enableChoiceChoices.(*ves_io_schema_bgp.FamilyInet6_Disable)
+
+								if isDisable {
+									familyInetV6enableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+								} else {
+									familyInetV6enableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+								}
 
 								// resource specToModelNested PointerOfOneOfField --> Enable
 								// <no value>
@@ -6180,8 +6038,7 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 													for _, optionsElement := range aggregationElement.GetOptions() {
 														bgpAggregationOptionModel := BgpAggregationOption{}
 
-														// resource specToModelNested RequiredOneOfField --> AggregationChoice
-														// <no value>
+														// resource specToModelNested OneOfField --> AggregationChoice
 														if optionsElement.GetAggregationChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
 															optionsaggregationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6216,7 +6073,9 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 															bgpAggregationOptionModel.AggregationChoice = finalObj
 														} else {
 															// The OneOf field is nil in the source spec, so set the Terraform object to null.
-															bgpAggregationOptionModel.AggregationChoice = types.ObjectNull(BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceEnableAggregationOptionsAggregationChoiceModelAttributeMap)
+															bgpAggregationOptionModel.AggregationChoice = types.ObjectValueMust(BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceEnableAggregationOptionsAggregationChoiceModelAttributeMap, map[string]attr.Value{
+																"summary_only": types.BoolValue(true),
+															})
 														}
 
 														optionsElements = append(optionsElements, bgpAggregationOptionModel)
@@ -6282,7 +6141,10 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 								bgpFamilyInet6Model.EnableChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								bgpFamilyInet6Model.EnableChoice = types.ObjectNull(BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceModelAttributeMap)
+								bgpFamilyInet6Model.EnableChoice = types.ObjectValueMust(BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceModelAttributeMap, map[string]attr.Value{
+									"disable": types.BoolValue(true),
+									"enable":  types.ObjectNull(BgpPeersTypeChoiceExternalFamilyInetV6EnableChoiceEnableModelAttributeMap),
+								})
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
@@ -6526,70 +6388,6 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested EnumField --> NetworkType
-					{
-						if siteElement.GetNetworkType().String() != "" {
-							stringValue := types.StringValue(siteElement.GetNetworkType().String())
-							stringSlice := []types.String{stringValue}
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							siteAttributeMap["network_type"] = listValue
-						} else {
-							siteAttributeMap["network_type"] = types.ListNull(types.StringType)
-						}
-					}
-
 					// resource specToModelNested RequiredArrayOfPointerField --> Ref
 					if len(siteElement.GetRef()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
@@ -6660,70 +6458,6 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
-
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested EnumField --> NetworkType
-					{
-						if virtualSiteElement.GetNetworkType().String() != "" {
-							stringValue := types.StringValue(virtualSiteElement.GetNetworkType().String())
-							stringSlice := []types.String{stringValue}
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							virtualSiteAttributeMap["network_type"] = listValue
-						} else {
-							virtualSiteAttributeMap["network_type"] = types.ListNull(types.StringType)
-						}
-					}
 
 					// resource specToModelNested RequiredArrayOfPointerField --> Ref
 					if len(virtualSiteElement.GetRef()) > 0 {
@@ -6819,12 +6553,6 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 		data.Where = types.ObjectNull(BgpWhereModelAttributeMap)
 	}
 
-	// Restore prior state for Peers. The API redacts sensitive fields
-	// in GET responses. Preserve prior state to keep state consistent.
-	if !priorPeers.IsNull() && !priorPeers.IsUnknown() {
-		data.Peers = priorPeers
-	}
-
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -6834,6 +6562,12 @@ func (r *ResourceF5XCBgp) Read(ctx context.Context, request resource.ReadRequest
 }
 
 func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCBgpModel
@@ -6862,7 +6596,6 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planPeers := data.Peers
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -6939,6 +6672,9 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 		// resource modelToSpecRoot RequiredPointerField --> BgpParameters
 		if !data.BgpParameters.IsNull() && !data.BgpParameters.IsUnknown() {
 			bgpParametersSpec := &ves_io_schema_bgp.BgpParameters{}
+			bgpParametersSpec.RouterIdChoice = &ves_io_schema_bgp.BgpParameters_LocalAddress{
+				LocalAddress: &ves_io_schema.Empty{},
+			}
 			spec.BgpParameters = bgpParametersSpec
 			var bgpParametersModel BgpBgpParameters
 
@@ -6952,7 +6688,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 			// resource modelToSpecNested RequiredUintField --> Asn
 			bgpParametersSpec.Asn = uint32(uint32(bgpParametersModel.Asn.ValueInt64()))
 
-			// resource modelToSpecNested RequiredOneOfField --> RouterIdChoice
+			// resource modelToSpecNested OneOfField --> RouterIdChoice
 			if !bgpParametersModel.RouterIdChoice.IsNull() && !bgpParametersModel.RouterIdChoice.IsUnknown() {
 				bgpParametersRouterIdChoiceModel := BgpRouterIdChoice{}
 				response.Diagnostics.Append(bgpParametersModel.RouterIdChoice.As(ctx, &bgpParametersRouterIdChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6998,8 +6734,17 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 
 		for i, peersElement := range peersElementsModelToSpec {
 			peersSpec[i] = &ves_io_schema_bgp.Peer{}
+			peersSpec[i].BfdChoice = &ves_io_schema_bgp.Peer_BfdDisabled{
+				BfdDisabled: &ves_io_schema.Empty{},
+			}
+			peersSpec[i].EnableChoice = &ves_io_schema_bgp.Peer_Disable{
+				Disable: &ves_io_schema.Empty{},
+			}
+			peersSpec[i].PassiveChoice = &ves_io_schema_bgp.Peer_PassiveModeDisabled{
+				PassiveModeDisabled: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> BfdChoice
+			// resource modelToSpecNested OneOfField --> BfdChoice
 			if !peersElement.BfdChoice.IsNull() && !peersElement.BfdChoice.IsUnknown() {
 				peersBfdChoiceModel := BgpBfdChoice{}
 				response.Diagnostics.Append(peersElement.BfdChoice.As(ctx, &peersBfdChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7062,12 +6807,19 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> EnableChoice
+			// resource modelToSpecNested OneOfField --> EnableChoice
 			if !peersElement.EnableChoice.IsNull() && !peersElement.EnableChoice.IsUnknown() {
 				peersEnableChoiceModel := BgpEnableChoice{}
 				response.Diagnostics.Append(peersElement.EnableChoice.As(ctx, &peersEnableChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !peersEnableChoiceModel.Disable.IsNull() && !peersEnableChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_bgp.Peer_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					peersSpec[i].EnableChoice = disableSpecBool
 				}
 
 				// resource modelToSpecNested PointerOfOneOfField --> RoutingPolicies
@@ -7236,7 +6988,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PassiveChoice
+			// resource modelToSpecNested OneOfField --> PassiveChoice
 			if !peersElement.PassiveChoice.IsNull() && !peersElement.PassiveChoice.IsUnknown() {
 				peersPassiveChoiceModel := BgpPassiveChoice{}
 				response.Diagnostics.Append(peersElement.PassiveChoice.As(ctx, &peersPassiveChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7277,6 +7029,9 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 					}
 					externalOneOfSpec := &ves_io_schema_bgp.Peer_External{}
 					externalOneOfSpec.External = &ves_io_schema_bgp.PeerExternal{}
+					externalOneOfSpec.External.AddressChoiceV6 = &ves_io_schema_bgp.PeerExternal_DisableV6{
+						DisableV6: &ves_io_schema.Empty{},
+					}
 					peersSpec[i].TypeChoice = externalOneOfSpec
 
 					// resource modelToSpecNested RequiredOneOfField --> AddressChoice
@@ -7299,6 +7054,13 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 							defaultGatewaySpecBool := &ves_io_schema_bgp.PeerExternal_DefaultGateway{}
 							defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
 							externalOneOfSpec.External.AddressChoice = defaultGatewaySpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+						if !externalAddressChoiceModel.Disable.IsNull() && !externalAddressChoiceModel.Disable.IsUnknown() {
+							disableSpecBool := &ves_io_schema_bgp.PeerExternal_Disable{}
+							disableSpecBool.Disable = &ves_io_schema.Empty{}
+							externalOneOfSpec.External.AddressChoice = disableSpecBool
 						}
 
 						// resource modelToSpecNested BoolOfOneOfPointerField --> ExternalConnector
@@ -7331,7 +7093,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> AddressChoiceV6
+					// resource modelToSpecNested OneOfField --> AddressChoiceV6
 					if !bgpExternalModel.AddressChoiceV6Choice.IsNull() && !bgpExternalModel.AddressChoiceV6Choice.IsUnknown() {
 						externalAddressChoiceV6ChoiceModel := BgpAddrChoiceV6Choice{}
 						response.Diagnostics.Append(bgpExternalModel.AddressChoiceV6Choice.As(ctx, &externalAddressChoiceV6ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7429,6 +7191,13 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 								return
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+							if !familyInetEnableChoiceModel.Disable.IsNull() && !familyInetEnableChoiceModel.Disable.IsUnknown() {
+								disableSpecBool := &ves_io_schema_bgp.FamilyInet_Disable{}
+								disableSpecBool.Disable = &ves_io_schema.Empty{}
+								familyInetSpec.EnableChoice = disableSpecBool
+							}
+
 							// resource modelToSpecNested PointerOfOneOfField --> Enable
 							if !familyInetEnableChoiceModel.Enable.IsNull() && !familyInetEnableChoiceModel.Enable.IsUnknown() {
 								var bgpEnableModel BgpEnable
@@ -7482,10 +7251,13 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 											for iii, optionsElement := range optionsElements {
 												// Initialize the spec struct for the current element
 												enableOneOfSpec.Enable.Aggregation[ii].Options[iii] = &ves_io_schema_bgp.AggregationOption{}
+												enableOneOfSpec.Enable.Aggregation[ii].Options[iii].AggregationChoice = &ves_io_schema_bgp.AggregationOption_SummaryOnly{
+													SummaryOnly: &ves_io_schema.Empty{},
+												}
 
 												// Recursively process nested elements
 
-												// resource modelToSpecNested RequiredOneOfField --> AggregationChoice
+												// resource modelToSpecNested OneOfField --> AggregationChoice
 												if !optionsElement.AggregationChoice.IsNull() && !optionsElement.AggregationChoice.IsUnknown() {
 													optionsAggregationChoiceModel := BgpAggregationChoice{}
 													response.Diagnostics.Append(optionsElement.AggregationChoice.As(ctx, &optionsAggregationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7523,14 +7295,24 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 						}
 
 						familyInetV6Spec := &ves_io_schema_bgp.FamilyInet6{}
+						familyInetV6Spec.EnableChoice = &ves_io_schema_bgp.FamilyInet6_Disable{
+							Disable: &ves_io_schema.Empty{},
+						}
 						externalOneOfSpec.External.FamilyInetV6 = familyInetV6Spec
 
-						// resource modelToSpecNested RequiredOneOfField --> EnableChoice
+						// resource modelToSpecNested OneOfField --> EnableChoice
 						if !familyInetV6Model.EnableChoice.IsNull() && !familyInetV6Model.EnableChoice.IsUnknown() {
 							familyInetV6EnableChoiceModel := BgpFamilyInet6EnableChoice{}
 							response.Diagnostics.Append(familyInetV6Model.EnableChoice.As(ctx, &familyInetV6EnableChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+							if !familyInetV6EnableChoiceModel.Disable.IsNull() && !familyInetV6EnableChoiceModel.Disable.IsUnknown() {
+								disableSpecBool := &ves_io_schema_bgp.FamilyInet6_Disable{}
+								disableSpecBool.Disable = &ves_io_schema.Empty{}
+								familyInetV6Spec.EnableChoice = disableSpecBool
 							}
 
 							// resource modelToSpecNested PointerOfOneOfField --> Enable
@@ -7586,10 +7368,13 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 											for iii, optionsElement := range optionsElements {
 												// Initialize the spec struct for the current element
 												enableOneOfSpec.Enable.Aggregation[ii].Options[iii] = &ves_io_schema_bgp.AggregationOption{}
+												enableOneOfSpec.Enable.Aggregation[ii].Options[iii].AggregationChoice = &ves_io_schema_bgp.AggregationOption_SummaryOnly{
+													SummaryOnly: &ves_io_schema.Empty{},
+												}
 
 												// Recursively process nested elements
 
-												// resource modelToSpecNested RequiredOneOfField --> AggregationChoice
+												// resource modelToSpecNested OneOfField --> AggregationChoice
 												if !optionsElement.AggregationChoice.IsNull() && !optionsElement.AggregationChoice.IsUnknown() {
 													optionsAggregationChoiceModel := BgpAggregationChoice{}
 													response.Diagnostics.Append(optionsElement.AggregationChoice.As(ctx, &optionsAggregationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7744,55 +7529,10 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 					}
 					siteOneOfSpec := &ves_io_schema.SiteVirtualSiteRefSelector_Site{}
 					siteOneOfSpec.Site = &ves_io_schema.SiteRefType{}
+					siteOneOfSpec.Site.InternetVipChoice = &ves_io_schema.SiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = siteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !bgpSiteModel.InternetVipChoice.IsNull() && !bgpSiteModel.InternetVipChoice.IsUnknown() {
-						siteInternetVipChoiceModel := BgpInternetVipChoice{}
-						response.Diagnostics.Append(bgpSiteModel.InternetVipChoice.As(ctx, &siteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !siteInternetVipChoiceModel.DisableInternetVip.IsNull() && !siteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.SiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !siteInternetVipChoiceModel.EnableInternetVip.IsNull() && !siteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.SiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							siteOneOfSpec.Site.InternetVipChoice = enableInternetVipSpecBool
-						}
-
-					}
-
-					// resource modelToSpecNested EnumField --> NetworkType
-					if !bgpSiteModel.NetworkType.IsNull() && !bgpSiteModel.NetworkType.IsUnknown() {
-						var networkTypeTfStrings []types.String
-						diags = bgpSiteModel.NetworkType.ElementsAs(ctx, &networkTypeTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(networkTypeTfStrings) > 0 {
-							valStr := networkTypeTfStrings[0].ValueString()
-							if v, ok := ves_io_schema.VirtualNetworkType_value[valStr]; ok {
-								siteOneOfSpec.Site.NetworkType = ves_io_schema.VirtualNetworkType(v)
-							} else {
-								response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for NetworkType", valStr))
-								return
-							}
-						}
-					} else {
-						if v, ok := ves_io_schema.VirtualNetworkType_value["VIRTUAL_NETWORK_SITE_LOCAL"]; ok {
-							siteOneOfSpec.Site.NetworkType = ves_io_schema.VirtualNetworkType(v)
-						}
-					}
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> Ref
 					if !bgpSiteModel.Ref.IsNull() && !bgpSiteModel.Ref.IsUnknown() && len(bgpSiteModel.Ref.Elements()) > 0 {
@@ -7838,55 +7578,10 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 					}
 					virtualSiteOneOfSpec := &ves_io_schema.SiteVirtualSiteRefSelector_VirtualSite{}
 					virtualSiteOneOfSpec.VirtualSite = &ves_io_schema.VSiteRefType{}
+					virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = &ves_io_schema.VSiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = virtualSiteOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
-					if !bgpVirtualSiteModel.InternetVipChoice.IsNull() && !bgpVirtualSiteModel.InternetVipChoice.IsUnknown() {
-						virtualSiteInternetVipChoiceModel := BgpVSiteRefTypeInternetVipChoice{}
-						response.Diagnostics.Append(bgpVirtualSiteModel.InternetVipChoice.As(ctx, &virtualSiteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DisableInternetVip
-						if !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.DisableInternetVip.IsUnknown() {
-							disableInternetVipSpecBool := &ves_io_schema.VSiteRefType_DisableInternetVip{}
-							disableInternetVipSpecBool.DisableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = disableInternetVipSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> EnableInternetVip
-						if !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsNull() && !virtualSiteInternetVipChoiceModel.EnableInternetVip.IsUnknown() {
-							enableInternetVipSpecBool := &ves_io_schema.VSiteRefType_EnableInternetVip{}
-							enableInternetVipSpecBool.EnableInternetVip = &ves_io_schema.Empty{}
-							virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = enableInternetVipSpecBool
-						}
-
-					}
-
-					// resource modelToSpecNested EnumField --> NetworkType
-					if !bgpVirtualSiteModel.NetworkType.IsNull() && !bgpVirtualSiteModel.NetworkType.IsUnknown() {
-						var networkTypeTfStrings []types.String
-						diags = bgpVirtualSiteModel.NetworkType.ElementsAs(ctx, &networkTypeTfStrings, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						if len(networkTypeTfStrings) > 0 {
-							valStr := networkTypeTfStrings[0].ValueString()
-							if v, ok := ves_io_schema.VirtualNetworkType_value[valStr]; ok {
-								virtualSiteOneOfSpec.VirtualSite.NetworkType = ves_io_schema.VirtualNetworkType(v)
-							} else {
-								response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for NetworkType", valStr))
-								return
-							}
-						}
-					} else {
-						if v, ok := ves_io_schema.VirtualNetworkType_value["VIRTUAL_NETWORK_SITE_LOCAL"]; ok {
-							virtualSiteOneOfSpec.VirtualSite.NetworkType = ves_io_schema.VirtualNetworkType(v)
-						}
-					}
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> Ref
 					if !bgpVirtualSiteModel.Ref.IsNull() && !bgpVirtualSiteModel.Ref.IsUnknown() && len(bgpVirtualSiteModel.Ref.Elements()) > 0 {
@@ -7931,7 +7626,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -7939,24 +7634,20 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "bgp", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bgp", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "bgp", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bgp", err),
 		)
 		return
 	}
@@ -8081,8 +7772,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 		// resource specToModelNested RequiredUintField --> Asn
 		bgpBgpParametersModel.Asn = types.Int64Value(int64(bgpParametersElement.GetAsn()))
 
-		// resource specToModelNested RequiredOneOfField --> RouterIdChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> RouterIdChoice
 		if bgpParametersElement.GetRouterIdChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			bgpParametersrouterIdChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8160,8 +7850,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 		for _, peersElement := range specData.GetPeers() {
 			bgpPeerModel := BgpPeer{}
 
-			// resource specToModelNested RequiredOneOfField --> BfdChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> BfdChoice
 			if peersElement.GetBfdChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peersbfdChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8276,8 +7965,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 				bgpPeerModel.EbgpMultihopChoice = types.ObjectNull(BgpPeersEbgpMultihopChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> EnableChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> EnableChoice
 			if peersElement.GetEnableChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peersenableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8286,6 +7974,15 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 				peersenableChoiceChoices := peersElement.GetEnableChoice()
 
 				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Disable
+				_, isDisable := peersenableChoiceChoices.(*ves_io_schema_bgp.Peer_Disable)
+
+				if isDisable {
+					peersenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+				} else {
+					peersenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+				}
 
 				// resource specToModelNested PointerOfOneOfField --> RoutingPolicies
 				// GlobalSpecType
@@ -8573,8 +8270,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 				bgpPeerModel.Metadata = types.ObjectNull(BgpPeersMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> PassiveChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> PassiveChoice
 			if peersElement.GetPassiveChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				peerspassiveChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8672,6 +8368,15 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 								externaladdressChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
 							}
 
+							// resource specToModelNested BoolOfOneOfPointerField --> Disable
+							_, isDisable := externaladdressChoiceChoices.(*ves_io_schema_bgp.PeerExternal_Disable)
+
+							if isDisable {
+								externaladdressChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+							} else {
+								externaladdressChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+							}
+
 							// resource specToModelNested BoolOfOneOfPointerField --> ExternalConnector
 							_, isExternalConnector := externaladdressChoiceChoices.(*ves_io_schema_bgp.PeerExternal_ExternalConnector)
 
@@ -8729,8 +8434,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 							externalAttributeMap["address_choice"] = types.ObjectNull(BgpPeersTypeChoiceExternalAddressChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> AddressChoiceV6
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> AddressChoiceV6
 						if externalElement.GetAddressChoiceV6() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							externaladdressChoiceV6ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8902,6 +8606,15 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 
 								// Process nested choices, populating the temporary attribute map
 
+								// resource specToModelNested BoolOfOneOfPointerField --> Disable
+								_, isDisable := familyInetenableChoiceChoices.(*ves_io_schema_bgp.FamilyInet_Disable)
+
+								if isDisable {
+									familyInetenableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+								} else {
+									familyInetenableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+								}
+
 								// resource specToModelNested PointerOfOneOfField --> Enable
 								// GlobalSpecType
 								// false
@@ -8936,8 +8649,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 													for _, optionsElement := range aggregationElement.GetOptions() {
 														bgpAggregationOptionModel := BgpAggregationOption{}
 
-														// resource specToModelNested RequiredOneOfField --> AggregationChoice
-														// GlobalSpecType
+														// resource specToModelNested OneOfField --> AggregationChoice
 														if optionsElement.GetAggregationChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
 															optionsaggregationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9067,8 +8779,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> EnableChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> EnableChoice
 							if familyInetV6Element.GetEnableChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								familyInetV6enableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9077,6 +8788,15 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 								familyInetV6enableChoiceChoices := familyInetV6Element.GetEnableChoice()
 
 								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> Disable
+								_, isDisable := familyInetV6enableChoiceChoices.(*ves_io_schema_bgp.FamilyInet6_Disable)
+
+								if isDisable {
+									familyInetV6enableChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+								} else {
+									familyInetV6enableChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+								}
 
 								// resource specToModelNested PointerOfOneOfField --> Enable
 								// GlobalSpecType
@@ -9112,8 +8832,7 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 													for _, optionsElement := range aggregationElement.GetOptions() {
 														bgpAggregationOptionModel := BgpAggregationOption{}
 
-														// resource specToModelNested RequiredOneOfField --> AggregationChoice
-														// GlobalSpecType
+														// resource specToModelNested OneOfField --> AggregationChoice
 														if optionsElement.GetAggregationChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
 															optionsaggregationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9458,70 +9177,6 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(BgpWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested EnumField --> NetworkType
-					{
-						if siteElement.GetNetworkType().String() != "" {
-							stringValue := types.StringValue(siteElement.GetNetworkType().String())
-							stringSlice := []types.String{stringValue}
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							siteAttributeMap["network_type"] = listValue
-						} else {
-							siteAttributeMap["network_type"] = types.ListNull(types.StringType)
-						}
-					}
-
 					// resource specToModelNested RequiredArrayOfPointerField --> Ref
 					if len(siteElement.GetRef()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
@@ -9592,70 +9247,6 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
-
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(BgpWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested EnumField --> NetworkType
-					{
-						if virtualSiteElement.GetNetworkType().String() != "" {
-							stringValue := types.StringValue(virtualSiteElement.GetNetworkType().String())
-							stringSlice := []types.String{stringValue}
-							listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(listDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							virtualSiteAttributeMap["network_type"] = listValue
-						} else {
-							virtualSiteAttributeMap["network_type"] = types.ListNull(types.StringType)
-						}
-					}
 
 					// resource specToModelNested RequiredArrayOfPointerField --> Ref
 					if len(virtualSiteElement.GetRef()) > 0 {
@@ -9776,9 +9367,6 @@ func (r *ResourceF5XCBgp) Update(ctx context.Context, request resource.UpdateReq
 		}
 		data.Labels = mergedMap
 	}
-	// Restore plan value for Peers. The API redacts sensitive fields
-	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.Peers = planPeers
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -9826,7 +9414,7 @@ func (r *ResourceF5XCBgp) Delete(ctx context.Context, request resource.DeleteReq
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "bgp", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "bgp", err),
 		)
 		return
 	}

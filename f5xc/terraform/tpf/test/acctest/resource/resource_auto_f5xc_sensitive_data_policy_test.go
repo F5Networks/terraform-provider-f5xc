@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCSensitiveDataPolicy_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sensitive-policy-" + testAccRunSuffix(t)
+	name := "example-sensitive-policy-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -37,18 +37,18 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withDescription(name, namespace, "sensitive data policy basic updated")},
+			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withDescription(name, namespace, "sensitive data policy updated example")},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -58,7 +58,7 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_basic(t *testing.T) {
 func TestAccResourceAutoF5XCSensitiveDataPolicy_compliancesTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sensitive-policy-" + testAccRunSuffix(t)
+	name := "example-sensitive-policy-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -68,18 +68,18 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_compliancesTransition(t *testing
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withCompliances(name, namespace, []string{"PCI_DSS"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withCompliances(name, namespace, []string{"GDPR"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -89,7 +89,7 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_compliancesTransition(t *testing
 func TestAccResourceAutoF5XCSensitiveDataPolicy_compliancesMultiTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sensitive-policy-" + testAccRunSuffix(t)
+	name := "example-sensitive-policy-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -99,18 +99,18 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_compliancesMultiTransition(t *te
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withCompliances(name, namespace, []string{"HIPAA", "SOX"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withCompliances(name, namespace, []string{"CCPA", "GDPR"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -120,7 +120,7 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_compliancesMultiTransition(t *te
 func TestAccResourceAutoF5XCSensitiveDataPolicy_disabledPredefinedDataTypesTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sensitive-policy-" + testAccRunSuffix(t)
+	name := "example-sensitive-policy-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -130,18 +130,18 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_disabledPredefinedDataTypesTrans
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withDisabledPredefinedDataTypes(name, namespace, []string{"credit_card", "ssn"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_withDisabledPredefinedDataTypes(name, namespace, []string{"email", "phone"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -151,32 +151,36 @@ func TestAccResourceAutoF5XCSensitiveDataPolicy_disabledPredefinedDataTypesTrans
 func TestAccResourceAutoF5XCSensitiveDataPolicy_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sensitive-policy-" + testAccRunSuffix(t)
+	name := "example-sensitive-policy-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckSensitiveDataPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_full(name, namespace, "team-a", "test", []string{"PCI_DSS", "HIPAA"}, []string{"credit_card", "ssn"})},
+			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_full(name, namespace, "example-team", "example", []string{"PCI_DSS", "HIPAA"}, []string{"credit_card", "ssn"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
-			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_full(name, namespace, "team-b", "prod", []string{"GDPR", "CCPA"}, []string{"email", "phone"})},
+			{Config: testAccResourceAutoF5XCSensitiveDataPolicyConfig_full(name, namespace, "example-team-alt", "example", []string{"GDPR", "CCPA"}, []string{"email", "phone"})},
 			{
-				ResourceName:                         "f5xc_sensitive_data_policy.test",
+				ResourceName:                         "f5xc_sensitive_data_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_sensitive_data_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCSensitiveDataPolicyConfig_full("example-sensitive-data-policy", "default", "example-owner", "example", []string{"PCI_DSS", "HIPAA"}, []string{"credit_card", "ssn"}),
+		})
 }
 
 func testAccCheckSensitiveDataPolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -185,7 +189,7 @@ func testAccCheckSensitiveDataPolicyDestroyProducer(t *testing.T) func(*terrafor
 
 func testAccResourceAutoF5XCSensitiveDataPolicyConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_sensitive_data_policy" "test" {
+resource "f5xc_sensitive_data_policy" "example" {
   name      = %q
   namespace = %q
 }
@@ -194,7 +198,7 @@ resource "f5xc_sensitive_data_policy" "test" {
 
 func testAccResourceAutoF5XCSensitiveDataPolicyConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_sensitive_data_policy" "test" {
+resource "f5xc_sensitive_data_policy" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -204,7 +208,7 @@ resource "f5xc_sensitive_data_policy" "test" {
 
 func testAccResourceAutoF5XCSensitiveDataPolicyConfig_withCompliances(name, namespace string, compliances []string) string {
 	return fmt.Sprintf(`
-resource "f5xc_sensitive_data_policy" "test" {
+resource "f5xc_sensitive_data_policy" "example" {
   name        = %q
   namespace   = %q
   compliances = [%s]
@@ -214,19 +218,19 @@ resource "f5xc_sensitive_data_policy" "test" {
 
 func testAccResourceAutoF5XCSensitiveDataPolicyConfig_withDisabledPredefinedDataTypes(name, namespace string, disabledPredefined []string) string {
 	return fmt.Sprintf(`
-resource "f5xc_sensitive_data_policy" "test" {
+resource "f5xc_sensitive_data_policy" "example" {
   name        = %q
   namespace   = %q
   compliances = ["PCI_DSS"]
 
-	disabled_predefined_data_types = [%s]
+  disabled_predefined_data_types = [%s]
 }
 `, name, namespace, quoteHCLStrings(disabledPredefined))
 }
 
 func testAccResourceAutoF5XCSensitiveDataPolicyConfig_full(name, namespace, owner, env string, compliances, disabledPredefined []string) string {
 	return fmt.Sprintf(`
-resource "f5xc_sensitive_data_policy" "test" {
+resource "f5xc_sensitive_data_policy" "example" {
   name        = %q
   namespace   = %q
   description = "sensitive data policy full"
@@ -241,7 +245,7 @@ resource "f5xc_sensitive_data_policy" "test" {
 
   compliances = [%s]
 
-	disabled_predefined_data_types = [%s]
+  disabled_predefined_data_types = [%s]
 }
 `, name, namespace, env, owner, quoteHCLStrings(compliances), quoteHCLStrings(disabledPredefined))
 }

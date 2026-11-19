@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-waf-excl-" + testAccRunSuffix(t)
+	name := "example-waf-excl-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_description(name, namespace, "waf exclusion policy basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withDomainChoiceTransition(t *tes
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-waf-excl-" + testAccRunSuffix(t)
+	name := "example-waf-excl-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withDomainChoiceTransition(t *tes
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_domain_choice(name, namespace, "exact_value", "api.example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_domain_choice(name, namespace, "suffix_value", "example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withPathChoiceTransition(t *testi
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-waf-excl-" + testAccRunSuffix(t)
+	name := "example-waf-excl-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withPathChoiceTransition(t *testi
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_path_choice(name, namespace, "path_prefix", "/api"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_path_choice(name, namespace, "path_regex", "^/v[0-9]+/.*$"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withMethodsTransition(t *testing.
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-waf-excl-" + testAccRunSuffix(t)
+	name := "example-waf-excl-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withMethodsTransition(t *testing.
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_method(name, namespace, "ANY"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_method(name, namespace, "GET"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +168,7 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withWafActionTransition(t *testin
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-waf-excl-" + testAccRunSuffix(t)
+	name := "example-waf-excl-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,20 +179,20 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_withWafActionTransition(t *testin
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_waf_skip_processing(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_with_attack_type_context(name, namespace, "ATTACK_TYPE_SQL_INJECTION", "CONTEXT_PARAMETER"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -203,9 +203,9 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-waf-excl-" + testAccRunSuffix(t)
+	name := "example-waf-excl-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckWafExclusionPolicyDestroyProducer(t),
@@ -214,24 +214,28 @@ func TestAccResourceAutoF5XCWafExclusionPolicy_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_full(name, namespace, "VIOL_METHOD", "CONTEXT_URL"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCWafExclusionPolicyConfig_full(name, namespace, "VIOL_FILE_UPLOAD_IN_BODY", "CONTEXT_HEADER"),
 			},
 			{
-				ResourceName:                         "f5xc_waf_exclusion_policy.test",
+				ResourceName:                         "f5xc_waf_exclusion_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_waf_exclusion_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCWafExclusionPolicyConfig_full("example-waf-exclusion-policy", "default", "VIOL_METHOD", "CONTEXT_URL"),
+		})
 }
 
 func testAccCheckWafExclusionPolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -239,57 +243,155 @@ func testAccCheckWafExclusionPolicyDestroyProducer(t *testing.T) func(*terraform
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_basic(name, namespace string) string {
-	domainBlock := "any_domain = true"
-	pathBlock := "any_path = true"
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name      = %q
+  namespace = %q
 
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, "", "")
+  waf_exclusion_rules = [{
+    domain_choice = {
+      any_domain = true
+    }
+    path_choice = {
+      any_path = true
+    }
+    metadata = {
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
+    }
+  }]
+}
+`, name, namespace)
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_with_description(name, namespace, description string) string {
-	domainBlock := "any_domain = true"
-	pathBlock := "any_path = true"
-	extraTop := fmt.Sprintf("\n  description = %q", description)
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name        = %q
+  namespace   = %q
+  description = %q
 
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, "", extraTop)
+  waf_exclusion_rules = [{
+    domain_choice = {
+      any_domain = true
+    }
+    path_choice = {
+      any_path = true
+    }
+    metadata = {
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
+    }
+  }]
+}
+`, name, namespace, description)
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_with_domain_choice(name, namespace, domainKey, domainValue string) string {
-	domainBlock := fmt.Sprintf("%s = %q", domainKey, domainValue)
-	pathBlock := "any_path = true"
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name      = %q
+  namespace = %q
 
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, "", "")
+  waf_exclusion_rules = [{
+    domain_choice = {
+      %s = %q
+    }
+    path_choice = {
+      any_path = true
+    }
+    metadata = {
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
+    }
+  }]
+}
+`, name, namespace, domainKey, domainValue)
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_with_path_choice(name, namespace, pathKey, pathValue string) string {
-	domainBlock := "any_domain = true"
-	pathBlock := fmt.Sprintf("%s = %q", pathKey, pathValue)
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name      = %q
+  namespace = %q
 
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, "", "")
+  waf_exclusion_rules = [{
+    domain_choice = {
+      any_domain = true
+    }
+    path_choice = {
+      %s = %q
+    }
+    metadata = {
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
+    }
+  }]
+}
+`, name, namespace, pathKey, pathValue)
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_with_method(name, namespace, method string) string {
-	domainBlock := "any_domain = true"
-	pathBlock := "any_path = true"
-	methodsBlock := fmt.Sprintf("methods = [%q]", method)
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name      = %q
+  namespace = %q
 
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, methodsBlock, "")
+  waf_exclusion_rules = [{
+    domain_choice = {
+      any_domain = true
+    }
+    path_choice = {
+      any_path = true
+    }
+    methods = [%q]
+    metadata = {
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
+    }
+  }]
+}
+`, name, namespace, method)
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_with_waf_skip_processing(name, namespace string) string {
-	domainBlock := "any_domain = true"
-	pathBlock := "any_path = true"
-	advancedBlock := `
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name      = %q
+  namespace = %q
+
+  waf_exclusion_rules = [{
+    domain_choice = {
+      any_domain = true
+    }
+    path_choice = {
+      any_path = true
+    }
     waf_advanced_configuration_choice = {
       waf_skip_processing = true
-    }`
-
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, advancedBlock, "")
+    }
+    metadata = {
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
+    }
+  }]
+}
+`, name, namespace)
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_with_attack_type_context(name, namespace, attackType, contextType string) string {
-	domainBlock := "any_domain = true"
-	pathBlock := "path_prefix = \"/api\""
-	advancedBlock := fmt.Sprintf(`
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name      = %q
+  namespace = %q
+
+  waf_exclusion_rules = [{
+    domain_choice = {
+      any_domain = true
+    }
+    path_choice = {
+      path_prefix = "/api"
+    }
     waf_advanced_configuration_choice = {
       app_firewall_detection_control = {
         exclude_attack_type_contexts = [{
@@ -298,56 +400,54 @@ func testAccResourceAutoF5XCWafExclusionPolicyConfig_with_attack_type_context(na
           context_name        = "arg_user"
         }]
       }
-    }`, attackType, contextType)
-
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, advancedBlock, "")
+    }
+    metadata = {
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
+    }
+  }]
+}
+`, name, namespace, attackType, contextType)
 }
 
 func testAccResourceAutoF5XCWafExclusionPolicyConfig_full(name, namespace, violation, contextType string) string {
-	domainBlock := "exact_value = \"shop.example.com\""
-	pathBlock := "path_prefix = \"/checkout\""
-	methodsBlock := `methods = ["POST"]
-    expiration_timestamp = "2035-01-01T00:00:00Z"
-    waf_advanced_configuration_choice = {
-      app_firewall_detection_control = {
-        exclude_violation_contexts = [{
-          exclude_violation = ["` + violation + `"]
-          context           = ["` + contextType + `"]
-          context_name      = "hdr_xff"
-        }]
-      }
-    }`
-	extraTop := `
-  description = "waf exclusion full"
+	return fmt.Sprintf(`
+resource "f5xc_waf_exclusion_policy" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Waf exclusion policy full example"
+
   labels = {
-    env = "test"
+    env = "example"
   }
+
   annotations = {
     owner = "platform"
-  }`
-
-	return testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, methodsBlock, extraTop)
-}
-
-func testAccResourceAutoF5XCWafExclusionPolicyConfig_base(name, namespace, domainBlock, pathBlock, ruleOptionalBlock, extraTop string) string {
-	return fmt.Sprintf(`
-resource "f5xc_waf_exclusion_policy" "test" {
-  name      = %q
-  namespace = %q%s
+  }
 
   waf_exclusion_rules = [{
     domain_choice = {
-      %s
+      exact_value = "shop.example.com"
     }
     path_choice = {
-      %s
+      path_prefix = "/checkout"
+    }
+    methods               = ["POST"]
+    expiration_timestamp  = "2035-01-01T00:00:00Z"
+    waf_advanced_configuration_choice = {
+      app_firewall_detection_control = {
+        exclude_violation_contexts = [{
+          exclude_violation = [%q]
+          context           = [%q]
+          context_name      = "hdr_xff"
+        }]
+      }
     }
     metadata = {
-      name        = "rule-1"
-      description = "waf exclusion rule"
+      name        = "example-rule"
+      description = "Waf exclusion rule example"
     }
-    %s
   }]
 }
-`, name, namespace, extraTop, domainBlock, pathBlock, ruleOptionalBlock)
+`, name, namespace, violation, contextType)
 }

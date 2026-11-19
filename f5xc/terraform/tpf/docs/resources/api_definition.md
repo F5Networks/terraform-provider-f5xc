@@ -14,18 +14,137 @@
 page_title: "f5xc_api_definition Resource - F5 XC Distributed Cloud"
 subcategory: "API Security & Management"
 description: |-
-  api definition object api definition object The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs. Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.
+  The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs.<br>Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.<br>In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.
 ---
 
 # f5xc_api_definition (Resource)
 
-api definition object api definition object The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs. Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.
+The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs.<br>Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.<br>In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.
 
 To get more information about f5xc_api_definition, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/views-api-definition)
 
+## Example Usage
 
+```terraform
+# Example: Api Definition - Basic
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  api_inventory_inclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/v1/orders/{order_id}"
+    }
+  ]
+  schema_updates_strategy_choice = {
+    strict_schema_origin = true
+  }
+}
+```
+
+```terraform
+# Example: Api Definition - Exclusion List
+
+resource "f5xc_api_definition_uploader" "spec" {
+  metadata = {
+    name      = "example-api-definition-spec"
+    namespace = "shared"
+  }
+  string_value = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"Test API\",\"version\":\"1.0.0\"},\"paths\":{\"/2.0/repositories/{username}\":{\"get\":{\"operationId\":\"getRepositoriesByOwner\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"repos\"}}}},\"/2.0/repositories/{username}/{slug}/pullrequests/{pid}/merge\":{\"post\":{\"operationId\":\"mergePullRequest\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}},{\"name\":\"slug\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}},{\"name\":\"pid\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"204\":{\"description\":\"merged\"}}}}}}"
+}
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  swagger_specs = [f5xc_api_definition_uploader.spec.metadata.url]
+
+  api_inventory_exclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/2.0/repositories/{username}"
+    }
+  ]
+
+  schema_updates_strategy_choice = {
+    strict_schema_origin = true
+  }
+}
+```
+
+```terraform
+# Example: Api Definition - Full
+
+resource "f5xc_api_definition_uploader" "spec" {
+  metadata = {
+    name      = "example-api-definition-spec"
+    namespace = "shared"
+  }
+  string_value = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"Full Test API\",\"version\":\"1.0.0\"},\"paths\":{\"/2.0/users/{username}\":{\"get\":{\"operationId\":\"getUserByName\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"The User\"}}}},\"/2.0/repositories/{username}\":{\"get\":{\"operationId\":\"getRepositoriesByOwner\",\"parameters\":[{\"name\":\"username\",\"in\":\"path\",\"required\":true,\"schema\":{\"type\":\"string\"}}],\"responses\":{\"200\":{\"description\":\"repos\"}}}}}}"
+}
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  swagger_specs = [f5xc_api_definition_uploader.spec.metadata.url]
+
+  # Path is intentionally NOT present in the inline swagger above.
+  # Under mixed_schema_origin the API drops inclusion-list entries whose
+  # path is already declared in the swagger (auto-discovered), which
+  # causes a "provider produced inconsistent result after apply" error.
+  api_inventory_inclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/2.0/starred/{username}"
+    }
+  ]
+
+  non_api_endpoints = [
+    {
+      method = ["HEAD"]
+      path   = "/readyz"
+    }
+  ]
+
+  description = "API definition example"
+
+  labels = {
+    env = "example"
+  }
+
+  annotations = {
+    owner = "platform"
+  }
+
+  schema_updates_strategy_choice = {
+    mixed_schema_origin = true
+  }
+}
+```
+
+```terraform
+# Example: Api Definition - Inclusion List
+
+resource "f5xc_api_definition" "example" {
+  name      = "example-api-definition"
+  namespace = "shared"
+
+  api_inventory_inclusion_list = [
+    {
+      method = ["GET"]
+      path   = "/v1/orders/{order_id}"
+    }
+  ]
+  schema_updates_strategy_choice = {
+    strict_schema_origin = true
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -34,7 +153,6 @@ To get more information about f5xc_api_definition, refer:
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `schema_updates_strategy_choice` (Attributes) schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas. (see [below for nested schema](#nestedatt--schema_updates_strategy_choice))
 
 ### Optional
 
@@ -44,21 +162,13 @@ To get more information about f5xc_api_definition, refer:
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `non_api_endpoints` (Attributes List) non_api_endpoints List of Non-API Endpoints. (see [below for nested schema](#nestedatt--non_api_endpoints))
+- `schema_updates_strategy_choice` (Attributes) schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.<br>Exactly one of `mixed_schema_origin` or `strict_schema_origin` must be specified when `schema_updates_strategy_choice` is configured. (see [below for nested schema](#nestedatt--schema_updates_strategy_choice))
 - `swagger_specs` (List of String) swagger_specs Define your application API by single or multiple OpenAPI files. 1. Upload your OpenAPI files via Web App & API Protection-> Files-> Swagger Files. 2. Select from the list of uploaded files. Notice file versions. If OpenAPI file is updated, need to select a new version here to redefine the API.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
-
-<a id="nestedatt--schema_updates_strategy_choice"></a>
-### Nested Schema for `schema_updates_strategy_choice`
-
-Optional:
-
-- `mixed_schema_origin` (Boolean) mixed_schema_origin The schema can be updated from all associated LBs
-- `strict_schema_origin` (Boolean) strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint
-
 
 <a id="nestedatt--api_inventory_exclusion_list"></a>
 ### Nested Schema for `api_inventory_exclusion_list`
@@ -87,6 +197,15 @@ Required:
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
+<a id="nestedatt--schema_updates_strategy_choice"></a>
+### Nested Schema for `schema_updates_strategy_choice`
+
+Optional:
+
+- `mixed_schema_origin` (Boolean) mixed_schema_origin The schema can be updated from all associated LBs<br>Conflicts with `strict_schema_origin`.
+- `strict_schema_origin` (Boolean) strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint<br>Conflicts with `mixed_schema_origin`.
+
+
 <a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
@@ -102,7 +221,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -110,13 +229,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_api_definition.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_api_definition.example"
+	to = f5xc_api_definition.example
 }
 ```

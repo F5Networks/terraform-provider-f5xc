@@ -209,6 +209,68 @@ func TestPlanModifyList_ChangedConfiguredRRSetUsesPlannedValue(t *testing.T) {
 	assert.False(t, resp.Diagnostics.HasError())
 }
 
+// TestPlanModifyList_RRSetGroup_ConfigNullStatePresentPlansNull verifies that removing
+// a non-computed rr_set_group list from HCL (config null, state non-null) plans to null
+// rather than unknown so Terraform does not reject the plan.
+//
+// Why: In f5xc_dns_zone, rr_set_group is Optional: true, Computed: false. Returning an
+// unknown plan value for a non-computed attribute when it is removed from configuration
+// is rejected by Terraform core.
+//
+// How: Constructs an rr_set_group element type (containing "metadata" and "rr_set"),
+// populates state with one group while config is null, and asserts PlanValue.IsNull().
+//
+// Parameters:
+//   - t: testing context.
+//
+// Returns:
+//   - None.
+func TestPlanModifyList_RRSetGroup_ConfigNullStatePresentPlansNull(t *testing.T) {
+	m := rrsetListMergeModifier{}
+
+	groupElemType := types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"metadata": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"name":        types.StringType,
+					"description": types.StringType,
+				},
+			},
+			"rr_set": types.ListType{ElemType: types.ObjectType{AttrTypes: rrsetAttrTypes()}},
+		},
+	}
+
+	metaObj, diags := types.ObjectValue(
+		map[string]attr.Type{
+			"name":        types.StringType,
+			"description": types.StringType,
+		},
+		map[string]attr.Value{
+			"name":        types.StringValue("g1"),
+			"description": types.StringNull(),
+		},
+	)
+	require.False(t, diags.HasError())
+
+	groupObj, diags := types.ObjectValue(
+		groupElemType.AttrTypes,
+		map[string]attr.Value{
+			"metadata": metaObj,
+			"rr_set":   rrsetList(t, aRecordRRSet(t, "www.example.com", "1.2.3.4")),
+		},
+	)
+	require.False(t, diags.HasError())
+
+	nullList := types.ListNull(groupElemType)
+	stateList, diags := types.ListValue(groupElemType, []attr.Value{groupObj})
+	require.False(t, diags.HasError())
+
+	resp := runPlanModifyListWithPlan(t, m, nullList, stateList, nullList)
+	assert.True(t, resp.PlanValue.IsNull())
+	assert.False(t, resp.PlanValue.IsUnknown())
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
 // runPlanModifyList executes the modifier with the given config/state list values.
 func runPlanModifyList(t *testing.T, modifier rrsetListMergeModifier, configValue, stateValue types.List) *planmodifier.ListResponse {
 	t.Helper()

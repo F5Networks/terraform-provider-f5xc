@@ -25,13 +25,6 @@ import (
 	context "context"
 	encoding_binary "encoding/binary"
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
-
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -50,6 +43,12 @@ import (
 	vk8s_audit_log "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/log/vk8s_audit_log"
 	vk8s_events "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/log/vk8s_events"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

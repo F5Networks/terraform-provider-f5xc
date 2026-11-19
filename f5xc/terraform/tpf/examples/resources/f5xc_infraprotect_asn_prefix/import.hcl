@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_infraprotect_asn_prefix.example"
+	to = f5xc_infraprotect_asn_prefix.example
 }

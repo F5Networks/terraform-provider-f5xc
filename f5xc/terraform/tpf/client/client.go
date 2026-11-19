@@ -16,6 +16,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -32,6 +34,16 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 )
 
+var (
+	// providerBinaryVersionRE extracts X.Y.Z from provider binaries or install paths.
+	providerBinaryVersionRE = regexp.MustCompile(`(\d+\.\d+\.\d+)`)
+	// providerBinaryNameRE extracts terraform-provider-<name> from the binary name.
+	providerBinaryNameRE    = regexp.MustCompile(`^(terraform-provider-[^_]+)`)
+	defaultProviderName     = "terraform-provider-f5xc"
+	defaultProviderVersion  = "dev"
+	defaultTerraformVersion = "unknown"
+)
+
 // Authenticator is the Strategy interface.
 // All authentication methods must implement this.
 type Authenticator interface {
@@ -44,6 +56,7 @@ type Authenticator interface {
 type AuthClient struct {
 	URL              string
 	Authenticator    Authenticator
+	UserAgent        string
 	ThrottlePolicy   throttlingPolicy
 	ThrottleRegistry *ResourceThrottleRegistry
 }
@@ -73,22 +86,24 @@ type ClientTimeouts struct {
 
 // ProviderConfig data for f5xc provider
 type ProviderConfig struct {
-	Url            string            // The base URL for the F5XC API endpoint.
-	Test           bool              // Indicates whether the provider is running in test mode.
-	Vesenv         bool              // Specifies if the provider is running in a Ves environment.
-	tenant         string            // The tenant identifier for API requests.
-	Timeout        string            // The timeout duration for API requests, as a string (e.g., "30s").
-	TimeoutCreate  string            // Default timeout for Create operations (e.g. "10m"). Falls back to resource default if empty.
-	TimeoutRead    string            // Default timeout for Read operations (e.g. "5m"). Falls back to resource default if empty.
-	TimeoutUpdate  string            // Default timeout for Update operations (e.g. "10m"). Falls back to resource default if empty.
-	TimeoutDelete  string            // Default timeout for Delete operations (e.g. "10m"). Falls back to resource default if empty.
-	Throttling     *ThrottlingConfig // Backend-driven request throttling configuration.
-	ApiCert        string            // The path to the API client certificate file.
-	ApiKey         string            // The path to the API client key file.
-	ApiToken       string            // The API token used for authentication.
-	ApiCACert      string            // The path to the CA certificate file for API requests.
-	ApiP12File     string            // The path to the PKCS#12 file containing client credentials.
-	ApiP12Password string            // The password for the PKCS#12 file.
+	Url              string            // The base URL for the F5XC API endpoint.
+	Test             bool              // Indicates whether the provider is running in test mode.
+	TerraformVersion string            // The Terraform CLI version driving provider Configure.
+	ProviderVersion  string            // The provider version injected at build time (e.g., "2.1.0" or "dev").
+	Vesenv           bool              // Specifies if the provider is running in a Ves environment.
+	tenant           string            // The tenant identifier for API requests.
+	Timeout          string            // The timeout duration for API requests, as a string (e.g., "30s").
+	TimeoutCreate    string            // Default timeout for Create operations (e.g. "10m"). Falls back to resource default if empty.
+	TimeoutRead      string            // Default timeout for Read operations (e.g. "5m"). Falls back to resource default if empty.
+	TimeoutUpdate    string            // Default timeout for Update operations (e.g. "10m"). Falls back to resource default if empty.
+	TimeoutDelete    string            // Default timeout for Delete operations (e.g. "10m"). Falls back to resource default if empty.
+	Throttling       *ThrottlingConfig // Backend-driven request throttling configuration.
+	ApiCert          string            // The path to the API client certificate file.
+	ApiKey           string            // The path to the API client key file.
+	ApiToken         string            // The API token used for authentication.
+	ApiCACert        string            // The path to the CA certificate file for API requests.
+	ApiP12File       string            // The path to the PKCS#12 file containing client credentials.
+	ApiP12Password   string            // The password for the PKCS#12 file.
 }
 
 // APIClient embeds vesapi.APIClient
@@ -115,6 +130,16 @@ type ResourceF5XCApiDefinitionUploaderApiModel struct {
 	StringValue string                                               `json:"string_value"`
 }
 
+// ResourceF5XCApiDefinitionUploaderCreateRequest represents the PUT request payload for F5 XC Object Store CreateObject.
+// Unlike CreateObjectResponse and GetObjectResponse (which nest StoredObjectDescriptor under metadata),
+// ves.io.schema.stored_object.CreateObjectRequest accepts description as a top-level JSON field and
+// accepts either string_value or bytes_value (Base64) under the contents oneof.
+type ResourceF5XCApiDefinitionUploaderCreateRequest struct {
+	Description string `json:"description,omitempty"`  // Human-readable description for the stored object version.
+	StringValue string `json:"string_value,omitempty"` // Raw OpenAPI specification content.
+	BytesValue  string `json:"bytes_value,omitempty"`  // Base64-encoded OpenAPI specification content.
+}
+
 // Supported CRUD operations
 const (
 	Create = iota
@@ -124,11 +149,118 @@ const (
 )
 
 // NewAuthClient creates a new client with a specified authentication strategy.
-func NewAuthClient(url string, auth Authenticator) *AuthClient {
+func NewAuthClient(url string, auth Authenticator, userAgent string) *AuthClient {
 	return &AuthClient{
 		URL:           url,
 		Authenticator: auth,
+		UserAgent:     userAgent,
 	}
+}
+
+// providerBinaryInfo extracts the provider name and version from the running binary path.
+//
+// Why: The Terraform provider needs to identify itself in User-Agent headers and logs.
+// The binary name and path may contain version information that helps track which
+// provider version is executing a request.
+//
+// How: It attempts to extract the provider name from the binary filename using the
+// providerBinaryNameRE regex. It then looks for version strings matching the pattern
+// X.Y.Z in both the binary name and the full executable path. If extraction fails at
+// any step, it falls back to default constants.
+//
+// Parameters: none
+//
+// Returns:
+//   - string: the provider name (e.g., "terraform-provider-f5xc"), or defaultProviderName
+//   - string: the provider version (e.g., "1.2.3"), or defaultProviderVersion
+//
+// Example:
+//
+//	name, version := providerBinaryInfo()
+//	// name: "terraform-provider-f5xc", version: "1.0.0"
+func providerBinaryInfo() (string, string) {
+	execPath, err := os.Executable()
+	if err != nil {
+		return defaultProviderName, defaultProviderVersion
+	}
+
+	binaryName := strings.TrimSuffix(filepath.Base(execPath), filepath.Ext(execPath))
+	if binaryName == "" {
+		return defaultProviderName, defaultProviderVersion
+	}
+
+	name := defaultProviderName
+	if matches := providerBinaryNameRE.FindStringSubmatch(binaryName); len(matches) > 1 {
+		name = matches[1]
+	}
+
+	if matches := providerBinaryVersionRE.FindStringSubmatch(binaryName); len(matches) > 1 {
+		return name, matches[1]
+	}
+
+	if matches := providerBinaryVersionRE.FindStringSubmatch(execPath); len(matches) > 1 {
+		return name, matches[1]
+	}
+
+	return name, defaultProviderVersion
+}
+
+// providerUserAgent constructs a User-Agent header value for API requests using binary path heuristics.
+//
+// Why: HTTP User-Agent headers identify the client making requests to the API.
+// This is essential for server-side logging, monitoring, and debugging to know
+// which version of the provider is making requests.
+//
+// How: It delegates to providerUserAgentWithVersion with an empty configured
+// provider version so that binary path extraction is used.
+//
+// Parameters:
+//   - terraformVersion: the Terraform CLI version string (may be empty or contain whitespace)
+//
+// Returns:
+//   - string: a User-Agent string suitable for HTTP request headers
+//
+// Example:
+//
+//	userAgent := providerUserAgent("1.5.0")
+//	// Returns: "terraform/1.5.0 terraform-provider-f5xc/1.0.0"
+func providerUserAgent(terraformVersion string) string {
+	return providerUserAgentWithVersion(terraformVersion, "")
+}
+
+// providerUserAgentWithVersion constructs a User-Agent header value preferring an explicit provider version.
+//
+// Why: When the provider version is injected at build time via -ldflags, using it
+// directly is more reliable than parsing the executable file path, which fails in
+// local development builds, test binaries, or custom plugin cache layouts.
+//
+// How: It normalizes terraformVersion (falling back to defaultTerraformVersion if empty)
+// and queries providerBinaryInfo() for the binary name and path-derived version. If
+// configuredProviderVersion is non-empty and not equal to defaultProviderVersion ("dev"),
+// it strips any leading "v" prefix and overrides the path-derived version.
+//
+// Parameters:
+//   - terraformVersion:          the Terraform CLI version string
+//   - configuredProviderVersion: the build-time provider version from ProviderConfig
+//
+// Returns:
+//   - string: formatted User-Agent header ("terraform/<tfVersion> <providerName>/<providerVersion>")
+//
+// Example:
+//
+//	ua := providerUserAgentWithVersion("1.8.0", "v2.1.0")
+//	// ua == "terraform/1.8.0 terraform-provider-f5xc/2.1.0"
+func providerUserAgentWithVersion(terraformVersion, configuredProviderVersion string) string {
+	terraformVersion = strings.TrimSpace(terraformVersion)
+	if terraformVersion == "" {
+		terraformVersion = defaultTerraformVersion
+	}
+	providerName, providerVersion := providerBinaryInfo()
+	configured := strings.TrimPrefix(strings.TrimSpace(configuredProviderVersion), "v")
+	if configured != "" && configured != defaultProviderVersion {
+		providerVersion = configured
+	}
+	return fmt.Sprintf("terraform/%s %s/%s", terraformVersion, providerName, providerVersion)
 }
 
 // NewAPITokenAuth creates and initializes a new APITokenAuth instance for API token-based authentication.
@@ -144,6 +276,9 @@ func NewAPITokenAuth(token string, timeout time.Duration) *APITokenAuth {
 		Client: &http.Client{
 			Transport: wrapTransportForVCR(&http.Transport{
 				Proxy: http.ProxyFromEnvironment,
+				TLSClientConfig: &tls.Config{
+					MinVersion: tls.VersionTLS12,
+				},
 			}),
 			Timeout: timeout,
 		},
@@ -163,7 +298,11 @@ func NewAPITokenAuth(token string, timeout time.Duration) *APITokenAuth {
 //   - *tls.Config: A TLS configuration with the client certificate loaded.
 //   - error: Any error encountered while reading or decoding the file.
 func buildTLSConfigFromP12(p12Path, password string) (*tls.Config, error) {
-	filePath := strings.TrimPrefix(p12Path, "file:///")
+	filePath := filepath.Clean(strings.TrimPrefix(p12Path, "file:///"))
+	if strings.ContainsRune(filePath, 0) {
+		return nil, fmt.Errorf("invalid p12 path: contains null byte")
+	}
+	// #nosec G304 -- filePath is cleaned via filepath.Clean and validated to contain no null bytes
 	p12Data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read p12 file: %w", err)
@@ -187,11 +326,11 @@ func buildTLSConfigFromP12(p12Path, password string) (*tls.Config, error) {
 	// Build the certificate chain PEM: end-entity cert first, then CA certs
 	var certPEMBuf bytes.Buffer
 	if errPemChain := pem.Encode(&certPEMBuf, &pem.Block{Type: "CERTIFICATE", Bytes: endEntityCert.Raw}); errPemChain != nil {
-		return nil, fmt.Errorf("failed to encode end-entity certificate from p12: %w", err)
+		return nil, fmt.Errorf("failed to encode end-entity certificate from p12: %w", errPemChain)
 	}
 	for _, caCert := range caCerts {
 		if errCaCert := pem.Encode(&certPEMBuf, &pem.Block{Type: "CERTIFICATE", Bytes: caCert.Raw}); errCaCert != nil {
-			return nil, fmt.Errorf("failed to encode CA certificate from p12: %w", err)
+			return nil, fmt.Errorf("failed to encode CA certificate from p12: %w", errCaCert)
 		}
 	}
 
@@ -202,6 +341,7 @@ func buildTLSConfigFromP12(p12Path, password string) (*tls.Config, error) {
 
 	return &tls.Config{
 		Certificates: []tls.Certificate{clientCert},
+		MinVersion:   tls.VersionTLS12,
 	}, nil
 }
 
@@ -266,6 +406,9 @@ func (a *APITokenAuth) GetClient() *http.Client {
 		Timeout: 10 * time.Second,
 		Transport: wrapTransportForVCR(&http.Transport{
 			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				MinVersion: tls.VersionTLS12,
+			},
 		}),
 	}
 
@@ -336,8 +479,13 @@ func (ac *AuthClient) Execute(ctx context.Context, method, url string, body []by
 		return nil, fmt.Errorf("error applying authentication: %w", err)
 	}
 
+	userAgent := ac.UserAgent
+	if userAgent == "" {
+		userAgent = providerUserAgent("")
+	}
+
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "F5XC-Terraform-Provider/1.0.0 (Go-Client)")
+	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := ac.Authenticator.GetClient()
@@ -345,10 +493,21 @@ func (ac *AuthClient) Execute(ctx context.Context, method, url string, body []by
 
 	tflog.Info(ctx, fmt.Sprintf("Method: %s URL: %s", method, url))
 	tflog.Info(ctx, fmt.Sprintf("Req URL: %s", req.URL.String()))
-	tflog.Info(ctx, fmt.Sprintf("Req Header: %s", req.Header))
+	sanitizedHeader := req.Header.Clone()
+	if sanitizedHeader.Get("Authorization") != "" {
+		sanitizedHeader.Set("Authorization", "APIToken [REDACTED]")
+	}
+	if sanitizedHeader.Get("X-Volterra-Token") != "" {
+		sanitizedHeader.Set("X-Volterra-Token", "[REDACTED]")
+	}
+	if sanitizedHeader.Get("Cookie") != "" {
+		sanitizedHeader.Set("Cookie", "[REDACTED]")
+	}
+	tflog.Debug(ctx, fmt.Sprintf("Req Header: %v", sanitizedHeader))
 
 	resourceKey := resolveRequestResourceKey(req)
 	resp, err := doRequestWithThrottling(ctx, req, resourceKey, ac.ThrottlePolicy, ac.ThrottleRegistry, func(attemptReq *http.Request) (*http.Response, error) {
+		// #nosec G704 -- HTTP client executes requests to provider-configured F5 XC API endpoints
 		return client.Do(attemptReq)
 	})
 	if err != nil {
@@ -367,15 +526,13 @@ func (ac *AuthClient) Execute(ctx context.Context, method, url string, body []by
 		return nil, fmt.Errorf("error reading response body: %v", readErr)
 	}
 
-	// Log the full status string and code
-	tflog.Info(ctx, fmt.Sprintf("DEBUG: Response Status: %s", resp.Status))
-	tflog.Info(ctx, fmt.Sprintf("DEBUG: Response Code: %d", resp.StatusCode))
-
-	// Use string(respBody) to convert the []byte to a string
-	tflog.Info(ctx, fmt.Sprintf("DEBUG: Full Response Body: %s", string(respBody)))
+	tflog.Debug(ctx, fmt.Sprintf("Response Status: %s (Code: %d)", resp.Status, resp.StatusCode))
 
 	if resp.StatusCode != http.StatusOK {
 		tflog.Error(ctx, fmt.Sprintf("API call returned status %s. Body: %s", resp.Status, string(respBody)))
+		if len(respBody) > 0 {
+			return nil, fmt.Errorf("API call returned status %s: %s", resp.Status, strings.TrimSpace(string(respBody)))
+		}
 		return nil, fmt.Errorf("API call returned status %s", resp.Status)
 	}
 
@@ -480,16 +637,61 @@ func serviceSlugFromContext(ctx context.Context) string {
 //   - rsp: The *http.Response received from the server.
 //   - err: Any error encountered during the request.
 func logAndRoundTrip(rt http.RoundTripper, req *http.Request) (*http.Response, error) {
-	curlOut, err := http2curl.GetCurlCommand(req)
-	if err == nil {
-		log.Printf("[TRACE] Request Sent: \n%s\n", curlOut)
+	if reqForCurl := req.Clone(req.Context()); reqForCurl != nil {
+		if req.Body != nil {
+			var bodyBytes []byte
+			if req.GetBody != nil {
+				if rc, err := req.GetBody(); err == nil {
+					bodyBytes, _ = io.ReadAll(rc)
+					_ = rc.Close()
+				}
+			} else {
+				var err error
+				bodyBytes, err = io.ReadAll(req.Body)
+				if err != nil {
+					bodyBytes = nil
+				}
+			}
+			// Independent reader for the real network request
+			req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+			req.GetBody = func() (io.ReadCloser, error) {
+				return io.NopCloser(bytes.NewReader(bodyBytes)), nil
+			}
+			// Independent reader for the curl logger
+			reqForCurl.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+			reqForCurl.GetBody = func() (io.ReadCloser, error) {
+				return io.NopCloser(bytes.NewReader(bodyBytes)), nil
+			}
+		}
+
+		if reqForCurl.Header.Get("Authorization") != "" {
+			reqForCurl.Header.Set("Authorization", "APIToken [REDACTED]")
+		}
+		if reqForCurl.Header.Get("X-Volterra-Token") != "" {
+			reqForCurl.Header.Set("X-Volterra-Token", "[REDACTED]")
+		}
+		if reqForCurl.Header.Get("Cookie") != "" {
+			reqForCurl.Header.Set("Cookie", "[REDACTED]")
+		}
+		if curlOut, err := http2curl.GetCurlCommand(reqForCurl); err == nil {
+			// #nosec G706 -- trace request curl output for debugging
+			log.Printf("[TRACE] Request Sent: \n%s\n", curlOut)
+		}
 	}
 
 	rsp, err := wrapTransportForVCR(rt).RoundTrip(req)
 	if err != nil {
+		// #nosec G706 -- trace error log for debugging
 		log.Printf("[TRACE] Response Error: \n%s\n", err.Error())
 	} else {
-		if out, httpErr := httputil.DumpResponse(rsp, true); httpErr == nil {
+		rspForDump := *rsp
+		rspForDump.Header = rsp.Header.Clone()
+		if rspForDump.Header.Get("Set-Cookie") != "" {
+			rspForDump.Header.Set("Set-Cookie", "[REDACTED]")
+		}
+		if out, httpErr := httputil.DumpResponse(&rspForDump, true); httpErr == nil {
+			rsp.Body = rspForDump.Body
+			// #nosec G706 -- trace response log for debugging
 			log.Printf("[TRACE] Response Output:\n%s\n", out)
 		}
 	}
@@ -504,7 +706,7 @@ func logAndRoundTrip(rt http.RoundTripper, req *http.Request) (*http.Response, e
 // Returns:
 //   - *http.Response: The HTTP response received from the server.
 //   - error: Any error encountered during the request or remapping process.
-func prismURIRemapperFn(apiGwURL string, policy throttlingPolicy, registry *ResourceThrottleRegistry) (stdlibClient.RoundTripperFunc, error) {
+func prismURIRemapperFn(apiGwURL, userAgent string, policy throttlingPolicy, registry *ResourceThrottleRegistry) (stdlibClient.RoundTripperFunc, error) {
 	u, err := url.Parse(apiGwURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Parsing apigw url %s", apiGwURL)
@@ -512,6 +714,7 @@ func prismURIRemapperFn(apiGwURL string, policy throttlingPolicy, registry *Reso
 	rtFn := func(req *http.Request, rt http.RoundTripper) (*http.Response, error) {
 		resourceKey := resolveRequestResourceKey(req)
 		return doRequestWithThrottling(req.Context(), req, resourceKey, policy, registry, func(attemptReq *http.Request) (*http.Response, error) {
+			attemptReq.Header.Set("User-Agent", userAgent)
 			// convert https://x.y.volterra.us/api + /public/some/thing/here to
 			//         https://x.y.volterra.us/api/config/some/thing/here
 			srvURI := u.Path
@@ -549,10 +752,11 @@ func prismURIRemapperFn(apiGwURL string, policy throttlingPolicy, registry *Reso
 // Returns:
 //   - *http.Response: The HTTP response received from the server.
 //   - error: Any error encountered during the request or remapping process.
-func uriRemapperFn(tenant string, policy throttlingPolicy, registry *ResourceThrottleRegistry) stdlibClient.RoundTripperFunc {
+func uriRemapperFn(tenant, userAgent string, policy throttlingPolicy, registry *ResourceThrottleRegistry) stdlibClient.RoundTripperFunc {
 	rtFn := func(req *http.Request, rt http.RoundTripper) (*http.Response, error) {
 		resourceKey := resolveRequestResourceKey(req)
 		return doRequestWithThrottling(req.Context(), req, resourceKey, policy, registry, func(attemptReq *http.Request) (*http.Response, error) {
+			attemptReq.Header.Set("User-Agent", userAgent)
 			attemptReq.Header.Set(server.TenantHdrName, tenant)
 			return logAndRoundTrip(rt, attemptReq)
 		})
@@ -568,12 +772,13 @@ func uriRemapperFn(tenant string, policy throttlingPolicy, registry *ResourceThr
 // Returns:
 //   - []VesAPIClientOpt: A slice of client options to be used when creating a VesAPI client.
 func getClientOpts(c *ProviderConfig, policy throttlingPolicy, registry *ResourceThrottleRegistry) ([]vesapi.ConfigOpt, error) {
-	remapperFn, err := prismURIRemapperFn(c.Url, policy, registry)
+	userAgent := providerUserAgentWithVersion(c.TerraformVersion, c.ProviderVersion)
+	remapperFn, err := prismURIRemapperFn(c.Url, userAgent, policy, registry)
 	if err != nil {
 		return nil, err
 	}
 	if c.Vesenv {
-		remapperFn = uriRemapperFn(c.tenant, policy, registry)
+		remapperFn = uriRemapperFn(c.tenant, userAgent, policy, registry)
 	}
 
 	dur, err := time.ParseDuration(c.Timeout)
@@ -636,8 +841,10 @@ func NewVesAPIClient(c *ProviderConfig) (*APIClient, error) {
 		return nil, errors.Wrap(err, "Building client options")
 	}
 
+	userAgent := providerUserAgentWithVersion(c.TerraformVersion, c.ProviderVersion)
+
 	if c.Test {
-		clOpts, err = getTestClientOpts(c.Url, c.tenant)
+		clOpts, err = getTestClientOpts(c.Url, c.tenant, userAgent)
 		if err != nil {
 			return nil, errors.Wrap(err, "Building client options")
 		}
@@ -652,7 +859,7 @@ func NewVesAPIClient(c *ProviderConfig) (*APIClient, error) {
 
 	if c.ApiToken != "" {
 		tokenAuth := NewAPITokenAuth(c.ApiToken, 5*time.Second)
-		authClient = NewAuthClient(c.Url, tokenAuth)
+		authClient = NewAuthClient(c.Url, tokenAuth, userAgent)
 	}
 
 	if c.ApiP12File != "" && c.ApiP12Password != "" {
@@ -660,7 +867,7 @@ func NewVesAPIClient(c *ProviderConfig) (*APIClient, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "Creating new F5XC APIClient")
 		}
-		authClient = NewAuthClient(c.Url, p12Auth)
+		authClient = NewAuthClient(c.Url, p12Auth, userAgent)
 	}
 	if authClient != nil {
 		authClient.ThrottlePolicy = throttlingPolicy

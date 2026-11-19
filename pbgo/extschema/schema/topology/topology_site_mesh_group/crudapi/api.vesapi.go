@@ -3267,7 +3267,6 @@ var APISwaggerJSON string = `{
             "description": "Defines different types of Mesh\n\nInvalid mesh type\nMesh of type Hub\nMesh of type Spoke\nFull mesh of tunnels are created between all sites",
             "title": "Site Mesh Group Type",
             "enum": [
-                "SITE_MESH_GROUP_TYPE_INVALID",
                 "SITE_MESH_GROUP_TYPE_HUB_FULL_MESH",
                 "SITE_MESH_GROUP_TYPE_SPOKE",
                 "SITE_MESH_GROUP_TYPE_FULL_MESH"

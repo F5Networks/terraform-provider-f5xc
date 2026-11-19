@@ -68,8 +68,8 @@ func (d *DataSourceF5XCVirtualSite) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCVirtualSite) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a virtual_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a virtual_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_site) etc. can be fetched",
+		MarkdownDescription: "Virtual site object is mechanism to create arbitrary set of sites<br>It selects all the sites for which label selector expression return true.<br>Selector is goes thru all customer edge sites for a given tenant and all regional sites from volterra",
+		Description:         "Virtual site object is mechanism to create arbitrary set of sites It selects all the sites for which label selector expression return true. Selector is goes thru all customer edge sites for a given tenant and all regional sites from volterra",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -189,7 +189,7 @@ func (d *DataSourceF5XCVirtualSite) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_virtual_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "virtual_site", err))
 		return
 	}
 

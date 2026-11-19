@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -20,6 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -32,18 +36,18 @@ type DataSourceF5XCSecretPolicyRule struct {
 	client *client.APIClient
 }
 
-type SecretPolicyRuleCreateSpecTypeClientChoice struct {
+type SecretPolicyRuleClientChoice struct {
 	ClientName        types.String `tfsdk:"client_name"`
 	ClientNameMatcher types.Object `tfsdk:"client_name_matcher"`
 	ClientSelector    types.Object `tfsdk:"client_selector"`
 }
 
-type SecretPolicyRuleCreateSpecTypeClientNameMatcher struct {
+type SecretPolicyRuleClientNameMatcher struct {
 	ExactValues types.List `tfsdk:"exact_values"`
 	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type SecretPolicyRuleCreateSpecTypeClientSelector struct {
+type SecretPolicyRuleClientSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
@@ -106,8 +110,8 @@ func (d *DataSourceF5XCSecretPolicyRule) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCSecretPolicyRule) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Secret Policy Rule Specifications A secret_policy_rule object consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from client certificate. A rule is considered to match if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a rule is matched, the action specified for the rule is enforced for that request. A secret_policy_rule can be part of exactly one secret_policy and must belong to the same namespace as the secret policy.",
-		Description:         "Secret Policy Rule Specifications A secret_policy_rule object consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from client certificate. A rule is considered to match if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a rule is matched, the action specified for the rule is enforced for that request. A secret_policy_rule can be part of exactly one secret_policy and must belong to the same namespace as the secret policy.",
+		MarkdownDescription: "Secret Policy Rule defines a rule controlling access to a secret.<br>A secret_policy_rule object consists of an unordered list of predicates and an action.<br>The predicates are evaluated against a set of input fields that are extracted from client certificate.<br>A rule is considered to match if all predicates in the rule evaluate to true for that request.<br>Any predicates that are not specified in a rule are implicitly considered to be true.<br>If a rule is matched, the action specified for the rule is enforced for that request.<br><br>A secret_policy_rule can be part of exactly one secret_policy and must belong to the same namespace as the secret policy.",
+		Description:         "Secret Policy Rule defines a rule controlling access to a secret. A secret_policy_rule object consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from client certificate. A rule is considered to match if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a rule is matched, the action specified for the rule is enforced for that request. A secret_policy_rule can be part of exactly one secret_policy and must belong to the same namespace as the secret policy.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -261,9 +265,15 @@ func (d *DataSourceF5XCSecretPolicyRule) Read(ctx context.Context, request datas
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_secret_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_secret_policy_rule.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_secret_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "secret_policy_rule", err))
 		return
 	}
 
@@ -271,7 +281,41 @@ func (d *DataSourceF5XCSecretPolicyRule) Read(ctx context.Context, request datas
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_secret_policy_rule.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -294,8 +338,14 @@ func (d *DataSourceF5XCSecretPolicyRule) Read(ctx context.Context, request datas
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -304,6 +354,7 @@ func (d *DataSourceF5XCSecretPolicyRule) Read(ctx context.Context, request datas
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -405,10 +456,15 @@ func (d *DataSourceF5XCSecretPolicyRule) Read(ctx context.Context, request datas
 	if oneofClientChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		clientChoiceChoices := rawSpecMap["client_choice"]
+		var clientChoiceChoices interface{}
+		if v := rawSpecMap["client_choice"]; v != nil {
+			clientChoiceChoices = v
+		} else {
+			clientChoiceChoices = specData.GetClientChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var clientChoiceChoicesModel = &SecretPolicyRuleCreateSpecTypeClientChoice{}
+		var clientChoiceChoicesModel = &SecretPolicyRuleClientChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

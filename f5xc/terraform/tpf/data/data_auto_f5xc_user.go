@@ -31,46 +31,39 @@ type DataSourceF5XCUser struct {
 	client *client.APIClient
 }
 
+type UserNsRoleType struct {
+	Namespace types.String `tfsdk:"namespace"`
+	Role      types.String `tfsdk:"role"`
+}
+
 // DataSourceF5XCUserModel describes the resource data model.
 type DataSourceF5XCUserModel struct {
-	Annotations        types.Map         `tfsdk:"annotations"`
-	Description        types.String      `tfsdk:"description"`
-	Labels             types.Map         `tfsdk:"labels"`
-	Name               types.String      `tfsdk:"name"`
-	Namespace          types.String      `tfsdk:"namespace"`
-	Uid                types.String      `tfsdk:"uid"`
-	Contacts           types.List        `tfsdk:"contacts"`
+	CreationTimestamp  timetypes.RFC3339 `tfsdk:"creation_timestamp"`
+	Disabled           types.Bool        `tfsdk:"disabled"`
 	DomainOwner        types.Bool        `tfsdk:"domain_owner"`
 	Email              types.String      `tfsdk:"email"`
 	FirstName          types.String      `tfsdk:"first_name"`
-	Groups             types.List        `tfsdk:"groups"`
+	GroupNames         types.List        `tfsdk:"group_names"`
 	IdmType            types.List        `tfsdk:"idm_type"`
 	LastLoginTimestamp timetypes.RFC3339 `tfsdk:"last_login_timestamp"`
 	LastName           types.String      `tfsdk:"last_name"`
-	Locale             types.String      `tfsdk:"locale"`
+	Name               types.String      `tfsdk:"name"`
+	Namespace          types.String      `tfsdk:"namespace"`
+	NamespaceRoles     types.List        `tfsdk:"namespace_roles"`
+	OtpEnabled         types.Bool        `tfsdk:"otp_enabled"`
 	SyncMode           types.List        `tfsdk:"sync_mode"`
-	TosAccepted        types.String      `tfsdk:"tos_accepted"`
-	TosAcceptedAt      timetypes.RFC3339 `tfsdk:"tos_accepted_at"`
-	TosVersion         types.String      `tfsdk:"tos_version"`
+	Tenant             types.String      `tfsdk:"tenant"`
+	TenantType         types.List        `tfsdk:"tenant_type"`
 	Type               types.List        `tfsdk:"type"`
 	Timeouts           timeouts.Value    `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> Contacts
-var UserContactsObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> NamespaceRoles
+var UserNamespaceRolesModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> Groups
-var UserGroupsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
+	"role":      types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -87,69 +80,95 @@ func (d *DataSourceF5XCUser) Metadata(ctx context.Context, request datasource.Me
 func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Billing Feature Indicator Single instance of a billing indicator. It informs the customer of any problems with their billing, including failed payments, overdue invoices, or missing valid payment methods.",
-		Description:         "Billing Feature Indicator Single instance of a billing indicator. It informs the customer of any problems with their billing, including failed payments, overdue invoices, or missing valid payment methods.",
+		MarkdownDescription: "Represents user for a given tenant",
+		Description:         "Represents user for a given tenant",
 
 		Attributes: map[string]schema.Attribute{
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+			"creation_timestamp": schema.StringAttribute{
+				Description: "Creation timestamp Timestamp of user creation.",
+				CustomType:  timetypes.RFC3339Type{},
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"disabled": schema.BoolAttribute{
+				Description: "Disabled If set to true user is completely disabled including IDM.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"domain_owner": schema.BoolAttribute{
+				Description: "Domain Owner Domain owner is the first user who registered or signed up the associated Tenant. User created via signup flow will have this value set to true. Few restrictions apply to this user w.r.t role update and deletion.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"email": schema.StringAttribute{
+				Description: "Email Email of the user object",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"first_name": schema.StringAttribute{
+				Description: "First name First name of the customer",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"group_names": schema.ListAttribute{
+				Description: "Groups Group list must be associated to this user.",
+				Required:    false,
+				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
+			"idm_type": schema.ListAttribute{
+				Description: "IDM type Identity management type of the user (F5XC Managed, SSO)",
 				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
+			},
+			"last_login_timestamp": schema.StringAttribute{
+				Description: "Last login timestamp Last login timestamp when user successfully login to access VoltConsole.",
+				CustomType:  timetypes.RFC3339Type{},
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"last_name": schema.StringAttribute{
+				Description: "Last name Last name of the customer",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
 			},
 			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Description: "Name name of the user",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 			},
 			"namespace": schema.StringAttribute{
-				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Description: "Namespace Namespace of the user object (namespace where the user object is stored).",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+			"namespace_roles": schema.ListNestedAttribute{
+				Description: "Namespace roles List of directly attached roles that the user has for each namespace.",
 				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"contacts": schema.ListNestedAttribute{
-				Description: "contacts Contact information for user",
-				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
 						"namespace": schema.StringAttribute{
-							Description: "",
+							Description: "Namespace Namespace the role applies to '*' value implies all namespaces",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
 						},
-						"tenant": schema.StringAttribute{
-							Description: "",
+						"role": schema.StringAttribute{
+							Description: "Role Users role for this namespace",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
@@ -157,108 +176,36 @@ func (r *DataSourceF5XCUser) Schema(ctx context.Context, request datasource.Sche
 					},
 				},
 			},
-			"domain_owner": schema.BoolAttribute{
-				Description: "Domain Owner Domain owner is the first user who registered or signed up the associated Tenant. User created via signup flow will have this value set to true. Few restrictions apply to this user w.r.t role update and deletion.",
+			"otp_enabled": schema.BoolAttribute{
+				Description: "OTP Enabled Shows if OTP is enabled in IDM Provider.",
 				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"email": schema.StringAttribute{
-				Description: "email user's email",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"first_name": schema.StringAttribute{
-				Description: "first_name user's first name",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"groups": schema.ListNestedAttribute{
-				Description: "Groups Reference to the user groups.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"idm_type": schema.ListAttribute{
-				Description: "IDM Type Type of the identity management who is managing this user.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"last_login_timestamp": schema.StringAttribute{
-				Description: "last_login_timestamp Last successful login timestamp of the user.",
-				CustomType:  timetypes.RFC3339Type{},
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"last_name": schema.StringAttribute{
-				Description: "last_name user's last name",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"locale": schema.StringAttribute{
-				Description: "locale locale of the user (defaults to English)",
-				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 			},
 			"sync_mode": schema.ListAttribute{
 				Description: "Sync Mode Denotes if this is an externally managed entity imported into UAM by SCIM protocol, or self managed.",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"tos_accepted": schema.StringAttribute{
-				Description: "tos_accepted tos accepted version, this field is deprecated refer the fields `tos_accepted_at` and `tos_version` instead.",
+			"tenant": schema.StringAttribute{
+				Description: "Tenant tenant that the user belongs to",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 			},
-			"tos_accepted_at": schema.StringAttribute{
-				Description: "tos_accepted_at tos accepted timestamp.",
-				CustomType:  timetypes.RFC3339Type{},
+			"tenant_type": schema.ListAttribute{
+				Description: "Tenant type tenant type of the user (FREEMIUM, ENTERPRISE, ...)",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
-			},
-			"tos_version": schema.StringAttribute{
-				Description: "tos_version tos accepted version",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"type": schema.ListAttribute{
-				Description: "type type of the user",
+				Description: "User type Type of the user account (USER, SERVICE)",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
 			},
@@ -317,116 +264,44 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_user.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	// CustomAPI Read: List
+	customReadRPCFQN := "ves.io.schema.user.CustomAPI.List"
+	customReadURI := fmt.Sprintf("/public/custom/namespaces/%s/user_roles", data.Namespace.ValueString())
+
+	readRespMsg, err := d.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "user", err))
 		return
 	}
+	// Cast the proto.Message to the concrete read response type
+	readResp, ok := readRespMsg.(*ves_io_schema_user.ListUserRoleResponse)
+	if !ok {
+		response.Diagnostics.AddError("Type Assertion Error", fmt.Sprintf("Failed to cast read response to *ves_io_schema_user.ListUserRoleResponse, got: %T", readRespMsg))
+		return
+	}
+	// List-RPC: iterate items to find the entry matching the primary key.
+	// ListMatchExpr defines which Go expression to compare against (defaults to data.Name.ValueString()).
+	var readRespItem *ves_io_schema_user.ListUserRoleResponseItem
+	for _, item := range readResp.GetItems() {
+		itemName := item.GetEmail()
+		if itemName == data.Email.ValueString() {
+			readRespItem = item
+			break
+		}
+	}
+	if readRespItem == nil {
+		response.Diagnostics.AddError("Not Found", fmt.Sprintf("No %s matching the given attributes was found", "user"))
+		return
+	}
+	specData := readRespItem
 
-	// Write back the response to the model
-	metaData := httpResp.GetObjMetadata()
-	specData := httpResp.GetObjSpec().(*ves_io_schema_user.SpecType).GcSpec
-	systemMetaData := httpResp.GetObjSystemMetadata()
-
-	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
-	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		data.Annotations = types.MapNull(types.StringType)
-	}
+	// data SpecToModelRoot TimeStampField --> CreationTimestamp
+	data.CreationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetCreationTimestamp())
 
-	// data SpecToModelRoot Meta StringField --> Description
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Description.IsNull() || data.Description.IsUnknown() {
-		data.Description = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Name.IsNull() || data.Name.IsUnknown() {
-		data.Name = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
-		data.Namespace = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Uid.IsNull() || data.Uid.IsUnknown() {
-		data.Uid = types.StringNull()
-	}
-
-	// data SpecToModelRoot ArrayOfPointerField --> Contacts
-	if len(specData.GetContacts()) > 0 {
-		contactsElements := make([]ObjectRefTypeModel, 0, len(specData.GetContacts()))
-
-		for _, contactsElement := range specData.GetContacts() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested RequiredStringField --> Name
-			if contactsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(contactsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if contactsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(contactsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if contactsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(contactsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			contactsElements = append(contactsElements, objectRefTypeModelModel)
-		}
-
-		{
-			contactsList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				UserContactsObjectRefModelAttributeMap,
-				contactsElements,
-			)
-
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			data.Contacts = contactsList
-		}
-	} else {
-		var contactsObjectType = basetypes.ObjectType{
-			AttrTypes: UserContactsObjectRefModelAttributeMap,
-		}
-		nullContactsList := basetypes.NewListNull(contactsObjectType)
-		data.Contacts = nullContactsList
-	}
+	// data SpecToModelRoot BoolField --> Disabled
+	data.Disabled = types.BoolValue(specData.GetDisabled())
 
 	// data SpecToModelRoot BoolField --> DomainOwner
 	data.DomainOwner = types.BoolValue(specData.GetDomainOwner())
@@ -447,60 +322,18 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 		data.FirstName = types.StringNull()
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> Groups
-	if len(specData.GetGroups()) > 0 {
-		groupsElements := make([]ObjectRefTypeModel, 0, len(specData.GetGroups()))
-
-		for _, groupsElement := range specData.GetGroups() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested RequiredStringField --> Name
-			if groupsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(groupsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if groupsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(groupsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if groupsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(groupsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			groupsElements = append(groupsElements, objectRefTypeModelModel)
-		}
-
-		{
-			groupsList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				UserGroupsObjectRefModelAttributeMap,
-				groupsElements,
-			)
-
+	// data specToModelRootOld ArrayOfStringField --> GroupNames
+	{
+		if len(specData.GetGroupNames()) > 0 {
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, specData.GetGroupNames())
 			response.Diagnostics.Append(listDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-
-			data.Groups = groupsList
+			data.GroupNames = listValue
+		} else {
+			data.GroupNames = types.ListNull(types.StringType)
 		}
-	} else {
-		var groupsObjectType = basetypes.ObjectType{
-			AttrTypes: UserGroupsObjectRefModelAttributeMap,
-		}
-		nullGroupsList := basetypes.NewListNull(groupsObjectType)
-		data.Groups = nullGroupsList
 	}
 
 	// data SpecToModelRoot EnumField --> IdmType
@@ -531,13 +364,72 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 		data.LastName = types.StringNull()
 	}
 
-	// data SpecToModelRoot StringField --> Locale
-	if specData.GetLocale() != "" {
-		data.Locale = types.StringValue(specData.GetLocale())
+	// data SpecToModelRoot StringField --> Name
+	if specData.GetName() != "" {
+		data.Name = types.StringValue(specData.GetName())
 	} else {
 		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Locale = types.StringNull()
+		data.Name = types.StringNull()
 	}
+
+	// data SpecToModelRoot StringField --> Namespace
+	if specData.GetNamespace() != "" {
+		data.Namespace = types.StringValue(specData.GetNamespace())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.Namespace = types.StringNull()
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> NamespaceRoles
+	if len(specData.GetNamespaceRoles()) > 0 {
+		namespaceRolesElements := make([]UserNsRoleType, 0, len(specData.GetNamespaceRoles()))
+
+		for _, namespaceRolesElement := range specData.GetNamespaceRoles() {
+			userNsRoleTypeModel := UserNsRoleType{}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if namespaceRolesElement.GetNamespace() != "" {
+				userNsRoleTypeModel.Namespace = types.StringValue(namespaceRolesElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				userNsRoleTypeModel.Namespace = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Role
+			if namespaceRolesElement.GetRole() != "" {
+				userNsRoleTypeModel.Role = types.StringValue(namespaceRolesElement.GetRole())
+			} else {
+				// Empty string, set to null
+				userNsRoleTypeModel.Role = types.StringNull()
+			}
+
+			namespaceRolesElements = append(namespaceRolesElements, userNsRoleTypeModel)
+		}
+
+		{
+			namespaceRolesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				UserNamespaceRolesModelAttributeMap,
+				namespaceRolesElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.NamespaceRoles = namespaceRolesList
+		}
+	} else {
+		var namespaceRolesObjectType = basetypes.ObjectType{
+			AttrTypes: UserNamespaceRolesModelAttributeMap,
+		}
+		nullNamespaceRolesList := basetypes.NewListNull(namespaceRolesObjectType)
+		data.NamespaceRoles = nullNamespaceRolesList
+	}
+
+	// data SpecToModelRoot BoolField --> OtpEnabled
+	data.OtpEnabled = types.BoolValue(specData.GetOtpEnabled())
 
 	// data SpecToModelRoot EnumField --> SyncMode
 	{
@@ -556,23 +448,29 @@ func (d *DataSourceF5XCUser) Read(ctx context.Context, request datasource.ReadRe
 		}
 	}
 
-	// data SpecToModelRoot StringField --> TosAccepted
-	if specData.GetTosAccepted() != "" {
-		data.TosAccepted = types.StringValue(specData.GetTosAccepted())
+	// data SpecToModelRoot StringField --> Tenant
+	if specData.GetTenant() != "" {
+		data.Tenant = types.StringValue(specData.GetTenant())
 	} else {
 		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TosAccepted = types.StringNull()
+		data.Tenant = types.StringNull()
 	}
 
-	// data SpecToModelRoot TimeStampField --> TosAcceptedAt
-	data.TosAcceptedAt = timetypes.NewRFC3339ProtobufPointerValue(specData.GetTosAcceptedAt())
-
-	// data SpecToModelRoot StringField --> TosVersion
-	if specData.GetTosVersion() != "" {
-		data.TosVersion = types.StringValue(specData.GetTosVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.TosVersion = types.StringNull()
+	// data SpecToModelRoot EnumField --> TenantType
+	{
+		if specData.GetTenantType().String() != "" {
+			stringValue := types.StringValue(specData.GetTenantType().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.TenantType = listValue
+		} else {
+			// Empty string, set to null
+			data.TenantType = types.ListNull(types.StringType)
+		}
 	}
 
 	// data SpecToModelRoot EnumField --> Type

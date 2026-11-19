@@ -34,18 +34,19 @@ type ContainerRegistrySecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type ContainerRegistrySecretTypeSecretInfoChoice struct {
+type ContainerRegistrySecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type ContainerRegistrySecretTypeBlindfoldSecretInfo struct {
+type ContainerRegistryBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type ContainerRegistrySecretTypeClearSecretInfo struct {
+type ContainerRegistryClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
@@ -83,6 +84,7 @@ var ContainerRegistryPasswordSecretInfoOneofModelAttributeMap = map[string]attr.
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ContainerRegistryPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -114,8 +116,8 @@ func (d *DataSourceF5XCContainerRegistry) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCContainerRegistry) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a container_registry This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of container_registry) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a container_registry This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of container_registry) etc. can be fetched",
+		MarkdownDescription: "Container registry is the container or docker registry information",
+		Description:         "Container registry is the container or docker registry information",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -217,8 +219,15 @@ func (r *DataSourceF5XCContainerRegistry) Schema(ctx context.Context, request da
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
+										Sensitive:   true,
 									},
 								},
+							},
+							"none": schema.BoolAttribute{
+								Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
 							},
 						},
 					},
@@ -293,7 +302,7 @@ func (d *DataSourceF5XCContainerRegistry) Read(ctx context.Context, request data
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_container_registry.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "container_registry", err))
 		return
 	}
 
@@ -459,6 +468,15 @@ func (d *DataSourceF5XCContainerRegistry) Read(ctx context.Context, request data
 				} else {
 					passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ContainerRegistryPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 				}
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> None
+			_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+			if isNone {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+			} else {
+				passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---

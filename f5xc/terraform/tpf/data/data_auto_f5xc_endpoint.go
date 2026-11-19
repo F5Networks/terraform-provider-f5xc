@@ -30,84 +30,72 @@ type DataSourceF5XCEndpoint struct {
 	client *client.APIClient
 }
 
-type EndpointGlobalSpecTypeEndpointAddressChoice struct {
+type EndpointEndpointAddrChoice struct {
 	DnsName         types.String `tfsdk:"dns_name"`
 	DnsNameAdvanced types.Object `tfsdk:"dns_name_advanced"`
 	Ip              types.String `tfsdk:"ip"`
 	ServiceInfo     types.Object `tfsdk:"service_info"`
 }
 
-type EndpointGlobalSpecTypeDnsNameAdvanced struct {
+type EndpointDnsNameAdvanced struct {
 	Name      types.String `tfsdk:"name"`
 	TtlChoice types.Object `tfsdk:"ttl_choice"`
 }
 
-type EndpointDnsNameAdvancedTypeTtlChoice struct {
+type EndpointTtlChoice struct {
 	RefreshInterval types.Int64 `tfsdk:"refresh_interval"`
 }
 
-type EndpointGlobalSpecTypeServiceInfo struct {
+type EndpointSvcInfo struct {
 	DiscoveryType     types.List   `tfsdk:"discovery_type"`
 	ServiceInfoChoice types.Object `tfsdk:"service_info_choice"`
 }
 
-type EndpointServiceInfoTypeServiceInfoChoice struct {
+type EndpointSvcInfoChoice struct {
 	ServiceName     types.String `tfsdk:"service_name"`
 	ServiceSelector types.Object `tfsdk:"service_selector"`
 }
 
-type EndpointServiceInfoTypeServiceSelector struct {
+type EndpointSvcSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type EndpointViewsSnatPoolConfiguration struct {
+type EndpointSnatPoolCfg struct {
 	SnatPoolChoice types.Object `tfsdk:"snat_pool_choice"`
 }
 
-type EndpointSnatPoolConfigurationSnatPoolChoice struct {
+type EndpointSnatPoolChoice struct {
 	NoSnatPool types.Bool   `tfsdk:"no_snat_pool"`
 	SnatPool   types.Object `tfsdk:"snat_pool"`
 }
 
-type EndpointSnatPoolConfigurationSnatPool struct {
+type EndpointSnatPool struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type EndpointNetworkSiteRefSelector struct {
+type EndpointNetSiteRefSelector struct {
 	RefOrSelectorChoice types.Object `tfsdk:"ref_or_selector_choice"`
 }
 
-type EndpointNetworkSiteRefSelectorRefOrSelectorChoice struct {
+type EndpointRefOrSelectorChoice struct {
 	Site           types.Object `tfsdk:"site"`
 	VirtualNetwork types.Object `tfsdk:"virtual_network"`
 	VirtualSite    types.Object `tfsdk:"virtual_site"`
 }
 
-type EndpointNetworkSiteRefSelectorSite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
+type EndpointSite struct {
+	NetworkType types.List `tfsdk:"network_type"`
+	Ref         types.List `tfsdk:"ref"`
 }
 
-type EndpointSiteRefTypeInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
-}
-
-type EndpointNetworkSiteRefSelectorVirtualNetwork struct {
+type EndpointVirtualNet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type EndpointNetworkSiteRefSelectorVirtualSite struct {
-	InternetVipChoice types.Object `tfsdk:"internet_vip_choice"`
-	NetworkType       types.List   `tfsdk:"network_type"`
-	Ref               types.List   `tfsdk:"ref"`
-}
-
-type EndpointVSiteRefTypeInternetVipChoice struct {
-	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
-	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
+type EndpointVirtualSite struct {
+	NetworkType types.List `tfsdk:"network_type"`
+	Ref         types.List `tfsdk:"ref"`
 }
 
 // DataSourceF5XCEndpointModel describes the resource data model.
@@ -237,9 +225,6 @@ var EndpointWhereRefOrSelectorModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> Site
 var EndpointWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: EndpointWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap,
-	},
 	"network_type": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -253,13 +238,6 @@ var EndpointWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Type{
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var EndpointWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Ref
@@ -288,9 +266,6 @@ var EndpointWhereRefOrSelectorVirtualNetworkModelAttributeMap = map[string]attr.
 // Attribute map for PointerOfOneOfField --> VirtualSite
 var EndpointWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Type{
 
-	"internet_vip_choice": types.ObjectType{
-		AttrTypes: EndpointWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap,
-	},
 	"network_type": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -304,13 +279,6 @@ var EndpointWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]attr.Typ
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InternetVipChoice
-var EndpointWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_internet_vip": types.BoolType,
-	"enable_internet_vip":  types.BoolType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -327,8 +295,8 @@ func (d *DataSourceF5XCEndpoint) Metadata(ctx context.Context, request datasourc
 func (r *DataSourceF5XCEndpoint) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a endpoint This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of endpoint) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a endpoint This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of endpoint) etc. can be fetched",
+		MarkdownDescription: "Endpoint object represent the actual endpoint that provides the service (Origin Server).<br>Sometimes due to dynamic discovery of the endpoints, single endpoint object may result in<br>multiple actual discovered endpoints",
+		Description:         "Endpoint object represent the actual endpoint that provides the service (Origin Server). Sometimes due to dynamic discovery of the endpoints, single endpoint object may result in multiple actual discovered endpoints",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -541,26 +509,6 @@ func (r *DataSourceF5XCEndpoint) Schema(ctx context.Context, request datasource.
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description: "Internet VIP Choice Internet VIP Choice",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
 									"network_type": schema.ListAttribute{
 										Description: "network_type The type of network on the referred site",
 										ElementType: types.StringType,
@@ -640,26 +588,6 @@ func (r *DataSourceF5XCEndpoint) Schema(ctx context.Context, request datasource.
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"internet_vip_choice": schema.SingleNestedAttribute{
-										Description: "Internet VIP Choice Internet VIP Choice",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"disable_internet_vip": schema.BoolAttribute{
-												Description: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"enable_internet_vip": schema.BoolAttribute{
-												Description: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
 									"network_type": schema.ListAttribute{
 										Description: "network_type The type of network on the referred virtual_site",
 										ElementType: types.StringType,
@@ -758,7 +686,7 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_endpoint.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "endpoint", err))
 		return
 	}
 
@@ -829,7 +757,7 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 		endpointAddressChoiceChoices := specData.GetEndpointAddress()
 
 		// The model struct that will be populated by the nested template.
-		var endpointAddressChoiceChoicesModel = &EndpointGlobalSpecTypeEndpointAddressChoice{}
+		var endpointAddressChoiceChoicesModel = &EndpointEndpointAddrChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1051,20 +979,12 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 	}
 
 	// data SpecToModelRoot UintField --> HealthCheckPort
-	healthCheckPortValue := specData.GetHealthCheckPort()
-	if healthCheckPortValue > 0 {
-		data.HealthCheckPort = types.Int64Value(int64(healthCheckPortValue))
-	} else {
-		data.HealthCheckPort = types.Int64Null()
-	}
+	// The resource defaults this field to 0, so API 0 must stay 0 to match it.
+	data.HealthCheckPort = types.Int64Value(int64(specData.GetHealthCheckPort()))
 
 	// data SpecToModelRoot UintField --> Port
-	portValue := specData.GetPort()
-	if portValue > 0 {
-		data.Port = types.Int64Value(int64(portValue))
-	} else {
-		data.Port = types.Int64Null()
-	}
+	// The resource defaults this field to 0, so API 0 must stay 0 to match it.
+	data.Port = types.Int64Value(int64(specData.GetPort()))
 
 	// data SpecToModelRoot StringField --> Protocol
 	if specData.GetProtocol() != "" {
@@ -1076,7 +996,7 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 
 	// data SpecToModelRoot PointerField --> SnatPool
 	if specData.GetSnatPool() != nil {
-		var endpointViewsSnatPoolConfigurationModel = &EndpointViewsSnatPoolConfiguration{}
+		var endpointSnatPoolCfgModel = &EndpointSnatPoolCfg{}
 		snatPoolElement := specData.GetSnatPool()
 
 		// data specToModelNested OneOfField --> SnatPoolChoice
@@ -1157,16 +1077,16 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			endpointViewsSnatPoolConfigurationModel.SnatPoolChoice = finalObj
+			endpointSnatPoolCfgModel.SnatPoolChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			endpointViewsSnatPoolConfigurationModel.SnatPoolChoice = types.ObjectNull(EndpointSnatPoolSnatPoolChoiceModelAttributeMap)
+			endpointSnatPoolCfgModel.SnatPoolChoice = types.ObjectNull(EndpointSnatPoolSnatPoolChoiceModelAttributeMap)
 		}
 
 		snatPoolObj, snatPoolDiags := utils.GoStructToObjectValue(
 			ctx,
 			EndpointSnatPoolModelAttributeMap,
-			endpointViewsSnatPoolConfigurationModel,
+			endpointSnatPoolCfgModel,
 		)
 		response.Diagnostics.Append(snatPoolDiags...)
 		data.SnatPool = snatPoolObj
@@ -1176,7 +1096,7 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 
 	// data SpecToModelRoot PointerField --> Where
 	if specData.GetWhere() != nil {
-		var endpointNetworkSiteRefSelectorModel = &EndpointNetworkSiteRefSelector{}
+		var endpointNetSiteRefSelectorModel = &EndpointNetSiteRefSelector{}
 		whereElement := specData.GetWhere()
 
 		// data specToModelNested RequiredOneOfField --> RefOrSelector
@@ -1200,55 +1120,6 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
-
-					// data specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if siteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						siteinternetVipChoiceChoices := siteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := siteinternetVipChoiceChoices.(*ves_io_schema.SiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							siteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, siteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							EndpointWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							siteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(siteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						siteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						siteAttributeMap["internet_vip_choice"] = types.ObjectNull(EndpointWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap)
-					}
 
 					// data specToModelNested EnumField --> NetworkType
 					if siteElement.GetNetworkType().String() != "" {
@@ -1406,55 +1277,6 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// data specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
-					if virtualSiteElement.GetInternetVipChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						virtualSiteinternetVipChoiceChoices := virtualSiteElement.GetInternetVipChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> DisableInternetVip
-						_, isDisableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_DisableInternetVip)
-
-						if isDisableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["disable_internet_vip"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> EnableInternetVip
-						_, isEnableInternetVip := virtualSiteinternetVipChoiceChoices.(*ves_io_schema.VSiteRefType_EnableInternetVip)
-
-						if isEnableInternetVip {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolValue(true)
-						} else {
-							virtualSiteinternetVipChoiceChoicesAttributeMap["enable_internet_vip"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, virtualSiteinternetVipChoiceChoicesObjDiags := types.ObjectValue(
-							EndpointWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							virtualSiteinternetVipChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(virtualSiteinternetVipChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						virtualSiteAttributeMap["internet_vip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						virtualSiteAttributeMap["internet_vip_choice"] = types.ObjectNull(EndpointWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap)
-					}
-
 					// data specToModelNested EnumField --> NetworkType
 					if virtualSiteElement.GetNetworkType().String() != "" {
 						stringValue := types.StringValue(virtualSiteElement.GetNetworkType().String())
@@ -1543,16 +1365,16 @@ func (d *DataSourceF5XCEndpoint) Read(ctx context.Context, request datasource.Re
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			endpointNetworkSiteRefSelectorModel.RefOrSelectorChoice = finalObj
+			endpointNetSiteRefSelectorModel.RefOrSelectorChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			endpointNetworkSiteRefSelectorModel.RefOrSelectorChoice = types.ObjectNull(EndpointWhereRefOrSelectorModelAttributeMap)
+			endpointNetSiteRefSelectorModel.RefOrSelectorChoice = types.ObjectNull(EndpointWhereRefOrSelectorModelAttributeMap)
 		}
 
 		whereObj, whereDiags := utils.GoStructToObjectValue(
 			ctx,
 			EndpointWhereModelAttributeMap,
-			endpointNetworkSiteRefSelectorModel,
+			endpointNetSiteRefSelectorModel,
 		)
 		response.Diagnostics.Append(whereDiags...)
 		data.Where = whereObj

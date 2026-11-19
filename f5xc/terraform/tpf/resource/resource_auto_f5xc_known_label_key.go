@@ -12,11 +12,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
+
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -68,10 +73,11 @@ func (r *ResourceF5XCKnownLabelKey) Schema(ctx context.Context, request resource
 		Attributes: map[string]schema.Attribute{
 			"description": schema.StringAttribute{
 				Description:         "Description Description for the label key",
-				MarkdownDescription: "Description Description for the label key",
+				MarkdownDescription: "Description Description for the label key<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -152,9 +158,17 @@ func (r *ResourceF5XCKnownLabelKey) ModifyPlan(ctx context.Context, req resource
 			return
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCKnownLabelKey) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCKnownLabelKeyModel
 
 	// Read Terraform plan data into the model
@@ -220,7 +234,7 @@ func (r *ResourceF5XCKnownLabelKey) Create(ctx context.Context, request resource
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "known_label_key", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "known_label_key", err),
 		)
 		return
 	}
@@ -284,7 +298,7 @@ func (r *ResourceF5XCKnownLabelKey) Read(ctx context.Context, request resource.R
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "known_label_key", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "known_label_key", err),
 		)
 		return
 	}
@@ -313,12 +327,8 @@ func (r *ResourceF5XCKnownLabelKey) Read(ctx context.Context, request resource.R
 	specData := readRespItem
 
 	// resource SpecToModelRoot StringField --> Description
-	if specData.GetDescription() != "" {
-		data.Description = types.StringValue(specData.GetDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Description = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Description = types.StringValue(specData.GetDescription())
 
 	// resource SpecToModelRoot StringField --> Key
 	if specData.GetKey() != "" {
@@ -389,7 +399,7 @@ func (r *ResourceF5XCKnownLabelKey) Delete(ctx context.Context, request resource
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "known_label_key", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "known_label_key", err),
 			)
 			return
 		}
@@ -405,7 +415,7 @@ func (r *ResourceF5XCKnownLabelKey) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "known_label_key", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "known_label_key", err),
 		)
 		return
 	}

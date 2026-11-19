@@ -28,38 +28,42 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-efp-" + acctest.RandString(t, 8)
+	name := "example-efp-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckEnhancedFirewallPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withRuleChoice(name, namespace, "deny_all")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withRuleChoice("example-enhanced-firewall-policy", "system", "deny_all"),
+		})
 }
 
 func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withRuleChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-efp-" + acctest.RandString(t, 8)
+	name := "example-efp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,34 +72,34 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withRuleChoiceTransition(t *t
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withRuleChoice(name, namespace, "deny_all")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withRuleChoice(name, namespace, "allow_all")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withDeniedSources(name, namespace)},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withAllowedDestinations(name, namespace)},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -106,7 +110,7 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withCustomRuleActionAndLoggin
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-efp-" + acctest.RandString(t, 8)
+	name := "example-efp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -115,18 +119,18 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withCustomRuleActionAndLoggin
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRule(name, namespace, "allow", "all_traffic", "NOLOG")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRule(name, namespace, "deny", "all_tcp_traffic", "LOG")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -137,7 +141,7 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withCustomRuleTrafficTransiti
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-efp-" + acctest.RandString(t, 8)
+	name := "example-efp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -146,34 +150,34 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withCustomRuleTrafficTransiti
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRule(name, namespace, "allow", "all_udp_traffic", "NOLOG")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRuleProtocolPortRange(name, namespace, "TCP", "443")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRuleApplications(name, namespace, "APPLICATION_HTTP")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRuleApplications(name, namespace, "APPLICATION_DNS")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -184,7 +188,7 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withSegmentPolicyTransition(t
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-efp-" + acctest.RandString(t, 8)
+	name := "example-efp-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -193,18 +197,18 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_withSegmentPolicyTransition(t
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_segmentPolicy(name, namespace, "dst_any")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_segmentPolicy(name, namespace, "intra_segment")},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -215,31 +219,35 @@ func TestAccResourceAutoF5XCEnhancedFirewallPolicy_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-efp-" + acctest.RandString(t, 8)
+	name := "example-efp-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckEnhancedFirewallPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_enhanced_firewall_policy.test",
+				ResourceName:                         "f5xc_enhanced_firewall_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_enhanced_firewall_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_full("example-enhanced-firewall-policy", "system"),
+		})
 }
 
 func testAccCheckEnhancedFirewallPolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -248,7 +256,7 @@ func testAccCheckEnhancedFirewallPolicyDestroyProducer(t *testing.T) func(*terra
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withRuleChoice(name, namespace, choice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -261,10 +269,10 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "enhanced firewall policy updated"
+  description = "Updated enhanced firewall policy example"
 
   rule_choice = {
     allow_all = true
@@ -275,7 +283,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withDeniedSources(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -291,7 +299,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_withAllowedDestinations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -307,7 +315,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRule(name, namespace, actionChoice, trafficChoice, logAction string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -316,7 +324,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
       rules = [
         {
           metadata = {
-            name        = "rule-1"
+            name        = "example-rule"
             description = "custom rule"
           }
 
@@ -349,7 +357,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRuleProtocolPortRange(name, namespace, protocol, portRange string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -389,7 +397,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_customRuleApplications(name, namespace, app string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -428,7 +436,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_segmentPolicy(name, namespace, dstChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -451,13 +459,13 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "enhanced firewall policy full"
+  description = "Full enhanced firewall policy example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -469,8 +477,8 @@ resource "f5xc_enhanced_firewall_policy" "test" {
       rules = [
         {
           metadata = {
-            name        = "rule-full"
-            description = "full rule"
+            name        = "example-rule-full"
+            description = "Full rule example"
           }
 
           action_choice = {
@@ -522,13 +530,13 @@ resource "f5xc_enhanced_firewall_policy" "test" {
 
 func testAccResourceAutoF5XCEnhancedFirewallPolicyConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_enhanced_firewall_policy" "test" {
+resource "f5xc_enhanced_firewall_policy" "example" {
   name        = %q
   namespace   = %q
-  description = "enhanced firewall policy full updated"
+  description = "Updated full enhanced firewall policy example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {
@@ -540,7 +548,7 @@ resource "f5xc_enhanced_firewall_policy" "test" {
       rules = [
         {
           metadata = {
-            name        = "rule-full-updated"
+            name        = "example-rule-full-updated"
             description = "updated rule"
           }
 

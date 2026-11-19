@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_bgp.example"
+	to = f5xc_bgp.example
 }

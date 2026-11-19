@@ -22,6 +22,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	acctest "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/test/acctest"
 	apiCredentialSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_credential"
 )
@@ -31,7 +32,7 @@ import (
 func TestAccResourceAutoF5XCServiceCredential_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sc-" + acctest.RandString(t, 8)
+	name := "example-sc-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -43,19 +44,19 @@ func TestAccResourceAutoF5XCServiceCredential_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false, // credential_name is computed; name/namespace restored from import ID
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 			{
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 		},
 	})
@@ -66,34 +67,46 @@ func TestAccResourceAutoF5XCServiceCredential_basic(t *testing.T) {
 func TestAccResourceAutoF5XCServiceCredential_withApiCertificate(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sc-" + acctest.RandString(t, 8)
+	name := "example-sc-" + acctest.RandString(t, 8)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckServiceCredentialDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_withApiCertificate(name, namespace, "SecurePass123"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_service_credential.example",
+					tfjsonpath.New("service_credential_choice").AtMapKey("api_certificate").AtMapKey("password"),
+				),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 			{
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_withApiCertificate(name, namespace, "UpdatedPass456"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_service_credential.example",
+					tfjsonpath.New("service_credential_choice").AtMapKey("api_certificate").AtMapKey("password"),
+				),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCServiceCredentialConfig_withApiCertificate("example-service-credential", "system", "ExamplePass1!"),
+		})
 }
 
 // TestAccResourceAutoF5XCServiceCredential_withNamespaceRoles tests the
@@ -101,10 +114,10 @@ func TestAccResourceAutoF5XCServiceCredential_withApiCertificate(t *testing.T) {
 func TestAccResourceAutoF5XCServiceCredential_withNamespaceRoles(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sc-" + acctest.RandString(t, 8)
+	name := "example-sc-" + acctest.RandString(t, 8)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckServiceCredentialDestroyProducer(t),
@@ -113,21 +126,25 @@ func TestAccResourceAutoF5XCServiceCredential_withNamespaceRoles(t *testing.T) {
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_withNamespaceRoles(name, namespace),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCServiceCredentialConfig_withNamespaceRoles("example-service-credential", "system"),
+		})
 }
 
 // TestAccResourceAutoF5XCServiceCredential_typeTransition tests enum transitions
-// for the type field: SERVICE_API_TOKEN → SERVICE_API_TOKEN.
+// for the type field: SERVICE_API_TOKEN → SERVICE_API_CERTIFICATE.
 func TestAccResourceAutoF5XCServiceCredential_typeTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sc-" + acctest.RandString(t, 8)
+	name := "example-sc-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -138,26 +155,32 @@ func TestAccResourceAutoF5XCServiceCredential_typeTransition(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_withType(name, namespace, "SERVICE_API_TOKEN"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_service_credential.test", "type.0", "SERVICE_API_TOKEN"),
+					resource.TestCheckResourceAttr("f5xc_service_credential.example", "service_credential_choice.api_token", "true"),
+					resource.TestCheckNoResourceAttr("f5xc_service_credential.example", "service_credential_choice.api_certificate.password"),
 				),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 			{
-				Config: testAccResourceAutoF5XCServiceCredentialConfig_withType(name, namespace, "SERVICE_API_TOKEN"),
+				Config: testAccResourceAutoF5XCServiceCredentialConfig_withType(name, namespace, "SERVICE_API_CERTIFICATE"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_service_credential.example",
+					tfjsonpath.New("service_credential_choice").AtMapKey("api_certificate").AtMapKey("password"),
+				),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_service_credential.test", "type.0", "SERVICE_API_TOKEN"),
+					resource.TestCheckResourceAttr("f5xc_service_credential.example", "service_credential_choice.api_certificate.password", "SecurePass123"),
+					resource.TestCheckNoResourceAttr("f5xc_service_credential.example", "service_credential_choice.api_token"),
 				),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 		},
 	})
@@ -168,7 +191,7 @@ func TestAccResourceAutoF5XCServiceCredential_typeTransition(t *testing.T) {
 func TestAccResourceAutoF5XCServiceCredential_withUserGroups(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sc-" + acctest.RandString(t, 8)
+	name := "example-sc-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -180,10 +203,58 @@ func TestAccResourceAutoF5XCServiceCredential_withUserGroups(t *testing.T) {
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_withUserGroups(name, namespace),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
+			},
+		},
+	})
+}
+
+// TestAccResourceAutoF5XCServiceCredential_withKubeConfig exercises the
+// vk8s_kubeconfig service_credential_choice variant by supplying vk8s_namespace
+// and vk8s_cluster_name (routing Create/Get/Delete through vk8s_namespace).
+// Step 3 re-applies the same configuration to verify that Read against the vK8s
+// namespace produces no diff, followed by a second import.
+//
+// In-place Update is intentionally not exercised: the backend rejects
+// ReplaceServiceCredentials for vK8s kubeconfig (SERVICE_KUBE_CONFIG) credentials
+// with HTTP 400 "wrong type of service credentials".
+//
+// Prerequisite: the target tenant must already contain the namespace
+// "terraform-acceptance-test" with a virtual_k8s named "test-vk8s"; the test does not
+// create them. Re-record VCR cassettes against a tenant that has both objects.
+func TestAccResourceAutoF5XCServiceCredential_withKubeConfig(t *testing.T) {
+	t.Parallel()
+
+	name := "example-sc-" + acctest.RandString(t, 8)
+	namespace := "system"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckServiceCredentialDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCServiceCredentialConfig_withKubeConfig(name, namespace, "terraform-acceptance-test", "test-vk8s", 30),
+				Check:  testAccCheckServiceCredentialVK8sState("terraform-acceptance-test", "30"),
+			},
+			{
+				ResourceName:      "f5xc_service_credential.example",
+				ImportState:       true,
+				ImportStateVerify: false,
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "service_credential_choice.vk8s_kubeconfig.vk8s_namespace", "credential_name"),
+			},
+			{
+				Config: testAccResourceAutoF5XCServiceCredentialConfig_withKubeConfig(name, namespace, "terraform-acceptance-test", "test-vk8s", 30),
+				Check:  testAccCheckServiceCredentialVK8sState("terraform-acceptance-test", "30"),
+			},
+			{
+				ResourceName:      "f5xc_service_credential.example",
+				ImportState:       true,
+				ImportStateVerify: false,
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "service_credential_choice.vk8s_kubeconfig.vk8s_namespace", "credential_name"),
 			},
 		},
 	})
@@ -194,7 +265,7 @@ func TestAccResourceAutoF5XCServiceCredential_withUserGroups(t *testing.T) {
 func TestAccResourceAutoF5XCServiceCredential_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-sc-" + acctest.RandString(t, 8)
+	name := "example-sc-" + acctest.RandString(t, 8)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -206,19 +277,19 @@ func TestAccResourceAutoF5XCServiceCredential_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_full(name, namespace),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 			{
 				Config: testAccResourceAutoF5XCServiceCredentialConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:      "f5xc_service_credential.test",
+				ResourceName:      "f5xc_service_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.test", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "namespace", "credential_name"),
 			},
 		},
 	})
@@ -232,12 +303,10 @@ func testAccCheckServiceCredentialDestroyProducer(t *testing.T) func(*terraform.
 
 func testAccResourceAutoF5XCServiceCredentialConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
+resource "f5xc_service_credential" "example" {
   name            = %q
   namespace       = %q
   expiration_days = 7
-  password        = "AccTestPass1!"
-  type            = ["SERVICE_API_TOKEN"]
 
   service_credential_choice = {
     api_token = true
@@ -255,12 +324,10 @@ resource "f5xc_service_credential" "test" {
 
 func testAccResourceAutoF5XCServiceCredentialConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
+resource "f5xc_service_credential" "example" {
   name            = %q
   namespace       = %q
   expiration_days = 14
-  password        = "AccTestPass1!"
-  type            = ["SERVICE_API_TOKEN"]
 
   service_credential_choice = {
     api_token = true
@@ -278,12 +345,10 @@ resource "f5xc_service_credential" "test" {
 
 func testAccResourceAutoF5XCServiceCredentialConfig_withApiCertificate(name, namespace, certPassword string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
+resource "f5xc_service_credential" "example" {
   name            = %q
   namespace       = %q
   expiration_days = 30
-  password        = "AccTestPass1!"
-  type            = ["SERVICE_API_CERTIFICATE"]
 
   service_credential_choice = {
     api_certificate = {
@@ -303,12 +368,10 @@ resource "f5xc_service_credential" "test" {
 
 func testAccResourceAutoF5XCServiceCredentialConfig_withNamespaceRoles(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
+resource "f5xc_service_credential" "example" {
   name            = %q
   namespace       = %q
   expiration_days = 7
-  password        = "AccTestPass1!"
-  type            = ["SERVICE_API_TOKEN"]
 
   service_credential_choice = {
     api_token = true
@@ -325,36 +388,14 @@ resource "f5xc_service_credential" "test" {
 }
 
 func testAccResourceAutoF5XCServiceCredentialConfig_withType(name, namespace, credType string) string {
+	if credType == "SERVICE_API_CERTIFICATE" {
+		return testAccResourceAutoF5XCServiceCredentialConfig_withApiCertificate(name, namespace, "SecurePass123")
+	}
 	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
+resource "f5xc_service_credential" "example" {
   name            = %q
   namespace       = %q
   expiration_days = 7
-  password        = "AccTestPass1!"
-  type            = [%q]
-
-  service_credential_choice = {
-    api_token = true
-  }
-
-  namespace_roles = [
-    {
-      namespace = "system"
-      role      = "ves-io-monitor-role"
-    }
-  ]
-}
-`, name, namespace, credType)
-}
-
-func testAccResourceAutoF5XCServiceCredentialConfig_withUserGroups(name, namespace string) string {
-	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
-  name            = %q
-  namespace       = %q
-  expiration_days = 7
-  password        = "AccTestPass1!"
-  type            = ["SERVICE_API_TOKEN"]
 
   service_credential_choice = {
     api_token = true
@@ -370,14 +411,71 @@ resource "f5xc_service_credential" "test" {
 `, name, namespace)
 }
 
+func testAccResourceAutoF5XCServiceCredentialConfig_withUserGroups(name, namespace string) string {
+	return fmt.Sprintf(`
+resource "f5xc_service_credential" "example" {
+  name            = %q
+  namespace       = %q
+  expiration_days = 7
+
+  service_credential_choice = {
+    api_token = true
+  }
+
+  namespace_roles = [
+    {
+      namespace = "system"
+      role      = "ves-io-monitor-role"
+    }
+  ]
+}
+`, name, namespace)
+}
+
+// testAccCheckServiceCredentialVK8sState verifies the state of a vk8s_kubeconfig
+// f5xc_service_credential after apply: the root namespace stays "system" while the
+// credential lives in the vK8s namespace, and the backend credential_name is set.
+func testAccCheckServiceCredentialVK8sState(vk8sNamespace, expirationDays string) resource.TestCheckFunc {
+	const addr = "f5xc_service_credential.example"
+	return resource.ComposeAggregateTestCheckFunc(
+		resource.TestCheckResourceAttr(addr, "namespace", "system"),
+		resource.TestCheckResourceAttrSet(addr, "credential_name"),
+		resource.TestCheckResourceAttr(addr, "service_credential_choice.vk8s_kubeconfig.vk8s_namespace", vk8sNamespace),
+		resource.TestCheckResourceAttr(addr, "expiration_days", expirationDays),
+	)
+}
+
+func testAccResourceAutoF5XCServiceCredentialConfig_withKubeConfig(name, namespace, vk8sNamespace, vk8sClusterName string, expirationDays int) string {
+	return fmt.Sprintf(`
+resource "f5xc_service_credential" "example" {
+  name            = %q
+  namespace       = %q
+  expiration_days = %d
+  renew_trigger   = false
+
+  service_credential_choice = {
+    vk8s_kubeconfig = {
+      vk8s_namespace    = %q
+      vk8s_cluster_name = %q
+    }
+  }
+
+  namespace_roles = [
+    {
+      namespace = %q
+      role      = "ves-io-admin-role"
+    }
+  ]
+}
+`, name, namespace, expirationDays, vk8sNamespace, vk8sClusterName, vk8sNamespace)
+}
+
 func testAccResourceAutoF5XCServiceCredentialConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
+resource "f5xc_service_credential" "example" {
   name            = %q
   namespace       = %q
   expiration_days = 30
-  password        = "AccTestPass1!"
-  type            = ["SERVICE_API_TOKEN"]
 
   service_credential_choice = {
     api_token = true
@@ -397,12 +495,10 @@ resource "f5xc_service_credential" "test" {
 
 func testAccResourceAutoF5XCServiceCredentialConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_credential" "test" {
+resource "f5xc_service_credential" "example" {
   name            = %q
   namespace       = %q
   expiration_days = 60
-  password        = "AccTestPass1!"
-  type            = ["SERVICE_API_TOKEN"]
 
   service_credential_choice = {
     api_token = true

@@ -33,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
@@ -111,8 +112,8 @@ func (r *ResourceF5XCSensitiveDataPolicy) Metadata(ctx context.Context, request 
 func (r *ResourceF5XCSensitiveDataPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a sensitive_data_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of sensitive_data_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a sensitive_data_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of sensitive_data_policy) etc. can be fetched",
+		MarkdownDescription: "The sensitive_data_policy is a policy defined by the user to discover the relevant compliances<br>and data types to the user.<br>the user can disabled predefined data types, and add custom data types.<br>the user defines the compliance list that he'd like to monitor.",
+		Description:         "The sensitive_data_policy is a policy defined by the user to discover the relevant compliances and data types to the user. the user can disabled predefined data types, and add custom data types. the user defines the compliance list that he'd like to monitor.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -180,7 +181,7 @@ func (r *ResourceF5XCSensitiveDataPolicy) Schema(ctx context.Context, request re
 			},
 			"compliances": schema.ListAttribute{
 				Description:         "compliances Select relevant compliance frameworks, such as GDPR, HIPAA, or PCI-DSS, to ensure monitoring under your sensitive data discovery.",
-				MarkdownDescription: "compliances Select relevant compliance frameworks, such as GDPR, HIPAA, or PCI-DSS, to ensure monitoring under your sensitive data discovery.<br>**Valid Options:** `['APPI', 'CCPA', 'CPA_CO', 'CPRA_2023', 'DPA_UK', 'EPRIVACY_DIRECTIVE', 'GDPR', 'GLBA', 'HIPAA', 'ISO_IEC_27001', 'ISO_IEC_27701', 'LGPD', 'PCI_DSS', 'PDPA_SG', 'PIPEDA', 'SOC2', 'SOX']` (Multiple selection allowed)<br>**Default:** `UNSPECIFIED`<br>**Default:** `PCI_DSS`",
+				MarkdownDescription: "compliances Select relevant compliance frameworks, such as GDPR, HIPAA, or PCI-DSS, to ensure monitoring under your sensitive data discovery.<br>**Valid Options:** `['APPI', 'CCPA', 'CPA_CO', 'CPRA_2023', 'DPA_UK', 'EPRIVACY_DIRECTIVE', 'GDPR', 'GLBA', 'HIPAA', 'ISO_IEC_27001', 'ISO_IEC_27701', 'LGPD', 'PCI_DSS', 'PDPA_SG', 'PIPEDA', 'SOC2', 'SOX']` (Multiple selection allowed)<br>**Default:** `PCI_DSS`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -188,6 +189,8 @@ func (r *ResourceF5XCSensitiveDataPolicy) Schema(ctx context.Context, request re
 				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("PCI_DSS")),
 				Validators: []validator.List{
 					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPI", "CCPA", "CPA_CO", "CPRA_2023", "DPA_UK", "EPRIVACY_DIRECTIVE", "GDPR", "GLBA", "HIPAA", "ISO_IEC_27001", "ISO_IEC_27701", "LGPD", "PCI_DSS", "PDPA_SG", "PIPEDA", "SOC2", "SOX"}...)),
+					listvalidator.SizeAtMost(17),
+					listvalidator.UniqueValues(),
 				},
 			},
 			"custom_data_types": schema.ListNestedAttribute{
@@ -229,7 +232,7 @@ func (r *ResourceF5XCSensitiveDataPolicy) Schema(ctx context.Context, request re
 									Optional:            false,
 									Computed:            true,
 									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
+										stringplanmodifier.UseNonNullStateForUnknown(),
 									},
 								},
 							},
@@ -312,9 +315,17 @@ func (r *ResourceF5XCSensitiveDataPolicy) ModifyPlan(ctx context.Context, req re
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCSensitiveDataPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCSensitiveDataPolicyModel
 
 	// Read Terraform plan data into the model
@@ -479,7 +490,7 @@ func (r *ResourceF5XCSensitiveDataPolicy) Create(ctx context.Context, request re
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -502,7 +513,7 @@ func (r *ResourceF5XCSensitiveDataPolicy) Create(ctx context.Context, request re
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "sensitive_data_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "sensitive_data_policy", err),
 		)
 		return
 	}
@@ -635,6 +646,9 @@ func (r *ResourceF5XCSensitiveDataPolicy) Create(ctx context.Context, request re
 				return
 			}
 			data.Compliances = listValue
+		} else if !data.Compliances.IsNull() && !data.Compliances.IsUnknown() && len(data.Compliances.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Compliances = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.Compliances = types.ListNull(types.StringType)
 		}
@@ -718,14 +732,12 @@ func (r *ResourceF5XCSensitiveDataPolicy) Create(ctx context.Context, request re
 			AttrTypes: SensitiveDataPolicyCustomDataTypesModelAttributeMap,
 		}
 		nullCustomDataTypesList := basetypes.NewListNull(customDataTypesObjectType)
-		var priorValCustomDataTypes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("custom_data_types"), &priorValCustomDataTypes)
-		if !priorValCustomDataTypes.IsNull() && !priorValCustomDataTypes.IsUnknown() {
-			data.CustomDataTypes = priorValCustomDataTypes
+		if !data.CustomDataTypes.IsNull() && !data.CustomDataTypes.IsUnknown() && len(data.CustomDataTypes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.CustomDataTypes = basetypes.NewListValueMust(customDataTypesObjectType, nil)
 		} else {
 			data.CustomDataTypes = nullCustomDataTypesList
 		}
-
 	}
 
 	// resource specToModelRootOld ArrayOfStringField --> DisabledPredefinedDataTypes
@@ -738,7 +750,12 @@ func (r *ResourceF5XCSensitiveDataPolicy) Create(ctx context.Context, request re
 			}
 			data.DisabledPredefinedDataTypes = listValue
 		} else {
-			data.DisabledPredefinedDataTypes = types.ListNull(types.StringType)
+			if !data.DisabledPredefinedDataTypes.IsNull() && !data.DisabledPredefinedDataTypes.IsUnknown() && len(data.DisabledPredefinedDataTypes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.DisabledPredefinedDataTypes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.DisabledPredefinedDataTypes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -785,14 +802,10 @@ func (r *ResourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request reso
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "sensitive_data_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "sensitive_data_policy", err),
 		)
 		return
 	}
@@ -925,6 +938,9 @@ func (r *ResourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request reso
 				return
 			}
 			data.Compliances = listValue
+		} else if !data.Compliances.IsNull() && !data.Compliances.IsUnknown() && len(data.Compliances.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Compliances = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.Compliances = types.ListNull(types.StringType)
 		}
@@ -1008,14 +1024,12 @@ func (r *ResourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request reso
 			AttrTypes: SensitiveDataPolicyCustomDataTypesModelAttributeMap,
 		}
 		nullCustomDataTypesList := basetypes.NewListNull(customDataTypesObjectType)
-		var priorValCustomDataTypes types.List
-		_ = request.State.GetAttribute(ctx, path.Root("custom_data_types"), &priorValCustomDataTypes)
-		if !priorValCustomDataTypes.IsNull() && !priorValCustomDataTypes.IsUnknown() {
-			data.CustomDataTypes = priorValCustomDataTypes
+		if !data.CustomDataTypes.IsNull() && !data.CustomDataTypes.IsUnknown() && len(data.CustomDataTypes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.CustomDataTypes = basetypes.NewListValueMust(customDataTypesObjectType, nil)
 		} else {
 			data.CustomDataTypes = nullCustomDataTypesList
 		}
-
 	}
 
 	// resource specToModelRootOld ArrayOfStringField --> DisabledPredefinedDataTypes
@@ -1028,7 +1042,12 @@ func (r *ResourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request reso
 			}
 			data.DisabledPredefinedDataTypes = listValue
 		} else {
-			data.DisabledPredefinedDataTypes = types.ListNull(types.StringType)
+			if !data.DisabledPredefinedDataTypes.IsNull() && !data.DisabledPredefinedDataTypes.IsUnknown() && len(data.DisabledPredefinedDataTypes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.DisabledPredefinedDataTypes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.DisabledPredefinedDataTypes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -1041,6 +1060,12 @@ func (r *ResourceF5XCSensitiveDataPolicy) Read(ctx context.Context, request reso
 }
 
 func (r *ResourceF5XCSensitiveDataPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCSensitiveDataPolicyModel
@@ -1225,7 +1250,7 @@ func (r *ResourceF5XCSensitiveDataPolicy) Update(ctx context.Context, request re
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1233,24 +1258,20 @@ func (r *ResourceF5XCSensitiveDataPolicy) Update(ctx context.Context, request re
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "sensitive_data_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "sensitive_data_policy", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_sensitive_data_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "sensitive_data_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "sensitive_data_policy", err),
 		)
 		return
 	}
@@ -1382,6 +1403,9 @@ func (r *ResourceF5XCSensitiveDataPolicy) Update(ctx context.Context, request re
 				return
 			}
 			data.Compliances = listValue
+		} else if !data.Compliances.IsNull() && !data.Compliances.IsUnknown() && len(data.Compliances.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Compliances = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.Compliances = types.ListNull(types.StringType)
 		}
@@ -1465,14 +1489,12 @@ func (r *ResourceF5XCSensitiveDataPolicy) Update(ctx context.Context, request re
 			AttrTypes: SensitiveDataPolicyCustomDataTypesModelAttributeMap,
 		}
 		nullCustomDataTypesList := basetypes.NewListNull(customDataTypesObjectType)
-		var priorValCustomDataTypes types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("custom_data_types"), &priorValCustomDataTypes)
-		if !priorValCustomDataTypes.IsNull() && !priorValCustomDataTypes.IsUnknown() {
-			data.CustomDataTypes = priorValCustomDataTypes
+		if !data.CustomDataTypes.IsNull() && !data.CustomDataTypes.IsUnknown() && len(data.CustomDataTypes.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.CustomDataTypes = basetypes.NewListValueMust(customDataTypesObjectType, nil)
 		} else {
 			data.CustomDataTypes = nullCustomDataTypesList
 		}
-
 	}
 
 	// resource specToModelRootOld ArrayOfStringField --> DisabledPredefinedDataTypes
@@ -1485,7 +1507,12 @@ func (r *ResourceF5XCSensitiveDataPolicy) Update(ctx context.Context, request re
 			}
 			data.DisabledPredefinedDataTypes = listValue
 		} else {
-			data.DisabledPredefinedDataTypes = types.ListNull(types.StringType)
+			if !data.DisabledPredefinedDataTypes.IsNull() && !data.DisabledPredefinedDataTypes.IsUnknown() && len(data.DisabledPredefinedDataTypes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.DisabledPredefinedDataTypes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.DisabledPredefinedDataTypes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -1561,7 +1588,7 @@ func (r *ResourceF5XCSensitiveDataPolicy) Delete(ctx context.Context, request re
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "sensitive_data_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "sensitive_data_policy", err),
 		)
 		return
 	}

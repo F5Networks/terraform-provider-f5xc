@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -46,6 +47,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_app_type "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/app_type"
 )
@@ -65,7 +67,8 @@ type AppTypeDiscoveredAPISettings struct {
 }
 
 type AppTypeLearnFromRedirectTrafficChoice struct {
-	Enable types.Bool `tfsdk:"enable"`
+	Disable types.Bool `tfsdk:"disable"`
+	Enable  types.Bool `tfsdk:"enable"`
 }
 
 type AppTypeFeature struct {
@@ -115,7 +118,8 @@ var AppTypeBusinessLogicMarkupSettingDiscoveredApiSettingsModelAttributeMap = ma
 // Attribute map for OneOfField --> LearnFromRedirectTraffic
 var AppTypeBusinessLogicMarkupSettingLearnFromRedirectTrafficModelAttributeMap = map[string]attr.Type{
 
-	"enable": types.BoolType,
+	"disable": types.BoolType,
+	"enable":  types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> Features
@@ -137,8 +141,8 @@ func (r *ResourceF5XCAppType) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
-		Description:         "Identified API Information about automatically identified API endpoint Each identified API endpoint has a CollapsedURL and Method. CollapsedURL is created by replacing dynamic components in the URL, if any, with the keyword DYN. These dynamic components are automatically identified. Additionally, any API endpoint that has a collapsedURL with automatically identified DYN components, will also have DYN-Examples which show a few examples of the original values of the components that were determined to be DYN.",
+		MarkdownDescription: "App Type object defines a application profile type from an advanced monitoring/security point of view.<br>An App type is a set of (micro) services that interact with one another and function as an application.<br>Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.<br>App type object is the profile for one such application label. One can define various advanced security features that can<br>be enabled for a given application in this object. All services in a given namespace that are labeled with<br>same ves.io/app_type label are assumed to be a single application. In a different namespace as two different<br>instances of same application.<br>app_type object is recommended per tenant and present only in shared namespace.<br>This way advanced security modeled developed for a given application can be shared across namespaces or deployments.<br>app_setting object can be used to enable a app_type monitoring profile in a given namespace.",
+		Description:         "App Type object defines a application profile type from an advanced monitoring/security point of view. An App type is a set of (micro) services that interact with one another and function as an application. Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services. App type object is the profile for one such application label. One can define various advanced security features that can be enabled for a given application in this object. All services in a given namespace that are labeled with same ves.io/app_type label are assumed to be a single application. In a different namespace as two different instances of same application. app_type object is recommended per tenant and present only in shared namespace. This way advanced security modeled developed for a given application can be shared across namespaces or deployments. app_setting object can be used to enable a app_type monitoring profile in a given namespace.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -194,7 +198,7 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"shared"}...),
+					namespacetypevalidator.AllowedIn("shared"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -236,19 +240,30 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 					},
 					"learn_from_redirect_traffic_choice": schema.SingleNestedAttribute{
 						Description:         "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
-						MarkdownDescription: "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
+						MarkdownDescription: "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx<br>Exactly one of `disable` or `enable` must be specified when `learn_from_redirect_traffic_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Validators: []validator.Object{
 							exactlyoneofvalidator.ExactlyOneOf(
+								"disable",
 								"enable",
 							),
 						},
 						Attributes: map[string]schema.Attribute{
+							"disable": schema.BoolAttribute{
+								Description:         "Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx",
+								MarkdownDescription: "Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `enable`.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
 							"enable": schema.BoolAttribute{
 								Description:         "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
-								MarkdownDescription: "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
+								MarkdownDescription: "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `disable`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -348,9 +363,17 @@ func (r *ResourceF5XCAppType) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAppTypeModel
 
 	// Read Terraform plan data into the model
@@ -473,6 +496,13 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 					return
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Disable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					businessLogicMarkupSettingSpec.LearnFromRedirectTraffic = disableSpecBool
+				}
+
 				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsUnknown() {
 					enableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable{}
@@ -533,7 +563,7 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -556,7 +586,7 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_app_type.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "app_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "app_type", err),
 		)
 		return
 	}
@@ -718,6 +748,15 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 
 			// Process nested choices, populating the temporary attribute map
 
+			// resource specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Disable)
+
+			if isDisable {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+			}
+
 			// resource specToModelNested BoolOfOneOfPointerField --> Enable
 			_, isEnable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable)
 
@@ -804,14 +843,12 @@ func (r *ResourceF5XCAppType) Create(ctx context.Context, request resource.Creat
 			AttrTypes: AppTypeFeaturesModelAttributeMap,
 		}
 		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
-		var priorValFeatures types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("features"), &priorValFeatures)
-		if !priorValFeatures.IsNull() && !priorValFeatures.IsUnknown() {
-			data.Features = priorValFeatures
+		if !data.Features.IsNull() && !data.Features.IsUnknown() && len(data.Features.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Features = basetypes.NewListValueMust(featuresObjectType, nil)
 		} else {
 			data.Features = nullFeaturesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -857,14 +894,10 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "app_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "app_type", err),
 		)
 		return
 	}
@@ -1026,6 +1059,15 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 
 			// Process nested choices, populating the temporary attribute map
 
+			// resource specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Disable)
+
+			if isDisable {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+			}
+
 			// resource specToModelNested BoolOfOneOfPointerField --> Enable
 			_, isEnable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable)
 
@@ -1112,14 +1154,12 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: AppTypeFeaturesModelAttributeMap,
 		}
 		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
-		var priorValFeatures types.List
-		_ = request.State.GetAttribute(ctx, path.Root("features"), &priorValFeatures)
-		if !priorValFeatures.IsNull() && !priorValFeatures.IsUnknown() {
-			data.Features = priorValFeatures
+		if !data.Features.IsNull() && !data.Features.IsUnknown() && len(data.Features.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Features = basetypes.NewListValueMust(featuresObjectType, nil)
 		} else {
 			data.Features = nullFeaturesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1131,6 +1171,12 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAppTypeModel
@@ -1273,6 +1319,13 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 					return
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Disable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					businessLogicMarkupSettingSpec.LearnFromRedirectTraffic = disableSpecBool
+				}
+
 				// resource modelToSpecNested BoolOfOneOfPointerField --> Enable
 				if !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsNull() && !businessLogicMarkupSettingLearnFromRedirectTrafficChoiceModel.Enable.IsUnknown() {
 					enableSpecBool := &ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable{}
@@ -1333,7 +1386,7 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1341,24 +1394,20 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_app_type.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_app_type.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "app_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "app_type", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "app_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "app_type", err),
 		)
 		return
 	}
@@ -1519,6 +1568,15 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 
 			// Process nested choices, populating the temporary attribute map
 
+			// resource specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Disable)
+
+			if isDisable {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+			}
+
 			// resource specToModelNested BoolOfOneOfPointerField --> Enable
 			_, isEnable := businessLogicMarkupSettinglearnFromRedirectTrafficChoiceChoices.(*ves_io_schema_app_type.BusinessLogicMarkupSetting_Enable)
 
@@ -1605,14 +1663,12 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 			AttrTypes: AppTypeFeaturesModelAttributeMap,
 		}
 		nullFeaturesList := basetypes.NewListNull(featuresObjectType)
-		var priorValFeatures types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("features"), &priorValFeatures)
-		if !priorValFeatures.IsNull() && !priorValFeatures.IsUnknown() {
-			data.Features = priorValFeatures
+		if !data.Features.IsNull() && !data.Features.IsUnknown() && len(data.Features.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Features = basetypes.NewListValueMust(featuresObjectType, nil)
 		} else {
 			data.Features = nullFeaturesList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -1687,7 +1743,7 @@ func (r *ResourceF5XCAppType) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "app_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "app_type", err),
 		)
 		return
 	}

@@ -25,20 +25,20 @@ import (
 	allowedDomainSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/shape/client_side_defense/allowed_domain"
 )
 
-// testAccGenerateDomainValue generates a unique RFC 1034 compliant domain name
+// testAccGenerateAllowedDomainValue generates a unique RFC 1034 compliant domain name
 // for acceptance tests. The returned value matches the regex:
 // ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$
-func testAccGenerateDomainValue(t *testing.T, prefix string) string {
-	return fmt.Sprintf("%s-%s.example.com", prefix, strings.ToLower(acctest.RandString(t, 8)))
+func testAccGenerateAllowedDomainValue(t *testing.T, prefix string) string {
+	return fmt.Sprintf("%s-%s.allowed-test.com", prefix, strings.ToLower(acctest.RandString(t, 8)))
 }
 
 func TestAccResourceAutoF5XCAllowedDomain_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-domain-" + strings.ToLower(acctest.RandString(t, 8))
+	name := "example-domain-" + strings.ToLower(acctest.RandString(t, 8))
 	namespace := "system"
-	domain := testAccGenerateDomainValue(t, "basic")
-	domainUpdated := testAccGenerateDomainValue(t, "basic-upd")
+	domain := testAccGenerateAllowedDomainValue(t, "basic")
+	domainUpdated := testAccGenerateAllowedDomainValue(t, "basic-upd")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -48,29 +48,31 @@ func TestAccResourceAutoF5XCAllowedDomain_basic(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_basic(name, namespace, domain),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "name", name),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "namespace", namespace),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "allowed_domain", domain),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "name", name),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "namespace", namespace),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "allowed_domain", domain),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_basic(name, namespace, domainUpdated),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "name", name),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "namespace", namespace),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "allowed_domain", domainUpdated),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "name", name),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "namespace", namespace),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "allowed_domain", domainUpdated),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 		},
 	})
 }
 
 func TestAccResourceAutoF5XCAllowedDomain_withDescription(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-domain-" + strings.ToLower(acctest.RandString(t, 8))
+	name := "example-domain-" + strings.ToLower(acctest.RandString(t, 8))
 	namespace := "system"
-	domain := testAccGenerateDomainValue(t, "desc")
-	domainUpdated := testAccGenerateDomainValue(t, "desc-upd")
+	domain := testAccGenerateAllowedDomainValue(t, "desc")
+	domainUpdated := testAccGenerateAllowedDomainValue(t, "desc-upd")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -80,24 +82,26 @@ func TestAccResourceAutoF5XCAllowedDomain_withDescription(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_withDescription(name, namespace, domain, "API domain for client-side defense"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "description", "API domain for client-side defense"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "description", "API domain for client-side defense"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_withDescription(name, namespace, domainUpdated, "Gateway domain updated"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "description", "Gateway domain updated"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "description", "Gateway domain updated"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 		},
 	})
 }
 
 func TestAccResourceAutoF5XCAllowedDomain_withLabels(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-domain-" + strings.ToLower(acctest.RandString(t, 8))
+	name := "example-domain-" + strings.ToLower(acctest.RandString(t, 8))
 	namespace := "system"
-	domain := testAccGenerateDomainValue(t, "labels")
+	domain := testAccGenerateAllowedDomainValue(t, "labels")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -107,26 +111,28 @@ func TestAccResourceAutoF5XCAllowedDomain_withLabels(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_withLabels(name, namespace, domain, "production", "frontend"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "labels.env", "production"),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "labels.tier", "frontend"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "labels.env", "production"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "labels.tier", "frontend"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 			{
-				Config: testAccResourceAutoF5XCAllowedDomainConfig_withLabels(name, namespace, domain, "staging", "backend"),
+				Config: testAccResourceAutoF5XCAllowedDomainConfig_withLabels(name, namespace, domain, "example", "backend"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "labels.env", "staging"),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "labels.tier", "backend"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "labels.env", "example"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "labels.tier", "backend"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 		},
 	})
 }
 
 func TestAccResourceAutoF5XCAllowedDomain_withAnnotations(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-domain-" + strings.ToLower(acctest.RandString(t, 8))
+	name := "example-domain-" + strings.ToLower(acctest.RandString(t, 8))
 	namespace := "system"
-	domain := testAccGenerateDomainValue(t, "annot")
+	domain := testAccGenerateAllowedDomainValue(t, "annot")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -136,29 +142,31 @@ func TestAccResourceAutoF5XCAllowedDomain_withAnnotations(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_withAnnotations(name, namespace, domain, "security-team", "pci-dss"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "annotations.owner", "security-team"),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "annotations.compliance", "pci-dss"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "annotations.owner", "security-team"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "annotations.compliance", "pci-dss"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_withAnnotations(name, namespace, domain, "ops-team", "hipaa"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "annotations.owner", "ops-team"),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "annotations.compliance", "hipaa"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "annotations.owner", "ops-team"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "annotations.compliance", "hipaa"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 		},
 	})
 }
 
 func TestAccResourceAutoF5XCAllowedDomain_full(t *testing.T) {
 	t.Parallel()
-	name := "tf-acc-domain-" + strings.ToLower(acctest.RandString(t, 8))
+	name := "example-domain-" + strings.ToLower(acctest.RandString(t, 8))
 	namespace := "system"
-	domain := testAccGenerateDomainValue(t, "full")
-	domainUpdated := testAccGenerateDomainValue(t, "full-upd")
+	domain := testAccGenerateAllowedDomainValue(t, "full")
+	domainUpdated := testAccGenerateAllowedDomainValue(t, "full-upd")
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAllowedDomainDestroyProducer(t),
@@ -166,30 +174,48 @@ func TestAccResourceAutoF5XCAllowedDomain_full(t *testing.T) {
 			{
 				Config: testAccResourceAutoF5XCAllowedDomainConfig_full(name, namespace, domain, "Secure domain with full configuration", "production", "high", "platform-team", "terraform"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "name", name),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "allowed_domain", domain),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "description", "Secure domain with full configuration"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "name", name),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "allowed_domain", domain),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "description", "Secure domain with full configuration"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 			{
-				Config: testAccResourceAutoF5XCAllowedDomainConfig_full(name, namespace, domainUpdated, "Production domain updated", "staging", "medium", "admin-team", "operator"),
+				Config: testAccResourceAutoF5XCAllowedDomainConfig_full(name, namespace, domainUpdated, "Production domain updated", "example", "medium", "admin-team", "operator"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "name", name),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "allowed_domain", domainUpdated),
-					resource.TestCheckResourceAttr("f5xc_allowed_domain.test", "description", "Production domain updated"),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "name", name),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "allowed_domain", domainUpdated),
+					resource.TestCheckResourceAttr("f5xc_allowed_domain.example", "description", "Production domain updated"),
 				),
 			},
+			testAccResourceAutoF5XCAllowedDomainImportStep(),
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAllowedDomainConfig_full(name, "system", domain, "Secure domain with full configuration", "production", "high", "platform-team", "terraform"),
+		})
 }
 
 func testAccCheckAllowedDomainDestroyProducer(t *testing.T) func(*terraform.State) error {
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_allowed_domain", allowedDomainSchema.ObjectType, "allowed domain")
 }
 
+// testAccResourceAutoF5XCAllowedDomainImportStep imports by "namespace/allowed_domain"; name, uid and description are not round-tripped.
+func testAccResourceAutoF5XCAllowedDomainImportStep() resource.TestStep {
+	return resource.TestStep{
+		ResourceName:                         "f5xc_allowed_domain.example",
+		ImportState:                          true,
+		ImportStateVerify:                    true,
+		ImportStateIdFunc:                    acctest.ImportStateIDWithFields("f5xc_allowed_domain.example", "namespace", "allowed_domain"),
+		ImportStateVerifyIdentifierAttribute: "allowed_domain",
+		ImportStateVerifyIgnore:              []string{"uid", "description", "name", "labels", "annotations"},
+	}
+}
+
 func testAccResourceAutoF5XCAllowedDomainConfig_basic(name, namespace, allowedDomain string) string {
 	return fmt.Sprintf(`
-resource "f5xc_allowed_domain" "test" {
+resource "f5xc_allowed_domain" "example" {
   name           = %q
   namespace      = %q
   allowed_domain = %q
@@ -199,7 +225,7 @@ resource "f5xc_allowed_domain" "test" {
 
 func testAccResourceAutoF5XCAllowedDomainConfig_withDescription(name, namespace, allowedDomain, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_allowed_domain" "test" {
+resource "f5xc_allowed_domain" "example" {
   name           = %q
   namespace      = %q
   allowed_domain = %q
@@ -210,7 +236,7 @@ resource "f5xc_allowed_domain" "test" {
 
 func testAccResourceAutoF5XCAllowedDomainConfig_withLabels(name, namespace, allowedDomain, env, tier string) string {
 	return fmt.Sprintf(`
-resource "f5xc_allowed_domain" "test" {
+resource "f5xc_allowed_domain" "example" {
   name           = %q
   namespace      = %q
   allowed_domain = %q
@@ -225,7 +251,7 @@ resource "f5xc_allowed_domain" "test" {
 
 func testAccResourceAutoF5XCAllowedDomainConfig_withAnnotations(name, namespace, allowedDomain, owner, compliance string) string {
 	return fmt.Sprintf(`
-resource "f5xc_allowed_domain" "test" {
+resource "f5xc_allowed_domain" "example" {
   name           = %q
   namespace      = %q
   allowed_domain = %q
@@ -240,7 +266,7 @@ resource "f5xc_allowed_domain" "test" {
 
 func testAccResourceAutoF5XCAllowedDomainConfig_full(name, namespace, allowedDomain, description, env, security, owner, managedBy string) string {
 	return fmt.Sprintf(`
-resource "f5xc_allowed_domain" "test" {
+resource "f5xc_allowed_domain" "example" {
   name           = %q
   namespace      = %q
   allowed_domain = %q

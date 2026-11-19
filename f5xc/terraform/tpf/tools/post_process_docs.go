@@ -56,12 +56,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	linksPath := "docs_links.generated.yaml"
-	links, err := loadLinksConfig(linksPath)
+	generatedLinksPath := "docs_links.generated.yaml"
+	generatedLinks, err := loadLinksConfig(generatedLinksPath)
 	if err != nil {
-		fmt.Printf("❌ Error reading %s: %v\n", linksPath, err)
+		fmt.Printf("❌ Error reading %s: %v\n", generatedLinksPath, err)
 		os.Exit(1)
 	}
+
+	overrideLinksPath := "docs_link_override.yaml"
+	overrideLinks, err := loadLinksConfig(overrideLinksPath)
+	if err != nil {
+		fmt.Printf("❌ Error reading %s: %v\n", overrideLinksPath, err)
+		os.Exit(1)
+	}
+
+	links := mergeLinksConfig(generatedLinks, overrideLinks)
 
 	targets := []docsTarget{
 		{Dir: "../docs/resources", Kind: "resources", ConfigPath: configPath},
@@ -134,6 +143,36 @@ func loadLinksConfig(configPath string) (*LinksConfig, error) {
 	return links, nil
 }
 
+func mergeLinksConfig(base, override *LinksConfig) *LinksConfig {
+	if base == nil {
+		base = &LinksConfig{Resources: map[string]string{}, DataSources: map[string]string{}}
+	}
+	if override == nil {
+		override = &LinksConfig{Resources: map[string]string{}, DataSources: map[string]string{}}
+	}
+
+	merged := &LinksConfig{
+		Resources:   map[string]string{},
+		DataSources: map[string]string{},
+	}
+
+	for key, value := range base.Resources {
+		merged.Resources[key] = value
+	}
+	for key, value := range override.Resources {
+		merged.Resources[key] = value
+	}
+
+	for key, value := range base.DataSources {
+		merged.DataSources[key] = value
+	}
+	for key, value := range override.DataSources {
+		merged.DataSources[key] = value
+	}
+
+	return merged
+}
+
 // loadConfig loads categories.yaml and supports both string and object entries.
 func loadConfig(configPath string) (*Config, error) {
 	data, err := os.ReadFile(configPath)
@@ -193,17 +232,44 @@ func normalizeDocMetadataMap(raw map[string]interface{}) map[string]DocMetadata 
 	return out
 }
 
+const attachmentDefaultSubcategory = "App Security & Load Balancing"
+
 // resolveMetadata resolves category and API URL for a docs item.
+//
+// Why: Each Terraform resource and data source documentation page needs both a
+// registry subcategory and an F5 XC API documentation reference URL.
+//
+// How: It looks up the base metadata from cfg, applies any link override from
+// links, falls back to the parent target resource's API URL for synthetic
+// *_attachments resources when no explicit URL is configured, and resolves the
+// subcategory via resolveCategory when unset.
+//
+// Parameters:
+//   - name:  short resource or data source name without the "f5xc_" prefix
+//   - kind:  documentation kind ("resources" or "data-sources")
+//   - cfg:   loaded category/metadata configuration
+//   - links: optional generated and overridden API documentation links
+//
+// Returns:
+//   - DocMetadata: resolved subcategory and API documentation URL
 func resolveMetadata(name, kind string, cfg *Config, links *LinksConfig) DocMetadata {
 	entry := DocMetadata{}
 	if kind == "data-sources" {
 		entry = cfg.DataSources[name]
+		if links != nil {
+			if url := strings.TrimSpace(links.DataSources[name]); url != "" {
+				entry.APIURL = url
+			}
+		}
 	} else {
 		entry = cfg.Resources[name]
 		if links != nil {
 			if url := strings.TrimSpace(links.Resources[name]); url != "" {
 				entry.APIURL = url
 			}
+		}
+		if strings.TrimSpace(entry.APIURL) == "" && strings.HasSuffix(name, "_attachments") {
+			entry.APIURL = resolveAttachmentParentAPIURL(name, cfg, links)
 		}
 	}
 
@@ -214,13 +280,88 @@ func resolveMetadata(name, kind string, cfg *Config, links *LinksConfig) DocMeta
 	return entry
 }
 
+// resolveAttachmentParentAPIURL finds the parent resource's API documentation URL for an attachment resource.
+//
+// Why: Synthetic *_attachments resources manage policy lists on a parent target
+// resource (e.g. tcp_loadbalancer or securemesh_site_v2) and do not have a
+// standalone OpenAPI specification. When no explicit link override exists, they
+// should inherit the parent resource's API documentation URL rather than the
+// generic root URL.
+//
+// How: It searches links.Resources (highest precedence) and cfg.Resources for
+// the longest resource key `parent` where `name` starts with `parent + "_"` and
+// has a non-empty API URL.
+//
+// Parameters:
+//   - name:  attachment resource name without the "f5xc_" prefix
+//   - cfg:   loaded category/metadata configuration
+//   - links: optional generated and overridden API documentation links
+//
+// Returns:
+//   - string: the parent resource's API URL, or empty string if no parent match is found
+//
+// Example:
+//
+//	url := resolveAttachmentParentAPIURL("tcp_loadbalancer_service_policy_attachments", cfg, links)
+//	// url == "https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer"
+func resolveAttachmentParentAPIURL(name string, cfg *Config, links *LinksConfig) string {
+	bestParentLen := 0
+	bestURL := ""
+
+	if links != nil {
+		for parent, rawURL := range links.Resources {
+			url := strings.TrimSpace(rawURL)
+			if url == "" || parent == name {
+				continue
+			}
+			if strings.HasPrefix(name, parent+"_") && len(parent) > bestParentLen {
+				bestParentLen = len(parent)
+				bestURL = url
+			}
+		}
+	}
+
+	if cfg != nil {
+		for parent, meta := range cfg.Resources {
+			url := strings.TrimSpace(meta.APIURL)
+			if url == "" || parent == name {
+				continue
+			}
+			if strings.HasPrefix(name, parent+"_") && len(parent) > bestParentLen {
+				bestParentLen = len(parent)
+				bestURL = url
+			}
+		}
+	}
+
+	return bestURL
+}
+
 // resolveCategory finds the best matching category for a docs item.
+//
+// Why: Every documentation page requires a non-empty subcategory in its YAML
+// frontmatter so the Terraform Registry groups resources consistently.
+//
+// How: It checks explicit resource and data-source entries first, assigns all
+// *_attachments resources to "App Security & Load Balancing", then checks
+// prefix mappings and the configured default category.
+//
+// Parameters:
+//   - name: short resource or data source name without the "f5xc_" prefix
+//   - cfg:  loaded category configuration
+//
+// Returns:
+//   - string: resolved category name
 func resolveCategory(name string, cfg *Config) string {
 	if entry, ok := cfg.Resources[name]; ok && strings.TrimSpace(entry.Subcategory) != "" {
 		return entry.Subcategory
 	}
 	if entry, ok := cfg.DataSources[name]; ok && strings.TrimSpace(entry.Subcategory) != "" {
 		return entry.Subcategory
+	}
+
+	if strings.HasSuffix(name, "_attachments") {
+		return attachmentDefaultSubcategory
 	}
 
 	for prefix, cat := range cfg.PrefixMappings {

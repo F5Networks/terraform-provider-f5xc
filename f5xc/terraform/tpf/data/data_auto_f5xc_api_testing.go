@@ -30,26 +30,26 @@ type DataSourceF5XCApiTesting struct {
 	client *client.APIClient
 }
 
-type ApiTestingApiTestingDomainConfiguration struct {
+type ApiTestingDomainCfg struct {
 	AllowDestructiveMethods types.Bool   `tfsdk:"allow_destructive_methods"`
 	Credentials             types.List   `tfsdk:"credentials"`
 	Domain                  types.String `tfsdk:"domain"`
 }
 
-type ApiTestingApiTestingCredentials struct {
+type ApiTestingCredentials struct {
 	CredentialName    types.String `tfsdk:"credential_name"`
 	CredentialsChoice types.Object `tfsdk:"credentials_choice"`
 	RoleChoice        types.Object `tfsdk:"role_choice"`
 }
 
-type ApiTestingCredentialsCredentialsChoice struct {
+type ApiTestingCredentialsChoice struct {
 	ApiKey        types.Object `tfsdk:"api_key"`
 	BasicAuth     types.Object `tfsdk:"basic_auth"`
 	BearerToken   types.Object `tfsdk:"bearer_token"`
 	LoginEndpoint types.Object `tfsdk:"login_endpoint"`
 }
 
-type ApiTestingCredentialsApiKey struct {
+type ApiTestingApiKey struct {
 	Key   types.String `tfsdk:"key"`
 	Value types.Object `tfsdk:"value"`
 }
@@ -58,44 +58,45 @@ type ApiTestingSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type ApiTestingSecretTypeSecretInfoChoice struct {
+type ApiTestingSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type ApiTestingSecretTypeBlindfoldSecretInfo struct {
+type ApiTestingBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type ApiTestingSecretTypeClearSecretInfo struct {
+type ApiTestingClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type ApiTestingCredentialsBasicAuth struct {
+type ApiTestingBasicAuth struct {
 	Password types.Object `tfsdk:"password"`
 	User     types.String `tfsdk:"user"`
 }
 
-type ApiTestingCredentialsBearerToken struct {
+type ApiTestingBearerToken struct {
 	Token types.Object `tfsdk:"token"`
 }
 
-type ApiTestingCredentialsLoginEndpoint struct {
+type ApiTestingLoginEndpoint struct {
 	JsonPayload      types.Object `tfsdk:"json_payload"`
 	Method           types.List   `tfsdk:"method"`
 	Path             types.String `tfsdk:"path"`
 	TokenResponseKey types.String `tfsdk:"token_response_key"`
 }
 
-type ApiTestingCredentialsRoleChoice struct {
+type ApiTestingRoleChoice struct {
 	Admin    types.Bool `tfsdk:"admin"`
 	Standard types.Bool `tfsdk:"standard"`
 }
 
-type ApiTestingGlobalSpecTypeFrequencyChoice struct {
+type ApiTestingFrequencyChoice struct {
 	EveryDay   types.Bool `tfsdk:"every_day"`
 	EveryMonth types.Bool `tfsdk:"every_month"`
 	EveryWeek  types.Bool `tfsdk:"every_week"`
@@ -194,6 +195,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofModel
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -239,6 +241,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneo
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -283,6 +286,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceBearerTokenTokenSecretInfoOneof
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceBearerTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -332,6 +336,7 @@ var ApiTestingDomainsCredentialsCredentialsChoiceLoginEndpointJsonPayloadSecretI
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ApiTestingDomainsCredentialsCredentialsChoiceLoginEndpointJsonPayloadSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -378,8 +383,8 @@ func (d *DataSourceF5XCApiTesting) Metadata(ctx context.Context, request datasou
 func (r *DataSourceF5XCApiTesting) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a api_testing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_testing) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a api_testing This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_testing) etc. can be fetched",
+		MarkdownDescription: "This is the api testing type",
+		Description:         "This is the api testing type",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -471,7 +476,7 @@ func (r *DataSourceF5XCApiTesting) Schema(ctx context.Context, request datasourc
 														Computed:    true,
 													},
 													"value": schema.SingleNestedAttribute{
-														Description: "Api Key Value",
+														Description: "API Key Value",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -525,8 +530,15 @@ func (r *DataSourceF5XCApiTesting) Schema(ctx context.Context, request datasourc
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
+																				Sensitive:   true,
 																			},
 																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
 																	},
 																},
 															},
@@ -595,8 +607,15 @@ func (r *DataSourceF5XCApiTesting) Schema(ctx context.Context, request datasourc
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
+																				Sensitive:   true,
 																			},
 																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
 																	},
 																},
 															},
@@ -671,8 +690,15 @@ func (r *DataSourceF5XCApiTesting) Schema(ctx context.Context, request datasourc
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
+																				Sensitive:   true,
 																			},
 																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
 																	},
 																},
 															},
@@ -741,8 +767,15 @@ func (r *DataSourceF5XCApiTesting) Schema(ctx context.Context, request datasourc
 																				Required:    false,
 																				Optional:    false,
 																				Computed:    true,
+																				Sensitive:   true,
 																			},
 																		},
+																	},
+																	"none": schema.BoolAttribute{
+																		Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
 																	},
 																},
 															},
@@ -886,7 +919,7 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "api_testing", err))
 		return
 	}
 
@@ -948,36 +981,32 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot StringField --> CustomHeaderValue
-	if specData.GetCustomHeaderValue() != "" {
-		data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.CustomHeaderValue = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.CustomHeaderValue = types.StringValue(specData.GetCustomHeaderValue())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Domains
-	domainsElementsSpectToModel := make([]ApiTestingApiTestingDomainConfiguration, 0, len(specData.GetDomains()))
+	domainsElementsSpectToModel := make([]ApiTestingDomainCfg, 0, len(specData.GetDomains()))
 
 	for _, domainsElement := range specData.GetDomains() {
-		apiTestingApiTestingDomainConfigurationModel := ApiTestingApiTestingDomainConfiguration{}
+		apiTestingDomainCfgModel := ApiTestingDomainCfg{}
 
 		// data specToModelNested BoolField --> AllowDestructiveMethods
-		apiTestingApiTestingDomainConfigurationModel.AllowDestructiveMethods = types.BoolValue(bool(domainsElement.GetAllowDestructiveMethods()))
+		apiTestingDomainCfgModel.AllowDestructiveMethods = types.BoolValue(bool(domainsElement.GetAllowDestructiveMethods()))
 
 		// data specToModelNested RequiredArrayOfPointerField --> Credentials
 		if len(domainsElement.GetCredentials()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			credentialsElements := make([]ApiTestingApiTestingCredentials, 0, len(domainsElement.GetCredentials()))
+			credentialsElements := make([]ApiTestingCredentials, 0, len(domainsElement.GetCredentials()))
 			for _, credentialsElement := range domainsElement.GetCredentials() {
-				apiTestingApiTestingCredentialsModel := ApiTestingApiTestingCredentials{}
+				apiTestingCredentialsModel := ApiTestingCredentials{}
 
 				// data specToModelNested RequiredStringField --> CredentialName
 				if credentialsElement.GetCredentialName() != "" {
-					apiTestingApiTestingCredentialsModel.CredentialName = types.StringValue(credentialsElement.GetCredentialName())
+					apiTestingCredentialsModel.CredentialName = types.StringValue(credentialsElement.GetCredentialName())
 				} else {
 					// Empty string, set to null
-					apiTestingApiTestingCredentialsModel.CredentialName = types.StringNull()
+					apiTestingCredentialsModel.CredentialName = types.StringNull()
 				}
 
 				// data specToModelNested RequiredOneOfField --> CredentialsChoice
@@ -1110,6 +1139,15 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 										} else {
 											valuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceApiKeyValueSecretInfoOneofClearSecretInfoModelAttributeMap)
 										}
+									}
+
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := valuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										valuesecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -1282,6 +1320,15 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 										} else {
 											passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
 										}
+									}
+
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -1464,6 +1511,15 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -1636,6 +1692,15 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 										}
 									}
 
+									// data specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := jsonPayloadsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										jsonPayloadsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -1739,10 +1804,10 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					apiTestingApiTestingCredentialsModel.CredentialsChoice = finalObj
+					apiTestingCredentialsModel.CredentialsChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					apiTestingApiTestingCredentialsModel.CredentialsChoice = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceModelAttributeMap)
+					apiTestingCredentialsModel.CredentialsChoice = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested RequiredOneOfField --> RoleChoice
@@ -1788,13 +1853,13 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					apiTestingApiTestingCredentialsModel.RoleChoice = finalObj
+					apiTestingCredentialsModel.RoleChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					apiTestingApiTestingCredentialsModel.RoleChoice = types.ObjectNull(ApiTestingDomainsCredentialsRoleChoiceModelAttributeMap)
+					apiTestingCredentialsModel.RoleChoice = types.ObjectNull(ApiTestingDomainsCredentialsRoleChoiceModelAttributeMap)
 				}
 
-				credentialsElements = append(credentialsElements, apiTestingApiTestingCredentialsModel)
+				credentialsElements = append(credentialsElements, apiTestingCredentialsModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1803,24 +1868,24 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			apiTestingApiTestingDomainConfigurationModel.Credentials = credentialsListValue
+			apiTestingDomainCfgModel.Credentials = credentialsListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			apiTestingApiTestingDomainConfigurationModel.Credentials = types.ListNull(types.ObjectType{AttrTypes: ApiTestingDomainsCredentialsModelAttributeMap})
+			apiTestingDomainCfgModel.Credentials = types.ListNull(types.ObjectType{AttrTypes: ApiTestingDomainsCredentialsModelAttributeMap})
 		}
 
 		// data specToModelNested RequiredStringField --> Domain
 		if domainsElement.GetDomain() != "" {
-			apiTestingApiTestingDomainConfigurationModel.Domain = types.StringValue(domainsElement.GetDomain())
+			apiTestingDomainCfgModel.Domain = types.StringValue(domainsElement.GetDomain())
 		} else {
 			// Empty string, set to null
-			apiTestingApiTestingDomainConfigurationModel.Domain = types.StringNull()
+			apiTestingDomainCfgModel.Domain = types.StringNull()
 		}
 
-		domainsElementsSpectToModel = append(domainsElementsSpectToModel, apiTestingApiTestingDomainConfigurationModel)
+		domainsElementsSpectToModel = append(domainsElementsSpectToModel, apiTestingDomainCfgModel)
 	}
 
 	{
@@ -1848,7 +1913,7 @@ func (d *DataSourceF5XCApiTesting) Read(ctx context.Context, request datasource.
 		frequencyChoiceChoices := specData.GetFrequencyChoice()
 
 		// The model struct that will be populated by the nested template.
-		var frequencyChoiceChoicesModel = &ApiTestingGlobalSpecTypeFrequencyChoice{}
+		var frequencyChoiceChoicesModel = &ApiTestingFrequencyChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCHealthcheck_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-hc-" + testAccRunSuffix(t)
+	name := "example-hc-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,20 +37,20 @@ func TestAccResourceAutoF5XCHealthcheck_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -61,7 +61,7 @@ func TestAccResourceAutoF5XCHealthcheck_withHealthCheckChoiceTransition(t *testi
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-hc-" + testAccRunSuffix(t)
+	name := "example-hc-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -70,29 +70,29 @@ func TestAccResourceAutoF5XCHealthcheck_withHealthCheckChoiceTransition(t *testi
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withUDPICMP(name, namespace)},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withTCP(name, namespace, "0A0B", "0A0B")},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withHTTP(name, namespace, true, "", "/healthz")},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -103,7 +103,7 @@ func TestAccResourceAutoF5XCHealthcheck_withHTTPHostHeaderChoiceTransition(t *te
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-hc-" + testAccRunSuffix(t)
+	name := "example-hc-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -112,20 +112,20 @@ func TestAccResourceAutoF5XCHealthcheck_withHTTPHostHeaderChoiceTransition(t *te
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withHTTP(name, namespace, true, "", "/readyz")},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withHTTP(name, namespace, false, "example.com", "/livez")},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -136,7 +136,7 @@ func TestAccResourceAutoF5XCHealthcheck_withHTTPExpectedStatusCodesTransition(t 
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-hc-" + testAccRunSuffix(t)
+	name := "example-hc-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -145,20 +145,20 @@ func TestAccResourceAutoF5XCHealthcheck_withHTTPExpectedStatusCodesTransition(t 
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withHTTPStatusCodes(name, namespace, "200")},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withHTTPStatusCodes(name, namespace, "200-299")},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -169,7 +169,7 @@ func TestAccResourceAutoF5XCHealthcheck_withThresholdsAndIntervalTransition(t *t
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-hc-" + testAccRunSuffix(t)
+	name := "example-hc-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -178,20 +178,20 @@ func TestAccResourceAutoF5XCHealthcheck_withThresholdsAndIntervalTransition(t *t
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withThresholds(name, namespace, 3, 15, 1, 3)},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_withThresholds(name, namespace, 10, 30, 2, 5)},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -202,33 +202,37 @@ func TestAccResourceAutoF5XCHealthcheck_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-hc-" + testAccRunSuffix(t)
+	name := "example-hc-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckHealthcheckDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCHealthcheckConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_healthcheck.test",
+				ResourceName:                         "f5xc_healthcheck.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              testAccHealthcheckImportStateVerifyIgnore(),
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_healthcheck.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCHealthcheckConfig_full("example-healthcheck", "default"),
+		})
 }
 
 func testAccCheckHealthcheckDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -245,7 +249,7 @@ func testAccHealthcheckImportStateVerifyIgnore() []string {
 
 func testAccResourceAutoF5XCHealthcheckConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name      = %q
   namespace = %q
 
@@ -258,10 +262,10 @@ resource "f5xc_healthcheck" "test" {
 
 func testAccResourceAutoF5XCHealthcheckConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name        = %q
   namespace   = %q
-  description = "healthcheck updated"
+  description = "Updated healthcheck example"
 
   timeout             = 5
   interval            = 20
@@ -280,7 +284,7 @@ resource "f5xc_healthcheck" "test" {
 
 func testAccResourceAutoF5XCHealthcheckConfig_withUDPICMP(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name      = %q
   namespace = %q
 
@@ -293,7 +297,7 @@ resource "f5xc_healthcheck" "test" {
 
 func testAccResourceAutoF5XCHealthcheckConfig_withTCP(name, namespace, sendPayload, expectedResponse string) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name      = %q
   namespace = %q
 
@@ -314,7 +318,7 @@ func testAccResourceAutoF5XCHealthcheckConfig_withHTTP(name, namespace string, u
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name      = %q
   namespace = %q
 
@@ -332,7 +336,7 @@ resource "f5xc_healthcheck" "test" {
 
 func testAccResourceAutoF5XCHealthcheckConfig_withHTTPStatusCodes(name, namespace, statusCode string) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name      = %q
   namespace = %q
 
@@ -351,7 +355,7 @@ resource "f5xc_healthcheck" "test" {
 
 func testAccResourceAutoF5XCHealthcheckConfig_withThresholds(name, namespace string, timeout, interval, unhealthy, healthy int64) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name      = %q
   namespace = %q
 
@@ -369,13 +373,13 @@ resource "f5xc_healthcheck" "test" {
 
 func testAccResourceAutoF5XCHealthcheckConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name        = %q
   namespace   = %q
-  description = "healthcheck full"
+  description = "Full healthcheck example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -408,13 +412,13 @@ resource "f5xc_healthcheck" "test" {
 
 func testAccResourceAutoF5XCHealthcheckConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_healthcheck" "test" {
+resource "f5xc_healthcheck" "example" {
   name        = %q
   namespace   = %q
-  description = "healthcheck full updated"
+  description = "Updated full healthcheck example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {

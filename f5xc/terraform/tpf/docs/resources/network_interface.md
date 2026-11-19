@@ -14,25 +14,67 @@
 page_title: "f5xc_network_interface Resource - F5 XC Distributed Cloud"
 subcategory: "Networking & Connectivity"
 description: |-
-  Network Interface Network Interface object represents the configuration of a network device in a fleet of F5XC Customer Edge sites. The following properties can be configured in this object: IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface Subnet to use for allocation Default gateway DNS server Interfaces belonging to site local inside and site local outside networks have to be configured as part of bootstrap configuration. This configuration can be done in two ways: during site registration and is bundled as part of certified hardware image. configured locally on the CE via Sia application Interfaces corresponding to these local interfaces can be configured in the global configuration. Label assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP can be still be configured on site local inside network interface configuration, so that dynamic address is obtained and used. When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or addresses internally allocated from the same subnet or may be disabled. Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured and DHCP server disabled, if an external DHCP server is used. Currently, DHCP client should always be enabled, setting static address on a network interface is not supported. If this Network interface is for primary network device (site local), then it has to be configured only as DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network of this interface has to be site local network. If there are multiple interfaces and multiple virtual networks, then site local interface has to be in the outside network. If network has Network interface with DHCP address assignment configured, then default gateway and DNS server for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary interface will be used.
+  Network Interface object represents the configuration of a network device in a fleet of<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br><br>IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface<br><br>Subnet to use for allocation<br><br>Default gateway<br><br>DNS server<br><br>Interfaces belonging to site local inside and site local outside networks have to be configured as part of<br>bootstrap configuration. This configuration can be done in two ways:<br><br>during site registration and is bundled as part of certified hardware image.<br><br>configured locally on the CE via Sia application<br><br>Interfaces corresponding to these local interfaces can be configured in the global configuration. Label<br>assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP<br>can be still be configured on site local inside network interface configuration, so that dynamic address is<br>obtained and used.<br><br>When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses<br>assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP<br>client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or<br>addresses internally allocated from the same subnet or may be disabled.<br><br>Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured<br>and DHCP server disabled, if an external DHCP server is used.<br><br>Currently, DHCP client should always be enabled, setting static address on a network interface is not supported.<br><br>If this Network interface is for primary network device (site local), then it has to be configured only as<br>DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network<br>of this interface has to be site local network. If there are multiple interfaces and multiple virtual<br>networks, then site local interface has to be in the outside network.<br><br>If network has Network interface with DHCP address assignment configured, then default gateway and DNS server<br>for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route<br>can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary<br>interface will be used.
 ---
 
 # f5xc_network_interface (Resource)
 
-Network Interface Network Interface object represents the configuration of a network device in a fleet of F5XC Customer Edge sites. The following properties can be configured in this object: IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface Subnet to use for allocation Default gateway DNS server Interfaces belonging to site local inside and site local outside networks have to be configured as part of bootstrap configuration. This configuration can be done in two ways: during site registration and is bundled as part of certified hardware image. configured locally on the CE via Sia application Interfaces corresponding to these local interfaces can be configured in the global configuration. Label assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP can be still be configured on site local inside network interface configuration, so that dynamic address is obtained and used. When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or addresses internally allocated from the same subnet or may be disabled. Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured and DHCP server disabled, if an external DHCP server is used. Currently, DHCP client should always be enabled, setting static address on a network interface is not supported. If this Network interface is for primary network device (site local), then it has to be configured only as DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network of this interface has to be site local network. If there are multiple interfaces and multiple virtual networks, then site local interface has to be in the outside network. If network has Network interface with DHCP address assignment configured, then default gateway and DNS server for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary interface will be used.
+Network Interface object represents the configuration of a network device in a fleet of<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br><br>IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface<br><br>Subnet to use for allocation<br><br>Default gateway<br><br>DNS server<br><br>Interfaces belonging to site local inside and site local outside networks have to be configured as part of<br>bootstrap configuration. This configuration can be done in two ways:<br><br>during site registration and is bundled as part of certified hardware image.<br><br>configured locally on the CE via Sia application<br><br>Interfaces corresponding to these local interfaces can be configured in the global configuration. Label<br>assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP<br>can be still be configured on site local inside network interface configuration, so that dynamic address is<br>obtained and used.<br><br>When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses<br>assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP<br>client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or<br>addresses internally allocated from the same subnet or may be disabled.<br><br>Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured<br>and DHCP server disabled, if an external DHCP server is used.<br><br>Currently, DHCP client should always be enabled, setting static address on a network interface is not supported.<br><br>If this Network interface is for primary network device (site local), then it has to be configured only as<br>DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network<br>of this interface has to be site local network. If there are multiple interfaces and multiple virtual<br>networks, then site local interface has to be in the outside network.<br><br>If network has Network interface with DHCP address assignment configured, then default gateway and DNS server<br>for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route<br>can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary<br>interface will be used.
 
 To get more information about f5xc_network_interface, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/network-interface)
 
+## Example Usage
 
+```terraform
+# Example: Network Interface - Full
+
+resource "f5xc_network_interface" "example" {
+  name        = "example-network-interface"
+  namespace   = "system"
+  description = "Full network interface example"
+
+  labels = {
+    env  = "example"
+    team = "platform"
+  }
+
+  annotations = {
+    owner = "example-owner"
+  }
+
+  interface_choice = {
+    ethernet_interface = {
+      device = "eth0"
+
+      address_choice = {
+        dhcp_client = true
+      }
+      network_choice = {
+        site_local_network = true
+      }
+      node_choice = {
+        cluster = true
+      }
+
+      primary_choice = {
+        not_primary = true
+      }
+      vlan_choice = {
+        untagged = true
+      }
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
 
 ### Required
 
-- `interface_choice` (Attributes) Interface Config Type Select the interface configuration type (see [below for nested schema](#nestedatt--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the interface configuration type<br>Exactly one of `dedicated_interface`, `dedicated_management_interface`, `ethernet_interface`, `layer2_interface`, or `tunnel_interface` must be specified. (see [below for nested schema](#nestedatt--interface_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -52,11 +94,11 @@ To get more information about f5xc_network_interface, refer:
 
 Optional:
 
-- `dedicated_interface` (Attributes) Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet, WLAN, or LTE/4G. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface))
-- `dedicated_management_interface` (Attributes) Dedicated Management Interface In dc cluster sites fallback management interfaces can be made into dedicated management interface (see [below for nested schema](#nestedatt--interface_choice--dedicated_management_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface Ethernet interface configuration. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface))
-- `layer2_interface` (Attributes) Layer2 interface Layer2 interface configuration (see [below for nested schema](#nestedatt--interface_choice--layer2_interface))
-- `tunnel_interface` (Attributes) Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface))
+- `dedicated_interface` (Attributes) Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet, WLAN, or LTE/4G.<br>Conflicts with `dedicated_management_interface`, `ethernet_interface`, `layer2_interface`, and `tunnel_interface`. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface))
+- `dedicated_management_interface` (Attributes) Dedicated Management Interface In dc cluster sites fallback management interfaces can be made into dedicated management interface<br>Conflicts with `dedicated_interface`, `ethernet_interface`, `layer2_interface`, and `tunnel_interface`. (see [below for nested schema](#nestedatt--interface_choice--dedicated_management_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface Ethernet interface configuration.<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, `layer2_interface`, and `tunnel_interface`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface))
+- `layer2_interface` (Attributes) Layer2 interface Layer2 interface configuration<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, `ethernet_interface`, and `tunnel_interface`. (see [below for nested schema](#nestedatt--interface_choice--layer2_interface))
+- `tunnel_interface` (Attributes) Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices.<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, `ethernet_interface`, and `layer2_interface`. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface))
 
 <a id="nestedatt--interface_choice--dedicated_interface"></a>
 ### Nested Schema for `interface_choice.dedicated_interface`
@@ -64,22 +106,31 @@ Optional:
 Required:
 
 - `device` (String) Device Name of the device for which interface is configured. Use wwan0 for 4G/LTE.<br>**Validation:** `Length LengthBetween(1, 64)`
-- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface--node_choice))
-- `primary_choice` (Attributes) Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface--primary_choice))
 
 Optional:
 
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface--monitoring_choice))
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
-- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface--monitoring_choice))
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
+- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface--node_choice))
+- `primary_choice` (Attributes) Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet<br>Exactly one of `is_primary` or `not_primary` must be specified when `primary_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--dedicated_interface--primary_choice))
+- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`
+
+<a id="nestedatt--interface_choice--dedicated_interface--monitoring_choice"></a>
+### Nested Schema for `interface_choice.dedicated_interface.monitoring_choice`
+
+Optional:
+
+- `monitor` (Boolean) Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled Link quality monitoring disabled on the interface.<br>Conflicts with `monitor`.
+
 
 <a id="nestedatt--interface_choice--dedicated_interface--node_choice"></a>
 ### Nested Schema for `interface_choice.dedicated_interface.node_choice`
 
 Optional:
 
-- `cluster` (Boolean) Cluster Configuration will apply to given device on all nodes of the site.
-- `node` (String) Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`
+- `cluster` (Boolean) Cluster Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.
+- `node` (String) Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.
 
 
 <a id="nestedatt--interface_choice--dedicated_interface--primary_choice"></a>
@@ -87,17 +138,8 @@ Optional:
 
 Optional:
 
-- `is_primary` (Boolean) Interface is Primary This interface is primary
-- `not_primary` (Boolean) Interface is Not Primary This interface is not primary
-
-
-<a id="nestedatt--interface_choice--dedicated_interface--monitoring_choice"></a>
-### Nested Schema for `interface_choice.dedicated_interface.monitoring_choice`
-
-Optional:
-
-- `monitor` (Boolean) Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.
-- `monitor_disabled` (Boolean) Monitoring disabled Link quality monitoring disabled on the interface.
+- `is_primary` (Boolean) Interface is Primary This interface is primary<br>Conflicts with `not_primary`.
+- `not_primary` (Boolean) Interface is Not Primary This interface is not primary<br>Conflicts with `is_primary`.
 
 
 
@@ -107,19 +149,19 @@ Optional:
 Required:
 
 - `device` (String) Device Name of the device for which interface is configured<br>**Validation:** `Length LengthBetween(1, 64)`
-- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node. (see [below for nested schema](#nestedatt--interface_choice--dedicated_management_interface--node_choice))
 
 Optional:
 
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
+- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--dedicated_management_interface--node_choice))
 
 <a id="nestedatt--interface_choice--dedicated_management_interface--node_choice"></a>
 ### Nested Schema for `interface_choice.dedicated_management_interface.node_choice`
 
 Optional:
 
-- `cluster` (Boolean) Cluster Configuration will apply to given device on all nodes of the site.
-- `node` (String) Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`
+- `cluster` (Boolean) Cluster Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.
+- `node` (String) Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.
 
 
 
@@ -128,28 +170,28 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ip address will be assigned to Interface (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice))
 - `device` (String) Device Interface configuration for the ethernet device<br>**Validation:** `Length LengthBetween(1, 64)`
-- `network_choice` (Attributes) Network for this Interface Select virtual network of this interface (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--network_choice))
-- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--node_choice))
-- `primary_choice` (Attributes) Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--primary_choice))
-- `vlan_choice` (Attributes) Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--vlan_choice))
 
 Optional:
 
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice))
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--monitoring_choice))
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
-- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority
+- `address_choice` (Attributes) Interface Addressing Select how ip address will be assigned to Interface<br>Exactly one of `dhcp_client`, `dhcp_server`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--monitoring_choice))
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
+- `network_choice` (Attributes) Network for this Interface Select virtual network of this interface<br>Exactly one of `segment_network`, `site_local_inside_network`, `site_local_network`, or `storage_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--network_choice))
+- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--node_choice))
+- `primary_choice` (Attributes) Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet<br>Exactly one of `is_primary` or `not_primary` must be specified when `primary_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--primary_choice))
+- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`
+- `vlan_choice` (Attributes) Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged<br>Exactly one of `untagged` or `vlan_id` must be specified when `vlan_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--vlan_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice`
 
 Optional:
 
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from external DHCP server
-- `dhcp_server` (Attributes) DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server))
-- `static_ip` (Attributes) Static IP Interface IP is configured statically (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip))
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from external DHCP server<br>Conflicts with `dhcp_server` and `static_ip`.
+- `dhcp_server` (Attributes) DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.<br>Conflicts with `dhcp_client` and `static_ip`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server))
+- `static_ip` (Attributes) Static IP Interface IP is configured statically<br>Conflicts with `dhcp_client` and `dhcp_server`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip))
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server`
@@ -157,44 +199,25 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP Networks List of networks from which DHCP Server can allocate IPv4 Addresses (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IP Assignments Assign fixed IPv4 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--interfaces_addressing_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server.dhcp_networks`
 
 Required:
 
-- `dns_choice` (Attributes) DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--dns_choice))
-- `gateway_choice` (Attributes) Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--gateway_choice))
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for the site (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for the site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCP pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
 
+- `dns_choice` (Attributes) DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dns_address` or `same_as_dgw` must be specified when `dns_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--dns_choice))
+- `gateway_choice` (Attributes) Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dgw_address`, `first_address`, or `last_address` must be specified when `gateway_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--gateway_choice))
 - `pools` (Attributes List) DHCP pools List of non overlapping ip address ranges. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--pools))
-
-<a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--dns_choice"></a>
-### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server.dhcp_networks.dns_choice`
-
-Optional:
-
-- `dns_address` (String) Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.
-- `same_as_dgw` (Boolean) Default Gateway Address DNS server address is same as default gateway address
-
-
-<a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--gateway_choice"></a>
-### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server.dhcp_networks.gateway_choice`
-
-Optional:
-
-- `dgw_address` (String) Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as default gateway
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as default gateway
-
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--network_prefix_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server.dhcp_networks.network_prefix_choice`
@@ -202,6 +225,25 @@ Optional:
 Optional:
 
 - `network_prefix` (String) Network Prefix Set the network prefix for the site. ex: 10.1.1.0/24
+
+
+<a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--dns_choice"></a>
+### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server.dhcp_networks.dns_choice`
+
+Optional:
+
+- `dns_address` (String) Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.<br>Conflicts with `same_as_dgw`.
+- `same_as_dgw` (Boolean) Default Gateway Address DNS server address is same as default gateway address<br>Conflicts with `dns_address`.
+
+
+<a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--gateway_choice"></a>
+### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server.dhcp_networks.gateway_choice`
+
+Optional:
+
+- `dgw_address` (String) Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `first_address`.
 
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--dhcp_networks--pools"></a>
@@ -219,9 +261,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from end of the first network in the DHCP Network list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the DHCP Network list
-- `interface_ip_map` (Attributes) Static IPv4 Configuration Statically configure a IPv4 address for every node (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from end of the first network in the DHCP Network list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the DHCP Network list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Static IPv4 Configuration Statically configure a IPv4 address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice--dhcp_server--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice.dhcp_server.interfaces_addressing_choice.interface_ip_map`
@@ -238,15 +280,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice.static_ip.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--interface_choice--ethernet_interface--address_choice--static_ip--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.address_choice.static_ip.network_prefix_choice.cluster_static_ip`
@@ -283,87 +325,36 @@ Optional:
 
 
 
-<a id="nestedatt--interface_choice--ethernet_interface--network_choice"></a>
-### Nested Schema for `interface_choice.ethernet_interface.network_choice`
-
-Optional:
-
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside Interface belongs to site local network inside
-- `site_local_network` (Boolean) Site Local Network Interface belongs to site local network (outside)
-- `storage_network` (Boolean) Storage Network Interface belongs to site local network inside
-
-<a id="nestedatt--interface_choice--ethernet_interface--network_choice--segment_network"></a>
-### Nested Schema for `interface_choice.ethernet_interface.network_choice.segment_network`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--interface_choice--ethernet_interface--node_choice"></a>
-### Nested Schema for `interface_choice.ethernet_interface.node_choice`
-
-Optional:
-
-- `cluster` (Boolean) Node Independent Configuration will apply to given device on all nodes of the site.
-- `node` (String) Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`
-
-
-<a id="nestedatt--interface_choice--ethernet_interface--primary_choice"></a>
-### Nested Schema for `interface_choice.ethernet_interface.primary_choice`
-
-Optional:
-
-- `is_primary` (Boolean) Interface is Primary This interface is primary
-- `not_primary` (Boolean) Interface is Not Primary This interface is not primary
-
-
-<a id="nestedatt--interface_choice--ethernet_interface--vlan_choice"></a>
-### Nested Schema for `interface_choice.ethernet_interface.vlan_choice`
-
-Optional:
-
-- `untagged` (Boolean) Untagged Configure a untagged ethernet interface
-- `vlan_id` (Number) VLAN Id Configure a VLAN tagged ethernet interface
-
-
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IP is configured statically (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IP is configured statically<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -374,8 +365,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -383,18 +374,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -424,9 +415,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -444,15 +435,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -465,18 +456,18 @@ Required:
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -490,15 +481,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--interface_choice--ethernet_interface--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `interface_choice.ethernet_interface.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -540,8 +531,59 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.
-- `monitor_disabled` (Boolean) Monitoring disabled Link quality monitoring disabled on the interface.
+- `monitor` (Boolean) Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled Link quality monitoring disabled on the interface.<br>Conflicts with `monitor`.
+
+
+<a id="nestedatt--interface_choice--ethernet_interface--network_choice"></a>
+### Nested Schema for `interface_choice.ethernet_interface.network_choice`
+
+Optional:
+
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network`, `site_local_network`, and `storage_network`. (see [below for nested schema](#nestedatt--interface_choice--ethernet_interface--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_network`, and `storage_network`.
+- `site_local_network` (Boolean) Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `segment_network`, `site_local_inside_network`, and `storage_network`.
+- `storage_network` (Boolean) Storage Network Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_inside_network`, and `site_local_network`.
+
+<a id="nestedatt--interface_choice--ethernet_interface--network_choice--segment_network"></a>
+### Nested Schema for `interface_choice.ethernet_interface.network_choice.segment_network`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--interface_choice--ethernet_interface--node_choice"></a>
+### Nested Schema for `interface_choice.ethernet_interface.node_choice`
+
+Optional:
+
+- `cluster` (Boolean) Node Independent Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.
+- `node` (String) Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.
+
+
+<a id="nestedatt--interface_choice--ethernet_interface--primary_choice"></a>
+### Nested Schema for `interface_choice.ethernet_interface.primary_choice`
+
+Optional:
+
+- `is_primary` (Boolean) Interface is Primary This interface is primary<br>Conflicts with `not_primary`.
+- `not_primary` (Boolean) Interface is Not Primary This interface is not primary<br>Conflicts with `is_primary`.
+
+
+<a id="nestedatt--interface_choice--ethernet_interface--vlan_choice"></a>
+### Nested Schema for `interface_choice.ethernet_interface.vlan_choice`
+
+Optional:
+
+- `untagged` (Boolean) Untagged Configure a untagged ethernet interface<br>Conflicts with `vlan_id`.
+- `vlan_id` (Number) VLAN Id Configure a VLAN tagged ethernet interface<br>Conflicts with `untagged`.
 
 
 
@@ -550,16 +592,16 @@ Optional:
 
 Required:
 
-- `layer2_interface_choice` (Attributes) Layer2 Interface choice Select the Layer2 interface type (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice))
+- `layer2_interface_choice` (Attributes) Layer2 Interface choice Select the Layer2 interface type<br>Exactly one of `l2sriov_interface`, `l2vlan_interface`, or `l2vlan_slo_interface` must be specified. (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice))
 
 <a id="nestedatt--interface_choice--layer2_interface--layer2_interface_choice"></a>
 ### Nested Schema for `interface_choice.layer2_interface.layer2_interface_choice`
 
 Optional:
 
-- `l2sriov_interface` (Attributes) SR-IOV interface Layer2 SR-IOV interface (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2sriov_interface))
-- `l2vlan_interface` (Attributes) VLAN Interface Layer2 interface of type VLAN (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2vlan_interface))
-- `l2vlan_slo_interface` (Attributes) SLO VLAN interface VLAN on site local outside interface (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2vlan_slo_interface))
+- `l2sriov_interface` (Attributes) SR-IOV interface Layer2 SR-IOV interface<br>Conflicts with `l2vlan_interface` and `l2vlan_slo_interface`. (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2sriov_interface))
+- `l2vlan_interface` (Attributes) VLAN Interface Layer2 interface of type VLAN<br>Conflicts with `l2sriov_interface` and `l2vlan_slo_interface`. (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2vlan_interface))
+- `l2vlan_slo_interface` (Attributes) SLO VLAN interface VLAN on site local outside interface<br>Conflicts with `l2sriov_interface` and `l2vlan_interface`. (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2vlan_slo_interface))
 
 <a id="nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2sriov_interface"></a>
 ### Nested Schema for `interface_choice.layer2_interface.layer2_interface_choice.l2sriov_interface`
@@ -567,15 +609,18 @@ Optional:
 Required:
 
 - `device` (String) Device Physical ethernet interface<br>**Validation:** `Length LengthBetween(1, 64)`
-- `vlan_choice` (Attributes) Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2sriov_interface--vlan_choice))
+
+Optional:
+
+- `vlan_choice` (Attributes) Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged<br>Exactly one of `untagged` or `vlan_id` must be specified when `vlan_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2sriov_interface--vlan_choice))
 
 <a id="nestedatt--interface_choice--layer2_interface--layer2_interface_choice--l2sriov_interface--vlan_choice"></a>
 ### Nested Schema for `interface_choice.layer2_interface.layer2_interface_choice.l2sriov_interface.vlan_choice`
 
 Optional:
 
-- `untagged` (Boolean) Untagged Configure a untagged interface
-- `vlan_id` (Number) VLAN Id Configure a VLAN tagged interface
+- `untagged` (Boolean) Untagged Configure a untagged interface<br>Conflicts with `vlan_id`.
+- `vlan_id` (Number) VLAN Id Configure a VLAN tagged interface<br>Conflicts with `untagged`.
 
 
 
@@ -603,24 +648,15 @@ Required:
 
 Required:
 
-- `network_choice` (Attributes) Network for this Interface Select virtual network of this interface (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--network_choice))
-- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--node_choice))
+- `node_choice` (Attributes) Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node.<br>`node` must be specified. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--node_choice))
 - `static_ip` (Attributes) Static IP Interface IP is configured statically (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--static_ip))
 - `tunnel` (Attributes) Tunnel Tunnel Configuration for this Interface (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--tunnel))
 
 Optional:
 
-- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000
-- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority
-
-<a id="nestedatt--interface_choice--tunnel_interface--network_choice"></a>
-### Nested Schema for `interface_choice.tunnel_interface.network_choice`
-
-Optional:
-
-- `site_local_inside_network` (Boolean) Site Local Network Inside Interface belongs to site local network inside
-- `site_local_network` (Boolean) Site Local Network Interface belongs to site local network (outside)
-
+- `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`
+- `network_choice` (Attributes) Network for this Interface Select virtual network of this interface<br>Exactly one of `site_local_inside_network` or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--network_choice))
+- `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`
 
 <a id="nestedatt--interface_choice--tunnel_interface--node_choice"></a>
 ### Nested Schema for `interface_choice.tunnel_interface.node_choice`
@@ -635,15 +671,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice))
 
 <a id="nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice"></a>
 ### Nested Schema for `interface_choice.tunnel_interface.static_ip.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--interface_choice--tunnel_interface--static_ip--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `interface_choice.tunnel_interface.static_ip.network_prefix_choice.cluster_static_ip`
@@ -692,6 +728,15 @@ Read-Only:
 - `tenant` (String)
 
 
+<a id="nestedatt--interface_choice--tunnel_interface--network_choice"></a>
+### Nested Schema for `interface_choice.tunnel_interface.network_choice`
+
+Optional:
+
+- `site_local_inside_network` (Boolean) Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `site_local_inside_network`.
+
+
 
 
 <a id="nestedatt--timeouts"></a>
@@ -709,7 +754,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -717,13 +762,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_network_interface.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_network_interface.example"
+	to = f5xc_network_interface.example
 }
 ```

@@ -3083,12 +3083,12 @@ var APISwaggerJSON string = `{
                 },
                 "status": {
                     "type": "string",
-                    "description": " Status of the condition\n \"Success\" Validtion has succeded. Requested operation was successful.\n \"Failed\"  Validation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s\n \"Down\" Configuration is operationally down. e.g. down interface\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]\n",
+                    "description": " Status of the condition\n \"Success\" Validation has succeeded. Requested operation was successful.\n \"Failed\"  Validation or operation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s.\n \"Down\" Configuration is operationally down. e.g. down interface.\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs.\n \"InProgress\" Operation is in progress.\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]\n",
                     "title": "status",
                     "x-displayname": "Status",
                     "x-ves-example": "Failed",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]"
+                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]"
                     }
                 },
                 "type": {
@@ -3108,7 +3108,6 @@ var APISwaggerJSON string = `{
             "description": "Definitions for DH Groups\n\n - DH_GROUP_DEFAULT: Use Default DH Group\n\nUse default DH group (DH Group 19)\n - DH_GROUP_14: DH_GROUP_14\n\nUse DH_GROUP_14 Diffie Hellman Group\n - DH_GROUP_15: DH_GROUP_15\n\nUse DH_GROUP_15 Diffie Hellman Group\n - DH_GROUP_16: DH_GROUP_16\n\nUse DH_GROUP_16 Diffie Hellman Group\n - DH_GROUP_17: DH_GROUP_17\n\nUse DH_GROUP_17 Diffie Hellman Group\n - DH_GROUP_18: DH_GROUP_18\n\nUse DH_GROUP_18 Diffie Hellman Group\n - DH_GROUP_19: DH_GROUP_19\n\nUse DH_GROUP_19 Diffie Hellman Group\n - DH_GROUP_20: DH_GROUP_20\n\nUse DH_GROUP_20 Diffie Hellman Group\n - DH_GROUP_21: DH_GROUP_21\n\nUse DH_GROUP_21 Diffie Hellman Group\n - DH_GROUP_26: DH_GROUP_26\n\nUse DH_GROUP_26 Diffie Hellman Group",
             "title": "DHGroup",
             "enum": [
-                "DH_GROUP_DEFAULT",
                 "DH_GROUP_14",
                 "DH_GROUP_15",
                 "DH_GROUP_16",

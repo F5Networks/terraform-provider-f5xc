@@ -24,6 +24,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listsizevalidator"
 
@@ -32,6 +34,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"gopkg.volterra.us/stdlib/codec"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	ves_io_schema_views_azure_vnet_site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/azure_vnet_site"
@@ -212,8 +215,8 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Metadata(ctx context.Context
 func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a azure_vnet_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of azure_vnet_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a azure_vnet_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of azure_vnet_site) etc. can be fetched",
+		MarkdownDescription: "Azure VNet site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Azure VNet.<br>It can be used to automatically site creation in the Azure VNet.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "Azure VNet site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Azure VNet. It can be used to automatically site creation in the Azure VNet. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -230,7 +233,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Schema(ctx context.Context, 
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"azure_vnet_info": schema.SingleNestedAttribute{
@@ -373,7 +376,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Schema(ctx context.Context, 
 										},
 										"routing_type_choice": schema.SingleNestedAttribute{
 											Description:         "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-											MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
+											MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -386,7 +389,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Schema(ctx context.Context, 
 											Attributes: map[string]schema.Attribute{
 												"f5_orchestrated_routing": schema.BoolAttribute{
 													Description:         "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
-													MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
+													MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -396,7 +399,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Schema(ctx context.Context, 
 												},
 												"manual_routing": schema.BoolAttribute{
 													Description:         "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
-													MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
+													MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -508,9 +511,17 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) ModifyPlan(ctx context.Conte
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAzureVnetSiteSetCloudSiteInfoModel
 
 	// Read Terraform plan data into the model
@@ -768,7 +779,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Create(ctx context.Context, 
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "azure_vnet_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "azure_vnet_site_set_cloud_site_info", err),
 		)
 		return
 	}
@@ -824,6 +835,12 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Read(ctx context.Context, re
 }
 
 func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAzureVnetSiteSetCloudSiteInfoModel
@@ -1083,7 +1100,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Update(ctx context.Context, 
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "azure_vnet_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "azure_vnet_site_set_cloud_site_info", err),
 		)
 		return
 	}
@@ -1144,7 +1161,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Delete(ctx context.Context, 
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "azure_vnet_site_set_cloud_site_info", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "azure_vnet_site_set_cloud_site_info", err),
 			)
 			return
 		}
@@ -1160,7 +1177,7 @@ func (r *ResourceF5XCAzureVnetSiteSetCloudSiteInfo) Delete(ctx context.Context, 
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "azure_vnet_site_set_cloud_site_info", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "azure_vnet_site_set_cloud_site_info", err),
 		)
 		return
 	}

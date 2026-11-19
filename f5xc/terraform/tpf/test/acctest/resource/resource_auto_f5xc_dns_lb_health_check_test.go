@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dns-hc-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-health-check-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHealthCheckTypeTransitionHTTPTC
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dns-hc-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-health-check-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,26 +72,26 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHealthCheckTypeTransitionHTTPTC
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPDisableVHost(name, namespace, 80)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withTCP(name, namespace, 8080)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withUDP(name, namespace, 53, "probe", "ok")},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -102,7 +102,7 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHealthCheckTypeTransitionICMPTC
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dns-hc-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-health-check-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -111,18 +111,18 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHealthCheckTypeTransitionICMPTC
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withICMP(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withTCPHex(name, namespace, 9000, "000000FF", "00000034")},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHTTPVirtualHostChoiceTransition
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dns-hc-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-health-check-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -142,26 +142,26 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHTTPVirtualHostChoiceTransition
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPDisableVHost(name, namespace, 80)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPVirtualHost(name, namespace, 80, "example.com")},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPInheritVHost(name, namespace, 80)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -172,7 +172,7 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHTTPSVirtualHostChoiceTransitio
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dns-hc-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-health-check-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -181,26 +181,26 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_withHTTPSVirtualHostChoiceTransitio
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPSDisableVHost(name, namespace, 443)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPSVirtualHost(name, namespace, 443, "health.example.com")},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPSInheritVHost(name, namespace, 443)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -211,30 +211,33 @@ func TestAccResourceAutoF5XCDnsLBHealthCheck_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dns-hc-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-health-check-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsLBHealthCheckDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBHealthCheckConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_health_check.test",
+				ResourceName:                         "f5xc_dns_lb_health_check.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_health_check.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsLBHealthCheckConfig_full(name, namespace),
 	})
 }
 
@@ -248,10 +251,10 @@ func testAccResourceAutoF5XCDnsLBHealthCheckConfig_basic(name, namespace string)
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name        = %q
   namespace   = %q
-  description = "dns lb health check updated"
+  description = "DNS LB health check example updated"
 
   health_check_choice = {
     http_health_check = {
@@ -267,7 +270,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPDisableVHost(name, namespace string, port int) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -285,7 +288,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPVirtualHost(name, namespace string, port int, host string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -303,7 +306,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPInheritVHost(name, namespace string, port int) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -321,7 +324,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPSDisableVHost(name, namespace string, port int) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -339,7 +342,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPSVirtualHost(name, namespace string, port int, host string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -357,7 +360,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withHTTPSInheritVHost(name, namespace string, port int) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -375,7 +378,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withTCP(name, namespace string, port int) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -392,7 +395,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withUDP(name, namespace string, port int, send, receive string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -409,7 +412,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withICMP(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -422,7 +425,7 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_withTCPHex(name, namespace string, port int, sendHex, receiveHex string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name      = %q
   namespace = %q
 
@@ -439,13 +442,13 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name        = %q
   namespace   = %q
-  description = "dns lb health check full"
+  description = "DNS LB health check example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -469,13 +472,13 @@ resource "f5xc_dns_lb_health_check" "test" {
 
 func testAccResourceAutoF5XCDnsLBHealthCheckConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_health_check" "test" {
+resource "f5xc_dns_lb_health_check" "example" {
   name        = %q
   namespace   = %q
-  description = "dns lb health check full updated"
+  description = "DNS LB health check example updated"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {

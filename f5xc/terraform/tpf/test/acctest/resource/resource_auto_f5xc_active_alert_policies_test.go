@@ -31,8 +31,8 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_basic(t *testing.T) {
 
 	namespace := "default"
 	suffix := acctest.RandString(t, 8)
-	policyOneName := "tf-acc-active-alert-policy-one-" + suffix
-	receiverName := "tf-acc-active-alert-receiver-" + suffix
+	policyOneName := "example-active-alert-policy-one-" + suffix
+	receiverName := "example-active-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -42,7 +42,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -52,7 +52,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_withSinglePolicy(namespace, receiverName, policyOneName),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -62,15 +62,15 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceAutoF5XCActiveAlertPolicies_withSinglePolicyTransition(t *testing.T) {
+func TestAccResourceAutoF5XCActiveAlertPolicies_withPolicy(t *testing.T) {
 
 	namespace := "default"
 	suffix := acctest.RandString(t, 8)
-	policyOneName := "tf-acc-active-alert-policy-one-" + suffix
-	policyTwoName := "tf-acc-active-alert-policy-two-" + suffix
-	receiverName := "tf-acc-active-alert-receiver-" + suffix
+	policyOneName := "example-active-alert-policy-one-" + suffix
+	policyTwoName := "example-active-alert-policy-two-" + suffix
+	receiverName := "example-active-alert-receiver-" + suffix
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
@@ -78,7 +78,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withSinglePolicyTransition(t *te
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_withSinglePolicy(namespace, receiverName, policyOneName),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -88,24 +88,28 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withSinglePolicyTransition(t *te
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_withReplacementPolicy(namespace, receiverName, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
 				ImportStateVerifyIdentifierAttribute: "namespace",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCActiveAlertPoliciesConfig_withPolicyDocExample(),
+		})
 }
 
 func TestAccResourceAutoF5XCActiveAlertPolicies_withMultiplePolicies(t *testing.T) {
 
 	namespace := "default"
 	suffix := acctest.RandString(t, 8)
-	policyOneName := "tf-acc-active-alert-policy-one-" + suffix
-	policyTwoName := "tf-acc-active-alert-policy-two-" + suffix
-	policyThreeName := "tf-acc-active-alert-policy-three-" + suffix
-	receiverName := "tf-acc-active-alert-receiver-" + suffix
+	policyOneName := "example-active-alert-policy-one-" + suffix
+	policyTwoName := "example-active-alert-policy-two-" + suffix
+	policyThreeName := "example-active-alert-policy-three-" + suffix
+	receiverName := "example-active-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -115,7 +119,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withMultiplePolicies(t *testing.
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_withTwoPolicies(namespace, receiverName, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -125,7 +129,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withMultiplePolicies(t *testing.
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_withThreePolicies(namespace, receiverName, policyOneName, policyTwoName, policyThreeName),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -139,9 +143,9 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withPoliciesCleared(t *testing.T
 
 	namespace := "default"
 	suffix := acctest.RandString(t, 8)
-	policyOneName := "tf-acc-active-alert-policy-one-" + suffix
-	policyTwoName := "tf-acc-active-alert-policy-two-" + suffix
-	receiverName := "tf-acc-active-alert-receiver-" + suffix
+	policyOneName := "example-active-alert-policy-one-" + suffix
+	policyTwoName := "example-active-alert-policy-two-" + suffix
+	receiverName := "example-active-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -151,7 +155,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withPoliciesCleared(t *testing.T
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_withTwoPolicies(namespace, receiverName, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -161,7 +165,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withPoliciesCleared(t *testing.T
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -175,9 +179,9 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withUpdateCycle(t *testing.T) {
 
 	namespace := "default"
 	suffix := acctest.RandString(t, 8)
-	policyOneName := "tf-acc-active-alert-policy-one-" + suffix
-	policyTwoName := "tf-acc-active-alert-policy-two-" + suffix
-	receiverName := "tf-acc-active-alert-receiver-" + suffix
+	policyOneName := "example-active-alert-policy-one-" + suffix
+	policyTwoName := "example-active-alert-policy-two-" + suffix
+	receiverName := "example-active-alert-receiver-" + suffix
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -187,7 +191,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withUpdateCycle(t *testing.T) {
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_basic(namespace),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -197,7 +201,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withUpdateCycle(t *testing.T) {
 				Config: testAccResourceAutoF5XCActiveAlertPoliciesConfig_withTwoPolicies(namespace, receiverName, policyOneName, policyTwoName),
 			},
 			{
-				ResourceName:                         "f5xc_active_alert_policies.test",
+				ResourceName:                         "f5xc_active_alert_policies.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateId:                        namespace,
@@ -209,7 +213,7 @@ func TestAccResourceAutoF5XCActiveAlertPolicies_withUpdateCycle(t *testing.T) {
 
 func testAccResourceAutoF5XCActiveAlertPoliciesConfig_basic(namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_active_alert_policies" "test" {
+resource "f5xc_active_alert_policies" "example" {
   namespace = %q
 }
 `, namespace)
@@ -219,7 +223,7 @@ func testAccResourceAutoF5XCActiveAlertPoliciesConfig_withSinglePolicy(namespace
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_alert_policies" "test" {
+resource "f5xc_active_alert_policies" "example" {
   namespace = %q
 
   alert_policies = [
@@ -238,7 +242,7 @@ func testAccResourceAutoF5XCActiveAlertPoliciesConfig_withReplacementPolicy(name
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_alert_policies" "test" {
+resource "f5xc_active_alert_policies" "example" {
   namespace = %q
 
   alert_policies = [
@@ -258,7 +262,7 @@ func testAccResourceAutoF5XCActiveAlertPoliciesConfig_withTwoPolicies(namespace,
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_alert_policies" "test" {
+resource "f5xc_active_alert_policies" "example" {
   namespace = %q
 
   alert_policies = [
@@ -282,7 +286,7 @@ func testAccResourceAutoF5XCActiveAlertPoliciesConfig_withThreePolicies(namespac
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_active_alert_policies" "test" {
+resource "f5xc_active_alert_policies" "example" {
   namespace = %q
 
   alert_policies = [
@@ -315,12 +319,12 @@ func testAccResourceAutoF5XCActiveAlertPoliciesPoliciesConfig(namespace, receive
 resource "f5xc_alert_policy" %q {
   name        = %q
   namespace   = %q
-  description = "Acceptance test active alert policy"
+	description = "Active alert policy example"
 
   receivers = [
     {
-      name      = f5xc_alert_receiver.test.name
-      namespace = f5xc_alert_receiver.test.namespace
+	name      = f5xc_alert_receiver.example.name
+	namespace = f5xc_alert_receiver.example.namespace
     }
   ]
 
@@ -352,7 +356,7 @@ resource "f5xc_alert_policy" %q {
 
 func testAccResourceAutoF5XCActiveAlertPoliciesReceiverConfig(receiverName, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_alert_receiver" "test" {
+resource "f5xc_alert_receiver" "example" {
   name      = %q
   namespace = %q
 
@@ -363,4 +367,12 @@ resource "f5xc_alert_receiver" "test" {
   }
 }
 `, receiverName, namespace)
+}
+
+func testAccResourceAutoF5XCActiveAlertPoliciesConfig_withPolicyDocExample() string {
+	return testAccResourceAutoF5XCActiveAlertPoliciesConfig_withSinglePolicy(
+		"default",
+		"example-alert-receiver",
+		"example-alert-policy",
+	)
 }

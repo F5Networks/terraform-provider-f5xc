@@ -29,21 +29,21 @@ type DataSourceF5XCFastAclRule struct {
 	client *client.APIClient
 }
 
-type FastAclRuleFastAclRuleFastAclRuleAction struct {
+type FastAclRuleFastAclRuleAction struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 }
 
-type FastAclRuleFastAclRuleActionActionChoice struct {
+type FastAclRuleActionChoice struct {
 	PolicerAction         types.Object `tfsdk:"policer_action"`
 	ProtocolPolicerAction types.Object `tfsdk:"protocol_policer_action"`
 	SimpleAction          types.List   `tfsdk:"simple_action"`
 }
 
-type FastAclRuleFastAclRuleActionPolicerAction struct {
+type FastAclRulePolicerAction struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type FastAclRuleFastAclRuleActionProtocolPolicerAction struct {
+type FastAclRuleProtoPolicerAction struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
@@ -51,22 +51,22 @@ type FastAclRulePortValueType struct {
 	PortValueTypeChoice types.Object `tfsdk:"port_value_type_choice"`
 }
 
-type FastAclRulePortValueTypePortValueTypeChoice struct {
+type FastAclRulePortValueTypeChoice struct {
 	All         types.Bool  `tfsdk:"all"`
 	Dns         types.Bool  `tfsdk:"dns"`
 	UserDefined types.Int64 `tfsdk:"user_defined"`
 }
 
-type FastAclRuleGlobalSpecTypeSourceChoice struct {
+type FastAclRuleSrcChoice struct {
 	IpPrefixSet types.Object `tfsdk:"ip_prefix_set"`
 	Prefix      types.Object `tfsdk:"prefix"`
 }
 
-type FastAclRuleGlobalSpecTypeIpPrefixSet struct {
+type FastAclRuleIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
-type FastAclRuleGlobalSpecTypePrefix struct {
+type FastAclRulePrefix struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 	Prefix     types.List `tfsdk:"prefix"`
 }
@@ -213,8 +213,8 @@ func (d *DataSourceF5XCFastAclRule) Metadata(ctx context.Context, request dataso
 func (r *DataSourceF5XCFastAclRule) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a fast_acl_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of fast_acl_rule) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a fast_acl_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of fast_acl_rule) etc. can be fetched",
+		MarkdownDescription: "Fast ACL rule<br>Rule consists of following:<br>1. Protocol to match from packet<br>2. List of source IP prefixes or a reference to IP prefix set, to which<br>source IP in packet should belong to.<br>3. Action to be applied if above fields match<br>`fast_acl` object would refer to `fast_acl_rule`, both objects together provides a<br>five tuple {destination ip, destination port, source ip, source port, protocol} to match<br>and an action to be applied. In five tuple rule provides source IP, source port and action<br><br>Supported actions are:<br>- Allow<br>- Deny<br>- Policer - Rate limit using policer defined<br>- Protocol Policer - Rate limit for various protocol type. Supported protocols are tcp, udp, icmp, dns",
+		Description:         "Fast ACL rule Rule consists of following: 1. Protocol to match from packet 2. List of source IP prefixes or a reference to IP prefix set, to which source IP in packet should belong to. 3. Action to be applied if above fields match `fast_acl` object would refer to `fast_acl_rule`, both objects together provides a five tuple {destination ip, destination port, source ip, source port, protocol} to match and an action to be applied. In five tuple rule provides source IP, source port and action Supported actions are: - Allow - Deny - Policer - Rate limit using policer defined - Protocol Policer - Rate limit for various protocol type. Supported protocols are tcp, udp, icmp, dns",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -509,7 +509,7 @@ func (d *DataSourceF5XCFastAclRule) Read(ctx context.Context, request datasource
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "fast_acl_rule", err))
 		return
 	}
 
@@ -572,7 +572,7 @@ func (d *DataSourceF5XCFastAclRule) Read(ctx context.Context, request datasource
 
 	// data SpecToModelRoot RequiredPointerField --> Action
 	if specData.GetAction() != nil {
-		var fastAclRuleFastAclRuleFastAclRuleActionModel = &FastAclRuleFastAclRuleFastAclRuleAction{}
+		var fastAclRuleFastAclRuleActionModel = &FastAclRuleFastAclRuleAction{}
 		actionElement := specData.GetAction()
 
 		// data specToModelNested OneOfField --> Action
@@ -769,16 +769,16 @@ func (d *DataSourceF5XCFastAclRule) Read(ctx context.Context, request datasource
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			fastAclRuleFastAclRuleFastAclRuleActionModel.ActionChoice = finalObj
+			fastAclRuleFastAclRuleActionModel.ActionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			fastAclRuleFastAclRuleFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclRuleActionActionModelAttributeMap)
+			fastAclRuleFastAclRuleActionModel.ActionChoice = types.ObjectNull(FastAclRuleActionActionModelAttributeMap)
 		}
 
 		actionObj, actionDiags := utils.GoStructToObjectValue(
 			ctx,
 			FastAclRuleActionModelAttributeMap,
-			fastAclRuleFastAclRuleFastAclRuleActionModel,
+			fastAclRuleFastAclRuleActionModel,
 		)
 		response.Diagnostics.Append(actionDiags...)
 		if response.Diagnostics.HasError() {
@@ -881,7 +881,7 @@ func (d *DataSourceF5XCFastAclRule) Read(ctx context.Context, request datasource
 		sourceChoiceChoices := specData.GetSource()
 
 		// The model struct that will be populated by the nested template.
-		var sourceChoiceChoicesModel = &FastAclRuleGlobalSpecTypeSourceChoice{}
+		var sourceChoiceChoicesModel = &FastAclRuleSrcChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

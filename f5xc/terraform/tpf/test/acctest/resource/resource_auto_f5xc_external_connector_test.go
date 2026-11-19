@@ -20,6 +20,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	acctest "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/test/acctest"
 	externalConnectorSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/external_connector"
 )
@@ -27,9 +28,9 @@ import (
 func TestAccResourceAutoF5XCExternalConnector_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ec-" + acctest.RandString(t, 8)
+	name := "example-ec-" + acctest.RandString(t, 8)
 	namespace := "system"
-	siteName := "tf-acc-site-" + acctest.RandString(t, 8)
+	siteName := "example-site-" + acctest.RandString(t, 8)
 	peerIP := "198.51.100.10"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,23 +40,31 @@ func TestAccResourceAutoF5XCExternalConnector_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_basic(name, namespace, siteName, peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
 			{
-				Config: testAccResourceAutoF5XCExternalConnectorConfig_withDescription(name, namespace, siteName, "external connector basic updated", peerIP),
+				Config: testAccResourceAutoF5XCExternalConnectorConfig_withDescription(name, namespace, siteName, "external connector updated example", peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
@@ -66,9 +75,9 @@ func TestAccResourceAutoF5XCExternalConnector_basic(t *testing.T) {
 func TestAccResourceAutoF5XCExternalConnector_withIpsecModeTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ec-" + acctest.RandString(t, 8)
+	name := "example-ec-" + acctest.RandString(t, 8)
 	namespace := "system"
-	siteName := "tf-acc-site-" + acctest.RandString(t, 8)
+	siteName := "example-site-" + acctest.RandString(t, 8)
 	peerIP := "198.51.100.20"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -78,23 +87,31 @@ func TestAccResourceAutoF5XCExternalConnector_withIpsecModeTransition(t *testing
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withIpsecMode(name, namespace, siteName, "initiator", peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
 			{
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withIpsecMode(name, namespace, siteName, "responder", peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
@@ -105,9 +122,9 @@ func TestAccResourceAutoF5XCExternalConnector_withIpsecModeTransition(t *testing
 func TestAccResourceAutoF5XCExternalConnector_withIpsecDpdTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ec-" + acctest.RandString(t, 8)
+	name := "example-ec-" + acctest.RandString(t, 8)
 	namespace := "system"
-	siteName := "tf-acc-site-" + acctest.RandString(t, 8)
+	siteName := "example-site-" + acctest.RandString(t, 8)
 	peerIP := "198.51.100.30"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -117,23 +134,31 @@ func TestAccResourceAutoF5XCExternalConnector_withIpsecDpdTransition(t *testing.
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withDpdDisabled(name, namespace, siteName, peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
 			{
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withDpdEnabled(name, namespace, siteName, 5, peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
@@ -144,9 +169,9 @@ func TestAccResourceAutoF5XCExternalConnector_withIpsecDpdTransition(t *testing.
 func TestAccResourceAutoF5XCExternalConnector_withTunnelSourceVnTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ec-" + acctest.RandString(t, 8)
+	name := "example-ec-" + acctest.RandString(t, 8)
 	namespace := "system"
-	siteName := "tf-acc-site-" + acctest.RandString(t, 8)
+	siteName := "example-site-" + acctest.RandString(t, 8)
 	peerIP := "198.51.100.40"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -156,23 +181,31 @@ func TestAccResourceAutoF5XCExternalConnector_withTunnelSourceVnTransition(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withTunnelSourceVn(name, namespace, siteName, "site_local_network", peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
 			{
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withTunnelSourceVn(name, namespace, siteName, "site_local_inside_network", peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
@@ -183,9 +216,9 @@ func TestAccResourceAutoF5XCExternalConnector_withTunnelSourceVnTransition(t *te
 func TestAccResourceAutoF5XCExternalConnector_withGre(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ec-" + acctest.RandString(t, 8)
+	name := "example-ec-" + acctest.RandString(t, 8)
 	namespace := "system"
-	siteName := "tf-acc-site-" + acctest.RandString(t, 8)
+	siteName := "example-site-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -196,10 +229,10 @@ func TestAccResourceAutoF5XCExternalConnector_withGre(t *testing.T) {
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withGre(name, namespace, siteName, "198.51.100.60"),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
@@ -207,10 +240,10 @@ func TestAccResourceAutoF5XCExternalConnector_withGre(t *testing.T) {
 				Config: testAccResourceAutoF5XCExternalConnectorConfig_withGre(name, namespace, siteName, "198.51.100.61"),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
@@ -221,9 +254,9 @@ func TestAccResourceAutoF5XCExternalConnector_withGre(t *testing.T) {
 func TestAccResourceAutoF5XCExternalConnector_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ec-" + acctest.RandString(t, 12)
+	name := "example-ec-" + acctest.RandString(t, 12)
 	namespace := "system"
-	siteName := "tf-acc-site-" + acctest.RandString(t, 8)
+	siteName := "example-site-" + acctest.RandString(t, 8)
 	peerIP := "198.51.100.50"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -232,24 +265,32 @@ func TestAccResourceAutoF5XCExternalConnector_full(t *testing.T) {
 		CheckDestroy:             testAccCheckExternalConnectorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCExternalConnectorConfig_full(name, namespace, siteName, "team-a", "1370", "169.254.1.1/30", "169.254.1.2/30", peerIP),
+				Config: testAccResourceAutoF5XCExternalConnectorConfig_full(name, namespace, siteName, "example-team", "1370", "169.254.1.1/30", "169.254.1.2/30", peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
 			{
-				Config: testAccResourceAutoF5XCExternalConnectorConfig_full(name, namespace, siteName, "team-b", "1370", "169.254.2.1/30", "169.254.2.2/30", peerIP),
+				Config: testAccResourceAutoF5XCExternalConnectorConfig_full(name, namespace, siteName, "example-team-alt", "1370", "169.254.2.1/30", "169.254.2.2/30", peerIP),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_external_connector.example",
+					tfjsonpath.New("connection_type_choice").AtMapKey("ipsec").AtMapKey("ipsec_tunnel_parameters").AtMapKey("psk"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_external_connector.test",
+				ResourceName:                         "f5xc_external_connector.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_external_connector.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"connection_type_choice.ipsec.ipsec_tunnel_parameters.psk"},
 			},
@@ -291,7 +332,7 @@ resource "f5xc_ike_phase2_profile" "test_ike2" {
   }
 }
 
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name      = %q
   namespace = %q
 
@@ -377,7 +418,7 @@ resource "f5xc_ike_phase2_profile" "test_ike2" {
   }
 }
 
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -469,7 +510,7 @@ resource "f5xc_ike_phase2_profile" "test_ike2" {
   }
 }
 
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name      = %q
   namespace = %q
 
@@ -555,7 +596,7 @@ resource "f5xc_ike_phase2_profile" "test_ike2" {
   }
 }
 
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name      = %q
   namespace = %q
 
@@ -641,7 +682,7 @@ resource "f5xc_ike_phase2_profile" "test_ike2" {
   }
 }
 
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name      = %q
   namespace = %q
 
@@ -731,7 +772,7 @@ resource "f5xc_ike_phase2_profile" "test_ike2" {
   }
 }
 
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name      = %q
   namespace = %q
 
@@ -789,7 +830,7 @@ resource "f5xc_external_connector" "test" {
 
 func testAccResourceAutoF5XCExternalConnectorConfig_withGre(name, namespace, siteName, peerIp string) string {
 	return fmt.Sprintf(`
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name      = %q
   namespace = %q
 
@@ -852,7 +893,7 @@ resource "f5xc_ike_phase2_profile" "test_ike2" {
   }
 }
 
-resource "f5xc_external_connector" "test" {
+resource "f5xc_external_connector" "example" {
   name        = %q
   namespace   = %q
   description = "external connector full test"

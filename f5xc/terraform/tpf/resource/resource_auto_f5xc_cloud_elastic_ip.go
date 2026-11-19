@@ -32,6 +32,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -42,6 +43,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_cloud_elastic_ip "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/cloud_elastic_ip"
 )
@@ -93,8 +95,8 @@ func (r *ResourceF5XCCloudElasticIp) Metadata(ctx context.Context, request resou
 func (r *ResourceF5XCCloudElasticIp) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a cloud_elastic_ip This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_elastic_ip) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a cloud_elastic_ip This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of cloud_elastic_ip) etc. can be fetched",
+		MarkdownDescription: "Cloud Elastic IP object represents a cloud elastic IP address that are created for a cloud site",
+		Description:         "Cloud Elastic IP object represents a cloud elastic IP address that are created for a cloud site",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -150,7 +152,7 @@ func (r *ResourceF5XCCloudElasticIp) Schema(ctx context.Context, request resourc
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -205,7 +207,7 @@ func (r *ResourceF5XCCloudElasticIp) Schema(ctx context.Context, request resourc
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -273,9 +275,17 @@ func (r *ResourceF5XCCloudElasticIp) ModifyPlan(ctx context.Context, req resourc
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCCloudElasticIpModel
 
 	// Read Terraform plan data into the model
@@ -392,7 +402,7 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -415,7 +425,7 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_cloud_elastic_ip.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "cloud_elastic_ip", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "cloud_elastic_ip", err),
 		)
 		return
 	}
@@ -537,7 +547,7 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 	countValue := specData.GetCount()
 	if countValue > 0 {
 		data.Count = types.Int64Value(int64(countValue))
-	} else {
+	} else if data.Count.IsNull() || data.Count.IsUnknown() {
 		data.Count = types.Int64Null()
 	}
 
@@ -631,14 +641,10 @@ func (r *ResourceF5XCCloudElasticIp) Read(ctx context.Context, request resource.
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_elastic_ip.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_elastic_ip.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "cloud_elastic_ip", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "cloud_elastic_ip", err),
 		)
 		return
 	}
@@ -760,7 +766,7 @@ func (r *ResourceF5XCCloudElasticIp) Read(ctx context.Context, request resource.
 	countValue := specData.GetCount()
 	if countValue > 0 {
 		data.Count = types.Int64Value(int64(countValue))
-	} else {
+	} else if data.Count.IsNull() || data.Count.IsUnknown() {
 		data.Count = types.Int64Null()
 	}
 
@@ -820,6 +826,12 @@ func (r *ResourceF5XCCloudElasticIp) Read(ctx context.Context, request resource.
 }
 
 func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCCloudElasticIpModel
@@ -956,7 +968,7 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -964,24 +976,20 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_elastic_ip.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_elastic_ip.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "cloud_elastic_ip", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cloud_elastic_ip", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_elastic_ip.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_elastic_ip.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "cloud_elastic_ip", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cloud_elastic_ip", err),
 		)
 		return
 	}
@@ -1102,7 +1110,7 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 	countValue := specData.GetCount()
 	if countValue > 0 {
 		data.Count = types.Int64Value(int64(countValue))
-	} else {
+	} else if data.Count.IsNull() || data.Count.IsUnknown() {
 		data.Count = types.Int64Null()
 	}
 

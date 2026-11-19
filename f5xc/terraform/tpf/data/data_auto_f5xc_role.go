@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -19,8 +21,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
 	ves_io_schema_role "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/role"
 )
@@ -58,8 +63,8 @@ func (d *DataSourceF5XCRole) Metadata(ctx context.Context, request datasource.Me
 func (r *DataSourceF5XCRole) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a role This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of role) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a role This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of role) etc. can be fetched",
+		MarkdownDescription: "Defines the role the user has in a namespace. There are two kinds of roles:<br>* user defines roles - each tenant can define a set of their roles suiting their needs.<br>* built-in roles - volterra defined roles. Admins are free to use them but can't amend them nor can they remove them.",
+		Description:         "Defines the role the user has in a namespace. There are two kinds of roles: user defines roles - each tenant can define a set of their roles suiting their needs. built-in roles - volterra defined roles. Admins are free to use them but can't amend them nor can they remove them.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -162,9 +167,48 @@ func (d *DataSourceF5XCRole) Read(ctx context.Context, request datasource.ReadRe
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_role.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	// Custom-list responses carry spec fields which are absent from GetObject responses.
+	customReadRPCFQN := "ves.io.schema.role.CustomAPI.CustomList"
+	customReadURI := fmt.Sprintf("/public/custom/namespaces/%s/roles", data.Namespace.ValueString())
+	customListMsg, err := d.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to list %s, got error: %s", "role", err))
+		return
+	}
+
+	var customListItemRawMap map[string]interface{}
+	if customListMsg != nil {
+		var listBuf bytes.Buffer
+		listMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := listMarshaler.Marshal(&listBuf, customListMsg); marshalErr == nil {
+			var listRsp map[string]interface{}
+			if jsonErr := json.Unmarshal(listBuf.Bytes(), &listRsp); jsonErr == nil {
+				if items, ok := listRsp["items"].([]interface{}); ok {
+					for _, item := range items {
+						if itemMap, ok := item.(map[string]interface{}); ok {
+							if name, ok := itemMap["name"].(string); ok && name == data.Name.ValueString() {
+								customListItemRawMap = itemMap
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if customListItemRawMap == nil {
+		response.Diagnostics.AddError("Not Found", fmt.Sprintf("No %s matching the given attributes was found", "role"))
+		return
+	}
+	readGetRspType := strings.Replace(ves_io_schema_role.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_role.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	if err != nil {
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "role", err))
 		return
 	}
 
@@ -172,7 +216,49 @@ func (d *DataSourceF5XCRole) Read(ctx context.Context, request datasource.ReadRe
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_role.CustomCreateRequest
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap == nil {
+		readRspRawSpecMap = make(map[string]interface{})
+	}
+	for k, v := range customListItemRawMap {
+		if _, exists := readRspRawSpecMap[k]; !exists {
+			readRspRawSpecMap[k] = v
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -195,8 +281,14 @@ func (d *DataSourceF5XCRole) Read(ctx context.Context, request datasource.ReadRe
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -205,47 +297,56 @@ func (d *DataSourceF5XCRole) Read(ctx context.Context, request datasource.ReadRe
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Annotations = annotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// data SpecToModelRoot Meta StringField --> Description
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Description.IsNull() || data.Description.IsUnknown() {
-		data.Description = types.StringNull()
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Labels.IsNull() || data.Labels.IsUnknown() {
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
 		data.Labels = types.MapNull(types.StringType)
 	}
 
 	// data SpecToModelRoot Meta RequiredStringField --> Name
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Name.IsNull() || data.Name.IsUnknown() {
-		data.Name = types.StringNull()
-	}
+	data.Name = types.StringValue(metaData.GetName())
 
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
-		data.Namespace = types.StringNull()
-	}
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
 	// data SpecToModelRoot Meta StringField --> Uid
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Uid.IsNull() || data.Uid.IsUnknown() {
-		data.Uid = types.StringNull()
-	}
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfStringField --> ApiGroups
 	{

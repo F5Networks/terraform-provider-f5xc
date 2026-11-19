@@ -31,6 +31,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
@@ -41,6 +42,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_token "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/token"
 )
@@ -86,8 +88,8 @@ func (r *ResourceF5XCToken) Metadata(ctx context.Context, request resource.Metad
 func (r *ResourceF5XCToken) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a token This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of token) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a token This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of token) etc. can be fetched",
+		MarkdownDescription: "token object is used to manage site admission. User must generate token before provisioning and pass this<br>token to site during it's registration. Invalid tokens are refused and site with invalid token won't be able<br>to join F5XC network.<br>Single token can be used to register multiple sites.",
+		Description:         "token object is used to manage site admission. User must generate token before provisioning and pass this token to site during it's registration. Invalid tokens are refused and site with invalid token won't be able to join F5XC network. Single token can be used to register multiple sites.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -143,7 +145,7 @@ func (r *ResourceF5XCToken) Schema(ctx context.Context, request resource.SchemaR
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -162,16 +164,18 @@ func (r *ResourceF5XCToken) Schema(ctx context.Context, request resource.SchemaR
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
+				Sensitive:           true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"site_name": schema.StringAttribute{
 				Description:         "site name only used for JWT token, to add cluster_name to JWT token",
-				MarkdownDescription: "site name only used for JWT token, to add cluster_name to JWT token",
+				MarkdownDescription: "site name only used for JWT token, to add cluster_name to JWT token<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					requiredifvalidator.RequiredIf("type", "JWT"),
 				},
@@ -251,9 +255,17 @@ func (r *ResourceF5XCToken) ModifyPlan(ctx context.Context, req resource.ModifyP
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCToken) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCTokenModel
 
 	// Read Terraform plan data into the model
@@ -367,7 +379,7 @@ func (r *ResourceF5XCToken) Create(ctx context.Context, request resource.CreateR
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -390,7 +402,7 @@ func (r *ResourceF5XCToken) Create(ctx context.Context, request resource.CreateR
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_token.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "token", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "token", err),
 		)
 		return
 	}
@@ -592,15 +604,12 @@ func (r *ResourceF5XCToken) Read(ctx context.Context, request resource.ReadReque
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
+	priorContent := data.Content
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_token.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_token.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "token", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "token", err),
 		)
 		return
 	}
@@ -760,6 +769,12 @@ func (r *ResourceF5XCToken) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
+	// Restore prior state for Content. The API redacts sensitive fields
+	// in GET responses. Preserve prior state to keep state consistent.
+	if !priorContent.IsNull() && !priorContent.IsUnknown() {
+		data.Content = priorContent
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -769,6 +784,12 @@ func (r *ResourceF5XCToken) Read(ctx context.Context, request resource.ReadReque
 }
 
 func (r *ResourceF5XCToken) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCTokenModel
@@ -778,6 +799,7 @@ func (r *ResourceF5XCToken) Update(ctx context.Context, request resource.UpdateR
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planContent := data.Content
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -872,7 +894,7 @@ func (r *ResourceF5XCToken) Update(ctx context.Context, request resource.UpdateR
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -880,24 +902,20 @@ func (r *ResourceF5XCToken) Update(ctx context.Context, request resource.UpdateR
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_token.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_token.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "token", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "token", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_token.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_token.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "token", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "token", err),
 		)
 		return
 	}
@@ -1081,6 +1099,9 @@ func (r *ResourceF5XCToken) Update(ctx context.Context, request resource.UpdateR
 		}
 		data.Labels = mergedMap
 	}
+	// Restore plan value for Content. The API redacts sensitive fields
+	// in GET responses. Restoring the plan value ensures apply result == plan.
+	data.Content = utils.ResolveUnknowns(planContent, data.Content)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -1128,7 +1149,7 @@ func (r *ResourceF5XCToken) Delete(ctx context.Context, request resource.DeleteR
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "token", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "token", err),
 		)
 		return
 	}

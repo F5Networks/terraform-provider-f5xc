@@ -29,27 +29,27 @@ type DataSourceF5XCProtocolPolicer struct {
 	client *client.APIClient
 }
 
-type ProtocolPolicerProtocolPolicerProtocolPolicerType struct {
+type ProtoPolicerProtoPolicerType struct {
 	Policer  types.List   `tfsdk:"policer"`
 	Protocol types.Object `tfsdk:"protocol"`
 }
 
-type ProtocolPolicerProtocolPolicerProtocolType struct {
+type ProtoPolicerProtoType struct {
 	TypeChoice types.Object `tfsdk:"type_choice"`
 }
 
-type ProtocolPolicerProtocolTypeTypeChoice struct {
+type ProtoPolicerTypeChoice struct {
 	Dns  types.Bool   `tfsdk:"dns"`
 	Icmp types.Object `tfsdk:"icmp"`
 	Tcp  types.Object `tfsdk:"tcp"`
 	Udp  types.Bool   `tfsdk:"udp"`
 }
 
-type ProtocolPolicerProtocolTypeIcmp struct {
+type ProtoPolicerIcmp struct {
 	Type types.List `tfsdk:"type"`
 }
 
-type ProtocolPolicerProtocolTypeTcp struct {
+type ProtoPolicerTcp struct {
 	Flags types.List `tfsdk:"flags"`
 }
 
@@ -145,8 +145,8 @@ func (d *DataSourceF5XCProtocolPolicer) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCProtocolPolicer) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Protocol Policer Type Protocol policer has set or network protocol fields and flags to be match on a layer 4 packet and corresponding rate limit to be applied, this would be useful in specifying * Ratelimiting TCP sessions accepted from in a given duration * Ratelimiting various ICMP message type packets * Ratelimiting all UDP traffic * Ratelimting DNS traffic",
-		Description:         "Protocol Policer Type Protocol policer has set or network protocol fields and flags to be match on a layer 4 packet and corresponding rate limit to be applied, this would be useful in specifying * Ratelimiting TCP sessions accepted from in a given duration * Ratelimiting various ICMP message type packets * Ratelimiting all UDP traffic * Ratelimting DNS traffic",
+		MarkdownDescription: "Protocol policer has set or network protocol fields and flags to be match on<br>a layer 4 packet and corresponding rate limit to be applied, this would be<br>useful in specifying<br>* Ratelimiting TCP sessions accepted from in a given duration<br>* Ratelimiting various ICMP message type packets<br>* Ratelimiting all UDP traffic<br>* Ratelimting DNS traffic",
+		Description:         "Protocol policer has set or network protocol fields and flags to be match on a layer 4 packet and corresponding rate limit to be applied, this would be useful in specifying Ratelimiting TCP sessions accepted from in a given duration Ratelimiting various ICMP message type packets Ratelimiting all UDP traffic Ratelimting DNS traffic",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -340,7 +340,7 @@ func (d *DataSourceF5XCProtocolPolicer) Read(ctx context.Context, request dataso
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "protocol_policer", err))
 		return
 	}
 
@@ -403,10 +403,10 @@ func (d *DataSourceF5XCProtocolPolicer) Read(ctx context.Context, request dataso
 
 	// data SpecToModelRoot ArrayOfPointerField --> ProtocolPolicer
 	if len(specData.GetProtocolPolicer()) > 0 {
-		protocolPolicerElements := make([]ProtocolPolicerProtocolPolicerProtocolPolicerType, 0, len(specData.GetProtocolPolicer()))
+		protocolPolicerElements := make([]ProtoPolicerProtoPolicerType, 0, len(specData.GetProtocolPolicer()))
 
 		for _, protocolPolicerElement := range specData.GetProtocolPolicer() {
-			protocolPolicerProtocolPolicerProtocolPolicerTypeModel := ProtocolPolicerProtocolPolicerProtocolPolicerType{}
+			protoPolicerProtoPolicerTypeModel := ProtoPolicerProtoPolicerType{}
 
 			// data specToModelNested RequiredArrayOfPointerField --> Policer
 			if len(protocolPolicerElement.GetPolicer()) > 0 {
@@ -449,19 +449,19 @@ func (d *DataSourceF5XCProtocolPolicer) Read(ctx context.Context, request dataso
 				if response.Diagnostics.HasError() {
 					return
 				}
-				protocolPolicerProtocolPolicerProtocolPolicerTypeModel.Policer = policerListValue
+				protoPolicerProtoPolicerTypeModel.Policer = policerListValue
 
 			} else {
 				// The source list is empty or nil.
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
-				protocolPolicerProtocolPolicerProtocolPolicerTypeModel.Policer = types.ListNull(types.ObjectType{AttrTypes: ProtocolPolicerPolicerObjectRefModelAttributeMap})
+				protoPolicerProtoPolicerTypeModel.Policer = types.ListNull(types.ObjectType{AttrTypes: ProtocolPolicerPolicerObjectRefModelAttributeMap})
 			}
 
 			// data specToModelNested RequiredPointerField --> Protocol
 			if protocolPolicerElement.GetProtocol() != nil {
 				// Create the nested Go struct
-				protocolPolicerProtocolPolicerProtocolTypeModel := &ProtocolPolicerProtocolPolicerProtocolType{}
+				protoPolicerProtoTypeModel := &ProtoPolicerProtoType{}
 				protocolElement := protocolPolicerElement.GetProtocol()
 
 				// Recursively populate the nested struct
@@ -586,19 +586,19 @@ func (d *DataSourceF5XCProtocolPolicer) Read(ctx context.Context, request dataso
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					protocolPolicerProtocolPolicerProtocolTypeModel.TypeChoice = finalObj
+					protoPolicerProtoTypeModel.TypeChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					protocolPolicerProtocolPolicerProtocolTypeModel.TypeChoice = types.ObjectNull(ProtocolPolicerProtocolPolicerProtocolTypeModelAttributeMap)
+					protoPolicerProtoTypeModel.TypeChoice = types.ObjectNull(ProtocolPolicerProtocolPolicerProtocolTypeModelAttributeMap)
 				}
 
 				// This field needs to be converted to a types.ObjectValue before assignment.
-				protocolPolicerProtocolPolicerProtocolTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtocolPolicerProtocolPolicerProtocolModelAttributeMap, protocolPolicerProtocolPolicerProtocolTypeModel)
+				protoPolicerProtoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ProtocolPolicerProtocolPolicerProtocolModelAttributeMap, protoPolicerProtoTypeModel)
 				response.Diagnostics.Append(objDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				protocolPolicerProtocolPolicerProtocolPolicerTypeModel.Protocol = protocolPolicerProtocolPolicerProtocolTypeModelObj
+				protoPolicerProtoPolicerTypeModel.Protocol = protoPolicerProtoTypeModelObj
 
 			} else {
 				// The source field is nil (e.g. redacted by the API).
@@ -607,10 +607,10 @@ func (d *DataSourceF5XCProtocolPolicer) Read(ctx context.Context, request dataso
 				// here because the API may always return a non-nil struct (with REDACTED values) for this
 				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 				// The target is a types.Object, so we use types.ObjectNull.
-				protocolPolicerProtocolPolicerProtocolPolicerTypeModel.Protocol = types.ObjectNull(ProtocolPolicerProtocolPolicerProtocolModelAttributeMap)
+				protoPolicerProtoPolicerTypeModel.Protocol = types.ObjectNull(ProtocolPolicerProtocolPolicerProtocolModelAttributeMap)
 			}
 
-			protocolPolicerElements = append(protocolPolicerElements, protocolPolicerProtocolPolicerProtocolPolicerTypeModel)
+			protocolPolicerElements = append(protocolPolicerElements, protoPolicerProtoPolicerTypeModel)
 		}
 
 		{

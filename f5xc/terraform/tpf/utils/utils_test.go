@@ -6,6 +6,7 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -15,6 +16,8 @@ import (
 	googleProtobuf "github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFormatToAbsolutePath(t *testing.T) {
@@ -1056,6 +1059,191 @@ func TestValueContainsUnknown_KnownValue(t *testing.T) {
 	}
 }
 
+// TestResolveUnknowns_FastPathKnown verifies that if the plan value contains no
+// unknown attributes, ResolveUnknowns returns it unmodified immediately.
+func TestResolveUnknowns_FastPathKnown(t *testing.T) {
+	planObj, diags := types.ObjectValue(
+		map[string]attr.Type{
+			"secret": types.StringType,
+			"tenant": types.StringType,
+		},
+		map[string]attr.Value{
+			"secret": types.StringValue("super-secret"),
+			"tenant": types.StringValue("ves-io-known"),
+		},
+	)
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics creating planObj: %v", diags)
+	}
+
+	apiObj, diags := types.ObjectValue(
+		map[string]attr.Type{
+			"secret": types.StringType,
+			"tenant": types.StringType,
+		},
+		map[string]attr.Value{
+			"secret": types.StringValue("redacted"),
+			"tenant": types.StringValue("ves-io-api"),
+		},
+	)
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics creating apiObj: %v", diags)
+	}
+
+	result := ResolveUnknowns(planObj, apiObj)
+	if !result.Equal(planObj) {
+		t.Fatalf("expected plan value to be preserved exactly in fast path, got %v", result)
+	}
+}
+
+// TestResolveUnknowns_ObjectWithSensitiveAndUnknown verifies that an object with a
+// known sensitive field and an unknown tenant field preserves the sensitive field
+// while resolving the tenant from the API response.
+func TestResolveUnknowns_ObjectWithSensitiveAndUnknown(t *testing.T) {
+	attrTypes := map[string]attr.Type{
+		"secret": types.StringType,
+		"tenant": types.StringType,
+		"count":  types.Int64Type,
+	}
+
+	planObj, diags := types.ObjectValue(
+		attrTypes,
+		map[string]attr.Value{
+			"secret": types.StringValue("blindfold-or-md5-secret"),
+			"tenant": types.StringUnknown(),
+			"count":  types.Int64Value(42),
+		},
+	)
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics creating planObj: %v", diags)
+	}
+
+	apiObj, diags := types.ObjectValue(
+		attrTypes,
+		map[string]attr.Value{
+			"secret": types.StringNull(), // Backend redacts or omits secret in GET
+			"tenant": types.StringValue("ves-io-tenant-resolved"),
+			"count":  types.Int64Value(42),
+		},
+	)
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics creating apiObj: %v", diags)
+	}
+
+	result := ResolveUnknowns(planObj, apiObj)
+	if ValueContainsUnknown(result) {
+		t.Fatalf("resolved object should not contain any unknown attributes, got %v", result)
+	}
+
+	attrs := result.Attributes()
+	if !attrs["secret"].Equal(types.StringValue("blindfold-or-md5-secret")) {
+		t.Errorf("expected secret to be preserved from plan, got %v", attrs["secret"])
+	}
+	if !attrs["tenant"].Equal(types.StringValue("ves-io-tenant-resolved")) {
+		t.Errorf("expected tenant to be resolved from API, got %v", attrs["tenant"])
+	}
+	if !attrs["count"].Equal(types.Int64Value(42)) {
+		t.Errorf("expected count to be preserved, got %v", attrs["count"])
+	}
+}
+
+// TestResolveUnknowns_ListOfObjects verifies that a list of objects containing
+// newly-added items with unknown fields has its unknown attributes resolved from the API.
+func TestResolveUnknowns_ListOfObjects(t *testing.T) {
+	elemType := types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":   types.StringType,
+			"secret": types.StringType,
+			"tenant": types.StringType,
+		},
+	}
+
+	// Peer 0 is already known; Peer 1 is newly added during update with tenant unknown.
+	peer0Plan, _ := types.ObjectValue(elemType.AttrTypes, map[string]attr.Value{
+		"name":   types.StringValue("peer-0"),
+		"secret": types.StringValue("secret-0"),
+		"tenant": types.StringValue("ves-io-tenant-0"),
+	})
+	peer1Plan, _ := types.ObjectValue(elemType.AttrTypes, map[string]attr.Value{
+		"name":   types.StringValue("peer-1"),
+		"secret": types.StringValue("secret-1"),
+		"tenant": types.StringUnknown(),
+	})
+
+	planList, diags := types.ListValue(elemType, []attr.Value{peer0Plan, peer1Plan})
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics creating planList: %v", diags)
+	}
+
+	peer0API, _ := types.ObjectValue(elemType.AttrTypes, map[string]attr.Value{
+		"name":   types.StringValue("peer-0"),
+		"secret": types.StringNull(),
+		"tenant": types.StringValue("ves-io-tenant-0"),
+	})
+	peer1API, _ := types.ObjectValue(elemType.AttrTypes, map[string]attr.Value{
+		"name":   types.StringValue("peer-1"),
+		"secret": types.StringNull(),
+		"tenant": types.StringValue("ves-io-tenant-resolved"),
+	})
+
+	apiList, diags := types.ListValue(elemType, []attr.Value{peer0API, peer1API})
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics creating apiList: %v", diags)
+	}
+
+	result := ResolveUnknowns(planList, apiList)
+	if ValueContainsUnknown(result) {
+		t.Fatalf("resolved list should not contain any unknowns, got %v", result)
+	}
+
+	elems := result.Elements()
+	if len(elems) != 2 {
+		t.Fatalf("expected 2 elements in resolved list, got %d", len(elems))
+	}
+
+	peer1Resolved := elems[1].(types.Object).Attributes()
+	if !peer1Resolved["secret"].Equal(types.StringValue("secret-1")) {
+		t.Errorf("expected peer-1 secret to be preserved from plan, got %v", peer1Resolved["secret"])
+	}
+	if !peer1Resolved["tenant"].Equal(types.StringValue("ves-io-tenant-resolved")) {
+		t.Errorf("expected peer-1 tenant to be resolved from API, got %v", peer1Resolved["tenant"])
+	}
+}
+
+// TestResolveUnknowns_MissingAPIElement verifies that when the API returns fewer
+// elements than planned, unknown fields in extra elements fallback safely to typed null.
+func TestResolveUnknowns_MissingAPIElement(t *testing.T) {
+	elemType := types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":   types.StringType,
+			"tenant": types.StringType,
+		},
+	}
+
+	peerPlan, _ := types.ObjectValue(elemType.AttrTypes, map[string]attr.Value{
+		"name":   types.StringValue("peer-orphan"),
+		"tenant": types.StringUnknown(),
+	})
+
+	planList, _ := types.ListValue(elemType, []attr.Value{peerPlan})
+	// API returned an empty list
+	apiList, _ := types.ListValue(elemType, []attr.Value{})
+
+	result := ResolveUnknowns(planList, apiList)
+	if ValueContainsUnknown(result) {
+		t.Fatalf("resolved list should not contain unknowns even if API omitted element, got %v", result)
+	}
+
+	elems := result.Elements()
+	if len(elems) != 1 {
+		t.Fatalf("expected 1 element, got %d", len(elems))
+	}
+	resolvedAttrs := elems[0].(types.Object).Attributes()
+	if !resolvedAttrs["tenant"].Equal(types.StringNull()) {
+		t.Errorf("expected tenant to fallback to StringNull(), got %v", resolvedAttrs["tenant"])
+	}
+}
+
 // TestMergeRRSetListForApply_PreservesPlanShape verifies that backend-only API
 // RRsets are excluded from the immediate post-apply state while matching planned
 // RRsets still receive API-derived values.
@@ -1175,6 +1363,33 @@ func TestMergeRRSetListForApply_UnknownPlanExcludesDefault(t *testing.T) {
 	)
 	if !want.Equal(merged) {
 		t.Fatalf("expected default NS excluded from unknown-plan apply\nwant: %v\ngot:  %v", want, merged)
+	}
+}
+
+// TestMergeRRSetListForApply_MultipleDefaultNSExcludesDuplicates verifies that when
+// the API response contains multiple default NS records (which share the same empty name
+// and thus produce identical index keys), MergeRRSetListForApply filters them out before
+// indexing so that duplicate-key collisions do not abort apply-time reconciliation.
+func TestMergeRRSetListForApply_MultipleDefaultNSExcludesDuplicates(t *testing.T) {
+	planned := testRRSetListValue(t,
+		testARecordRRSet(t, "host.example.com", "192.168.1.10", types.StringUnknown()),
+	)
+	api := testRRSetListValue(t,
+		testARecordRRSet(t, "host.example.com", "192.168.1.10", types.StringNull()),
+		testNSRecordRRSet(t, "", "ns1crt.f5clouddns-test.com", types.StringNull()),
+		testNSRecordRRSet(t, "", "ns2crt.f5clouddns-test.com", types.StringNull()),
+	)
+
+	merged, diags := MergeRRSetListForApply(context.Background(), planned, api)
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics: %v", diags)
+	}
+
+	want := testRRSetListValue(t,
+		testARecordRRSet(t, "host.example.com", "192.168.1.10", types.StringNull()),
+	)
+	if !want.Equal(merged) {
+		t.Fatalf("merged rrset list mismatch\nwant: %v\ngot:  %v", want, merged)
 	}
 }
 
@@ -1465,4 +1680,1062 @@ func testNSRecordAttrTypes() map[string]attr.Type {
 		"name":   types.StringType,
 		"values": types.ListType{ElemType: types.StringType},
 	}
+}
+
+func TestSanitizeAPIError(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []struct {
+		name       string
+		action     string
+		resource   string
+		err        error
+		wantSubstr []string
+		notSubstr  []string
+	}{
+		{
+			name:     "5xx drops internal details and returns generic message",
+			action:   "create",
+			resource: "securemesh_site_v2",
+			err: errors.New(
+				`Creating object: Unsuccessful POST at URL https://x.volterra.us/api/public/namespaces/system/securemesh_site_v2s, status code 500, ` +
+					`body {"code":13,"details":[{"code":"UNKNOWN","details":"Filling oneof default choice: oneof container field list _protoutil.NilField is not _protoutil.PtrListField","timestamp":"2025-07-06T20:20:59Z"}],"message":"There was a server error in processing request"}`,
+			),
+			wantSubstr: []string{"Unable to create securemesh_site_v2", "internal server error", "HTTP 500"},
+			notSubstr:  []string{"_protoutil", "NilField", "PtrListField", "There was a server error"},
+		},
+		{
+			name:     "4xx surfaces message and code but drops details[].details",
+			action:   "update",
+			resource: "http_loadbalancer",
+			err: errors.New(
+				`Updating object: Unsuccessful PUT at URL https://x.volterra.us/api/config/foo, status code 400, ` +
+					`body {"code":3,"details":[{"code":"INVALID_ARGUMENT","details":"internal.pkg.Foo something"}],"message":"invalid domain: not FQDN"}`,
+			),
+			wantSubstr: []string{"Unable to update http_loadbalancer", "HTTP 400", "code 3", "invalid domain: not FQDN"},
+			notSubstr:  []string{"internal.pkg.Foo", "INVALID_ARGUMENT"},
+		},
+		{
+			name:       "unparsable error falls back to raw text",
+			action:     "read",
+			resource:   "foo",
+			err:        errors.New("connection refused"),
+			wantSubstr: []string{"Unable to read foo", "connection refused"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := SanitizeAPIError(ctx, tc.action, tc.resource, tc.err)
+			for _, s := range tc.wantSubstr {
+				if !strings.Contains(got, s) {
+					t.Errorf("expected substring %q in %q", s, got)
+				}
+			}
+			for _, s := range tc.notSubstr {
+				if strings.Contains(got, s) {
+					t.Errorf("did NOT expect substring %q in %q", s, got)
+				}
+			}
+		})
+	}
+}
+
+// testRRSetGroupMetaAttrTypes returns the attribute type map for an RRSetGroup's metadata.
+//
+// Why: Provides typed schema definitions for group metadata (name, description) in tests.
+//
+// How: Constructs a map with name and description StringTypes.
+//
+// Returns:
+//   - map[string]attr.Type: schema attribute types.
+func testRRSetGroupMetaAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"name":        types.StringType,
+		"description": types.StringType,
+	}
+}
+
+// testLBRecordValueAttrTypes returns the attribute type map for an lb_record's value ref.
+//
+// Why: Models the ObjectRefType structure (name, namespace, tenant) in tests.
+//
+// How: Constructs a map with name, namespace, and tenant StringTypes.
+//
+// Returns:
+//   - map[string]attr.Type: schema attribute types.
+func testLBRecordValueAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"name":      types.StringType,
+		"namespace": types.StringType,
+		"tenant":    types.StringType,
+	}
+}
+
+// testLBRecordAttrTypes returns the attribute type map for an lb_record choice branch.
+//
+// Why: Models the lb_record object structure containing name and value.
+//
+// How: Constructs a map with name StringType and value ObjectType.
+//
+// Returns:
+//   - map[string]attr.Type: schema attribute types.
+func testLBRecordAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"name":  types.StringType,
+		"value": types.ObjectType{AttrTypes: testLBRecordValueAttrTypes()},
+	}
+}
+
+// testRRSetTypeChoiceWithLBAttrTypes returns the oneof type choice attribute map including lb_record.
+//
+// Why: Enables testing lb_record resolution alongside a_record and ns_record.
+//
+// How: Constructs a map with a_record, ns_record, and lb_record ObjectTypes.
+//
+// Returns:
+//   - map[string]attr.Type: schema attribute types.
+func testRRSetTypeChoiceWithLBAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"a_record":  types.ObjectType{AttrTypes: testARecordAttrTypes()},
+		"ns_record": types.ObjectType{AttrTypes: testNSRecordAttrTypes()},
+		"lb_record": types.ObjectType{AttrTypes: testLBRecordAttrTypes()},
+	}
+}
+
+// testRRSetWithLBAttrTypes returns the RRSet object attribute map including lb_record in choice.
+//
+// Why: Defines full RRSet schema supporting lb_record branches in tests.
+//
+// How: Constructs a map with description, ttl, and type_record_set_choice ObjectType.
+//
+// Returns:
+//   - map[string]attr.Type: schema attribute types.
+func testRRSetWithLBAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"description":            types.StringType,
+		"ttl":                    types.Int64Type,
+		"type_record_set_choice": types.ObjectType{AttrTypes: testRRSetTypeChoiceWithLBAttrTypes()},
+	}
+}
+
+// testRRSetGroupWithLBAttrTypes returns the RRSetGroup object attribute map.
+//
+// Why: Defines the nested RRSetGroup schema containing metadata and child rr_set list.
+//
+// How: Constructs a map with metadata ObjectType and rr_set ListType.
+//
+// Returns:
+//   - map[string]attr.Type: schema attribute types.
+func testRRSetGroupWithLBAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"metadata": types.ObjectType{AttrTypes: testRRSetGroupMetaAttrTypes()},
+		"rr_set":   types.ListType{ElemType: types.ObjectType{AttrTypes: testRRSetWithLBAttrTypes()}},
+	}
+}
+
+// testLBRecordRRSet creates an RRSet object containing an lb_record choice branch.
+//
+// Why: Synthesizes test fixtures for f5xc_dns_zone rr_set_group lb_record tests.
+//
+// How: Builds nested ObjectValues for lb_record value, choice, and enclosing RRSet.
+//
+// Parameters:
+//   - t: testing context.
+//   - recordName: record name inside lb_record.
+//   - lbName: referenced load balancer name.
+//   - lbNamespace: referenced load balancer namespace.
+//   - tenant: candidate tenant string (may be unknown or concrete).
+//   - description: record description string (may be unknown, null, or concrete).
+//
+// Returns:
+//   - types.Object: synthesized RRSet object value.
+func testLBRecordRRSet(t *testing.T, recordName, lbName, lbNamespace string, tenant, description types.String) types.Object {
+	t.Helper()
+
+	choiceAttrs := map[string]attr.Value{
+		"a_record":  types.ObjectNull(testARecordAttrTypes()),
+		"ns_record": types.ObjectNull(testNSRecordAttrTypes()),
+		"lb_record": testRRSetBranchObject(t, testLBRecordAttrTypes(), map[string]attr.Value{
+			"name": types.StringValue(recordName),
+			"value": testRRSetBranchObject(t, testLBRecordValueAttrTypes(), map[string]attr.Value{
+				"name":      types.StringValue(lbName),
+				"namespace": types.StringValue(lbNamespace),
+				"tenant":    tenant,
+			}),
+		}),
+	}
+
+	choiceObj, diags := types.ObjectValue(testRRSetTypeChoiceWithLBAttrTypes(), choiceAttrs)
+	require.False(t, diags.HasError())
+
+	rrsetAttrs := map[string]attr.Value{
+		"description":            description,
+		"ttl":                    types.Int64Value(63),
+		"type_record_set_choice": choiceObj,
+	}
+
+	obj, diags := types.ObjectValue(testRRSetWithLBAttrTypes(), rrsetAttrs)
+	require.False(t, diags.HasError())
+	return obj
+}
+
+// testRRSetGroupObject creates an RRSetGroup object containing metadata and child record sets.
+//
+// Why: Synthesizes test fixtures representing named record groups in f5xc_dns_zone.
+//
+// How: Builds group metadata object and typed list of RRSet objects.
+//
+// Parameters:
+//   - t: testing context.
+//   - groupName: unique name for metadata.name.
+//   - rrsets: child RRSet objects to embed in the group.
+//
+// Returns:
+//   - types.Object: synthesized RRSetGroup object value.
+func testRRSetGroupObject(t *testing.T, groupName string, rrsets ...types.Object) types.Object {
+	t.Helper()
+
+	metaObj, diags := types.ObjectValue(testRRSetGroupMetaAttrTypes(), map[string]attr.Value{
+		"name":        types.StringValue(groupName),
+		"description": types.StringNull(),
+	})
+	require.False(t, diags.HasError())
+
+	rrsetElemType := types.ObjectType{AttrTypes: testRRSetWithLBAttrTypes()}
+	rrsetElements := make([]attr.Value, len(rrsets))
+	for i, r := range rrsets {
+		rrsetElements[i] = r
+	}
+	rrsetList, diags := types.ListValue(rrsetElemType, rrsetElements)
+	require.False(t, diags.HasError())
+
+	groupObj, diags := types.ObjectValue(testRRSetGroupWithLBAttrTypes(), map[string]attr.Value{
+		"metadata": metaObj,
+		"rr_set":   rrsetList,
+	})
+	require.False(t, diags.HasError())
+	return groupObj
+}
+
+// TestMergeRRSetListForApply_RRSetGroup_ResolvesNestedUnknowns verifies that when
+// planned rr_set_group elements contain nested unknown values (such as computed
+// description and lb_record.value.tenant), MergeRRSetListForApply populates concrete
+// values from matching API groups and guarantees zero unknown values remain.
+func TestMergeRRSetListForApply_RRSetGroup_ResolvesNestedUnknowns(t *testing.T) {
+	ctx := context.Background()
+
+	// 1. Build planned group where description and lb_record.value.tenant are unknown
+	plannedRecord := testLBRecordRRSet(t, "grouped", "repro-lb", "system", types.StringUnknown(), types.StringUnknown())
+	plannedGroup := testRRSetGroupObject(t, "group1", plannedRecord)
+	elemType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+	plannedList, diags := types.ListValue(elemType, []attr.Value{plannedGroup})
+	require.False(t, diags.HasError())
+	require.True(t, ValueContainsUnknown(plannedList))
+
+	// 2. Build API group where description is null and tenant is resolved
+	apiRecord := testLBRecordRRSet(t, "grouped", "repro-lb", "system", types.StringValue("automation-rllmbbuf"), types.StringNull())
+	apiGroup := testRRSetGroupObject(t, "group1", apiRecord)
+	apiList, diags := types.ListValue(elemType, []attr.Value{apiGroup})
+	require.False(t, diags.HasError())
+	require.False(t, ValueContainsUnknown(apiList))
+
+	// 3. Execute apply merge
+	result, diags := MergeRRSetListForApply(ctx, plannedList, apiList)
+	require.False(t, diags.HasError())
+
+	// 4. Invariant: zero unknowns in result
+	assert.False(t, ValueContainsUnknown(result), "Result list must not contain any unknown values")
+
+	// 5. Verify concrete field values
+	require.Len(t, result.Elements(), 1)
+	resultGroup := result.Elements()[0].(types.Object)
+	groupAttrs := resultGroup.Attributes()
+
+	rrSetList := groupAttrs["rr_set"].(types.List)
+	require.Len(t, rrSetList.Elements(), 1)
+	resultRecord := rrSetList.Elements()[0].(types.Object)
+	recAttrs := resultRecord.Attributes()
+
+	// description must be null
+	assert.True(t, recAttrs["description"].IsNull(), "Omitted description must resolve to null")
+
+	// tenant must be "automation-rllmbbuf"
+	choiceObj := recAttrs["type_record_set_choice"].(types.Object)
+	lbObj := choiceObj.Attributes()["lb_record"].(types.Object)
+	valObj := lbObj.Attributes()["value"].(types.Object)
+	tenantVal := valObj.Attributes()["tenant"].(types.String)
+	assert.Equal(t, "automation-rllmbbuf", tenantVal.ValueString(), "Tenant must be populated from API")
+}
+
+// TestMergeRRSetListForApply_UnkeyableFallbackResolvesUnknowns verifies the defensive
+// invariant that if a planned list containing unknowns cannot be indexed by RRSet or
+// RRSetGroup keying, MergeRRSetListForApply falls back to ResolveUnknowns rather than
+// returning raw planned values with unknowns.
+func TestMergeRRSetListForApply_UnkeyableFallbackResolvesUnknowns(t *testing.T) {
+	ctx := context.Background()
+
+	dummyAttrTypes := map[string]attr.Type{
+		"custom_field": types.StringType,
+	}
+	dummyElemType := types.ObjectType{AttrTypes: dummyAttrTypes}
+
+	plannedObj, diags := types.ObjectValue(dummyAttrTypes, map[string]attr.Value{
+		"custom_field": types.StringUnknown(),
+	})
+	require.False(t, diags.HasError())
+	plannedList, diags := types.ListValue(dummyElemType, []attr.Value{plannedObj})
+	require.False(t, diags.HasError())
+	require.True(t, ValueContainsUnknown(plannedList))
+
+	apiObj, diags := types.ObjectValue(dummyAttrTypes, map[string]attr.Value{
+		"custom_field": types.StringValue("resolved-value"),
+	})
+	require.False(t, diags.HasError())
+	apiList, diags := types.ListValue(dummyElemType, []attr.Value{apiObj})
+	require.False(t, diags.HasError())
+
+	result, diags := MergeRRSetListForApply(ctx, plannedList, apiList)
+	require.False(t, diags.HasError())
+	assert.False(t, ValueContainsUnknown(result), "Fallback must guarantee zero unknown values")
+
+	resObj := result.Elements()[0].(types.Object)
+	assert.Equal(t, "resolved-value", resObj.Attributes()["custom_field"].(types.String).ValueString())
+}
+
+// TestMergeRRSetListForRead_RRSetGroup_ReconcilesDrift verifies that MergeRRSetListForRead
+// preserves prior group ordering, surfaces out-of-band group additions, drops deleted
+// groups, and updates child record values.
+func TestMergeRRSetListForRead_RRSetGroup_ReconcilesDrift(t *testing.T) {
+	ctx := context.Background()
+	elemType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+
+	// Prior: group1 (rec1 with tenant="t1"), group2 (rec2)
+	priorGroup1 := testRRSetGroupObject(t, "group1", testLBRecordRRSet(t, "rec1", "lb1", "sys", types.StringValue("t1"), types.StringNull()))
+	priorGroup2 := testRRSetGroupObject(t, "group2", testLBRecordRRSet(t, "rec2", "lb2", "sys", types.StringValue("t2"), types.StringNull()))
+	priorList, diags := types.ListValue(elemType, []attr.Value{priorGroup1, priorGroup2})
+	require.False(t, diags.HasError())
+
+	// API: group1 (rec1 modified with tenant="t1-updated"), group2 deleted, group3 added
+	apiGroup1 := testRRSetGroupObject(t, "group1", testLBRecordRRSet(t, "rec1", "lb1", "sys", types.StringValue("t1-updated"), types.StringNull()))
+	apiGroup3 := testRRSetGroupObject(t, "group3", testLBRecordRRSet(t, "rec3", "lb3", "sys", types.StringValue("t3"), types.StringNull()))
+	apiList, diags := types.ListValue(elemType, []attr.Value{apiGroup1, apiGroup3})
+	require.False(t, diags.HasError())
+
+	result, diags := MergeRRSetListForRead(ctx, priorList, apiList)
+	require.False(t, diags.HasError())
+
+	// Result must contain group1 and group3 (group2 dropped)
+	require.Len(t, result.Elements(), 2)
+
+	// group1 is first (prior order preserved), with updated tenant
+	resGroup1 := result.Elements()[0].(types.Object)
+	group1Name, ok := rrsetGroupAttrValueKey(resGroup1)
+	require.True(t, ok)
+	assert.Equal(t, "group1", group1Name)
+
+	rrsetList1 := resGroup1.Attributes()["rr_set"].(types.List)
+	rec1 := rrsetList1.Elements()[0].(types.Object)
+	choice1 := rec1.Attributes()["type_record_set_choice"].(types.Object)
+	lb1 := choice1.Attributes()["lb_record"].(types.Object)
+	val1 := lb1.Attributes()["value"].(types.Object)
+	assert.Equal(t, "t1-updated", val1.Attributes()["tenant"].(types.String).ValueString())
+
+	// group3 is appended
+	resGroup3 := result.Elements()[1].(types.Object)
+	group3Name, ok := rrsetGroupAttrValueKey(resGroup3)
+	require.True(t, ok)
+	assert.Equal(t, "group3", group3Name)
+}
+
+// testUnkeyableRRSetGroupObject creates an RRSetGroup object with a null metadata object,
+// making it unkeyable by rrsetGroupAttrValueKey.
+func testUnkeyableRRSetGroupObject(t *testing.T) types.Object {
+	t.Helper()
+	metaObj := types.ObjectNull(testRRSetGroupMetaAttrTypes())
+	rrsetElemType := types.ObjectType{AttrTypes: testRRSetWithLBAttrTypes()}
+	rrsetList, diags := types.ListValue(rrsetElemType, []attr.Value{})
+	require.False(t, diags.HasError())
+
+	groupObj, diags := types.ObjectValue(testRRSetGroupWithLBAttrTypes(), map[string]attr.Value{
+		"metadata": metaObj,
+		"rr_set":   rrsetList,
+	})
+	require.False(t, diags.HasError())
+	return groupObj
+}
+
+// TestMergeRRSetListForRead_RRSetGroup_NullPriorNormalizesEmptyList verifies that when
+// prior state is null or unknown, an empty API list is normalized to types.ListNull
+// rather than an empty list, keeping behavior consistent with flat RRSet reconciliation.
+func TestMergeRRSetListForRead_RRSetGroup_NullPriorNormalizesEmptyList(t *testing.T) {
+	ctx := context.Background()
+	elemType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+
+	// Case 1: Prior is null, API is empty -> result is ListNull
+	priorNull := types.ListNull(elemType)
+	apiEmpty, diags := types.ListValue(elemType, []attr.Value{})
+	require.False(t, diags.HasError())
+
+	result, diags := MergeRRSetListForRead(ctx, priorNull, apiEmpty)
+	require.False(t, diags.HasError())
+	assert.True(t, result.IsNull(), "Empty API list with null prior must normalize to null list")
+
+	// Case 2: Prior is unknown, API is empty -> result is ListNull
+	priorUnknown := types.ListUnknown(elemType)
+	result, diags = MergeRRSetListForRead(ctx, priorUnknown, apiEmpty)
+	require.False(t, diags.HasError())
+	assert.True(t, result.IsNull(), "Empty API list with unknown prior must normalize to null list")
+
+	// Case 3: Prior is null, API has elements -> result is non-null with elements
+	apiGroup := testRRSetGroupObject(t, "group1", testLBRecordRRSet(t, "rec1", "lb1", "sys", types.StringValue("t1"), types.StringNull()))
+	apiWithElems, diags := types.ListValue(elemType, []attr.Value{apiGroup})
+	require.False(t, diags.HasError())
+
+	result, diags = MergeRRSetListForRead(ctx, priorNull, apiWithElems)
+	require.False(t, diags.HasError())
+	assert.False(t, result.IsNull(), "Non-empty API list must not be null")
+	require.Len(t, result.Elements(), 1)
+}
+
+// TestMergeRRSetListForRead_RRSetGroup_UnkeyableOrDuplicateFallback verifies that if API
+// elements are unkeyable or contain duplicate keys, or if prior elements are unkeyable,
+// MergeRRSetListForRead safely falls back to returning the API list rather than dropping
+// elements or crashing.
+func TestMergeRRSetListForRead_RRSetGroup_UnkeyableOrDuplicateFallback(t *testing.T) {
+	ctx := context.Background()
+	elemType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+
+	validGroup1 := testRRSetGroupObject(t, "group1", testLBRecordRRSet(t, "rec1", "lb1", "sys", types.StringValue("t1"), types.StringNull()))
+	validGroup2 := testRRSetGroupObject(t, "group2", testLBRecordRRSet(t, "rec2", "lb2", "sys", types.StringValue("t2"), types.StringNull()))
+	unkeyableGroup := testUnkeyableRRSetGroupObject(t)
+
+	priorList, diags := types.ListValue(elemType, []attr.Value{validGroup1})
+	require.False(t, diags.HasError())
+
+	// Subtest 1: Duplicate group names in API -> safe fallback to API list
+	t.Run("duplicate-api-keys", func(t *testing.T) {
+		dupGroup1 := testRRSetGroupObject(t, "group1", testLBRecordRRSet(t, "rec1-dup", "lb1", "sys", types.StringValue("t1-dup"), types.StringNull()))
+		apiDupList, diags := types.ListValue(elemType, []attr.Value{validGroup1, dupGroup1})
+		require.False(t, diags.HasError())
+
+		result, diags := MergeRRSetListForRead(ctx, priorList, apiDupList)
+		require.False(t, diags.HasError())
+		require.Len(t, result.Elements(), 2, "Fallback must preserve all API elements without dropping duplicates")
+	})
+
+	// Subtest 2: Unkeyable element in API -> safe fallback to API list
+	t.Run("unkeyable-api-element", func(t *testing.T) {
+		apiUnkeyableList, diags := types.ListValue(elemType, []attr.Value{validGroup1, unkeyableGroup})
+		require.False(t, diags.HasError())
+
+		result, diags := MergeRRSetListForRead(ctx, priorList, apiUnkeyableList)
+		require.False(t, diags.HasError())
+		require.Len(t, result.Elements(), 2, "Fallback must preserve unkeyable API element")
+	})
+
+	// Subtest 3: Unkeyable element in prior -> safe fallback to API list
+	t.Run("unkeyable-prior-element", func(t *testing.T) {
+		priorUnkeyableList, diags := types.ListValue(elemType, []attr.Value{unkeyableGroup})
+		require.False(t, diags.HasError())
+		apiList, diags := types.ListValue(elemType, []attr.Value{validGroup1, validGroup2})
+		require.False(t, diags.HasError())
+
+		result, diags := MergeRRSetListForRead(ctx, priorUnkeyableList, apiList)
+		require.False(t, diags.HasError())
+		require.Len(t, result.Elements(), 2, "Fallback must return API list when prior is unkeyable")
+	})
+}
+
+// testCustomNSRecordRRSet creates an NS record RRSet object with custom TTL, nullable name,
+// description, and multiple nameserver values for testing apex NS reconciliation.
+//
+// Why: Models user-configured apex NS records (where name may be omitted/null or empty ""
+// and TTL differs from the 86400 backend standalone default) alongside API responses that
+// append backend default nameservers.
+//
+// How: Constructs a typed RRSet ObjectValue with the provided ttl, description, name,
+// and values list under the ns_record branch.
+//
+// Parameters:
+//   - t: testing context.
+//   - ttl: record time-to-live in seconds.
+//   - name: record name attribute (may be null or concrete string).
+//   - description: record description attribute (may be unknown, null, or concrete string).
+//   - values: nameserver hostnames for ns_record.values.
+//
+// Return values:
+//   - types.Object: the constructed RRSet object value.
+//
+// Example:
+//
+//	rrset := testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringUnknown(), "ns1.vestest.secondary.com")
+func testCustomNSRecordRRSet(t *testing.T, ttl int64, name, description types.String, values ...string) types.Object {
+	t.Helper()
+
+	return testRRSetObject(t, map[string]attr.Value{
+		"description": description,
+		"ttl":         types.Int64Value(ttl),
+		"type_record_set_choice": testRRSetTypeChoiceObject(t, map[string]attr.Value{
+			"a_record": types.ObjectNull(testARecordAttrTypes()),
+			"ns_record": testRRSetBranchObject(t, testNSRecordAttrTypes(), map[string]attr.Value{
+				"name":   name,
+				"values": testStringListValue(t, values...),
+			}),
+		}),
+	})
+}
+
+// TestMergeRRSetListForApply_ApexNSRecordBackendInjectedValue verifies that when a user
+// configures an apex NS record (name omitted/null or empty "", ttl=360) and the backend
+// appends its default nameserver into the same ns_record.values slice, MergeRRSetListForApply
+// strips the unconfigured backend default nameserver, resolves unknown description to null,
+// and preserves the planned name representation.
+//
+// Why: Prevents Terraform core from aborting post-apply with "Provider produced inconsistent
+// result after apply: ...ns_record.values: new element 1 has appeared" (XC-76508 / XC-6129).
+//
+// How: Exercises subtests for omitted name (null), explicit empty name (""), and user-configured
+// default NS value retention.
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+//
+// Example:
+//
+//	go test -run TestMergeRRSetListForApply_ApexNSRecordBackendInjectedValue ./f5xc/terraform/tpf/utils/...
+func TestMergeRRSetListForApply_ApexNSRecordBackendInjectedValue(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("omitted-null-name-strips-backend-injected-ns", func(t *testing.T) {
+		planned := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringUnknown(), "ns1.vestest.secondary.com"),
+		)
+		api := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns1crt.f5clouddns-test.com"),
+		)
+
+		merged, diags := MergeRRSetListForApply(ctx, planned, api)
+		require.False(t, diags.HasError())
+		assert.False(t, ValueContainsUnknown(merged))
+
+		want := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com"),
+		)
+		assert.Equal(t, want, merged)
+	})
+
+	t.Run("explicit-empty-name-preserved-and-strips-backend-injected-ns", func(t *testing.T) {
+		planned := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringValue(""), types.StringUnknown(), "ns1.vestest.secondary.com"),
+		)
+		api := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns1crt.f5clouddns-test.com"),
+		)
+
+		merged, diags := MergeRRSetListForApply(ctx, planned, api)
+		require.False(t, diags.HasError())
+		assert.False(t, ValueContainsUnknown(merged))
+
+		want := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringValue(""), types.StringNull(), "ns1.vestest.secondary.com"),
+		)
+		assert.Equal(t, want, merged)
+	})
+
+	t.Run("user-configured-default-ns-value-is-retained", func(t *testing.T) {
+		planned := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringUnknown(), "ns1.vestest.secondary.com", "ns1crt.f5clouddns-test.com"),
+		)
+		api := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns1crt.f5clouddns-test.com"),
+		)
+
+		merged, diags := MergeRRSetListForApply(ctx, planned, api)
+		require.False(t, diags.HasError())
+
+		want := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns1crt.f5clouddns-test.com"),
+		)
+		assert.Equal(t, want, merged)
+	})
+}
+
+// TestMergeRRSetListForRead_ApexNSRecordBackendInjectedValue verifies that during Read
+// (both steady-state refresh and first-read/ImportState), backend-injected default NS
+// values are stripped from an apex NS record while genuine out-of-band drift is preserved.
+//
+// Why: Ensures subsequent `terraform plan` and `ImportStateVerify` runs do not report
+// perpetual drift on the backend-appended default nameserver while still catching real
+// out-of-band modifications.
+//
+// How: Tests steady-state refresh with no drift, out-of-band addition of a non-default
+// nameserver, and first-read (null prior state) sanitization.
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+//
+// Example:
+//
+//	go test -run TestMergeRRSetListForRead_ApexNSRecordBackendInjectedValue ./f5xc/terraform/tpf/utils/...
+func TestMergeRRSetListForRead_ApexNSRecordBackendInjectedValue(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("steady-state-read-strips-backend-injected-ns", func(t *testing.T) {
+		prior := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com"),
+		)
+		api := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns1crt.f5clouddns-test.com"),
+		)
+
+		merged, diags := MergeRRSetListForRead(ctx, prior, api)
+		require.False(t, diags.HasError())
+		assert.Equal(t, prior, merged)
+	})
+
+	t.Run("out-of-band-non-default-ns-surfaces-as-drift", func(t *testing.T) {
+		prior := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com"),
+		)
+		api := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns2.custom.example.com", "ns1crt.f5clouddns-test.com"),
+		)
+
+		merged, diags := MergeRRSetListForRead(ctx, prior, api)
+		require.False(t, diags.HasError())
+
+		want := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns2.custom.example.com"),
+		)
+		assert.Equal(t, want, merged)
+	})
+
+	t.Run("first-read-import-strips-backend-injected-ns-from-apex-record", func(t *testing.T) {
+		prior := types.ListNull(types.ObjectType{AttrTypes: testRRSetAttrTypes()})
+		api := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com", "ns1crt.f5clouddns-test.com"),
+		)
+
+		merged, diags := MergeRRSetListForRead(ctx, prior, api)
+		require.False(t, diags.HasError())
+
+		want := testRRSetListValue(t,
+			testCustomNSRecordRRSet(t, 360, types.StringNull(), types.StringNull(), "ns1.vestest.secondary.com"),
+		)
+		assert.Equal(t, want, merged)
+	})
+}
+
+// TestMergeRRSetListForApply_MultipleLBRecordsWithSameName verifies that multiple lb_record
+// entries sharing the same record name (e.g. "dynamic") but targeting different load
+// balancers are uniquely keyed by (type, name, namespace, target_name) and reconciled
+// without duplicate-key collisions even when the API returns them in a different order.
+//
+// Why: In GSLB/DNS e2e configurations (XC-6129), a single default_rr_set_group or
+// rr_set_group can declare several lb_record entries with name="dynamic" pointing to
+// different load balancers. Keying only by LB:dynamic caused indexRRSetAttrValues to fail
+// on duplicate keys and fall back to positional indexing.
+//
+// How: Builds a planned list with two lb_record entries sharing name="dynamic" (with
+// unknown tenant and description) and an API list in reversed order with concrete tenants,
+// then verifies MergeRRSetListForApply preserves planned order and resolves each record's
+// tenant from its matching load balancer target.
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+//
+// Example:
+//
+//	go test -run TestMergeRRSetListForApply_MultipleLBRecordsWithSameName ./f5xc/terraform/tpf/utils/...
+func TestMergeRRSetListForApply_MultipleLBRecordsWithSameName(t *testing.T) {
+	ctx := context.Background()
+	elemType := types.ObjectType{AttrTypes: testRRSetWithLBAttrTypes()}
+
+	plannedRec1 := testLBRecordRRSet(t, "dynamic", "auto-three-lb-rules-oaqq", "system", types.StringUnknown(), types.StringUnknown())
+	plannedRec2 := testLBRecordRRSet(t, "dynamic", "auto-lb-aaaa1-drxe", "system", types.StringUnknown(), types.StringUnknown())
+	plannedList, diags := types.ListValue(elemType, []attr.Value{plannedRec1, plannedRec2})
+	require.False(t, diags.HasError())
+
+	// API returns the two lb_records in reverse order with distinct resolved tenants
+	apiRec2 := testLBRecordRRSet(t, "dynamic", "auto-lb-aaaa1-drxe", "system", types.StringValue("tenant-aaaa1"), types.StringNull())
+	apiRec1 := testLBRecordRRSet(t, "dynamic", "auto-three-lb-rules-oaqq", "system", types.StringValue("tenant-oaqq"), types.StringNull())
+	apiList, diags := types.ListValue(elemType, []attr.Value{apiRec2, apiRec1})
+	require.False(t, diags.HasError())
+
+	result, diags := MergeRRSetListForApply(ctx, plannedList, apiList)
+	require.False(t, diags.HasError())
+	assert.False(t, ValueContainsUnknown(result))
+
+	expectedRec1 := testLBRecordRRSet(t, "dynamic", "auto-three-lb-rules-oaqq", "system", types.StringValue("tenant-oaqq"), types.StringNull())
+	expectedRec2 := testLBRecordRRSet(t, "dynamic", "auto-lb-aaaa1-drxe", "system", types.StringValue("tenant-aaaa1"), types.StringNull())
+	expectedList, diags := types.ListValue(elemType, []attr.Value{expectedRec1, expectedRec2})
+	require.False(t, diags.HasError())
+
+	assert.Equal(t, expectedList, result)
+}
+
+// TestMergeRRSetListForApply_IndexShiftedDescriptionDoesNotBleed verifies that when
+// the backend prepends a default NS record at API[0] and specToModel positionally
+// copies Plan[1].description onto API[1] (which is actually Record 0),
+// MergeRRSetListForApply keeps Record 0's omitted description as null.
+//
+// Why: Prevents index-shifted positional healing in specToModel from bleeding a
+// neighbor record's description onto a record whose description was omitted.
+//
+// How: Constructs a planned list where Record 0 has unknown description and Record 1
+// has description="rec2-desc", and an API list with a prepended default NS at API[0]
+// where API[1] (Record 0) was positionally contaminated with "rec2-desc".
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+func TestMergeRRSetListForApply_IndexShiftedDescriptionDoesNotBleed(t *testing.T) {
+	ctx := context.Background()
+
+	planned := testRRSetListValue(t,
+		testARecordRRSet(t, "rec1", "1.1.1.1", types.StringUnknown()),
+		testARecordRRSet(t, "rec2", "2.2.2.2", types.StringValue("rec2-desc")),
+	)
+
+	// Simulate specToModel output where API[0] is the backend default NS record,
+	// API[1] is rec1 (whose empty description was positionally healed from Plan[1] "rec2-desc"),
+	// and API[2] is rec2.
+	api := testRRSetListValue(t,
+		testNSRecordRRSet(t, "", "ns1crt.f5clouddns-test.com", types.StringNull()),
+		testARecordRRSet(t, "rec1", "1.1.1.1", types.StringValue("rec2-desc")),
+		testARecordRRSet(t, "rec2", "2.2.2.2", types.StringValue("rec2-desc")),
+	)
+
+	merged, diags := MergeRRSetListForApply(ctx, planned, api)
+	require.False(t, diags.HasError())
+	assert.False(t, ValueContainsUnknown(merged))
+
+	want := testRRSetListValue(t,
+		testARecordRRSet(t, "rec1", "1.1.1.1", types.StringNull()),
+		testARecordRRSet(t, "rec2", "2.2.2.2", types.StringValue("rec2-desc")),
+	)
+	assert.Equal(t, want, merged)
+}
+
+// TestMergeRRSetListForRead_IndexShiftedDescriptionDoesNotBleed verifies that during
+// Read refresh, when the backend prepends a default NS record at API[0] and specToModel
+// positionally copies State[1].description onto API[1] (which is actually Record 0),
+// MergeRRSetListForRead restores Record 0's null description from its key-matched
+// prior state element.
+//
+// Why: Without sanitizing index-shifted descriptions before filtering out API[0],
+// MergeRRSetListForRead would overwrite Record 0's null description with Record 1's
+// description on every refresh, causing perpetual drift.
+//
+// How: Constructs a prior state list where Record 0 has null description and Record 1
+// has description="rec2-desc", and an API list with a prepended default NS at API[0]
+// where API[1] (Record 0) has description="rec2-desc".
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+func TestMergeRRSetListForRead_IndexShiftedDescriptionDoesNotBleed(t *testing.T) {
+	ctx := context.Background()
+
+	prior := testRRSetListValue(t,
+		testARecordRRSet(t, "rec1", "1.1.1.1", types.StringNull()),
+		testARecordRRSet(t, "rec2", "2.2.2.2", types.StringValue("rec2-desc")),
+	)
+
+	api := testRRSetListValue(t,
+		testNSRecordRRSet(t, "", "ns1crt.f5clouddns-test.com", types.StringNull()),
+		testARecordRRSet(t, "rec1", "1.1.1.1", types.StringValue("rec2-desc")),
+		testARecordRRSet(t, "rec2", "2.2.2.2", types.StringValue("rec2-desc")),
+	)
+
+	merged, diags := MergeRRSetListForRead(ctx, prior, api)
+	require.False(t, diags.HasError())
+	assert.Equal(t, prior, merged)
+}
+
+// TestMergeRRSetListForRead_PreservesIPv6CasingAndMultiValueOrder verifies that
+// MergeRRSetListForRead preserves the prior state's representation when the backend
+// lowercases IPv6 hex digits on an aaaa_record or reorders multi-value slices, while
+// still surfacing genuine out-of-band value changes.
+//
+// Why: In TestGSLBRecords (XC-6129), users configure uppercase IPv6 addresses
+// ("AAAA::111:111:111:111") and multi-value records (["111.111.111.111", "22.22.22.22"]).
+// Backend canonicalization or slice sorting must not cause a non-empty plan on refresh.
+//
+// How: Exercises subtests for IPv6 hex casing normalization, multi-value slice reordering,
+// and genuine IPv6 out-of-band value drift.
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+func TestMergeRRSetListForRead_PreservesIPv6CasingAndMultiValueOrder(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("ipv6-uppercase-preserved-when-api-lowercases", func(t *testing.T) {
+		prior := testRRSetWithAAAAListValue(t,
+			testAAAARecordRRSetMulti(t, "static", types.StringNull(), "AAAA::111:111:111:111"),
+		)
+		api := testRRSetWithAAAAListValue(t,
+			testAAAARecordRRSetMulti(t, "static", types.StringNull(), "aaaa::111:111:111:111"),
+		)
+
+		merged, diags := MergeRRSetListForRead(ctx, prior, api)
+		require.False(t, diags.HasError())
+		assert.Equal(t, prior, merged)
+	})
+
+	t.Run("multi-value-a-record-order-preserved-when-api-reorders", func(t *testing.T) {
+		prior := testRRSetWithAAAAListValue(t,
+			testARecordRRSetMultiWithAAAA(t, "static", types.StringNull(), "111.111.111.111", "22.22.22.22"),
+		)
+		api := testRRSetWithAAAAListValue(t,
+			testARecordRRSetMultiWithAAAA(t, "static", types.StringNull(), "22.22.22.22", "111.111.111.111"),
+		)
+
+		merged, diags := MergeRRSetListForRead(ctx, prior, api)
+		require.False(t, diags.HasError())
+		assert.Equal(t, prior, merged)
+	})
+
+	t.Run("genuine-ipv6-value-change-surfaces-as-drift", func(t *testing.T) {
+		prior := testRRSetWithAAAAListValue(t,
+			testAAAARecordRRSetMulti(t, "static", types.StringNull(), "AAAA::111:111:111:111"),
+		)
+		api := testRRSetWithAAAAListValue(t,
+			testAAAARecordRRSetMulti(t, "static", types.StringNull(), "aaaa::222:222:222:222"),
+		)
+
+		merged, diags := MergeRRSetListForRead(ctx, prior, api)
+		require.False(t, diags.HasError())
+		assert.Equal(t, api, merged)
+	})
+}
+
+// TestMergeRRSetListForRead_RRSetGroup_PreservesEmptyMetadataDescription verifies
+// that an explicit empty string description ("") on rr_set_group[*].metadata.description
+// is preserved when specToModel normalizes the API response to null.
+//
+// Why: Prevents false read drift when a user configures metadata.description = "".
+//
+// How: Builds a prior RRSetGroup with metadata.description = "" and an API RRSetGroup
+// with metadata.description = null, then verifies MergeRRSetListForRead preserves "".
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+func TestMergeRRSetListForRead_RRSetGroup_PreservesEmptyMetadataDescription(t *testing.T) {
+	ctx := context.Background()
+	elemType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+
+	priorMeta, diags := types.ObjectValue(testRRSetGroupMetaAttrTypes(), map[string]attr.Value{
+		"name":        types.StringValue("group1"),
+		"description": types.StringValue(""),
+	})
+	require.False(t, diags.HasError())
+
+	rrsetElemType := types.ObjectType{AttrTypes: testRRSetWithLBAttrTypes()}
+	rec := testLBRecordRRSet(t, "rec1", "lb1", "sys", types.StringValue("t1"), types.StringNull())
+	rrsetList, diags := types.ListValue(rrsetElemType, []attr.Value{rec})
+	require.False(t, diags.HasError())
+
+	priorGroup, diags := types.ObjectValue(testRRSetGroupWithLBAttrTypes(), map[string]attr.Value{
+		"metadata": priorMeta,
+		"rr_set":   rrsetList,
+	})
+	require.False(t, diags.HasError())
+	priorList, diags := types.ListValue(elemType, []attr.Value{priorGroup})
+	require.False(t, diags.HasError())
+
+	apiGroup := testRRSetGroupObject(t, "group1", rec)
+	apiList, diags := types.ListValue(elemType, []attr.Value{apiGroup})
+	require.False(t, diags.HasError())
+
+	merged, diags := MergeRRSetListForRead(ctx, priorList, apiList)
+	require.False(t, diags.HasError())
+	assert.Equal(t, priorList, merged)
+}
+
+// TestMergeRRSetListForRead_FirstReadWithDuplicateKeysPopulatesState verifies that
+// on first read or ImportState (when prior is null), MergeRRSetListForRead populates
+// state from the sanitized API list even if the API list contains duplicate keys.
+//
+// Why: Evaluating indexRRSetAttrValues before checking prior.IsNull() previously
+// caused ImportState to return null whenever duplicate record keys existed.
+//
+// How: Calls MergeRRSetListForRead with prior = ListNull and an API list containing
+// two identical A records plus a backend default NS record, and verifies the two A
+// records are returned.
+//
+// Parameters:
+//   - t: testing context.
+//
+// Return values:
+//   - None.
+func TestMergeRRSetListForRead_FirstReadWithDuplicateKeysPopulatesState(t *testing.T) {
+	ctx := context.Background()
+	prior := types.ListNull(types.ObjectType{AttrTypes: testRRSetAttrTypes()})
+
+	api := testRRSetListValue(t,
+		testARecordRRSet(t, "dup.example.com", "1.1.1.1", types.StringNull()),
+		testARecordRRSet(t, "dup.example.com", "2.2.2.2", types.StringNull()),
+		testNSRecordRRSet(t, "", "ns1crt.f5clouddns-test.com", types.StringNull()),
+	)
+
+	merged, diags := MergeRRSetListForRead(ctx, prior, api)
+	require.False(t, diags.HasError())
+
+	want := testRRSetListValue(t,
+		testARecordRRSet(t, "dup.example.com", "1.1.1.1", types.StringNull()),
+		testARecordRRSet(t, "dup.example.com", "2.2.2.2", types.StringNull()),
+	)
+	assert.Equal(t, want, merged)
+}
+
+// testRRSetTypeChoiceWithAAAAAttrTypes returns the oneof object attribute map including aaaa_record.
+//
+// Why: Supports testing IPv6 aaaa_record canonicalization alongside a_record and ns_record.
+//
+// How: Constructs a map with a_record, aaaa_record, and ns_record ObjectTypes.
+//
+// Parameters:
+//   - None.
+//
+// Return values:
+//   - map[string]attr.Type: schema attribute types.
+func testRRSetTypeChoiceWithAAAAAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"a_record":    types.ObjectType{AttrTypes: testARecordAttrTypes()},
+		"aaaa_record": types.ObjectType{AttrTypes: testARecordAttrTypes()},
+		"ns_record":   types.ObjectType{AttrTypes: testNSRecordAttrTypes()},
+	}
+}
+
+// testRRSetWithAAAAAttrTypes returns the RRSet object attribute map including aaaa_record.
+//
+// Why: Defines the RRSet schema used by IPv6 and multi-value merge tests.
+//
+// How: Constructs a map with description, ttl, and type_record_set_choice ObjectType.
+//
+// Parameters:
+//   - None.
+//
+// Return values:
+//   - map[string]attr.Type: schema attribute types.
+func testRRSetWithAAAAAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"description":            types.StringType,
+		"ttl":                    types.Int64Type,
+		"type_record_set_choice": types.ObjectType{AttrTypes: testRRSetTypeChoiceWithAAAAAttrTypes()},
+	}
+}
+
+// testRRSetWithAAAAListValue creates a typed RRSet list supporting aaaa_record branches.
+//
+// Why: Builds list fixtures for IPv6 and multi-value read reconciliation tests.
+//
+// How: Wraps the given RRSet objects into a types.ListValue of testRRSetWithAAAAAttrTypes.
+//
+// Parameters:
+//   - t: testing context.
+//   - rrsets: RRSet objects to include in the list.
+//
+// Return values:
+//   - types.List: typed RRSet list value.
+func testRRSetWithAAAAListValue(t *testing.T, rrsets ...types.Object) types.List {
+	t.Helper()
+	elements := make([]attr.Value, 0, len(rrsets))
+	for _, r := range rrsets {
+		elements = append(elements, r)
+	}
+	list, diags := types.ListValue(types.ObjectType{AttrTypes: testRRSetWithAAAAAttrTypes()}, elements)
+	require.False(t, diags.HasError())
+	return list
+}
+
+// testAAAARecordRRSetMulti creates an AAAA record RRSet object with one or more IPv6 values.
+//
+// Why: Models user-configured and API-returned AAAA records in unit tests.
+//
+// How: Populates the aaaa_record branch of testRRSetWithAAAAAttrTypes.
+//
+// Parameters:
+//   - t: testing context.
+//   - name: record name.
+//   - description: record description.
+//   - values: IPv6 address strings.
+//
+// Return values:
+//   - types.Object: constructed RRSet object.
+func testAAAARecordRRSetMulti(t *testing.T, name string, description types.String, values ...string) types.Object {
+	t.Helper()
+	choiceObj, diags := types.ObjectValue(testRRSetTypeChoiceWithAAAAAttrTypes(), map[string]attr.Value{
+		"a_record": types.ObjectNull(testARecordAttrTypes()),
+		"aaaa_record": testRRSetBranchObject(t, testARecordAttrTypes(), map[string]attr.Value{
+			"name":   types.StringValue(name),
+			"values": testStringListValue(t, values...),
+		}),
+		"ns_record": types.ObjectNull(testNSRecordAttrTypes()),
+	})
+	require.False(t, diags.HasError())
+
+	obj, diags := types.ObjectValue(testRRSetWithAAAAAttrTypes(), map[string]attr.Value{
+		"description":            description,
+		"ttl":                    types.Int64Value(60),
+		"type_record_set_choice": choiceObj,
+	})
+	require.False(t, diags.HasError())
+	return obj
+}
+
+// testARecordRRSetMultiWithAAAA creates a multi-value A record RRSet object using the AAAA-capable schema.
+//
+// Why: Allows testing multi-value A record slice reordering with the same schema helper.
+//
+// How: Populates the a_record branch of testRRSetWithAAAAAttrTypes.
+//
+// Parameters:
+//   - t: testing context.
+//   - name: record name.
+//   - description: record description.
+//   - values: IPv4 address strings.
+//
+// Return values:
+//   - types.Object: constructed RRSet object.
+func testARecordRRSetMultiWithAAAA(t *testing.T, name string, description types.String, values ...string) types.Object {
+	t.Helper()
+	choiceObj, diags := types.ObjectValue(testRRSetTypeChoiceWithAAAAAttrTypes(), map[string]attr.Value{
+		"a_record": testRRSetBranchObject(t, testARecordAttrTypes(), map[string]attr.Value{
+			"name":   types.StringValue(name),
+			"values": testStringListValue(t, values...),
+		}),
+		"aaaa_record": types.ObjectNull(testARecordAttrTypes()),
+		"ns_record":   types.ObjectNull(testNSRecordAttrTypes()),
+	})
+	require.False(t, diags.HasError())
+
+	obj, diags := types.ObjectValue(testRRSetWithAAAAAttrTypes(), map[string]attr.Value{
+		"description":            description,
+		"ttl":                    types.Int64Value(60),
+		"type_record_set_choice": choiceObj,
+	})
+	require.False(t, diags.HasError())
+	return obj
 }

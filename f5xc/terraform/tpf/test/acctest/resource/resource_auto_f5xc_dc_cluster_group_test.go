@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCDcClusterGroup_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dccg-" + acctest.RandString(t, 8)
+	name := "example-dc-cluster-group-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCDcClusterGroup_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCDcClusterGroup_withMeshChoiceTransition(t *testing.T
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dccg-" + acctest.RandString(t, 8)
+	name := "example-dc-cluster-group-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCDcClusterGroup_withMeshChoiceTransition(t *testing.T
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_withMeshChoice(name, namespace, "data_plane_mesh"),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_withMeshChoice(name, namespace, "control_and_data_plane_mesh"),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCDcClusterGroup_withTypePresenceTransition(t *testing
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dccg-" + acctest.RandString(t, 8)
+	name := "example-dc-cluster-group-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCDcClusterGroup_withTypePresenceTransition(t *testing
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_withMeshChoice(name, namespace, "data_plane_mesh"),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCDcClusterGroup_withMetadataUpdate(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dccg-" + acctest.RandString(t, 8)
+	name := "example-dc-cluster-group-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -141,23 +141,23 @@ func TestAccResourceAutoF5XCDcClusterGroup_withMetadataUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDcClusterGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCDcClusterGroupConfig_withMetadata(name, namespace, "edge", "owner-a"),
+				Config: testAccResourceAutoF5XCDcClusterGroupConfig_withMetadata(name, namespace, "edge", "example-owner"),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCDcClusterGroupConfig_withMetadata(name, namespace, "core", "owner-b"),
+				Config: testAccResourceAutoF5XCDcClusterGroupConfig_withMetadata(name, namespace, "core", "example-owner-alt"),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,9 +168,9 @@ func TestAccResourceAutoF5XCDcClusterGroup_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-dccg-" + acctest.RandString(t, 8)
+	name := "example-dc-cluster-group-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDcClusterGroupDestroyProducer(t),
@@ -179,23 +179,26 @@ func TestAccResourceAutoF5XCDcClusterGroup_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDcClusterGroupConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dc_cluster_group.test",
+				ResourceName:                         "f5xc_dc_cluster_group.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dc_cluster_group.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDcClusterGroupConfig_full(name, "system"),
 	})
 }
 
@@ -205,7 +208,7 @@ func testAccCheckDcClusterGroupDestroyProducer(t *testing.T) func(*terraform.Sta
 
 func testAccResourceAutoF5XCDcClusterGroupConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dc_cluster_group" "test" {
+resource "f5xc_dc_cluster_group" "example" {
   name      = %q
   namespace = %q
 }
@@ -214,17 +217,17 @@ resource "f5xc_dc_cluster_group" "test" {
 
 func testAccResourceAutoF5XCDcClusterGroupConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dc_cluster_group" "test" {
+resource "f5xc_dc_cluster_group" "example" {
   name        = %q
   namespace   = %q
-  description = "dc cluster group updated"
+	description = "DC cluster group example updated"
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCDcClusterGroupConfig_withMeshChoice(name, namespace, meshChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dc_cluster_group" "test" {
+resource "f5xc_dc_cluster_group" "example" {
   name      = %q
   namespace = %q
 
@@ -239,10 +242,10 @@ resource "f5xc_dc_cluster_group" "test" {
 
 func testAccResourceAutoF5XCDcClusterGroupConfig_withMetadata(name, namespace, env, owner string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dc_cluster_group" "test" {
+resource "f5xc_dc_cluster_group" "example" {
   name        = %q
   namespace   = %q
-  description = "dc cluster group with metadata"
+	description = "DC cluster group example"
 
   labels = {
     env = %q
@@ -263,13 +266,13 @@ resource "f5xc_dc_cluster_group" "test" {
 
 func testAccResourceAutoF5XCDcClusterGroupConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dc_cluster_group" "test" {
+resource "f5xc_dc_cluster_group" "example" {
   name        = %q
   namespace   = %q
-  description = "dc cluster group full"
+	description = "DC cluster group example"
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "regional"
   }
 
@@ -288,13 +291,13 @@ resource "f5xc_dc_cluster_group" "test" {
 
 func testAccResourceAutoF5XCDcClusterGroupConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dc_cluster_group" "test" {
+resource "f5xc_dc_cluster_group" "example" {
   name        = %q
   namespace   = %q
-  description = "dc cluster group full updated"
+	description = "DC cluster group example updated"
 
   labels = {
-    env  = "prod"
+    env  = "example"
     tier = "global"
   }
 

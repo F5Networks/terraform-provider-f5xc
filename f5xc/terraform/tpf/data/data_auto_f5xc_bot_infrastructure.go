@@ -28,56 +28,58 @@ type DataSourceF5XCBotInfrastructure struct {
 	client *client.APIClient
 }
 
-type BotInfrastructureBotInfrastructurePolicyMetadata struct {
+type BotInfraPolicyMetadata struct {
 	Name    types.String `tfsdk:"name"`
 	Version types.String `tfsdk:"version"`
 }
 
-type BotInfrastructureBotInfrastructureEndpointPolicyMetadata struct {
+type BotInfraEndpointPolicyMetadata struct {
 	Name    types.String `tfsdk:"name"`
 	Version types.String `tfsdk:"version"`
 }
 
-type BotInfrastructureGlobalSpecTypeBotInfraChoice struct {
+type BotInfraBotInfraChoice struct {
 	CloudHosted    types.Object `tfsdk:"cloud_hosted"`
 	Kubernetes     types.Object `tfsdk:"kubernetes"`
 	OnPrem         types.Object `tfsdk:"on_prem"`
 	PhysicalHosted types.Object `tfsdk:"physical_hosted"`
 }
 
-type BotInfrastructureGlobalSpecTypeCloudHosted struct {
+type BotInfraCloudHosted struct {
+	ActiveRegions   types.List   `tfsdk:"active_regions"`
 	Egress          types.List   `tfsdk:"egress"`
 	FirmwareVersion types.String `tfsdk:"firmware_version"`
 	HostNames       types.List   `tfsdk:"host_names"`
 	InfraHostName   types.String `tfsdk:"infra_host_name"`
 	Ingress         types.List   `tfsdk:"ingress"`
 	IpAddresses     types.List   `tfsdk:"ip_addresses"`
+	PassiveRegions  types.List   `tfsdk:"passive_regions"`
 }
 
-type BotInfrastructureBotInfrastructureEgress struct {
+type BotInfraEgress struct {
 	IpAddress types.String `tfsdk:"ip_address"`
 	Region    types.List   `tfsdk:"region"`
 }
 
-type BotInfrastructureBotInfrastructureIngress struct {
+type BotInfraIngress struct {
 	CertId     types.String `tfsdk:"cert_id"`
 	CertStatus types.List   `tfsdk:"cert_status"`
 	Region     types.List   `tfsdk:"region"`
 	TypeChoice types.Object `tfsdk:"type_choice"`
 }
 
-type BotInfrastructureIngressTypeChoice struct {
+type BotInfraTypeChoice struct {
 	HostName  types.String `tfsdk:"host_name"`
 	IpAddress types.String `tfsdk:"ip_address"`
 }
 
-type BotInfrastructureGlobalSpecTypeKubernetes struct {
+type BotInfraK8s struct {
 	InfraHostName         types.String `tfsdk:"infra_host_name"`
 	KubernetesCluster     types.List   `tfsdk:"kubernetes_cluster"`
 	TargetFirmwareVersion types.String `tfsdk:"target_firmware_version"`
 }
 
-type BotInfrastructureBotInfrastructureKubernetesCluster struct {
+type BotInfraK8sCluster struct {
 	ClusterTag                               types.String `tfsdk:"cluster_tag"`
 	DeployedAllowlistPolicyMetadata          types.Object `tfsdk:"deployed_allowlist_policy_metadata"`
 	DeployedBotThreatIntelligencePackageName types.String `tfsdk:"deployed_bot_threat_intelligence_package_name"`
@@ -87,55 +89,91 @@ type BotInfrastructureBotInfrastructureKubernetesCluster struct {
 	SyncStatus                               types.List   `tfsdk:"sync_status"`
 }
 
-type BotInfrastructureGlobalSpecTypeOnPrem struct {
+type BotInfraOnPrem struct {
 	Devices         types.List   `tfsdk:"devices"`
 	FirmwareVersion types.String `tfsdk:"firmware_version"`
 	InfraHostName   types.String `tfsdk:"infra_host_name"`
 }
 
-type BotInfrastructureBotInfrastructureDevice struct {
+type BotInfraDevice struct {
 	CertificationStatus   types.String `tfsdk:"certification_status"`
 	DeviceFirmwareVersion types.String `tfsdk:"device_firmware_version"`
 	DeviceName            types.String `tfsdk:"device_name"`
 	IpInfo                types.Object `tfsdk:"ip_info"`
 }
 
-type BotInfrastructureBotInfrastructureIPInfo struct {
+type BotInfraIPInfo struct {
 	Local   types.String `tfsdk:"local"`
 	Traffic types.String `tfsdk:"traffic"`
 	Wan     types.String `tfsdk:"wan"`
 }
 
-type BotInfrastructureGlobalSpecTypePhysicalHosted struct {
+type BotInfraPhysicalHosted struct {
 	Devices         types.List   `tfsdk:"devices"`
 	FirmwareVersion types.String `tfsdk:"firmware_version"`
 	InfraHostName   types.String `tfsdk:"infra_host_name"`
 }
 
-type BotInfrastructureBotInfrastructureTIPackageInformation struct {
+type BotInfraTIPackageInformation struct {
 	Name types.String `tfsdk:"name"`
 }
 
-type BotInfrastructureGlobalSpecTypeCreateBotInfraChoice struct {
+type BotInfraCreateBotInfraChoice struct {
 	CreateCloudHosted types.Object `tfsdk:"create_cloud_hosted"`
 }
 
-type BotInfrastructureGlobalSpecTypeCreateCloudHosted struct {
-	IpAddresses types.List   `tfsdk:"ip_addresses"`
-	TypeChoice  types.Object `tfsdk:"type_choice"`
+type BotInfraCreateCloudHosted struct {
+	HostNameList  types.Object `tfsdk:"host_name_list"`
+	IpAddressList types.Object `tfsdk:"ip_address_list"`
+	TypeChoice    types.Object `tfsdk:"type_choice"`
 }
 
-type BotInfrastructureCreateSpecInfraCloudHostedTypeChoice struct {
-	Production types.Object `tfsdk:"production"`
-	Testing    types.Object `tfsdk:"testing"`
+type BotInfraHostNameList struct {
+	HostNames types.List `tfsdk:"host_names"`
 }
 
-type BotInfrastructureCreateSpecInfraCloudHostedProduction struct {
+type BotInfraIPAddrList struct {
+	IpAddresses types.List `tfsdk:"ip_addresses"`
+}
+
+type BotInfraCreateSpecInfraCloudHostedTypeChoice struct {
+	ProductionV2 types.Object `tfsdk:"production_v2"`
+	TestingV2    types.Object `tfsdk:"testing_v2"`
+}
+
+type BotInfraProductionV2 struct {
+	TypeChoiceProductionChoice types.Object `tfsdk:"type_choice_production_choice"`
+}
+
+type BotInfraTypeChoiceProductionChoice struct {
+	ActiveActiveRegion  types.Object `tfsdk:"active_active_region"`
+	ActivePassiveRegion types.Object `tfsdk:"active_passive_region"`
+	SingleActiveRegion  types.Object `tfsdk:"single_active_region"`
+}
+
+type BotInfraActiveActiveRegion struct {
 	Region_1 types.String `tfsdk:"region_1"`
 	Region_2 types.String `tfsdk:"region_2"`
 }
 
-type BotInfrastructureCreateSpecInfraCloudHostedTesting struct {
+type BotInfraActivePassiveRegion struct {
+	Region_1 types.String `tfsdk:"region_1"`
+	Region_2 types.String `tfsdk:"region_2"`
+}
+
+type BotInfraSingleActiveRegion struct {
+	Region_1 types.String `tfsdk:"region_1"`
+}
+
+type BotInfraTestingV2 struct {
+	TypeChoiceTestingChoice types.Object `tfsdk:"type_choice_testing_choice"`
+}
+
+type BotInfraTypeChoiceTestingChoice struct {
+	SingleActiveRegion types.Object `tfsdk:"single_active_region"`
+}
+
+type BotInfraTestingV2SingleActiveRegion struct {
 	Region_1 types.String `tfsdk:"region_1"`
 }
 
@@ -195,6 +233,9 @@ var BotInfrastructureBotInfraChoiceModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> CloudHosted
 var BotInfrastructureBotInfraChoiceCloudHostedModelAttributeMap = map[string]attr.Type{
 
+	"active_regions": types.ListType{
+		ElemType: types.StringType,
+	},
 	"egress": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -229,6 +270,9 @@ var BotInfrastructureBotInfraChoiceCloudHostedModelAttributeMap = map[string]att
 		},
 	},
 	"ip_addresses": types.ListType{
+		ElemType: types.StringType,
+	},
+	"passive_regions": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -449,35 +493,109 @@ var BotInfrastructureCreateBotInfraChoiceModelAttributeMap = map[string]attr.Typ
 
 // Attribute map for PointerOfOneOfField --> CreateCloudHosted
 var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedModelAttributeMap = map[string]attr.Type{
-
-	"ip_addresses": types.ListType{
-		ElemType: types.StringType,
+	"host_name_list": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"host_names": types.ListType{
+				ElemType: types.StringType,
+			}},
+	}, "ip_address_list": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"ip_addresses": types.ListType{
+				ElemType: types.StringType,
+			}},
 	},
 	"type_choice": types.ObjectType{
 		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceModelAttributeMap,
 	},
 }
 
-// Attribute map for RequiredOneOfField --> TypeChoice
-var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> HostNameList
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedHostNameListModelAttributeMap = map[string]attr.Type{
 
-	"production": types.ObjectType{
-		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionModelAttributeMap,
-	},
-	"testing": types.ObjectType{
-		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingModelAttributeMap,
+	"host_names": types.ListType{
+		ElemType: types.StringType,
 	},
 }
 
-// Attribute map for RequiredPointerOfOneOfField --> Production
-var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredPointerField --> IpAddressList
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedIpAddressListModelAttributeMap = map[string]attr.Type{
+
+	"ip_addresses": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> TypeChoice
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceModelAttributeMap = map[string]attr.Type{
+
+	"production_v2": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2ModelAttributeMap,
+	},
+	"testing_v2": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2ModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredPointerOfOneOfField --> ProductionV2
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2ModelAttributeMap = map[string]attr.Type{
+
+	"type_choice_production_choice": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> TypeChoiceProduction
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionModelAttributeMap = map[string]attr.Type{
+
+	"active_active_region": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActiveActiveRegionModelAttributeMap,
+	},
+	"active_passive_region": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActivePassiveRegionModelAttributeMap,
+	},
+	"single_active_region": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionSingleActiveRegionModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredPointerOfOneOfField --> ActiveActiveRegion
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActiveActiveRegionModelAttributeMap = map[string]attr.Type{
 
 	"region_1": types.StringType,
 	"region_2": types.StringType,
 }
 
-// Attribute map for RequiredPointerOfOneOfField --> Testing
-var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredPointerOfOneOfField --> ActivePassiveRegion
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActivePassiveRegionModelAttributeMap = map[string]attr.Type{
+
+	"region_1": types.StringType,
+	"region_2": types.StringType,
+}
+
+// Attribute map for RequiredPointerOfOneOfField --> SingleActiveRegion
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionSingleActiveRegionModelAttributeMap = map[string]attr.Type{
+
+	"region_1": types.StringType,
+}
+
+// Attribute map for RequiredPointerOfOneOfField --> TestingV2
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2ModelAttributeMap = map[string]attr.Type{
+
+	"type_choice_testing_choice": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> TypeChoiceTesting
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingModelAttributeMap = map[string]attr.Type{
+
+	"single_active_region": types.ObjectType{
+		AttrTypes: BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingSingleActiveRegionModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredPointerOfOneOfField --> SingleActiveRegion
+var BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingSingleActiveRegionModelAttributeMap = map[string]attr.Type{
 
 	"region_1": types.StringType,
 }
@@ -496,8 +614,8 @@ func (d *DataSourceF5XCBotInfrastructure) Metadata(ctx context.Context, request 
 func (r *DataSourceF5XCBotInfrastructure) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bot_infrastructure This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bot_infrastructure) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bot_infrastructure This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bot_infrastructure) etc. can be fetched",
+		MarkdownDescription: "Configures Bot Infrastructure by bot infrastructure",
+		Description:         "Configures Bot Infrastructure by bot infrastructure",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -590,6 +708,13 @@ func (r *DataSourceF5XCBotInfrastructure) Schema(ctx context.Context, request da
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
+							"active_regions": schema.ListAttribute{
+								Description: "Bot Infrastructure Active Regions Bot Infrastructure Active Regions",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
 							"egress": schema.ListNestedAttribute{
 								Description: "Egress Egress IP Addresses",
 								Required:    false,
@@ -684,6 +809,13 @@ func (r *DataSourceF5XCBotInfrastructure) Schema(ctx context.Context, request da
 							},
 							"ip_addresses": schema.ListAttribute{
 								Description: "IP Allowlist Only traffic from these IP addresses is allowed to access this Bot Defense infrastructure.",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"passive_regions": schema.ListAttribute{
+								Description: "Bot Infrastructure Passive Regions Bot Infrastructure Passive Regions",
 								ElementType: types.StringType,
 								Required:    false,
 								Optional:    false,
@@ -1009,12 +1141,35 @@ func (r *DataSourceF5XCBotInfrastructure) Schema(ctx context.Context, request da
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"ip_addresses": schema.ListAttribute{
-								Description: "IP Allowlist Only traffic from these IP addresses is allowed to access this Bot Defense infrastructure.",
-								ElementType: types.StringType,
+							"host_name_list": schema.SingleNestedAttribute{
+								Description: "Host Names Access Control List - Host Names",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"host_names": schema.ListAttribute{
+										Description: "HostNames List",
+										ElementType: types.StringType,
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+							"ip_address_list": schema.SingleNestedAttribute{
+								Description: "IP Addresses Access Control List - IP Addresses",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"ip_addresses": schema.ListAttribute{
+										Description: "IP Allowlist",
+										ElementType: types.StringType,
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
 							},
 							"type_choice": schema.SingleNestedAttribute{
 								Description: "Type Choice Identifies the environment as either Production or Testing. Production environments have two infrastructure regions in an Active-Active configuration where traffic is routed equally between the two regions. Test environments have a single infrastructure region.",
@@ -1022,37 +1177,103 @@ func (r *DataSourceF5XCBotInfrastructure) Schema(ctx context.Context, request da
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"production": schema.SingleNestedAttribute{
+									"production_v2": schema.SingleNestedAttribute{
 										Description: "Production Production Protect live production applications and services from automated attacks.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"region_1": schema.StringAttribute{
-												Description: "Bot Infrastructure Regions This is an Active-Active Infrastructure configuration where traffic is routed equally between the two regions.",
+											"type_choice_production_choice": schema.SingleNestedAttribute{
+												Description: "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
-											},
-											"region_2": schema.StringAttribute{
-												Description: "Bot Infrastructure Regions This is an Active-Active Infrastructure configuration where traffic is routed equally between the two regions.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"active_active_region": schema.SingleNestedAttribute{
+														Description: "Active - Active Traffic routed equally to both regions.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"region_1": schema.StringAttribute{
+																Description: "Bot Infrastructure Regions",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"region_2": schema.StringAttribute{
+																Description: "Bot Infrastructure Regions",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+													"active_passive_region": schema.SingleNestedAttribute{
+														Description: "Active - Passive Traffic routed to Active region with failover to Passive on health failure.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"region_1": schema.StringAttribute{
+																Description: "Bot Infrastructure Regions",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"region_2": schema.StringAttribute{
+																Description: "Bot Infrastructure Regions",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+													"single_active_region": schema.SingleNestedAttribute{
+														Description: "Single Active Only one region serves traffic.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"region_1": schema.StringAttribute{
+																Description: "Bot Infrastructure Regions",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+												},
 											},
 										},
 									},
-									"testing": schema.SingleNestedAttribute{
+									"testing_v2": schema.SingleNestedAttribute{
 										Description: "Testing Test Evaluate new features, settings, and system performance.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"region_1": schema.StringAttribute{
-												Description: "Bot Infrastructure Regions This is an Active-Passive Infrastructure configuration where traffic is routed to a single region.",
+											"type_choice_testing_choice": schema.SingleNestedAttribute{
+												Description: "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"single_active_region": schema.SingleNestedAttribute{
+														Description: "Single Active This is a single-active infrastructure configuration where traffic is routed to one region.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"region_1": schema.StringAttribute{
+																Description: "Bot Infrastructure Regions",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+												},
 											},
 										},
 									},
@@ -1140,7 +1361,7 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_bot_defense_bot_infrastructure.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "bot_infrastructure", err))
 		return
 	}
 
@@ -1203,29 +1424,29 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 
 	// data SpecToModelRoot PointerField --> BotAllowlistPolicyMetadata
 	if specData.GetBotAllowlistPolicyMetadata() != nil {
-		var botInfrastructureBotInfrastructurePolicyMetadataModel = &BotInfrastructureBotInfrastructurePolicyMetadata{}
+		var botInfraPolicyMetadataModel = &BotInfraPolicyMetadata{}
 		botAllowlistPolicyMetadataElement := specData.GetBotAllowlistPolicyMetadata()
 
 		// data specToModelNested StringField --> Name
 		if botAllowlistPolicyMetadataElement.GetName() != "" {
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringValue(botAllowlistPolicyMetadataElement.GetName())
+			botInfraPolicyMetadataModel.Name = types.StringValue(botAllowlistPolicyMetadataElement.GetName())
 		} else {
 			// Empty string, set to null
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringNull()
+			botInfraPolicyMetadataModel.Name = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> Version
 		if botAllowlistPolicyMetadataElement.GetVersion() != "" {
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringValue(botAllowlistPolicyMetadataElement.GetVersion())
+			botInfraPolicyMetadataModel.Version = types.StringValue(botAllowlistPolicyMetadataElement.GetVersion())
 		} else {
 			// Empty string, set to null
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringNull()
+			botInfraPolicyMetadataModel.Version = types.StringNull()
 		}
 
 		botAllowlistPolicyMetadataObj, botAllowlistPolicyMetadataDiags := utils.GoStructToObjectValue(
 			ctx,
 			BotInfrastructureBotAllowlistPolicyMetadataModelAttributeMap,
-			botInfrastructureBotInfrastructurePolicyMetadataModel,
+			botInfraPolicyMetadataModel,
 		)
 		response.Diagnostics.Append(botAllowlistPolicyMetadataDiags...)
 		data.BotAllowlistPolicyMetadata = botAllowlistPolicyMetadataObj
@@ -1235,29 +1456,29 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 
 	// data SpecToModelRoot PointerField --> BotEndpointPolicyMetadata
 	if specData.GetBotEndpointPolicyMetadata() != nil {
-		var botInfrastructureBotInfrastructureEndpointPolicyMetadataModel = &BotInfrastructureBotInfrastructureEndpointPolicyMetadata{}
+		var botInfraEndpointPolicyMetadataModel = &BotInfraEndpointPolicyMetadata{}
 		botEndpointPolicyMetadataElement := specData.GetBotEndpointPolicyMetadata()
 
 		// data specToModelNested StringField --> Name
 		if botEndpointPolicyMetadataElement.GetName() != "" {
-			botInfrastructureBotInfrastructureEndpointPolicyMetadataModel.Name = types.StringValue(botEndpointPolicyMetadataElement.GetName())
+			botInfraEndpointPolicyMetadataModel.Name = types.StringValue(botEndpointPolicyMetadataElement.GetName())
 		} else {
 			// Empty string, set to null
-			botInfrastructureBotInfrastructureEndpointPolicyMetadataModel.Name = types.StringNull()
+			botInfraEndpointPolicyMetadataModel.Name = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> Version
 		if botEndpointPolicyMetadataElement.GetVersion() != "" {
-			botInfrastructureBotInfrastructureEndpointPolicyMetadataModel.Version = types.StringValue(botEndpointPolicyMetadataElement.GetVersion())
+			botInfraEndpointPolicyMetadataModel.Version = types.StringValue(botEndpointPolicyMetadataElement.GetVersion())
 		} else {
 			// Empty string, set to null
-			botInfrastructureBotInfrastructureEndpointPolicyMetadataModel.Version = types.StringNull()
+			botInfraEndpointPolicyMetadataModel.Version = types.StringNull()
 		}
 
 		botEndpointPolicyMetadataObj, botEndpointPolicyMetadataDiags := utils.GoStructToObjectValue(
 			ctx,
 			BotInfrastructureBotEndpointPolicyMetadataModelAttributeMap,
-			botInfrastructureBotInfrastructureEndpointPolicyMetadataModel,
+			botInfraEndpointPolicyMetadataModel,
 		)
 		response.Diagnostics.Append(botEndpointPolicyMetadataDiags...)
 		data.BotEndpointPolicyMetadata = botEndpointPolicyMetadataObj
@@ -1275,7 +1496,7 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 		botInfraChoiceChoices := specData.GetBotInfraChoice()
 
 		// The model struct that will be populated by the nested template.
-		var botInfraChoiceChoicesModel = &BotInfrastructureGlobalSpecTypeBotInfraChoice{}
+		var botInfraChoiceChoicesModel = &BotInfraBotInfraChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1289,20 +1510,32 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 			if isCloudHosted && cloudHostedOptionsWrapper != nil && cloudHostedOptionsWrapper.CloudHosted != nil {
 				cloudHostedElement := cloudHostedOptionsWrapper.CloudHosted
 
+				// data specToModelNested RequiredArrayOfStringField --> ActiveRegions
+				if len(cloudHostedElement.GetActiveRegions()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, cloudHostedElement.GetActiveRegions())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cloudHostedAttributeMap["active_regions"] = listValue
+				} else {
+					cloudHostedAttributeMap["active_regions"] = types.ListNull(types.StringType)
+				}
+
 				// data specToModelNested ArrayOfPointerField --> Egress
 				if len(cloudHostedElement.GetEgress()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					egressElements := make([]BotInfrastructureBotInfrastructureEgress, 0, len(cloudHostedElement.GetEgress()))
+					egressElements := make([]BotInfraEgress, 0, len(cloudHostedElement.GetEgress()))
 					for _, egressElement := range cloudHostedElement.GetEgress() {
-						botInfrastructureBotInfrastructureEgressModel := BotInfrastructureBotInfrastructureEgress{}
+						botInfraEgressModel := BotInfraEgress{}
 
 						// data specToModelNested RequiredStringField --> IpAddress
 						if egressElement.GetIpAddress() != "" {
-							botInfrastructureBotInfrastructureEgressModel.IpAddress = types.StringValue(egressElement.GetIpAddress())
+							botInfraEgressModel.IpAddress = types.StringValue(egressElement.GetIpAddress())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureEgressModel.IpAddress = types.StringNull()
+							botInfraEgressModel.IpAddress = types.StringNull()
 						}
 
 						// data specToModelNested RequiredEnumField --> Region
@@ -1314,12 +1547,12 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureEgressModel.Region = listValue
+							botInfraEgressModel.Region = listValue
 						} else {
-							botInfrastructureBotInfrastructureEgressModel.Region = types.ListNull(types.StringType)
+							botInfraEgressModel.Region = types.ListNull(types.StringType)
 						}
 
-						egressElements = append(egressElements, botInfrastructureBotInfrastructureEgressModel)
+						egressElements = append(egressElements, botInfraEgressModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1369,16 +1602,16 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 				if len(cloudHostedElement.GetIngress()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					ingressElements := make([]BotInfrastructureBotInfrastructureIngress, 0, len(cloudHostedElement.GetIngress()))
+					ingressElements := make([]BotInfraIngress, 0, len(cloudHostedElement.GetIngress()))
 					for _, ingressElement := range cloudHostedElement.GetIngress() {
-						botInfrastructureBotInfrastructureIngressModel := BotInfrastructureBotInfrastructureIngress{}
+						botInfraIngressModel := BotInfraIngress{}
 
 						// data specToModelNested StringField --> CertId
 						if ingressElement.GetCertId() != "" {
-							botInfrastructureBotInfrastructureIngressModel.CertId = types.StringValue(ingressElement.GetCertId())
+							botInfraIngressModel.CertId = types.StringValue(ingressElement.GetCertId())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureIngressModel.CertId = types.StringNull()
+							botInfraIngressModel.CertId = types.StringNull()
 						}
 
 						// data specToModelNested EnumField --> CertStatus
@@ -1390,9 +1623,9 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureIngressModel.CertStatus = listValue
+							botInfraIngressModel.CertStatus = listValue
 						} else {
-							botInfrastructureBotInfrastructureIngressModel.CertStatus = types.ListNull(types.StringType)
+							botInfraIngressModel.CertStatus = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredEnumField --> Region
@@ -1404,9 +1637,9 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureIngressModel.Region = listValue
+							botInfraIngressModel.Region = listValue
 						} else {
-							botInfrastructureBotInfrastructureIngressModel.Region = types.ListNull(types.StringType)
+							botInfraIngressModel.Region = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> TypeChoice
@@ -1454,13 +1687,13 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							botInfrastructureBotInfrastructureIngressModel.TypeChoice = finalObj
+							botInfraIngressModel.TypeChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							botInfrastructureBotInfrastructureIngressModel.TypeChoice = types.ObjectNull(BotInfrastructureBotInfraChoiceCloudHostedIngressTypeChoiceModelAttributeMap)
+							botInfraIngressModel.TypeChoice = types.ObjectNull(BotInfrastructureBotInfraChoiceCloudHostedIngressTypeChoiceModelAttributeMap)
 						}
 
-						ingressElements = append(ingressElements, botInfrastructureBotInfrastructureIngressModel)
+						ingressElements = append(ingressElements, botInfraIngressModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1488,6 +1721,18 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 					cloudHostedAttributeMap["ip_addresses"] = listValue
 				} else {
 					cloudHostedAttributeMap["ip_addresses"] = types.ListNull(types.StringType)
+				}
+
+				// data specToModelNested RequiredArrayOfStringField --> PassiveRegions
+				if len(cloudHostedElement.GetPassiveRegions()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, cloudHostedElement.GetPassiveRegions())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cloudHostedAttributeMap["passive_regions"] = listValue
+				} else {
+					cloudHostedAttributeMap["passive_regions"] = types.ListNull(types.StringType)
 				}
 
 				cloudHostedObj, cloudHostedObjDiags := types.ObjectValue(BotInfrastructureBotInfraChoiceCloudHostedModelAttributeMap, cloudHostedAttributeMap)
@@ -1523,49 +1768,49 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 				if len(kubernetesElement.GetKubernetesCluster()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					kubernetesClusterElements := make([]BotInfrastructureBotInfrastructureKubernetesCluster, 0, len(kubernetesElement.GetKubernetesCluster()))
+					kubernetesClusterElements := make([]BotInfraK8sCluster, 0, len(kubernetesElement.GetKubernetesCluster()))
 					for _, kubernetesClusterElement := range kubernetesElement.GetKubernetesCluster() {
-						botInfrastructureBotInfrastructureKubernetesClusterModel := BotInfrastructureBotInfrastructureKubernetesCluster{}
+						botInfraK8sClusterModel := BotInfraK8sCluster{}
 
 						// data specToModelNested StringField --> ClusterTag
 						if kubernetesClusterElement.GetClusterTag() != "" {
-							botInfrastructureBotInfrastructureKubernetesClusterModel.ClusterTag = types.StringValue(kubernetesClusterElement.GetClusterTag())
+							botInfraK8sClusterModel.ClusterTag = types.StringValue(kubernetesClusterElement.GetClusterTag())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureKubernetesClusterModel.ClusterTag = types.StringNull()
+							botInfraK8sClusterModel.ClusterTag = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> DeployedAllowlistPolicyMetadata
 						if kubernetesClusterElement.GetDeployedAllowlistPolicyMetadata() != nil {
 							// Create the nested Go struct
-							botInfrastructureBotInfrastructurePolicyMetadataModel := &BotInfrastructureBotInfrastructurePolicyMetadata{}
+							botInfraPolicyMetadataModel := &BotInfraPolicyMetadata{}
 							deployedAllowlistPolicyMetadataElement := kubernetesClusterElement.GetDeployedAllowlistPolicyMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Name
 							if deployedAllowlistPolicyMetadataElement.GetName() != "" {
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringValue(deployedAllowlistPolicyMetadataElement.GetName())
+								botInfraPolicyMetadataModel.Name = types.StringValue(deployedAllowlistPolicyMetadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringNull()
+								botInfraPolicyMetadataModel.Name = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Version
 							if deployedAllowlistPolicyMetadataElement.GetVersion() != "" {
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringValue(deployedAllowlistPolicyMetadataElement.GetVersion())
+								botInfraPolicyMetadataModel.Version = types.StringValue(deployedAllowlistPolicyMetadataElement.GetVersion())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringNull()
+								botInfraPolicyMetadataModel.Version = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							botInfrastructureBotInfrastructurePolicyMetadataModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedAllowlistPolicyMetadataModelAttributeMap, botInfrastructureBotInfrastructurePolicyMetadataModel)
+							botInfraPolicyMetadataModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedAllowlistPolicyMetadataModelAttributeMap, botInfraPolicyMetadataModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedAllowlistPolicyMetadata = botInfrastructureBotInfrastructurePolicyMetadataModelObj
+							botInfraK8sClusterModel.DeployedAllowlistPolicyMetadata = botInfraPolicyMetadataModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1574,48 +1819,48 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedAllowlistPolicyMetadata = types.ObjectNull(BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedAllowlistPolicyMetadataModelAttributeMap)
+							botInfraK8sClusterModel.DeployedAllowlistPolicyMetadata = types.ObjectNull(BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedAllowlistPolicyMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested StringField --> DeployedBotThreatIntelligencePackageName
 						if kubernetesClusterElement.GetDeployedBotThreatIntelligencePackageName() != "" {
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedBotThreatIntelligencePackageName = types.StringValue(kubernetesClusterElement.GetDeployedBotThreatIntelligencePackageName())
+							botInfraK8sClusterModel.DeployedBotThreatIntelligencePackageName = types.StringValue(kubernetesClusterElement.GetDeployedBotThreatIntelligencePackageName())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedBotThreatIntelligencePackageName = types.StringNull()
+							botInfraK8sClusterModel.DeployedBotThreatIntelligencePackageName = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> DeployedEndpointPolicyMetadata
 						if kubernetesClusterElement.GetDeployedEndpointPolicyMetadata() != nil {
 							// Create the nested Go struct
-							botInfrastructureBotInfrastructurePolicyMetadataModel := &BotInfrastructureBotInfrastructurePolicyMetadata{}
+							botInfraPolicyMetadataModel := &BotInfraPolicyMetadata{}
 							deployedEndpointPolicyMetadataElement := kubernetesClusterElement.GetDeployedEndpointPolicyMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Name
 							if deployedEndpointPolicyMetadataElement.GetName() != "" {
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringValue(deployedEndpointPolicyMetadataElement.GetName())
+								botInfraPolicyMetadataModel.Name = types.StringValue(deployedEndpointPolicyMetadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringNull()
+								botInfraPolicyMetadataModel.Name = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Version
 							if deployedEndpointPolicyMetadataElement.GetVersion() != "" {
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringValue(deployedEndpointPolicyMetadataElement.GetVersion())
+								botInfraPolicyMetadataModel.Version = types.StringValue(deployedEndpointPolicyMetadataElement.GetVersion())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringNull()
+								botInfraPolicyMetadataModel.Version = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							botInfrastructureBotInfrastructurePolicyMetadataModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedEndpointPolicyMetadataModelAttributeMap, botInfrastructureBotInfrastructurePolicyMetadataModel)
+							botInfraPolicyMetadataModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedEndpointPolicyMetadataModelAttributeMap, botInfraPolicyMetadataModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedEndpointPolicyMetadata = botInfrastructureBotInfrastructurePolicyMetadataModelObj
+							botInfraK8sClusterModel.DeployedEndpointPolicyMetadata = botInfraPolicyMetadataModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1624,40 +1869,40 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedEndpointPolicyMetadata = types.ObjectNull(BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedEndpointPolicyMetadataModelAttributeMap)
+							botInfraK8sClusterModel.DeployedEndpointPolicyMetadata = types.ObjectNull(BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedEndpointPolicyMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested PointerField --> DeployedNetworkPolicyMetadata
 						if kubernetesClusterElement.GetDeployedNetworkPolicyMetadata() != nil {
 							// Create the nested Go struct
-							botInfrastructureBotInfrastructurePolicyMetadataModel := &BotInfrastructureBotInfrastructurePolicyMetadata{}
+							botInfraPolicyMetadataModel := &BotInfraPolicyMetadata{}
 							deployedNetworkPolicyMetadataElement := kubernetesClusterElement.GetDeployedNetworkPolicyMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Name
 							if deployedNetworkPolicyMetadataElement.GetName() != "" {
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringValue(deployedNetworkPolicyMetadataElement.GetName())
+								botInfraPolicyMetadataModel.Name = types.StringValue(deployedNetworkPolicyMetadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringNull()
+								botInfraPolicyMetadataModel.Name = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Version
 							if deployedNetworkPolicyMetadataElement.GetVersion() != "" {
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringValue(deployedNetworkPolicyMetadataElement.GetVersion())
+								botInfraPolicyMetadataModel.Version = types.StringValue(deployedNetworkPolicyMetadataElement.GetVersion())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringNull()
+								botInfraPolicyMetadataModel.Version = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							botInfrastructureBotInfrastructurePolicyMetadataModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedNetworkPolicyMetadataModelAttributeMap, botInfrastructureBotInfrastructurePolicyMetadataModel)
+							botInfraPolicyMetadataModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedNetworkPolicyMetadataModelAttributeMap, botInfraPolicyMetadataModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedNetworkPolicyMetadata = botInfrastructureBotInfrastructurePolicyMetadataModelObj
+							botInfraK8sClusterModel.DeployedNetworkPolicyMetadata = botInfraPolicyMetadataModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1666,15 +1911,15 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							botInfrastructureBotInfrastructureKubernetesClusterModel.DeployedNetworkPolicyMetadata = types.ObjectNull(BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedNetworkPolicyMetadataModelAttributeMap)
+							botInfraK8sClusterModel.DeployedNetworkPolicyMetadata = types.ObjectNull(BotInfrastructureBotInfraChoiceKubernetesKubernetesClusterDeployedNetworkPolicyMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested StringField --> FirmwareVersion
 						if kubernetesClusterElement.GetFirmwareVersion() != "" {
-							botInfrastructureBotInfrastructureKubernetesClusterModel.FirmwareVersion = types.StringValue(kubernetesClusterElement.GetFirmwareVersion())
+							botInfraK8sClusterModel.FirmwareVersion = types.StringValue(kubernetesClusterElement.GetFirmwareVersion())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureKubernetesClusterModel.FirmwareVersion = types.StringNull()
+							botInfraK8sClusterModel.FirmwareVersion = types.StringNull()
 						}
 
 						// data specToModelNested EnumField --> SyncStatus
@@ -1686,12 +1931,12 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureKubernetesClusterModel.SyncStatus = listValue
+							botInfraK8sClusterModel.SyncStatus = listValue
 						} else {
-							botInfrastructureBotInfrastructureKubernetesClusterModel.SyncStatus = types.ListNull(types.StringType)
+							botInfraK8sClusterModel.SyncStatus = types.ListNull(types.StringType)
 						}
 
-						kubernetesClusterElements = append(kubernetesClusterElements, botInfrastructureBotInfrastructureKubernetesClusterModel)
+						kubernetesClusterElements = append(kubernetesClusterElements, botInfraK8sClusterModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1742,73 +1987,73 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 				if len(onPremElement.GetDevices()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					devicesElements := make([]BotInfrastructureBotInfrastructureDevice, 0, len(onPremElement.GetDevices()))
+					devicesElements := make([]BotInfraDevice, 0, len(onPremElement.GetDevices()))
 					for _, devicesElement := range onPremElement.GetDevices() {
-						botInfrastructureBotInfrastructureDeviceModel := BotInfrastructureBotInfrastructureDevice{}
+						botInfraDeviceModel := BotInfraDevice{}
 
 						// data specToModelNested StringField --> CertificationStatus
 						if devicesElement.GetCertificationStatus() != "" {
-							botInfrastructureBotInfrastructureDeviceModel.CertificationStatus = types.StringValue(devicesElement.GetCertificationStatus())
+							botInfraDeviceModel.CertificationStatus = types.StringValue(devicesElement.GetCertificationStatus())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureDeviceModel.CertificationStatus = types.StringNull()
+							botInfraDeviceModel.CertificationStatus = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> DeviceFirmwareVersion
 						if devicesElement.GetDeviceFirmwareVersion() != "" {
-							botInfrastructureBotInfrastructureDeviceModel.DeviceFirmwareVersion = types.StringValue(devicesElement.GetDeviceFirmwareVersion())
+							botInfraDeviceModel.DeviceFirmwareVersion = types.StringValue(devicesElement.GetDeviceFirmwareVersion())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureDeviceModel.DeviceFirmwareVersion = types.StringNull()
+							botInfraDeviceModel.DeviceFirmwareVersion = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> DeviceName
 						if devicesElement.GetDeviceName() != "" {
-							botInfrastructureBotInfrastructureDeviceModel.DeviceName = types.StringValue(devicesElement.GetDeviceName())
+							botInfraDeviceModel.DeviceName = types.StringValue(devicesElement.GetDeviceName())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureDeviceModel.DeviceName = types.StringNull()
+							botInfraDeviceModel.DeviceName = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> IpInfo
 						if devicesElement.GetIpInfo() != nil {
 							// Create the nested Go struct
-							botInfrastructureBotInfrastructureIPInfoModel := &BotInfrastructureBotInfrastructureIPInfo{}
+							botInfraIPInfoModel := &BotInfraIPInfo{}
 							ipInfoElement := devicesElement.GetIpInfo()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Local
 							if ipInfoElement.GetLocal() != "" {
-								botInfrastructureBotInfrastructureIPInfoModel.Local = types.StringValue(ipInfoElement.GetLocal())
+								botInfraIPInfoModel.Local = types.StringValue(ipInfoElement.GetLocal())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructureIPInfoModel.Local = types.StringNull()
+								botInfraIPInfoModel.Local = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Traffic
 							if ipInfoElement.GetTraffic() != "" {
-								botInfrastructureBotInfrastructureIPInfoModel.Traffic = types.StringValue(ipInfoElement.GetTraffic())
+								botInfraIPInfoModel.Traffic = types.StringValue(ipInfoElement.GetTraffic())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructureIPInfoModel.Traffic = types.StringNull()
+								botInfraIPInfoModel.Traffic = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Wan
 							if ipInfoElement.GetWan() != "" {
-								botInfrastructureBotInfrastructureIPInfoModel.Wan = types.StringValue(ipInfoElement.GetWan())
+								botInfraIPInfoModel.Wan = types.StringValue(ipInfoElement.GetWan())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructureIPInfoModel.Wan = types.StringNull()
+								botInfraIPInfoModel.Wan = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							botInfrastructureBotInfrastructureIPInfoModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceOnPremDevicesIpInfoModelAttributeMap, botInfrastructureBotInfrastructureIPInfoModel)
+							botInfraIPInfoModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoiceOnPremDevicesIpInfoModelAttributeMap, botInfraIPInfoModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureDeviceModel.IpInfo = botInfrastructureBotInfrastructureIPInfoModelObj
+							botInfraDeviceModel.IpInfo = botInfraIPInfoModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1817,10 +2062,10 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							botInfrastructureBotInfrastructureDeviceModel.IpInfo = types.ObjectNull(BotInfrastructureBotInfraChoiceOnPremDevicesIpInfoModelAttributeMap)
+							botInfraDeviceModel.IpInfo = types.ObjectNull(BotInfrastructureBotInfraChoiceOnPremDevicesIpInfoModelAttributeMap)
 						}
 
-						devicesElements = append(devicesElements, botInfrastructureBotInfrastructureDeviceModel)
+						devicesElements = append(devicesElements, botInfraDeviceModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -1879,73 +2124,73 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 				if len(physicalHostedElement.GetDevices()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					devicesElements := make([]BotInfrastructureBotInfrastructureDevice, 0, len(physicalHostedElement.GetDevices()))
+					devicesElements := make([]BotInfraDevice, 0, len(physicalHostedElement.GetDevices()))
 					for _, devicesElement := range physicalHostedElement.GetDevices() {
-						botInfrastructureBotInfrastructureDeviceModel := BotInfrastructureBotInfrastructureDevice{}
+						botInfraDeviceModel := BotInfraDevice{}
 
 						// data specToModelNested StringField --> CertificationStatus
 						if devicesElement.GetCertificationStatus() != "" {
-							botInfrastructureBotInfrastructureDeviceModel.CertificationStatus = types.StringValue(devicesElement.GetCertificationStatus())
+							botInfraDeviceModel.CertificationStatus = types.StringValue(devicesElement.GetCertificationStatus())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureDeviceModel.CertificationStatus = types.StringNull()
+							botInfraDeviceModel.CertificationStatus = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> DeviceFirmwareVersion
 						if devicesElement.GetDeviceFirmwareVersion() != "" {
-							botInfrastructureBotInfrastructureDeviceModel.DeviceFirmwareVersion = types.StringValue(devicesElement.GetDeviceFirmwareVersion())
+							botInfraDeviceModel.DeviceFirmwareVersion = types.StringValue(devicesElement.GetDeviceFirmwareVersion())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureDeviceModel.DeviceFirmwareVersion = types.StringNull()
+							botInfraDeviceModel.DeviceFirmwareVersion = types.StringNull()
 						}
 
 						// data specToModelNested StringField --> DeviceName
 						if devicesElement.GetDeviceName() != "" {
-							botInfrastructureBotInfrastructureDeviceModel.DeviceName = types.StringValue(devicesElement.GetDeviceName())
+							botInfraDeviceModel.DeviceName = types.StringValue(devicesElement.GetDeviceName())
 						} else {
 							// Empty string, set to null
-							botInfrastructureBotInfrastructureDeviceModel.DeviceName = types.StringNull()
+							botInfraDeviceModel.DeviceName = types.StringNull()
 						}
 
 						// data specToModelNested PointerField --> IpInfo
 						if devicesElement.GetIpInfo() != nil {
 							// Create the nested Go struct
-							botInfrastructureBotInfrastructureIPInfoModel := &BotInfrastructureBotInfrastructureIPInfo{}
+							botInfraIPInfoModel := &BotInfraIPInfo{}
 							ipInfoElement := devicesElement.GetIpInfo()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Local
 							if ipInfoElement.GetLocal() != "" {
-								botInfrastructureBotInfrastructureIPInfoModel.Local = types.StringValue(ipInfoElement.GetLocal())
+								botInfraIPInfoModel.Local = types.StringValue(ipInfoElement.GetLocal())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructureIPInfoModel.Local = types.StringNull()
+								botInfraIPInfoModel.Local = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Traffic
 							if ipInfoElement.GetTraffic() != "" {
-								botInfrastructureBotInfrastructureIPInfoModel.Traffic = types.StringValue(ipInfoElement.GetTraffic())
+								botInfraIPInfoModel.Traffic = types.StringValue(ipInfoElement.GetTraffic())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructureIPInfoModel.Traffic = types.StringNull()
+								botInfraIPInfoModel.Traffic = types.StringNull()
 							}
 
 							// data specToModelNested StringField --> Wan
 							if ipInfoElement.GetWan() != "" {
-								botInfrastructureBotInfrastructureIPInfoModel.Wan = types.StringValue(ipInfoElement.GetWan())
+								botInfraIPInfoModel.Wan = types.StringValue(ipInfoElement.GetWan())
 							} else {
 								// Empty string, set to null
-								botInfrastructureBotInfrastructureIPInfoModel.Wan = types.StringNull()
+								botInfraIPInfoModel.Wan = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							botInfrastructureBotInfrastructureIPInfoModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoicePhysicalHostedDevicesIpInfoModelAttributeMap, botInfrastructureBotInfrastructureIPInfoModel)
+							botInfraIPInfoModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureBotInfraChoicePhysicalHostedDevicesIpInfoModelAttributeMap, botInfraIPInfoModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							botInfrastructureBotInfrastructureDeviceModel.IpInfo = botInfrastructureBotInfrastructureIPInfoModelObj
+							botInfraDeviceModel.IpInfo = botInfraIPInfoModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -1954,10 +2199,10 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 							// because the API may always return a non-nil struct (with REDACTED values) for this field,
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							botInfrastructureBotInfrastructureDeviceModel.IpInfo = types.ObjectNull(BotInfrastructureBotInfraChoicePhysicalHostedDevicesIpInfoModelAttributeMap)
+							botInfraDeviceModel.IpInfo = types.ObjectNull(BotInfrastructureBotInfraChoicePhysicalHostedDevicesIpInfoModelAttributeMap)
 						}
 
-						devicesElements = append(devicesElements, botInfrastructureBotInfrastructureDeviceModel)
+						devicesElements = append(devicesElements, botInfraDeviceModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2024,29 +2269,29 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 
 	// data SpecToModelRoot PointerField --> BotNetworkPolicyMetadata
 	if specData.GetBotNetworkPolicyMetadata() != nil {
-		var botInfrastructureBotInfrastructurePolicyMetadataModel = &BotInfrastructureBotInfrastructurePolicyMetadata{}
+		var botInfraPolicyMetadataModel = &BotInfraPolicyMetadata{}
 		botNetworkPolicyMetadataElement := specData.GetBotNetworkPolicyMetadata()
 
 		// data specToModelNested StringField --> Name
 		if botNetworkPolicyMetadataElement.GetName() != "" {
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringValue(botNetworkPolicyMetadataElement.GetName())
+			botInfraPolicyMetadataModel.Name = types.StringValue(botNetworkPolicyMetadataElement.GetName())
 		} else {
 			// Empty string, set to null
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Name = types.StringNull()
+			botInfraPolicyMetadataModel.Name = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> Version
 		if botNetworkPolicyMetadataElement.GetVersion() != "" {
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringValue(botNetworkPolicyMetadataElement.GetVersion())
+			botInfraPolicyMetadataModel.Version = types.StringValue(botNetworkPolicyMetadataElement.GetVersion())
 		} else {
 			// Empty string, set to null
-			botInfrastructureBotInfrastructurePolicyMetadataModel.Version = types.StringNull()
+			botInfraPolicyMetadataModel.Version = types.StringNull()
 		}
 
 		botNetworkPolicyMetadataObj, botNetworkPolicyMetadataDiags := utils.GoStructToObjectValue(
 			ctx,
 			BotInfrastructureBotNetworkPolicyMetadataModelAttributeMap,
-			botInfrastructureBotInfrastructurePolicyMetadataModel,
+			botInfraPolicyMetadataModel,
 		)
 		response.Diagnostics.Append(botNetworkPolicyMetadataDiags...)
 		data.BotNetworkPolicyMetadata = botNetworkPolicyMetadataObj
@@ -2056,21 +2301,21 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 
 	// data SpecToModelRoot PointerField --> BotTiPackageInformation
 	if specData.GetBotTiPackageInformation() != nil {
-		var botInfrastructureBotInfrastructureTIPackageInformationModel = &BotInfrastructureBotInfrastructureTIPackageInformation{}
+		var botInfraTIPackageInformationModel = &BotInfraTIPackageInformation{}
 		botTiPackageInformationElement := specData.GetBotTiPackageInformation()
 
 		// data specToModelNested StringField --> Name
 		if botTiPackageInformationElement.GetName() != "" {
-			botInfrastructureBotInfrastructureTIPackageInformationModel.Name = types.StringValue(botTiPackageInformationElement.GetName())
+			botInfraTIPackageInformationModel.Name = types.StringValue(botTiPackageInformationElement.GetName())
 		} else {
 			// Empty string, set to null
-			botInfrastructureBotInfrastructureTIPackageInformationModel.Name = types.StringNull()
+			botInfraTIPackageInformationModel.Name = types.StringNull()
 		}
 
 		botTiPackageInformationObj, botTiPackageInformationDiags := utils.GoStructToObjectValue(
 			ctx,
 			BotInfrastructureBotTiPackageInformationModelAttributeMap,
-			botInfrastructureBotInfrastructureTIPackageInformationModel,
+			botInfraTIPackageInformationModel,
 		)
 		response.Diagnostics.Append(botTiPackageInformationDiags...)
 		data.BotTiPackageInformation = botTiPackageInformationObj
@@ -2105,7 +2350,7 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 		createBotInfraChoiceChoices := specData.GetCreateBotInfraChoice()
 
 		// The model struct that will be populated by the nested template.
-		var createBotInfraChoiceChoicesModel = &BotInfrastructureGlobalSpecTypeCreateBotInfraChoice{}
+		var createBotInfraChoiceChoicesModel = &BotInfraCreateBotInfraChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2119,16 +2364,80 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 			if isCreateCloudHosted && createCloudHostedOptionsWrapper != nil && createCloudHostedOptionsWrapper.CreateCloudHosted != nil {
 				createCloudHostedElement := createCloudHostedOptionsWrapper.CreateCloudHosted
 
-				// data specToModelNested ArrayOfStringField --> IpAddresses
-				if len(createCloudHostedElement.GetIpAddresses()) > 0 {
-					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, createCloudHostedElement.GetIpAddresses())
-					response.Diagnostics.Append(listDiags...)
+				// data specToModelNested PointerField --> HostNameList
+				if createCloudHostedElement.GetHostNameList() != nil {
+					// Create the nested Go struct
+					botInfraHostNameListModel := &BotInfraHostNameList{}
+					hostNameListElement := createCloudHostedElement.GetHostNameList()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested ArrayOfStringField --> HostNames
+					if len(hostNameListElement.GetHostNames()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, hostNameListElement.GetHostNames())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						botInfraHostNameListModel.HostNames = listValue
+					} else {
+						botInfraHostNameListModel.HostNames = types.ListNull(types.StringType)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					botInfraHostNameListModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureCreateBotInfraChoiceCreateCloudHostedHostNameListModelAttributeMap, botInfraHostNameListModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					createCloudHostedAttributeMap["ip_addresses"] = listValue
+					createCloudHostedAttributeMap["host_name_list"] = botInfraHostNameListModelObj
+
 				} else {
-					createCloudHostedAttributeMap["ip_addresses"] = types.ListNull(types.StringType)
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+					// because the API may always return a non-nil struct (with REDACTED values) for this field,
+					// making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					createCloudHostedAttributeMap["host_name_list"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedHostNameListModelAttributeMap)
+				}
+
+				// data specToModelNested RequiredPointerField --> IpAddressList
+				if createCloudHostedElement.GetIpAddressList() != nil {
+					// Create the nested Go struct
+					botInfraIPAddrListModel := &BotInfraIPAddrList{}
+					ipAddressListElement := createCloudHostedElement.GetIpAddressList()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested RequiredArrayOfStringField --> IpAddresses
+					if len(ipAddressListElement.GetIpAddresses()) > 0 {
+						listValue, listDiags := types.ListValueFrom(ctx, types.StringType, ipAddressListElement.GetIpAddresses())
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						botInfraIPAddrListModel.IpAddresses = listValue
+					} else {
+						botInfraIPAddrListModel.IpAddresses = types.ListNull(types.StringType)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					botInfraIPAddrListModelObj, objDiags := types.ObjectValueFrom(ctx, BotInfrastructureCreateBotInfraChoiceCreateCloudHostedIpAddressListModelAttributeMap, botInfraIPAddrListModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					createCloudHostedAttributeMap["ip_address_list"] = botInfraIPAddrListModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					createCloudHostedAttributeMap["ip_address_list"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedIpAddressListModelAttributeMap)
 				}
 
 				// data specToModelNested RequiredOneOfField --> TypeChoice
@@ -2143,67 +2452,231 @@ func (d *DataSourceF5XCBotInfrastructure) Read(ctx context.Context, request data
 
 					// Process nested choices, populating the temporary attribute map
 
-					// data specToModelNested RequiredPointerOfOneOfField --> Production
+					// data specToModelNested RequiredPointerOfOneOfField --> ProductionV2
 					// <no value>
 					{
-						productionOptionsWrapper, isProduction := createCloudHostedtypeChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.CreateSpecInfraCloudHosted_Production)
-						productionAttributeMap := make(map[string]attr.Value)
+						productionV2OptionsWrapper, isProductionV2 := createCloudHostedtypeChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.CreateSpecInfraCloudHosted_ProductionV2)
+						productionV2AttributeMap := make(map[string]attr.Value)
 
-						if isProduction && productionOptionsWrapper != nil && productionOptionsWrapper.Production != nil {
-							productionElement := productionOptionsWrapper.Production
+						if isProductionV2 && productionV2OptionsWrapper != nil && productionV2OptionsWrapper.ProductionV2 != nil {
+							productionV2Element := productionV2OptionsWrapper.ProductionV2
 
-							// data specToModelNested RequiredStringField --> Region_1
-							if productionElement.GetRegion_1() != "" {
-								productionAttributeMap["region_1"] = types.StringValue(productionElement.GetRegion_1())
+							// data specToModelNested OneOfField --> TypeChoiceProduction
+							if productionV2Element.GetTypeChoiceProduction() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								productionV2typeChoiceProductionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								productionV2typeChoiceProductionChoiceChoices := productionV2Element.GetTypeChoiceProduction()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested RequiredPointerOfOneOfField --> ActiveActiveRegion
+								// <no value>
+								{
+									activeActiveRegionOptionsWrapper, isActiveActiveRegion := productionV2typeChoiceProductionChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.ProductionV2_ActiveActiveRegion)
+									activeActiveRegionAttributeMap := make(map[string]attr.Value)
+
+									if isActiveActiveRegion && activeActiveRegionOptionsWrapper != nil && activeActiveRegionOptionsWrapper.ActiveActiveRegion != nil {
+										activeActiveRegionElement := activeActiveRegionOptionsWrapper.ActiveActiveRegion
+
+										// data specToModelNested RequiredStringField --> Region_1
+										if activeActiveRegionElement.GetRegion_1() != "" {
+											activeActiveRegionAttributeMap["region_1"] = types.StringValue(activeActiveRegionElement.GetRegion_1())
+										} else {
+											// Empty string, set to null
+											activeActiveRegionAttributeMap["region_1"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Region_2
+										if activeActiveRegionElement.GetRegion_2() != "" {
+											activeActiveRegionAttributeMap["region_2"] = types.StringValue(activeActiveRegionElement.GetRegion_2())
+										} else {
+											// Empty string, set to null
+											activeActiveRegionAttributeMap["region_2"] = types.StringNull()
+										}
+
+										activeActiveRegionObj, activeActiveRegionObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActiveActiveRegionModelAttributeMap, activeActiveRegionAttributeMap)
+										response.Diagnostics.Append(activeActiveRegionObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										productionV2typeChoiceProductionChoiceChoicesAttributeMap["active_active_region"] = activeActiveRegionObj
+									} else {
+										productionV2typeChoiceProductionChoiceChoicesAttributeMap["active_active_region"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActiveActiveRegionModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested RequiredPointerOfOneOfField --> ActivePassiveRegion
+								// <no value>
+								{
+									activePassiveRegionOptionsWrapper, isActivePassiveRegion := productionV2typeChoiceProductionChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.ProductionV2_ActivePassiveRegion)
+									activePassiveRegionAttributeMap := make(map[string]attr.Value)
+
+									if isActivePassiveRegion && activePassiveRegionOptionsWrapper != nil && activePassiveRegionOptionsWrapper.ActivePassiveRegion != nil {
+										activePassiveRegionElement := activePassiveRegionOptionsWrapper.ActivePassiveRegion
+
+										// data specToModelNested RequiredStringField --> Region_1
+										if activePassiveRegionElement.GetRegion_1() != "" {
+											activePassiveRegionAttributeMap["region_1"] = types.StringValue(activePassiveRegionElement.GetRegion_1())
+										} else {
+											// Empty string, set to null
+											activePassiveRegionAttributeMap["region_1"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Region_2
+										if activePassiveRegionElement.GetRegion_2() != "" {
+											activePassiveRegionAttributeMap["region_2"] = types.StringValue(activePassiveRegionElement.GetRegion_2())
+										} else {
+											// Empty string, set to null
+											activePassiveRegionAttributeMap["region_2"] = types.StringNull()
+										}
+
+										activePassiveRegionObj, activePassiveRegionObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActivePassiveRegionModelAttributeMap, activePassiveRegionAttributeMap)
+										response.Diagnostics.Append(activePassiveRegionObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										productionV2typeChoiceProductionChoiceChoicesAttributeMap["active_passive_region"] = activePassiveRegionObj
+									} else {
+										productionV2typeChoiceProductionChoiceChoicesAttributeMap["active_passive_region"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionActivePassiveRegionModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested RequiredPointerOfOneOfField --> SingleActiveRegion
+								// <no value>
+								{
+									singleActiveRegionOptionsWrapper, isSingleActiveRegion := productionV2typeChoiceProductionChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.ProductionV2_SingleActiveRegion)
+									singleActiveRegionAttributeMap := make(map[string]attr.Value)
+
+									if isSingleActiveRegion && singleActiveRegionOptionsWrapper != nil && singleActiveRegionOptionsWrapper.SingleActiveRegion != nil {
+										singleActiveRegionElement := singleActiveRegionOptionsWrapper.SingleActiveRegion
+
+										// data specToModelNested RequiredStringField --> Region_1
+										if singleActiveRegionElement.GetRegion_1() != "" {
+											singleActiveRegionAttributeMap["region_1"] = types.StringValue(singleActiveRegionElement.GetRegion_1())
+										} else {
+											// Empty string, set to null
+											singleActiveRegionAttributeMap["region_1"] = types.StringNull()
+										}
+
+										singleActiveRegionObj, singleActiveRegionObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionSingleActiveRegionModelAttributeMap, singleActiveRegionAttributeMap)
+										response.Diagnostics.Append(singleActiveRegionObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										productionV2typeChoiceProductionChoiceChoicesAttributeMap["single_active_region"] = singleActiveRegionObj
+									} else {
+										productionV2typeChoiceProductionChoiceChoicesAttributeMap["single_active_region"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionSingleActiveRegionModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, productionV2typeChoiceProductionChoiceChoicesObjDiags := types.ObjectValue(
+									BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionModelAttributeMap, // The attribute schema for the OneOf choices
+									productionV2typeChoiceProductionChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(productionV2typeChoiceProductionChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								productionV2AttributeMap["type_choice_production_choice"] = finalObj
 							} else {
-								// Empty string, set to null
-								productionAttributeMap["region_1"] = types.StringNull()
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								productionV2AttributeMap["type_choice_production_choice"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2TypeChoiceProductionModelAttributeMap)
 							}
 
-							// data specToModelNested RequiredStringField --> Region_2
-							if productionElement.GetRegion_2() != "" {
-								productionAttributeMap["region_2"] = types.StringValue(productionElement.GetRegion_2())
-							} else {
-								// Empty string, set to null
-								productionAttributeMap["region_2"] = types.StringNull()
-							}
-
-							productionObj, productionObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionModelAttributeMap, productionAttributeMap)
-							response.Diagnostics.Append(productionObjDiags...)
+							productionV2Obj, productionV2ObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2ModelAttributeMap, productionV2AttributeMap)
+							response.Diagnostics.Append(productionV2ObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							createCloudHostedtypeChoiceChoicesAttributeMap["production"] = productionObj
+							createCloudHostedtypeChoiceChoicesAttributeMap["production_v2"] = productionV2Obj
 						} else {
-							createCloudHostedtypeChoiceChoicesAttributeMap["production"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionModelAttributeMap)
+							createCloudHostedtypeChoiceChoicesAttributeMap["production_v2"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceProductionV2ModelAttributeMap)
 						}
 					}
 
-					// data specToModelNested RequiredPointerOfOneOfField --> Testing
+					// data specToModelNested RequiredPointerOfOneOfField --> TestingV2
 					// <no value>
 					{
-						testingOptionsWrapper, isTesting := createCloudHostedtypeChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.CreateSpecInfraCloudHosted_Testing)
-						testingAttributeMap := make(map[string]attr.Value)
+						testingV2OptionsWrapper, isTestingV2 := createCloudHostedtypeChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.CreateSpecInfraCloudHosted_TestingV2)
+						testingV2AttributeMap := make(map[string]attr.Value)
 
-						if isTesting && testingOptionsWrapper != nil && testingOptionsWrapper.Testing != nil {
-							testingElement := testingOptionsWrapper.Testing
+						if isTestingV2 && testingV2OptionsWrapper != nil && testingV2OptionsWrapper.TestingV2 != nil {
+							testingV2Element := testingV2OptionsWrapper.TestingV2
 
-							// data specToModelNested RequiredStringField --> Region_1
-							if testingElement.GetRegion_1() != "" {
-								testingAttributeMap["region_1"] = types.StringValue(testingElement.GetRegion_1())
+							// data specToModelNested OneOfField --> TypeChoiceTesting
+							if testingV2Element.GetTypeChoiceTesting() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								testingV2typeChoiceTestingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								testingV2typeChoiceTestingChoiceChoices := testingV2Element.GetTypeChoiceTesting()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested RequiredPointerOfOneOfField --> SingleActiveRegion
+								// <no value>
+								{
+									singleActiveRegionOptionsWrapper, isSingleActiveRegion := testingV2typeChoiceTestingChoiceChoices.(*ves_io_schema_shape_bot_defense_bot_infrastructure.TestingV2_SingleActiveRegion)
+									singleActiveRegionAttributeMap := make(map[string]attr.Value)
+
+									if isSingleActiveRegion && singleActiveRegionOptionsWrapper != nil && singleActiveRegionOptionsWrapper.SingleActiveRegion != nil {
+										singleActiveRegionElement := singleActiveRegionOptionsWrapper.SingleActiveRegion
+
+										// data specToModelNested RequiredStringField --> Region_1
+										if singleActiveRegionElement.GetRegion_1() != "" {
+											singleActiveRegionAttributeMap["region_1"] = types.StringValue(singleActiveRegionElement.GetRegion_1())
+										} else {
+											// Empty string, set to null
+											singleActiveRegionAttributeMap["region_1"] = types.StringNull()
+										}
+
+										singleActiveRegionObj, singleActiveRegionObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingSingleActiveRegionModelAttributeMap, singleActiveRegionAttributeMap)
+										response.Diagnostics.Append(singleActiveRegionObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										testingV2typeChoiceTestingChoiceChoicesAttributeMap["single_active_region"] = singleActiveRegionObj
+									} else {
+										testingV2typeChoiceTestingChoiceChoicesAttributeMap["single_active_region"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingSingleActiveRegionModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, testingV2typeChoiceTestingChoiceChoicesObjDiags := types.ObjectValue(
+									BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingModelAttributeMap, // The attribute schema for the OneOf choices
+									testingV2typeChoiceTestingChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(testingV2typeChoiceTestingChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								testingV2AttributeMap["type_choice_testing_choice"] = finalObj
 							} else {
-								// Empty string, set to null
-								testingAttributeMap["region_1"] = types.StringNull()
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								testingV2AttributeMap["type_choice_testing_choice"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2TypeChoiceTestingModelAttributeMap)
 							}
 
-							testingObj, testingObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingModelAttributeMap, testingAttributeMap)
-							response.Diagnostics.Append(testingObjDiags...)
+							testingV2Obj, testingV2ObjDiags := types.ObjectValue(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2ModelAttributeMap, testingV2AttributeMap)
+							response.Diagnostics.Append(testingV2ObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							createCloudHostedtypeChoiceChoicesAttributeMap["testing"] = testingObj
+							createCloudHostedtypeChoiceChoicesAttributeMap["testing_v2"] = testingV2Obj
 						} else {
-							createCloudHostedtypeChoiceChoicesAttributeMap["testing"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingModelAttributeMap)
+							createCloudHostedtypeChoiceChoicesAttributeMap["testing_v2"] = types.ObjectNull(BotInfrastructureCreateBotInfraChoiceCreateCloudHostedTypeChoiceTestingV2ModelAttributeMap)
 						}
 					}
 

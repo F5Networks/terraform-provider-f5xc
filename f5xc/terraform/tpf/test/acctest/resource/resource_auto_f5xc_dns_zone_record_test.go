@@ -26,17 +26,18 @@ import (
 func TestAccResourceAutoF5XCDnsZoneRecord_basic(t *testing.T) {
 	t.Parallel()
 
-	zoneName := "tf-acc-" + testAccRunSuffix(t) + ".example.com"
+	zoneName := "example-dns-zone-" + testAccRunSuffix(t) + ".example.com"
 	groupName := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsZoneRecordDestroyProducer(t),
+		ErrorCheck:               testAccSkipKnownDnsZoneServiceConfigError(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_basic(zoneName, groupName)},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -44,9 +45,9 @@ func TestAccResourceAutoF5XCDnsZoneRecord_basic(t *testing.T) {
 				// stable, always-set top-level attribute instead.
 				ImportStateVerifyIdentifierAttribute: "dns_zone_name",
 			},
-			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withDescription(zoneName, groupName, "dns zone record updated")},
+			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withDescription(zoneName, groupName, "DNS zone record example updated")},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -61,17 +62,18 @@ func TestAccResourceAutoF5XCDnsZoneRecord_basic(t *testing.T) {
 func TestAccResourceAutoF5XCDnsZoneRecord_aRecordValuesTransition(t *testing.T) {
 	t.Parallel()
 
-	zoneName := "tf-acc-" + testAccRunSuffix(t) + ".example.com"
+	zoneName := "example-dns-zone-" + testAccRunSuffix(t) + ".example.com"
 	groupName := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsZoneRecordDestroyProducer(t),
+		ErrorCheck:               testAccSkipKnownDnsZoneServiceConfigError(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withARecord(zoneName, groupName, "www", "1.2.3.4")},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -81,7 +83,7 @@ func TestAccResourceAutoF5XCDnsZoneRecord_aRecordValuesTransition(t *testing.T) 
 			},
 			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withARecord(zoneName, groupName, "www", "1.2.3.5")},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -96,17 +98,18 @@ func TestAccResourceAutoF5XCDnsZoneRecord_aRecordValuesTransition(t *testing.T) 
 func TestAccResourceAutoF5XCDnsZoneRecord_txtRecordTransition(t *testing.T) {
 	t.Parallel()
 
-	zoneName := "tf-acc-" + testAccRunSuffix(t) + ".example.com"
+	zoneName := "example-dns-zone-" + testAccRunSuffix(t) + ".example.com"
 	groupName := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsZoneRecordDestroyProducer(t),
+		ErrorCheck:               testAccSkipKnownDnsZoneServiceConfigError(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withTxtRecord(zoneName, groupName, "txt", "v=spf1 include:example.com ~all")},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -116,7 +119,7 @@ func TestAccResourceAutoF5XCDnsZoneRecord_txtRecordTransition(t *testing.T) {
 			},
 			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withTxtRecord(zoneName, groupName, "txt", "v=spf1 include:mail.example.com ~all")},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -131,17 +134,18 @@ func TestAccResourceAutoF5XCDnsZoneRecord_txtRecordTransition(t *testing.T) {
 func TestAccResourceAutoF5XCDnsZoneRecord_ttlTransition(t *testing.T) {
 	t.Parallel()
 
-	zoneName := "tf-acc-" + testAccRunSuffix(t) + ".example.com"
+	zoneName := "example-dns-zone-" + testAccRunSuffix(t) + ".example.com"
 	groupName := "default"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsZoneRecordDestroyProducer(t),
+		ErrorCheck:               testAccSkipKnownDnsZoneServiceConfigError(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withTTL(zoneName, groupName, 300)},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -151,7 +155,7 @@ func TestAccResourceAutoF5XCDnsZoneRecord_ttlTransition(t *testing.T) {
 			},
 			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_withTTL(zoneName, groupName, 600)},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -166,17 +170,18 @@ func TestAccResourceAutoF5XCDnsZoneRecord_ttlTransition(t *testing.T) {
 func TestAccResourceAutoF5XCDnsZoneRecord_full(t *testing.T) {
 	t.Parallel()
 
-	zoneName := "tf-acc-" + testAccRunSuffix(t) + ".example.com"
+	zoneName := "example-dns-zone-" + testAccRunSuffix(t) + ".example.com"
 	groupName := "default"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsZoneRecordDestroyProducer(t),
+		ErrorCheck:               testAccSkipKnownDnsZoneServiceConfigError(t),
 		Steps: []resource.TestStep{
-			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "full record", 300, "api", "1.2.3.10")},
+			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "DNS zone record full example", 300, "api", "1.2.3.10")},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -184,9 +189,9 @@ func TestAccResourceAutoF5XCDnsZoneRecord_full(t *testing.T) {
 				// stable, always-set top-level attribute instead.
 				ImportStateVerifyIdentifierAttribute: "dns_zone_name",
 			},
-			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "full record updated", 600, "api", "1.2.3.11")},
+			{Config: testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "DNS zone record full example updated", 600, "api", "1.2.3.11")},
 			{
-				ResourceName:      "f5xc_dns_zone_record.test",
+				ResourceName:      "f5xc_dns_zone_record.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceAutoF5XCDnsZoneRecordImportStateID(zoneName),
@@ -195,6 +200,9 @@ func TestAccResourceAutoF5XCDnsZoneRecord_full(t *testing.T) {
 				ImportStateVerifyIdentifierAttribute: "dns_zone_name",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "DNS zone record full example", 300, "api", "1.2.3.10"),
 	})
 }
 
@@ -210,7 +218,7 @@ func testAccCheckDnsZoneRecordDestroyProducer(t *testing.T) func(*terraform.Stat
 // record_name/type for any record variant. The zoneName argument is retained for
 // call-site compatibility but is unused (the value is sourced from state).
 func testAccResourceAutoF5XCDnsZoneRecordImportStateID(_ string) func(*terraform.State) (string, error) {
-	return acctest.ImportStateIDFromFields("f5xc_dns_zone_record.test",
+	return acctest.ImportStateIDFromFields("f5xc_dns_zone_record.example",
 		"dns_zone_name", "group_name", "record_name", "type")
 }
 
@@ -232,7 +240,7 @@ resource "f5xc_dns_zone" "zone" {
 }
 
 func testAccResourceAutoF5XCDnsZoneRecordConfig_basic(zoneName, groupName string) string {
-	return testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "dns zone record", 300, "www", "1.2.3.4")
+	return testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "DNS zone record example", 300, "www", "1.2.3.4")
 }
 
 func testAccResourceAutoF5XCDnsZoneRecordConfig_withDescription(zoneName, groupName, description string) string {
@@ -240,18 +248,18 @@ func testAccResourceAutoF5XCDnsZoneRecordConfig_withDescription(zoneName, groupN
 }
 
 func testAccResourceAutoF5XCDnsZoneRecordConfig_withARecord(zoneName, groupName, recordName, ip string) string {
-	return testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "a record variant", 300, recordName, ip)
+	return testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "DNS zone record example with A record", 300, recordName, ip)
 }
 
 func testAccResourceAutoF5XCDnsZoneRecordConfig_withTTL(zoneName, groupName string, ttl int) string {
-	return testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "ttl variant", ttl, "www", "1.2.3.4")
+	return testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, "DNS zone record example with custom TTL", ttl, "www", "1.2.3.4")
 }
 
 func testAccResourceAutoF5XCDnsZoneRecordConfig_withTxtRecord(zoneName, groupName, recordName, txt string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_dns_zone_record" "test" {
+resource "f5xc_dns_zone_record" "example" {
   dns_zone_name = f5xc_dns_zone.zone.name
   group_name    = %q
 
@@ -274,7 +282,7 @@ func testAccResourceAutoF5XCDnsZoneRecordConfig_full(zoneName, groupName, descri
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_dns_zone_record" "test" {
+resource "f5xc_dns_zone_record" "example" {
   dns_zone_name = f5xc_dns_zone.zone.name
   group_name    = %q
 

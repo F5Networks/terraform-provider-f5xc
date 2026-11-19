@@ -6,14 +6,10 @@
 package data
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -35,14 +31,9 @@ type DataSourceF5XCFastAclsForInternetVips struct {
 
 // DataSourceF5XCFastAclsForInternetVipsModel describes the resource data model.
 type DataSourceF5XCFastAclsForInternetVipsModel struct {
-	Annotations types.Map      `tfsdk:"annotations"`
-	Description types.String   `tfsdk:"description"`
-	Labels      types.Map      `tfsdk:"labels"`
-	Name        types.String   `tfsdk:"name"`
-	Namespace   types.String   `tfsdk:"namespace"`
-	Uid         types.String   `tfsdk:"uid"`
-	FastAcls    types.List     `tfsdk:"fast_acls"`
-	Timeouts    timeouts.Value `tfsdk:"timeouts"`
+	Namespace types.String   `tfsdk:"namespace"`
+	FastAcls  types.List     `tfsdk:"fast_acls"`
+	Timeouts  timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
@@ -68,52 +59,20 @@ func (d *DataSourceF5XCFastAclsForInternetVips) Metadata(ctx context.Context, re
 func (r *DataSourceF5XCFastAclsForInternetVips) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		MarkdownDescription: "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names.<br><br>Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace<br><br>All monitoring is scoped by namespace<br><br>List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace<br><br>User roles can be scoped by namespace<br><br>The 'namespace' value of a namespace object itself is empty string",
+		Description:         "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names. Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace All monitoring is scoped by namespace List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace User roles can be scoped by namespace The 'namespace' value of a namespace object itself is empty string",
 
 		Attributes: map[string]schema.Attribute{
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
 			"namespace": schema.StringAttribute{
 				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"fast_acls": schema.ListNestedAttribute{
 				Description: "fast_acls The list of refs of FastACLs",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -193,89 +152,30 @@ func (d *DataSourceF5XCFastAclsForInternetVips) Read(ctx context.Context, reques
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_namespace.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	// CustomAPI Read: GetFastACLsForInternetVIPs
+	customReadRPCFQN := "ves.io.schema.namespace.NamespaceCustomAPI.GetFastACLsForInternetVIPs"
+	customReadURI := fmt.Sprintf("/public/namespaces/%s/fast_acls_for_internet_vips", data.Namespace.ValueString())
+
+	readRespMsg, err := d.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "fast_acls_for_internet_vips", err))
 		return
 	}
-
-	// Write back the response to the model
-	metaData := httpResp.GetObjMetadata()
-	var specData ves_io_schema_namespace.SetFastACLsForInternetVIPsRequest
-	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
-		var buf bytes.Buffer
-		marshaler := &jsonpb.Marshaler{
-			OrigName: true,
-		}
-
-		specMsg, ok := interface{}(objSpec).(proto.Message)
-		if !ok {
-			response.Diagnostics.AddError("Internal Error", "objSpec is not a proto message")
-			return
-		}
-
-		if err := marshaler.Marshal(&buf, specMsg); err != nil {
-			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal: %s", err))
-			return
-		}
-
-		if err := json.Unmarshal(buf.Bytes(), &rawSpecMap); err != nil {
-			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to marshal: %s", err))
-			return
-		}
-
-		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
-
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
-			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
-			return
-		}
+	// Cast the proto.Message to the concrete read response type
+	readResp, ok := readRespMsg.(*ves_io_schema_namespace.GetFastACLsForInternetVIPsResponse)
+	if !ok {
+		response.Diagnostics.AddError("Type Assertion Error", fmt.Sprintf("Failed to cast read response to *ves_io_schema_namespace.GetFastACLsForInternetVIPsResponse, got: %T", readRespMsg))
+		return
 	}
-	systemMetaData := httpResp.GetObjSystemMetadata()
+	specData := readResp
 
-	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
-	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Description.IsNull() || data.Description.IsUnknown() {
-		data.Description = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	// CustomAPI-only: no standard metadata in response; preserve existing model value or set null.
-	if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Name.IsNull() || data.Name.IsUnknown() {
-		data.Name = types.StringNull()
-	}
 
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
 	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
 	// were set from the request config and must not be overwritten with an empty string).
 	if data.Namespace.IsNull() || data.Namespace.IsUnknown() {
 		data.Namespace = types.StringNull()
-	}
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	// CustomAPI-only: no standard metadata in response; preserve the existing model value (name/namespace
-	// were set from the request config and must not be overwritten with an empty string).
-	if data.Uid.IsNull() || data.Uid.IsUnknown() {
-		data.Uid = types.StringNull()
 	}
 
 	// data SpecToModelRoot ArrayOfPointerField --> FastAcls

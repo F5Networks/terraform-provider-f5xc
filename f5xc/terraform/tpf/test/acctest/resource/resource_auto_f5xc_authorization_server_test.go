@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCAuthorizationServer_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-authsrv-" + acctest.RandString(t, 8)
+	name := "example-authorization-server-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,22 +39,22 @@ func TestAccResourceAutoF5XCAuthorizationServer_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCAuthorizationServer_basic(t *testing.T) {
 func TestAccResourceAutoF5XCAuthorizationServer_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-authsrv-" + acctest.RandString(t, 8)
+	name := "example-authorization-server-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,22 +76,22 @@ func TestAccResourceAutoF5XCAuthorizationServer_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -101,7 +101,7 @@ func TestAccResourceAutoF5XCAuthorizationServer_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCAuthorizationServer_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-authsrv-" + acctest.RandString(t, 8)
+	name := "example-authorization-server-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -113,22 +113,22 @@ func TestAccResourceAutoF5XCAuthorizationServer_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -138,10 +138,10 @@ func TestAccResourceAutoF5XCAuthorizationServer_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCAuthorizationServer_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-authsrv-" + acctest.RandString(t, 8)
+	name := "example-authorization-server-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAuthorizationServerDestroyProducer(t),
@@ -150,26 +150,30 @@ func TestAccResourceAutoF5XCAuthorizationServer_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAuthorizationServerConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_authorization_server.test",
+				ResourceName:                         "f5xc_authorization_server.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"last_fetch_status", "last_successful_fetch"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_authorization_server.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAuthorizationServerConfig_full("example-authorization-server", "default"),
+		})
 }
 
 func testAccCheckAuthorizationServerDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -178,10 +182,10 @@ func testAccCheckAuthorizationServerDestroyProducer(t *testing.T) func(*terrafor
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test authorization server"
+  description = "Authorization server example"
 	jwks_uri    = "https://www.googleapis.com/oauth2/v3/certs"
 }
 `, name, namespace)
@@ -189,10 +193,10 @@ resource "f5xc_authorization_server" "test" {
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test authorization server updated"
+  description = "Authorization server example updated"
 	jwks_uri    = "https://www.googleapis.com/oauth2/v3/certs"
 }
 `, name, namespace)
@@ -200,14 +204,14 @@ resource "f5xc_authorization_server" "test" {
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "Authorization server with labels"
 	jwks_uri    = "https://www.googleapis.com/oauth2/v3/certs"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -215,14 +219,14 @@ resource "f5xc_authorization_server" "test" {
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "Authorization server with labels"
 	jwks_uri    = "https://www.googleapis.com/oauth2/v3/certs"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "auth"
   }
 }
@@ -231,7 +235,7 @@ resource "f5xc_authorization_server" "test" {
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "Authorization server with annotations"
@@ -246,7 +250,7 @@ resource "f5xc_authorization_server" "test" {
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
   description = "Authorization server with annotations"
@@ -261,14 +265,14 @@ resource "f5xc_authorization_server" "test" {
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full authorization server"
+  description = "Full authorization server example"
 	jwks_uri    = "https://www.googleapis.com/oauth2/v3/certs"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -280,14 +284,14 @@ resource "f5xc_authorization_server" "test" {
 
 func testAccResourceAutoF5XCAuthorizationServerConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_authorization_server" "test" {
+resource "f5xc_authorization_server" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full authorization server updated"
+  description = "Full authorization server example updated"
 	jwks_uri    = "https://www.googleapis.com/oauth2/v3/certs"
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "auth"
   }
 

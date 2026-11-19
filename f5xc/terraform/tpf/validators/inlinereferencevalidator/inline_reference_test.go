@@ -6,6 +6,7 @@ package inlinereferencevalidator_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -50,6 +51,9 @@ func TestInlineReferenceValidator_ForbiddenChoiceTriggersError(t *testing.T) {
 	errDiag := resp.Diagnostics.Errors()[0]
 	if errDiag.Summary() != "Conflicting Service Policy Configuration" {
 		t.Errorf("unexpected summary: %s", errDiag.Summary())
+	}
+	if !strings.Contains(errDiag.Detail(), "inline is incompatible with the attachment resource") {
+		t.Errorf("unexpected detail message: %s", errDiag.Detail())
 	}
 
 	// Case 2: no_service_policies is configured (valid inline choice - no error)

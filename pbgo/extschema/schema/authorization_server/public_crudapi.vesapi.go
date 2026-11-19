@@ -2291,8 +2291,26 @@ var APISwaggerJSON string = `{
             "description": "Create authorization_server creates a new object in the storage backend for metadata.namespace.",
             "title": "Create authorization server",
             "x-displayname": "Create Authorization Server",
+            "x-ves-oneof-field-issuer_validation": "[\"issuer\",\"issuer_disable\"]",
             "x-ves-proto-message": "ves.io.schema.authorization_server.CreateSpecType",
             "properties": {
+                "issuer": {
+                    "type": "string",
+                    "description": "Exclusive with [issuer_disable]\n\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.max_len: 512\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "maxLength": 512,
+                    "x-displayname": "Exact Match",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.max_len": "512",
+                        "ves.io.schema.rules.string.not_empty": "true"
+                    }
+                },
+                "issuer_disable": {
+                    "description": "Exclusive with [issuer]\n",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Disable"
+                },
                 "jwks_uri": {
                     "type": "string",
                     "description": " x-textBlockContent:\n Automatic fetching of JWKS will happen once daily. You can also do it manually from the list of Authorization Servers at any time.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.max_len: 256\n  ves.io.schema.rules.string.uri: true\n",
@@ -2431,8 +2449,26 @@ var APISwaggerJSON string = `{
             "description": "Get authorization_server reads a given object from storage backend for metadata.namespace.",
             "title": "Get authorization server",
             "x-displayname": "Get Authorization Server",
+            "x-ves-oneof-field-issuer_validation": "[\"issuer\",\"issuer_disable\"]",
             "x-ves-proto-message": "ves.io.schema.authorization_server.GetSpecType",
             "properties": {
+                "issuer": {
+                    "type": "string",
+                    "description": "Exclusive with [issuer_disable]\n\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.max_len: 512\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "maxLength": 512,
+                    "x-displayname": "Exact Match",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.max_len": "512",
+                        "ves.io.schema.rules.string.not_empty": "true"
+                    }
+                },
+                "issuer_disable": {
+                    "description": "Exclusive with [issuer]\n",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Disable"
+                },
                 "jwks_uri": {
                     "type": "string",
                     "description": " x-textBlockContent:\n Automatic fetching of JWKS will happen once daily. You can also do it manually from the list of Authorization Servers at any time.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.max_len: 256\n  ves.io.schema.rules.string.uri: true\n",
@@ -2610,8 +2646,26 @@ var APISwaggerJSON string = `{
             "description": "Replace authorization_server replaces an existing object in the storage backend for metadata.namespace.",
             "title": "Replace authorization server",
             "x-displayname": "Replace Authorization Server",
+            "x-ves-oneof-field-issuer_validation": "[\"issuer\",\"issuer_disable\"]",
             "x-ves-proto-message": "ves.io.schema.authorization_server.ReplaceSpecType",
             "properties": {
+                "issuer": {
+                    "type": "string",
+                    "description": "Exclusive with [issuer_disable]\n\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.max_len: 512\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "maxLength": 512,
+                    "x-displayname": "Exact Match",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.max_len": "512",
+                        "ves.io.schema.rules.string.not_empty": "true"
+                    }
+                },
+                "issuer_disable": {
+                    "description": "Exclusive with [issuer]\n",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Disable"
+                },
                 "jwks_uri": {
                     "type": "string",
                     "description": " x-textBlockContent:\n Automatic fetching of JWKS will happen once daily. You can also do it manually from the list of Authorization Servers at any time.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.max_len: 256\n  ves.io.schema.rules.string.uri: true\n",
@@ -2672,6 +2726,13 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Config Object"
                 }
             }
+        },
+        "ioschemaEmpty": {
+            "type": "object",
+            "description": "This can be used for messages where no values are needed",
+            "title": "Empty",
+            "x-displayname": "Empty",
+            "x-ves-proto-message": "ves.io.schema.Empty"
         },
         "protobufAny": {
             "type": "object",
@@ -2744,12 +2805,12 @@ var APISwaggerJSON string = `{
                 },
                 "status": {
                     "type": "string",
-                    "description": " Status of the condition\n \"Success\" Validtion has succeded. Requested operation was successful.\n \"Failed\"  Validation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s\n \"Down\" Configuration is operationally down. e.g. down interface\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]\n",
+                    "description": " Status of the condition\n \"Success\" Validation has succeeded. Requested operation was successful.\n \"Failed\"  Validation or operation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s.\n \"Down\" Configuration is operationally down. e.g. down interface.\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs.\n \"InProgress\" Operation is in progress.\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]\n",
                     "title": "status",
                     "x-displayname": "Status",
                     "x-ves-example": "Failed",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]"
+                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]"
                     }
                 },
                 "type": {

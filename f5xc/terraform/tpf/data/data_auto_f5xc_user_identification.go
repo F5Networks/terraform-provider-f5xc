@@ -28,11 +28,11 @@ type DataSourceF5XCUserIdentification struct {
 	client *client.APIClient
 }
 
-type UserIdentificationUserIdentificationUserIdentificationRule struct {
+type UserIdentificationUserIdentificationRule struct {
 	IdentifierChoice types.Object `tfsdk:"identifier_choice"`
 }
 
-type UserIdentificationUserIdentificationRuleIdentifierChoice struct {
+type UserIdentificationIdentifierChoice struct {
 	ClientAsn              types.Bool   `tfsdk:"client_asn"`
 	ClientCity             types.Bool   `tfsdk:"client_city"`
 	ClientCountry          types.Bool   `tfsdk:"client_country"`
@@ -105,8 +105,8 @@ func (d *DataSourceF5XCUserIdentification) Metadata(ctx context.Context, request
 func (r *DataSourceF5XCUserIdentification) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a user_identification This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_identification) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a user_identification This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of user_identification) etc. can be fetched",
+		MarkdownDescription: "A user_identification object consists of an ordered list of rules. The rules are evaluated against the input fields that are extracted from an request API<br>to determine a user identifier. The identifier is subsequently used to apply a rate_limiter to the request. A user_identification object can be referred to<br>from virtual_host and rate_limiter objects. The rules in the most specific user_identification object are used to obtain the identifier prior to applying a<br>rate_limiter. For example, the user_identification rules from a rate_limiter are preferred over those from a virtual_host. If there no user_identification<br>objects associated with the virtual_host or the rate_limiter being applied, the client IP address is treated as the identifier.",
+		Description:         "A user_identification object consists of an ordered list of rules. The rules are evaluated against the input fields that are extracted from an request API to determine a user identifier. The identifier is subsequently used to apply a rate_limiter to the request. A user_identification object can be referred to from virtual_host and rate_limiter objects. The rules in the most specific user_identification object are used to obtain the identifier prior to applying a rate_limiter. For example, the user_identification rules from a rate_limiter are preferred over those from a virtual_host. If there no user_identification objects associated with the virtual_host or the rate_limiter being applied, the client IP address is treated as the identifier.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -312,7 +312,7 @@ func (d *DataSourceF5XCUserIdentification) Read(ctx context.Context, request dat
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_user_identification.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "user_identification", err))
 		return
 	}
 
@@ -374,10 +374,10 @@ func (d *DataSourceF5XCUserIdentification) Read(ctx context.Context, request dat
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Rules
-	rulesElementsSpectToModel := make([]UserIdentificationUserIdentificationUserIdentificationRule, 0, len(specData.GetRules()))
+	rulesElementsSpectToModel := make([]UserIdentificationUserIdentificationRule, 0, len(specData.GetRules()))
 
 	for _, rulesElement := range specData.GetRules() {
-		userIdentificationUserIdentificationUserIdentificationRuleModel := UserIdentificationUserIdentificationUserIdentificationRule{}
+		userIdentificationUserIdentificationRuleModel := UserIdentificationUserIdentificationRule{}
 
 		// data specToModelNested RequiredOneOfField --> Identifier
 		// <no value>
@@ -544,13 +544,13 @@ func (d *DataSourceF5XCUserIdentification) Read(ctx context.Context, request dat
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			userIdentificationUserIdentificationUserIdentificationRuleModel.IdentifierChoice = finalObj
+			userIdentificationUserIdentificationRuleModel.IdentifierChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			userIdentificationUserIdentificationUserIdentificationRuleModel.IdentifierChoice = types.ObjectNull(UserIdentificationRulesIdentifierModelAttributeMap)
+			userIdentificationUserIdentificationRuleModel.IdentifierChoice = types.ObjectNull(UserIdentificationRulesIdentifierModelAttributeMap)
 		}
 
-		rulesElementsSpectToModel = append(rulesElementsSpectToModel, userIdentificationUserIdentificationUserIdentificationRuleModel)
+		rulesElementsSpectToModel = append(rulesElementsSpectToModel, userIdentificationUserIdentificationRuleModel)
 	}
 
 	{

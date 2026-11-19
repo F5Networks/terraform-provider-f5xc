@@ -20,7 +20,6 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -38,6 +37,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -265,8 +265,8 @@ func (r *ResourceF5XCSecretPolicy) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "rule A Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced.",
-		Description:         "rule A Rule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced.",
+		MarkdownDescription: "A Secret Policy defines who gets access to a secret.<br>A secret_policy object consists of an unordered list of predicates and a list of secret policy rules.<br>The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate.<br>Any predicates that are not specified in a policy are implicitly considered to be true.<br>The rules in the policy are also evaluated against the input fields.<br>They are treated as an ordered or unordered list depending on the value of the rule combining algorithm.<br>A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched.<br><br>If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified.<br>If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action.<br>If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.",
+		Description:         "A Secret Policy defines who gets access to a secret. A secret_policy object consists of an unordered list of predicates and a list of secret policy rules. The predicates are evaluated against a set of input fields that are extracted from or derived from client TLS certificate. Any predicates that are not specified in a policy are implicitly considered to be true. The rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining algorithm. A policy is considered a match if all predicates in the policy evaluate to true and the one of the rules in the policy is also matched. If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -350,7 +350,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 			},
 			"rule_choice": schema.SingleNestedAttribute{
 				Description:         "rule choice Allowed/Denied Sources rules provide the ability to allow/deny lists of IP addresses, countries, TLS fingerprints and ASNs. Custom rules provide more flexibility to define your own logic to control incoming requests.",
-				MarkdownDescription: "rule choice Allowed/Denied Sources rules provide the ability to allow/deny lists of IP addresses, countries, TLS fingerprints and ASNs. Custom rules provide more flexibility to define your own logic to control incoming requests.",
+				MarkdownDescription: "rule choice Allowed/Denied Sources rules provide the ability to allow/deny lists of IP addresses, countries, TLS fingerprints and ASNs. Custom rules provide more flexibility to define your own logic to control incoming requests.<br>Exactly one of `legacy_rule_list` or `rule_list` must be specified when `rule_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -361,12 +361,12 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 					),
 				},
 				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"legacy_rule_list": schema.SingleNestedAttribute{
 						Description:         "legacy_rule_list",
-						MarkdownDescription: "legacy_rule_list",
+						MarkdownDescription: "legacy_rule_list<br>Conflicts with `rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -403,7 +403,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -413,7 +413,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 					},
 					"rule_list": schema.SingleNestedAttribute{
 						Description:         "rule_list",
-						MarkdownDescription: "rule_list",
+						MarkdownDescription: "rule_list<br>Conflicts with `legacy_rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -483,7 +483,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 												},
 												"client_choice": schema.SingleNestedAttribute{
 													Description:         "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.",
-													MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.",
+													MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.<br>Exactly one of `client_name`, `client_name_matcher`, or `client_selector` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -497,7 +497,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 													Attributes: map[string]schema.Attribute{
 														"client_name": schema.StringAttribute{
 															Description:         "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
-															MarkdownDescription: "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
+															MarkdownDescription: "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name<br>Conflicts with `client_name_matcher` and `client_selector`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -507,7 +507,7 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 														},
 														"client_name_matcher": schema.SingleNestedAttribute{
 															Description:         "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
-															MarkdownDescription: "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
+															MarkdownDescription: "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.<br>Conflicts with `client_name` and `client_selector`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -542,21 +542,22 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 																},
 																"transformers": schema.ListAttribute{
 																	Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																	MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)<br>**Default:** `TRANSFORMER_NONE`",
+																	MarkdownDescription: "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)",
 																	ElementType:         types.StringType,
 																	Required:            false,
 																	Optional:            true,
-																	Computed:            true,
-																	Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("TRANSFORMER_NONE")),
+																	Computed:            false,
 																	Validators: []validator.List{
 																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"BASE64_DECODE", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRANSFORMER_NONE", "TRIM", "TRIM_LEFT", "TRIM_RIGHT", "UPPER_CASE", "URL_DECODE"}...)),
+																		listvalidator.SizeAtMost(9),
+																		listvalidator.UniqueValues(),
 																	},
 																},
 															},
 														},
 														"client_selector": schema.SingleNestedAttribute{
 															Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
-															MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+															MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `client_name` and `client_name_matcher`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -648,9 +649,17 @@ func (r *ResourceF5XCSecretPolicy) ModifyPlan(ctx context.Context, req resource.
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCSecretPolicyModel
 
 	// Read Terraform plan data into the model
@@ -1030,7 +1039,7 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_secret_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "secret_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "secret_policy", err),
 		)
 		return
 	}
@@ -1581,14 +1590,10 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_secret_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_secret_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "secret_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "secret_policy", err),
 		)
 		return
 	}
@@ -2105,6 +2110,12 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 }
 
 func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCSecretPolicyModel
@@ -2489,24 +2500,20 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_secret_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_secret_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "secret_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "secret_policy", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_secret_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_secret_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "secret_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "secret_policy", err),
 		)
 		return
 	}
@@ -3085,7 +3092,7 @@ func (r *ResourceF5XCSecretPolicy) Delete(ctx context.Context, request resource.
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "secret_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "secret_policy", err),
 		)
 		return
 	}

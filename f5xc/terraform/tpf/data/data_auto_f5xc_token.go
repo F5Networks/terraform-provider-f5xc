@@ -58,8 +58,8 @@ func (d *DataSourceF5XCToken) Metadata(ctx context.Context, request datasource.M
 func (r *DataSourceF5XCToken) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a token This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of token) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a token This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of token) etc. can be fetched",
+		MarkdownDescription: "token object is used to manage site admission. User must generate token before provisioning and pass this<br>token to site during it's registration. Invalid tokens are refused and site with invalid token won't be able<br>to join F5XC network.<br>Single token can be used to register multiple sites.",
+		Description:         "token object is used to manage site admission. User must generate token before provisioning and pass this token to site during it's registration. Invalid tokens are refused and site with invalid token won't be able to join F5XC network. Single token can be used to register multiple sites.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -105,6 +105,7 @@ func (r *DataSourceF5XCToken) Schema(ctx context.Context, request datasource.Sch
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"site_name": schema.StringAttribute{
 				Description: "site name only used for JWT token, to add cluster_name to JWT token",
@@ -176,7 +177,7 @@ func (d *DataSourceF5XCToken) Read(ctx context.Context, request datasource.ReadR
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_token.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "token", err))
 		return
 	}
 

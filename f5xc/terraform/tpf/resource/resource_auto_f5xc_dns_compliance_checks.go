@@ -18,7 +18,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -33,6 +32,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -95,8 +95,8 @@ func (r *ResourceF5XCDnsComplianceChecks) Metadata(ctx context.Context, request 
 func (r *ResourceF5XCDnsComplianceChecks) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_compliance_checks This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_compliance_checks) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_compliance_checks This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_compliance_checks) etc. can be fetched",
+		MarkdownDescription: "DNS Compliance Checks view defines the required parameters that can be used in CRUD, to create and manage DNS Compliance Checks.<br>It can be used to create DNS Compliance Checks.",
+		Description:         "DNS Compliance Checks view defines the required parameters that can be used in CRUD, to create and manage DNS Compliance Checks. It can be used to create DNS Compliance Checks.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -164,26 +164,28 @@ func (r *ResourceF5XCDnsComplianceChecks) Schema(ctx context.Context, request re
 			},
 			"disallowed_query_type_list": schema.ListAttribute{
 				Description:         "Disallowed Query Type Values Disallowed Query Type Values",
-				MarkdownDescription: "Disallowed Query Type Values Disallowed Query Type Values<br>**Valid Options:** `['IQUERY', 'NOTIFY', 'QUERY', 'STATUS', 'UPDATE']` (Multiple selection allowed)<br>**Default:** `QUERY`",
+				MarkdownDescription: "Disallowed Query Type Values Disallowed Query Type Values<br>**Valid Options:** `['IQUERY', 'NOTIFY', 'QUERY', 'STATUS', 'UPDATE']` (Multiple selection allowed)",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
+				Computed:            false,
 				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("QUERY")),
 				Validators: []validator.List{
 					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"IQUERY", "NOTIFY", "QUERY", "STATUS", "UPDATE"}...)),
+					listvalidator.SizeAtMost(8),
+					listvalidator.UniqueValues(),
 				},
 			},
 			"disallowed_resource_record_type_list": schema.ListAttribute{
 				Description:         "Disallowed Resource Record Types Disallowed Resource Record Type List",
-				MarkdownDescription: "Disallowed Resource Record Types Disallowed Resource Record Type List<br>**Valid Options:** `['A', 'A6', 'AAAA', 'AFSDB', 'APL', 'ATMA', 'AXFR', 'CAA', 'CDNSKEY', 'CDS', 'CERT', 'CNAME', 'CSYNC', 'DHCID', 'DLV', 'DNAME', 'DNSKEY', 'DS', 'EID', 'EUI48', 'EUI64', 'GID', 'GPOS', 'HINFO', 'HIP', 'IPSECKEY', 'ISDN', 'IXFR', 'KEY', 'KX', 'L32', 'L64', 'LOC', 'LP', 'MAILA', 'MAILB', 'MB', 'MD', 'MF', 'MG', 'MINFO', 'MR', 'MX', 'NAPTR', 'NID', 'NIMLOC', 'NINFO', 'NS', 'NSAP', 'NSAP_PTR', 'NSEC', 'NSEC3', 'NSEC3PARAM', 'NULL', 'NXT', 'OPENPGPKEY', 'OPT', 'PTR', 'PX', 'RKEY', 'RP', 'RRSIG', 'RT', 'SIG', 'SINK', 'SMIMEA', 'SOA', 'SPF', 'SRV', 'SSHFP', 'T', 'TA', 'TALINK', 'TKEY', 'TLSA', 'TSIG', 'TXT', 'UID', 'UINFO', 'UNSPEC', 'URI', 'WKS', 'X25']` (Multiple selection allowed)<br>**Default:** `T`",
+				MarkdownDescription: "Disallowed Resource Record Types Disallowed Resource Record Type List<br>**Valid Options:** `['A', 'A6', 'AAAA', 'AFSDB', 'APL', 'ATMA', 'AXFR', 'CAA', 'CDNSKEY', 'CDS', 'CERT', 'CNAME', 'CSYNC', 'DHCID', 'DLV', 'DNAME', 'DNSKEY', 'DS', 'EID', 'EUI48', 'EUI64', 'GID', 'GPOS', 'HINFO', 'HIP', 'IPSECKEY', 'ISDN', 'IXFR', 'KEY', 'KX', 'L32', 'L64', 'LOC', 'LP', 'MAILA', 'MAILB', 'MB', 'MD', 'MF', 'MG', 'MINFO', 'MR', 'MX', 'NAPTR', 'NID', 'NIMLOC', 'NINFO', 'NS', 'NSAP', 'NSAP_PTR', 'NSEC', 'NSEC3', 'NSEC3PARAM', 'NULL', 'NXT', 'OPENPGPKEY', 'OPT', 'PTR', 'PX', 'RKEY', 'RP', 'RRSIG', 'RT', 'SIG', 'SINK', 'SMIMEA', 'SOA', 'SPF', 'SRV', 'SSHFP', 'T', 'TA', 'TALINK', 'TKEY', 'TLSA', 'TSIG', 'TXT', 'UID', 'UINFO', 'UNSPEC', 'URI', 'WKS', 'X25']` (Multiple selection allowed)",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
+				Computed:            false,
 				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("T")),
 				Validators: []validator.List{
 					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"A", "A6", "AAAA", "AFSDB", "APL", "ATMA", "AXFR", "CAA", "CDNSKEY", "CDS", "CERT", "CNAME", "CSYNC", "DHCID", "DLV", "DNAME", "DNSKEY", "DS", "EID", "EUI48", "EUI64", "GID", "GPOS", "HINFO", "HIP", "IPSECKEY", "ISDN", "IXFR", "KEY", "KX", "L32", "L64", "LOC", "LP", "MAILA", "MAILB", "MB", "MD", "MF", "MG", "MINFO", "MR", "MX", "NAPTR", "NID", "NIMLOC", "NINFO", "NS", "NSAP", "NSAP_PTR", "NSEC", "NSEC3", "NSEC3PARAM", "NULL", "NXT", "OPENPGPKEY", "OPT", "PTR", "PX", "RKEY", "RP", "RRSIG", "RT", "SIG", "SINK", "SMIMEA", "SOA", "SPF", "SRV", "SSHFP", "T", "TA", "TALINK", "TKEY", "TLSA", "TSIG", "TXT", "UID", "UINFO", "UNSPEC", "URI", "WKS", "X25"}...)),
+					listvalidator.SizeAtMost(8),
+					listvalidator.UniqueValues(),
 				},
 			},
 			"domain_denylist": schema.ListAttribute{
@@ -202,23 +204,23 @@ func (r *ResourceF5XCDnsComplianceChecks) Schema(ctx context.Context, request re
 				Description:         "backref_objs A list of protocol inspection configs using dns compliance checks",
 				MarkdownDescription: "backref_objs A list of protocol inspection configs using dns compliance checks",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
@@ -226,9 +228,6 @@ func (r *ResourceF5XCDnsComplianceChecks) Schema(ctx context.Context, request re
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
 						},
 					},
 				},
@@ -295,9 +294,17 @@ func (r *ResourceF5XCDnsComplianceChecks) ModifyPlan(ctx context.Context, req re
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDnsComplianceChecks) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDnsComplianceChecksModel
 
 	// Read Terraform plan data into the model
@@ -446,7 +453,7 @@ func (r *ResourceF5XCDnsComplianceChecks) Create(ctx context.Context, request re
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -469,7 +476,7 @@ func (r *ResourceF5XCDnsComplianceChecks) Create(ctx context.Context, request re
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "dns_compliance_checks", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "dns_compliance_checks", err),
 		)
 		return
 	}
@@ -602,6 +609,9 @@ func (r *ResourceF5XCDnsComplianceChecks) Create(ctx context.Context, request re
 				return
 			}
 			data.DisallowedQueryTypeList = listValue
+		} else if !data.DisallowedQueryTypeList.IsNull() && !data.DisallowedQueryTypeList.IsUnknown() && len(data.DisallowedQueryTypeList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DisallowedQueryTypeList = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.DisallowedQueryTypeList = types.ListNull(types.StringType)
 		}
@@ -622,6 +632,9 @@ func (r *ResourceF5XCDnsComplianceChecks) Create(ctx context.Context, request re
 				return
 			}
 			data.DisallowedResourceRecordTypeList = listValue
+		} else if !data.DisallowedResourceRecordTypeList.IsNull() && !data.DisallowedResourceRecordTypeList.IsUnknown() && len(data.DisallowedResourceRecordTypeList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DisallowedResourceRecordTypeList = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.DisallowedResourceRecordTypeList = types.ListNull(types.StringType)
 		}
@@ -637,7 +650,12 @@ func (r *ResourceF5XCDnsComplianceChecks) Create(ctx context.Context, request re
 			}
 			data.DomainDenylist = listValue
 		} else {
-			data.DomainDenylist = types.ListNull(types.StringType)
+			if !data.DomainDenylist.IsNull() && !data.DomainDenylist.IsUnknown() && len(data.DomainDenylist.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.DomainDenylist = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.DomainDenylist = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -693,14 +711,12 @@ func (r *ResourceF5XCDnsComplianceChecks) Create(ctx context.Context, request re
 			AttrTypes: DnsComplianceChecksProtocolInspectionObjectRefModelAttributeMap,
 		}
 		nullProtocolInspectionList := basetypes.NewListNull(protocolInspectionObjectType)
-		var priorValProtocolInspection types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("protocol_inspection"), &priorValProtocolInspection)
-		if !priorValProtocolInspection.IsNull() && !priorValProtocolInspection.IsUnknown() {
-			data.ProtocolInspection = priorValProtocolInspection
+		if !data.ProtocolInspection.IsNull() && !data.ProtocolInspection.IsUnknown() && len(data.ProtocolInspection.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ProtocolInspection = basetypes.NewListValueMust(protocolInspectionObjectType, nil)
 		} else {
 			data.ProtocolInspection = nullProtocolInspectionList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -746,14 +762,10 @@ func (r *ResourceF5XCDnsComplianceChecks) Read(ctx context.Context, request reso
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "dns_compliance_checks", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_compliance_checks", err),
 		)
 		return
 	}
@@ -886,6 +898,9 @@ func (r *ResourceF5XCDnsComplianceChecks) Read(ctx context.Context, request reso
 				return
 			}
 			data.DisallowedQueryTypeList = listValue
+		} else if !data.DisallowedQueryTypeList.IsNull() && !data.DisallowedQueryTypeList.IsUnknown() && len(data.DisallowedQueryTypeList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DisallowedQueryTypeList = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.DisallowedQueryTypeList = types.ListNull(types.StringType)
 		}
@@ -906,6 +921,9 @@ func (r *ResourceF5XCDnsComplianceChecks) Read(ctx context.Context, request reso
 				return
 			}
 			data.DisallowedResourceRecordTypeList = listValue
+		} else if !data.DisallowedResourceRecordTypeList.IsNull() && !data.DisallowedResourceRecordTypeList.IsUnknown() && len(data.DisallowedResourceRecordTypeList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DisallowedResourceRecordTypeList = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.DisallowedResourceRecordTypeList = types.ListNull(types.StringType)
 		}
@@ -921,7 +939,12 @@ func (r *ResourceF5XCDnsComplianceChecks) Read(ctx context.Context, request reso
 			}
 			data.DomainDenylist = listValue
 		} else {
-			data.DomainDenylist = types.ListNull(types.StringType)
+			if !data.DomainDenylist.IsNull() && !data.DomainDenylist.IsUnknown() && len(data.DomainDenylist.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.DomainDenylist = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.DomainDenylist = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -977,14 +1000,12 @@ func (r *ResourceF5XCDnsComplianceChecks) Read(ctx context.Context, request reso
 			AttrTypes: DnsComplianceChecksProtocolInspectionObjectRefModelAttributeMap,
 		}
 		nullProtocolInspectionList := basetypes.NewListNull(protocolInspectionObjectType)
-		var priorValProtocolInspection types.List
-		_ = request.State.GetAttribute(ctx, path.Root("protocol_inspection"), &priorValProtocolInspection)
-		if !priorValProtocolInspection.IsNull() && !priorValProtocolInspection.IsUnknown() {
-			data.ProtocolInspection = priorValProtocolInspection
+		if !data.ProtocolInspection.IsNull() && !data.ProtocolInspection.IsUnknown() && len(data.ProtocolInspection.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ProtocolInspection = basetypes.NewListValueMust(protocolInspectionObjectType, nil)
 		} else {
 			data.ProtocolInspection = nullProtocolInspectionList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -996,6 +1017,12 @@ func (r *ResourceF5XCDnsComplianceChecks) Read(ctx context.Context, request reso
 }
 
 func (r *ResourceF5XCDnsComplianceChecks) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDnsComplianceChecksModel
@@ -1164,7 +1191,7 @@ func (r *ResourceF5XCDnsComplianceChecks) Update(ctx context.Context, request re
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1172,24 +1199,20 @@ func (r *ResourceF5XCDnsComplianceChecks) Update(ctx context.Context, request re
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "dns_compliance_checks", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_compliance_checks", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_compliance_checks.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "dns_compliance_checks", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_compliance_checks", err),
 		)
 		return
 	}
@@ -1321,6 +1344,9 @@ func (r *ResourceF5XCDnsComplianceChecks) Update(ctx context.Context, request re
 				return
 			}
 			data.DisallowedQueryTypeList = listValue
+		} else if !data.DisallowedQueryTypeList.IsNull() && !data.DisallowedQueryTypeList.IsUnknown() && len(data.DisallowedQueryTypeList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DisallowedQueryTypeList = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.DisallowedQueryTypeList = types.ListNull(types.StringType)
 		}
@@ -1341,6 +1367,9 @@ func (r *ResourceF5XCDnsComplianceChecks) Update(ctx context.Context, request re
 				return
 			}
 			data.DisallowedResourceRecordTypeList = listValue
+		} else if !data.DisallowedResourceRecordTypeList.IsNull() && !data.DisallowedResourceRecordTypeList.IsUnknown() && len(data.DisallowedResourceRecordTypeList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DisallowedResourceRecordTypeList = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.DisallowedResourceRecordTypeList = types.ListNull(types.StringType)
 		}
@@ -1356,7 +1385,12 @@ func (r *ResourceF5XCDnsComplianceChecks) Update(ctx context.Context, request re
 			}
 			data.DomainDenylist = listValue
 		} else {
-			data.DomainDenylist = types.ListNull(types.StringType)
+			if !data.DomainDenylist.IsNull() && !data.DomainDenylist.IsUnknown() && len(data.DomainDenylist.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.DomainDenylist = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.DomainDenylist = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -1412,14 +1446,12 @@ func (r *ResourceF5XCDnsComplianceChecks) Update(ctx context.Context, request re
 			AttrTypes: DnsComplianceChecksProtocolInspectionObjectRefModelAttributeMap,
 		}
 		nullProtocolInspectionList := basetypes.NewListNull(protocolInspectionObjectType)
-		var priorValProtocolInspection types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("protocol_inspection"), &priorValProtocolInspection)
-		if !priorValProtocolInspection.IsNull() && !priorValProtocolInspection.IsUnknown() {
-			data.ProtocolInspection = priorValProtocolInspection
+		if !data.ProtocolInspection.IsNull() && !data.ProtocolInspection.IsUnknown() && len(data.ProtocolInspection.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ProtocolInspection = basetypes.NewListValueMust(protocolInspectionObjectType, nil)
 		} else {
 			data.ProtocolInspection = nullProtocolInspectionList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -1494,7 +1526,7 @@ func (r *ResourceF5XCDnsComplianceChecks) Delete(ctx context.Context, request re
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "dns_compliance_checks", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "dns_compliance_checks", err),
 		)
 		return
 	}

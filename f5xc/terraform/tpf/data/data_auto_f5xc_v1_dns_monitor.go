@@ -10,6 +10,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
@@ -21,6 +23,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"gopkg.volterra.us/stdlib/client/vesapi"
+	"gopkg.volterra.us/stdlib/server"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
@@ -34,60 +38,60 @@ type DataSourceF5XCV1DnsMonitor struct {
 	client *client.APIClient
 }
 
-type V1DnsMonitorSyntheticMonitorSourceExternal struct {
+type V1DnsMonitorSrcExternal struct {
 	SourceChoice types.Object `tfsdk:"source_choice"`
 }
 
-type V1DnsMonitorSourceExternalSourceChoice struct {
+type V1DnsMonitorSrcChoice struct {
 	Aws  types.Object `tfsdk:"aws"`
 	F5Xc types.Object `tfsdk:"f5xc"`
 }
 
-type V1DnsMonitorSourceExternalAws struct {
+type V1DnsMonitorAws struct {
 	Regions types.List `tfsdk:"regions"`
 }
 
-type V1DnsMonitorSourceExternalF5Xc struct {
+type V1DnsMonitorF5Xc struct {
 	Regions types.List `tfsdk:"regions"`
 }
 
-type V1DnsMonitorSyntheticMonitorHealthPolicy struct {
+type V1DnsMonitorHealthPolicy struct {
 	DynamicThresholdPolicyChoice   types.Object `tfsdk:"dynamic_threshold_policy_choice"`
 	StaticMaxThresholdPolicyChoice types.Object `tfsdk:"static_max_threshold_policy_choice"`
 	StaticMinThresholdPolicyChoice types.Object `tfsdk:"static_min_threshold_policy_choice"`
 }
 
-type V1DnsMonitorHealthPolicyDynamicThresholdPolicyChoice struct {
+type V1DnsMonitorDynamicThresholdPolicyChoice struct {
 	DynamicThreshold         types.Object `tfsdk:"dynamic_threshold"`
 	DynamicThresholdDisabled types.Bool   `tfsdk:"dynamic_threshold_disabled"`
 }
 
-type V1DnsMonitorHealthPolicyDynamicThreshold struct {
+type V1DnsMonitorDynamicThreshold struct {
 	EvalPeriod types.List `tfsdk:"eval_period"`
 	StdDevVal  types.List `tfsdk:"std_dev_val"`
 }
 
-type V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyChoice struct {
+type V1DnsMonitorStaticMaxThresholdPolicyChoice struct {
 	StaticMaxThreshold         types.Object `tfsdk:"static_max_threshold"`
 	StaticMaxThresholdDisabled types.Bool   `tfsdk:"static_max_threshold_disabled"`
 }
 
-type V1DnsMonitorHealthPolicyStaticMaxThreshold struct {
+type V1DnsMonitorStaticMaxThreshold struct {
 	EvalPeriod      types.List  `tfsdk:"eval_period"`
 	MaxResponseTime types.Int64 `tfsdk:"max_response_time"`
 }
 
-type V1DnsMonitorHealthPolicyStaticMinThresholdPolicyChoice struct {
+type V1DnsMonitorStaticMinThresholdPolicyChoice struct {
 	StaticMinThreshold         types.Object `tfsdk:"static_min_threshold"`
 	StaticMinThresholdDisabled types.Bool   `tfsdk:"static_min_threshold_disabled"`
 }
 
-type V1DnsMonitorHealthPolicyStaticMinThreshold struct {
+type V1DnsMonitorStaticMinThreshold struct {
 	EvalPeriod      types.List  `tfsdk:"eval_period"`
 	MinResponseTime types.Int64 `tfsdk:"min_response_time"`
 }
 
-type V1DnsMonitorCreateSpecTypeIntervalChoice struct {
+type V1DnsMonitorIntervalChoice struct {
 	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
 	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
 	Interval_1Day    types.Bool `tfsdk:"interval_1_day"`
@@ -99,12 +103,12 @@ type V1DnsMonitorCreateSpecTypeIntervalChoice struct {
 	Interval_6Hours  types.Bool `tfsdk:"interval_6_hours"`
 }
 
-type V1DnsMonitorV1DnsMonitorNameServer struct {
+type V1DnsMonitorNameServer struct {
 	NameServer types.String `tfsdk:"name_server"`
 	Port       types.Int64  `tfsdk:"port"`
 }
 
-type V1DnsMonitorCreateSpecTypeOnFailureToChoice struct {
+type V1DnsMonitorOnFailureToChoice struct {
 	OnFailureToAll types.Bool `tfsdk:"on_failure_to_all"`
 	OnFailureToAny types.Bool `tfsdk:"on_failure_to_any"`
 }
@@ -280,8 +284,8 @@ func (d *DataSourceF5XCV1DnsMonitor) Metadata(ctx context.Context, request datas
 func (r *DataSourceF5XCV1DnsMonitor) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a v1_dns_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_dns_monitor) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a v1_dns_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_dns_monitor) etc. can be fetched",
+		MarkdownDescription: "DNS Monitor defines a DNS synthetic monitor.",
+		Description:         "DNS Monitor defines a DNS synthetic monitor.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -685,9 +689,15 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-	httpResp, err := d.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
+	readGetRspType := strings.Replace(ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, "Object", "GetResponse", 1)
+	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
+	readCallRsp := &server.CallResponse{
+		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
+	}
+	opts := []vesapi.CallOpt{vesapi.WithOutCallResponse(readCallRsp)}
+	httpResp, err := d.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "v1_dns_monitor", err))
 		return
 	}
 
@@ -695,7 +705,41 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 	metaData := httpResp.GetObjMetadata()
 	var specData ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType
 	var rawSpecMap map[string]interface{}
-	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+	var readRspRawSpecMap map[string]interface{}
+	if readCallRsp.ProtoMsg != nil {
+		var rspBuf bytes.Buffer
+		rspMarshaler := &jsonpb.Marshaler{OrigName: true}
+		if marshalErr := rspMarshaler.Marshal(&rspBuf, readCallRsp.ProtoMsg); marshalErr == nil {
+			var fullRspMap map[string]interface{}
+			if jsonErr := json.Unmarshal(rspBuf.Bytes(), &fullRspMap); jsonErr == nil {
+				// Path 2b: GetResponse envelope – spec is under "object.spec"
+				if objMap, ok := fullRspMap["object"].(map[string]interface{}); ok {
+					if specMap, ok := objMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+				// Path 2a fallback: spec directly at top level (CreateResponse envelope)
+				if readRspRawSpecMap == nil {
+					if specMap, ok := fullRspMap["spec"].(map[string]interface{}); ok && len(specMap) > 0 {
+						readRspRawSpecMap = specMap
+					}
+				}
+			}
+		}
+	}
+	if readRspRawSpecMap != nil {
+		rawSpecMap = readRspRawSpecMap
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		if specBytes, marshalErr := json.Marshal(rawSpecMap); marshalErr == nil {
+			if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
+				response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal read spec: %s", err))
+				return
+			}
+		} else {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal readRspRawSpecMap: %s", marshalErr))
+			return
+		}
+	} else if objSpec := httpResp.GetObjSpec(); objSpec != nil {
 		var buf bytes.Buffer
 		marshaler := &jsonpb.Marshaler{
 			OrigName: true,
@@ -718,8 +762,14 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 		}
 
 		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+		specBytes := buf.Bytes()
+		if gcSpec, ok := rawSpecMap["gc_spec"]; ok {
+			if gcSpecBytes, err := json.Marshal(gcSpec); err == nil {
+				specBytes = gcSpecBytes
+			}
+		}
 
-		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+		if err := unmarshaler.Unmarshal(bytes.NewReader(specBytes), &specData); err != nil {
 			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
 			return
 		}
@@ -728,6 +778,7 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
+	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
@@ -787,10 +838,10 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> ExternalSources
-	externalSourcesElementsSpectToModel := make([]V1DnsMonitorSyntheticMonitorSourceExternal, 0, len(specData.GetExternalSources()))
+	externalSourcesElementsSpectToModel := make([]V1DnsMonitorSrcExternal, 0, len(specData.GetExternalSources()))
 
 	for _, externalSourcesElement := range specData.GetExternalSources() {
-		v1DnsMonitorSyntheticMonitorSourceExternalModel := V1DnsMonitorSyntheticMonitorSourceExternal{}
+		v1DnsMonitorSrcExternalModel := V1DnsMonitorSrcExternal{}
 
 		// data specToModelNested RequiredOneOfField --> SourceChoice
 		// CreateSpecType
@@ -884,12 +935,12 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1DnsMonitorSyntheticMonitorSourceExternalModel.SourceChoice = finalObj
+			v1DnsMonitorSrcExternalModel.SourceChoice = finalObj
 		} else {
-			v1DnsMonitorSyntheticMonitorSourceExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
+			v1DnsMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
 		}
 
-		externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1DnsMonitorSyntheticMonitorSourceExternalModel)
+		externalSourcesElementsSpectToModel = append(externalSourcesElementsSpectToModel, v1DnsMonitorSrcExternalModel)
 	}
 
 	{
@@ -909,7 +960,7 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot PointerField --> HealthPolicy
 	if specData.GetHealthPolicy() != nil {
-		var v1DnsMonitorSyntheticMonitorHealthPolicyModel = &V1DnsMonitorSyntheticMonitorHealthPolicy{}
+		var v1DnsMonitorHealthPolicyModel = &V1DnsMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
 		// data specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
@@ -1009,9 +1060,9 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1DnsMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
+			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorSyntheticMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
@@ -1100,9 +1151,9 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1DnsMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
+			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorSyntheticMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
@@ -1191,15 +1242,15 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			v1DnsMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
+			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorSyntheticMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
 		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			V1DnsMonitorHealthPolicyModelAttributeMap,
-			v1DnsMonitorSyntheticMonitorHealthPolicyModel,
+			v1DnsMonitorHealthPolicyModel,
 		)
 		response.Diagnostics.Append(healthPolicyDiags...)
 		data.HealthPolicy = healthPolicyObj
@@ -1265,10 +1316,15 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 	if oneofIntervalChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		intervalChoiceChoices := rawSpecMap["interval_choice"]
+		var intervalChoiceChoices interface{}
+		if v := rawSpecMap["interval_choice"]; v != nil {
+			intervalChoiceChoices = v
+		} else {
+			intervalChoiceChoices = specData.GetIntervalChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var intervalChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeIntervalChoice{}
+		var intervalChoiceChoicesModel = &V1DnsMonitorIntervalChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1498,23 +1554,23 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 
 	// data SpecToModelRoot ArrayOfPointerField --> NameServers
 	if len(specData.GetNameServers()) > 0 {
-		nameServersElements := make([]V1DnsMonitorV1DnsMonitorNameServer, 0, len(specData.GetNameServers()))
+		nameServersElements := make([]V1DnsMonitorNameServer, 0, len(specData.GetNameServers()))
 
 		for _, nameServersElement := range specData.GetNameServers() {
-			v1DnsMonitorV1DnsMonitorNameServerModel := V1DnsMonitorV1DnsMonitorNameServer{}
+			v1DnsMonitorNameServerModel := V1DnsMonitorNameServer{}
 
 			// data specToModelNested RequiredStringField --> NameServer
 			if nameServersElement.GetNameServer() != "" {
-				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringValue(nameServersElement.GetNameServer())
+				v1DnsMonitorNameServerModel.NameServer = types.StringValue(nameServersElement.GetNameServer())
 			} else {
 				// Empty string, set to null
-				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringNull()
+				v1DnsMonitorNameServerModel.NameServer = types.StringNull()
 			}
 
 			// data specToModelNested UintField --> Port
-			v1DnsMonitorV1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
+			v1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
 
-			nameServersElements = append(nameServersElements, v1DnsMonitorV1DnsMonitorNameServerModel)
+			nameServersElements = append(nameServersElements, v1DnsMonitorNameServerModel)
 		}
 
 		{
@@ -1575,10 +1631,15 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 	if oneofOnFailureToChoicePresent {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		onFailureToChoiceChoices := rawSpecMap["on_failure_to_choice"]
+		var onFailureToChoiceChoices interface{}
+		if v := rawSpecMap["on_failure_to_choice"]; v != nil {
+			onFailureToChoiceChoices = v
+		} else {
+			onFailureToChoiceChoices = specData.GetOnFailureToChoice()
+		}
 
 		// The model struct that will be populated by the nested template.
-		var onFailureToChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
+		var onFailureToChoiceChoicesModel = &V1DnsMonitorOnFailureToChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1655,12 +1716,8 @@ func (d *DataSourceF5XCV1DnsMonitor) Read(ctx context.Context, request datasourc
 	}
 
 	// data SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// data SpecToModelRoot RequiredStringField --> RecordType
 	if specData.GetRecordType() != "" {

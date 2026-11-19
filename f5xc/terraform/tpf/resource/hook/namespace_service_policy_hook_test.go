@@ -97,14 +97,20 @@ func setupActiveNamespace(t *testing.T, ns string) {
 	})
 }
 
-// TestServicePolicyPreDeleteHook_SkippedWhenNotActive verifies that when active policies
-// are not marked as enabled for a namespace, ServicePolicyPreDeleteHook short-circuits
-// immediately without making any CustomAPI calls.
-func TestServicePolicyPreDeleteHook_SkippedWhenNotActive(t *testing.T) {
+// TestServicePolicyPreDeleteHook_AlwaysChecksActiveList verifies that the hook
+// always performs the active-list check regardless of MarkNamespaceActivePolicies
+// state, since that in-memory flag doesn't survive across separate terraform
+// plan/apply process invocations and can't be relied on for correctness.
+func TestServicePolicyPreDeleteHook_AlwaysChecksActiveList(t *testing.T) {
 	MarkNamespaceActivePolicies("default", false)
 
 	stub := &stubCustomAPIClient{
 		handler: func(method, uri, rpcFQN, reqYml string) (proto.Message, error) {
+			if method == "GET" {
+				return &ves_io_schema_namespace.GetActiveServicePoliciesResponse{
+					ServicePolicies: []*views.ObjectRefType{},
+				}, nil
+			}
 			return nil, fmt.Errorf("unexpected CustomAPI call: %s %s", method, rpcFQN)
 		},
 	}
@@ -114,8 +120,8 @@ func TestServicePolicyPreDeleteHook_SkippedWhenNotActive(t *testing.T) {
 		t.Fatalf("expected no error, got: %v", err)
 	}
 
-	if len(stub.calls) != 0 {
-		t.Fatalf("expected 0 CustomAPI calls when active policies not enabled, got %d", len(stub.calls))
+	if len(stub.calls) != 1 {
+		t.Fatalf("expected 1 CustomAPI call (GET), got %d", len(stub.calls))
 	}
 }
 
@@ -798,5 +804,3 @@ func TestParseReferringObjects(t *testing.T) {
 		})
 	}
 }
-
-

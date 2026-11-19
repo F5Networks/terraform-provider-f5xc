@@ -28,30 +28,30 @@ type DataSourceF5XCMaliciousUserMitigation struct {
 	client *client.APIClient
 }
 
-type MaliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationType struct {
+type MaliciousUserMitigationMaliciousUserMitigationType struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type MaliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRule struct {
+type MaliciousUserMitigationMaliciousUserMitigationRule struct {
 	MitigationAction types.Object `tfsdk:"mitigation_action"`
 	ThreatLevel      types.Object `tfsdk:"threat_level"`
 }
 
-type MaliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationAction struct {
+type MaliciousUserMitigationMaliciousUserMitigationAction struct {
 	MitigationActionChoice types.Object `tfsdk:"mitigation_action_choice"`
 }
 
-type MaliciousUserMitigationMaliciousUserMitigationActionMitigationActionChoice struct {
+type MaliciousUserMitigationMitigationActionChoice struct {
 	BlockTemporarily    types.Bool `tfsdk:"block_temporarily"`
 	CaptchaChallenge    types.Bool `tfsdk:"captcha_challenge"`
 	JavascriptChallenge types.Bool `tfsdk:"javascript_challenge"`
 }
 
-type MaliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevel struct {
+type MaliciousUserMitigationMaliciousUserThreatLevel struct {
 	ThreatLevelChoice types.Object `tfsdk:"threat_level_choice"`
 }
 
-type MaliciousUserMitigationMaliciousUserThreatLevelThreatLevelChoice struct {
+type MaliciousUserMitigationThreatLevelChoice struct {
 	High   types.Bool `tfsdk:"high"`
 	Low    types.Bool `tfsdk:"low"`
 	Medium types.Bool `tfsdk:"medium"`
@@ -153,8 +153,8 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Metadata(ctx context.Context, re
 func (r *DataSourceF5XCMaliciousUserMitigation) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "MaliciousUserMitigationType Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.",
-		Description:         "MaliciousUserMitigationType Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.",
+		MarkdownDescription: "A malicious_user_mitigation object consists of settings that specify the actions to be taken when<br>malicious users are determined to be at different threat levels. User's activity is monitored and<br>continuously analyzed for malicious behavior. From this analysis, a threat level is assigned to each user.<br>The settings defined in malicious user mitigation specify what mitigation actions to take for users<br>determined to be at different threat levels.",
+		Description:         "A malicious_user_mitigation object consists of settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for users determined to be at different threat levels.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -338,7 +338,7 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Read(ctx context.Context, reques
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_malicious_user_mitigation.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "malicious_user_mitigation", err))
 		return
 	}
 
@@ -401,21 +401,21 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Read(ctx context.Context, reques
 
 	// data SpecToModelRoot PointerField --> MitigationType
 	if specData.GetMitigationType() != nil {
-		var maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationTypeModel = &MaliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationType{}
+		var maliciousUserMitigationMaliciousUserMitigationTypeModel = &MaliciousUserMitigationMaliciousUserMitigationType{}
 		mitigationTypeElement := specData.GetMitigationType()
 
 		// data specToModelNested RequiredArrayOfPointerField --> Rules
 		if len(mitigationTypeElement.GetRules()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			rulesElements := make([]MaliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRule, 0, len(mitigationTypeElement.GetRules()))
+			rulesElements := make([]MaliciousUserMitigationMaliciousUserMitigationRule, 0, len(mitigationTypeElement.GetRules()))
 			for _, rulesElement := range mitigationTypeElement.GetRules() {
-				maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRuleModel := MaliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRule{}
+				maliciousUserMitigationMaliciousUserMitigationRuleModel := MaliciousUserMitigationMaliciousUserMitigationRule{}
 
 				// data specToModelNested RequiredPointerField --> MitigationAction
 				if rulesElement.GetMitigationAction() != nil {
 					// Create the nested Go struct
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationActionModel := &MaliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationAction{}
+					maliciousUserMitigationMaliciousUserMitigationActionModel := &MaliciousUserMitigationMaliciousUserMitigationAction{}
 					mitigationActionElement := rulesElement.GetMitigationAction()
 
 					// Recursively populate the nested struct
@@ -472,19 +472,19 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Read(ctx context.Context, reques
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationActionModel.MitigationActionChoice = finalObj
+						maliciousUserMitigationMaliciousUserMitigationActionModel.MitigationActionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationActionModel.MitigationActionChoice = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesMitigationActionMitigationActionModelAttributeMap)
+						maliciousUserMitigationMaliciousUserMitigationActionModel.MitigationActionChoice = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesMitigationActionMitigationActionModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationActionModelObj, objDiags := types.ObjectValueFrom(ctx, MaliciousUserMitigationMitigationTypeRulesMitigationActionModelAttributeMap, maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationActionModel)
+					maliciousUserMitigationMaliciousUserMitigationActionModelObj, objDiags := types.ObjectValueFrom(ctx, MaliciousUserMitigationMitigationTypeRulesMitigationActionModelAttributeMap, maliciousUserMitigationMaliciousUserMitigationActionModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRuleModel.MitigationAction = maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationActionModelObj
+					maliciousUserMitigationMaliciousUserMitigationRuleModel.MitigationAction = maliciousUserMitigationMaliciousUserMitigationActionModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -493,13 +493,13 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Read(ctx context.Context, reques
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRuleModel.MitigationAction = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesMitigationActionModelAttributeMap)
+					maliciousUserMitigationMaliciousUserMitigationRuleModel.MitigationAction = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesMitigationActionModelAttributeMap)
 				}
 
 				// data specToModelNested RequiredPointerField --> ThreatLevel
 				if rulesElement.GetThreatLevel() != nil {
 					// Create the nested Go struct
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevelModel := &MaliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevel{}
+					maliciousUserMitigationMaliciousUserThreatLevelModel := &MaliciousUserMitigationMaliciousUserThreatLevel{}
 					threatLevelElement := rulesElement.GetThreatLevel()
 
 					// Recursively populate the nested struct
@@ -556,19 +556,19 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Read(ctx context.Context, reques
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						maliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevelModel.ThreatLevelChoice = finalObj
+						maliciousUserMitigationMaliciousUserThreatLevelModel.ThreatLevelChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						maliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevelModel.ThreatLevelChoice = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesThreatLevelThreatLevelModelAttributeMap)
+						maliciousUserMitigationMaliciousUserThreatLevelModel.ThreatLevelChoice = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesThreatLevelThreatLevelModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevelModelObj, objDiags := types.ObjectValueFrom(ctx, MaliciousUserMitigationMitigationTypeRulesThreatLevelModelAttributeMap, maliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevelModel)
+					maliciousUserMitigationMaliciousUserThreatLevelModelObj, objDiags := types.ObjectValueFrom(ctx, MaliciousUserMitigationMitigationTypeRulesThreatLevelModelAttributeMap, maliciousUserMitigationMaliciousUserThreatLevelModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRuleModel.ThreatLevel = maliciousUserMitigationMaliciousUserMitigationMaliciousUserThreatLevelModelObj
+					maliciousUserMitigationMaliciousUserMitigationRuleModel.ThreatLevel = maliciousUserMitigationMaliciousUserThreatLevelModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -577,10 +577,10 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Read(ctx context.Context, reques
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRuleModel.ThreatLevel = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesThreatLevelModelAttributeMap)
+					maliciousUserMitigationMaliciousUserMitigationRuleModel.ThreatLevel = types.ObjectNull(MaliciousUserMitigationMitigationTypeRulesThreatLevelModelAttributeMap)
 				}
 
-				rulesElements = append(rulesElements, maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationRuleModel)
+				rulesElements = append(rulesElements, maliciousUserMitigationMaliciousUserMitigationRuleModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -589,19 +589,19 @@ func (d *DataSourceF5XCMaliciousUserMitigation) Read(ctx context.Context, reques
 			if response.Diagnostics.HasError() {
 				return
 			}
-			maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationTypeModel.Rules = rulesListValue
+			maliciousUserMitigationMaliciousUserMitigationTypeModel.Rules = rulesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationTypeModel.Rules = types.ListNull(types.ObjectType{AttrTypes: MaliciousUserMitigationMitigationTypeRulesModelAttributeMap})
+			maliciousUserMitigationMaliciousUserMitigationTypeModel.Rules = types.ListNull(types.ObjectType{AttrTypes: MaliciousUserMitigationMitigationTypeRulesModelAttributeMap})
 		}
 
 		mitigationTypeObj, mitigationTypeDiags := utils.GoStructToObjectValue(
 			ctx,
 			MaliciousUserMitigationMitigationTypeModelAttributeMap,
-			maliciousUserMitigationMaliciousUserMitigationMaliciousUserMitigationTypeModel,
+			maliciousUserMitigationMaliciousUserMitigationTypeModel,
 		)
 		response.Diagnostics.Append(mitigationTypeDiags...)
 		data.MitigationType = mitigationTypeObj

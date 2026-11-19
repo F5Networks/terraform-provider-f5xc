@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -35,6 +36,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -149,6 +151,7 @@ type GlobalLogReceiverSecretType struct {
 type GlobalLogReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type GlobalLogReceiverBlindfoldSecretInfo struct {
@@ -379,7 +382,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> FilterChoice
+// Attribute map for OneOfField --> FilterChoice
 var GlobalLogReceiverFilterChoiceModelAttributeMap = map[string]attr.Type{
 
 	"ns_all":     types.BoolType,
@@ -416,7 +419,7 @@ var GlobalLogReceiverLogTypeRequestLogsModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> SamplingChoice
+// Attribute map for OneOfField --> SamplingChoice
 var GlobalLogReceiverLogTypeRequestLogsSamplingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"sampled":   types.BoolType,
@@ -544,7 +547,7 @@ var GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionModelAttributeMap =
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -581,6 +584,7 @@ var GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOne
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -673,7 +677,7 @@ var GlobalLogReceiverReceiverAzureReceiverCompressionModelAttributeMap = map[str
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverAzureReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -698,6 +702,7 @@ var GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofModelAt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -806,7 +811,7 @@ var GlobalLogReceiverReceiverDatadogReceiverCompressionModelAttributeMap = map[s
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverDatadogReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -831,6 +836,7 @@ var GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -881,7 +887,7 @@ var GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsModelAttributeMap = m
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CaChoice
+// Attribute map for OneOfField --> CaChoice
 var GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_ca":          types.BoolType,
@@ -925,6 +931,7 @@ var GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableK
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1031,7 +1038,7 @@ var GlobalLogReceiverReceiverGcpBucketReceiverCompressionModelAttributeMap = map
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverGcpBucketReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -1131,6 +1138,7 @@ var GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicPasswordSecretInfoOn
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1175,6 +1183,7 @@ var GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneof
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1235,7 +1244,7 @@ var GlobalLogReceiverReceiverHttpReceiverCompressionModelAttributeMap = map[stri
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverHttpReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -1269,7 +1278,7 @@ var GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsModelAttributeMap = map[
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CaChoice
+// Attribute map for OneOfField --> CaChoice
 var GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_ca":          types.BoolType,
@@ -1313,6 +1322,7 @@ var GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyU
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1415,7 +1425,7 @@ var GlobalLogReceiverReceiverKafkaReceiverCompressionModelAttributeMap = map[str
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverKafkaReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -1449,7 +1459,7 @@ var GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsModelAttributeMap = map
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CaChoice
+// Attribute map for OneOfField --> CaChoice
 var GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_ca":          types.BoolType,
@@ -1493,6 +1503,7 @@ var GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKey
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1554,6 +1565,7 @@ var GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofModelAttribute
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1571,7 +1583,7 @@ var GlobalLogReceiverReceiverNewRelicReceiverApiKeySecretInfoOneofClearSecretInf
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> EndpointChoice
+// Attribute map for OneOfField --> EndpointChoice
 var GlobalLogReceiverReceiverNewRelicReceiverEndpointChoiceModelAttributeMap = map[string]attr.Type{
 
 	"eu": types.BoolType,
@@ -1646,7 +1658,7 @@ var GlobalLogReceiverReceiverQradarReceiverCompressionModelAttributeMap = map[st
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverQradarReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -1680,7 +1692,7 @@ var GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsModelAttributeMap = ma
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CaChoice
+// Attribute map for OneOfField --> CaChoice
 var GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_ca":          types.BoolType,
@@ -1724,6 +1736,7 @@ var GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1839,7 +1852,7 @@ var GlobalLogReceiverReceiverS3ReceiverCompressionModelAttributeMap = map[string
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverS3ReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -1936,7 +1949,7 @@ var GlobalLogReceiverReceiverSplunkReceiverCompressionModelAttributeMap = map[st
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CompressionChoice
+// Attribute map for OneOfField --> CompressionChoice
 var GlobalLogReceiverReceiverSplunkReceiverCompressionCompressionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"compression_default": types.BoolType,
@@ -1961,6 +1974,7 @@ var GlobalLogReceiverReceiverSplunkReceiverSplunkHecTokenSecretInfoOneofModelAtt
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSplunkReceiverSplunkHecTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2004,7 +2018,7 @@ var GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsModelAttributeMap = ma
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CaChoice
+// Attribute map for OneOfField --> CaChoice
 var GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_ca":          types.BoolType,
@@ -2048,6 +2062,7 @@ var GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKe
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2106,6 +2121,7 @@ var GlobalLogReceiverReceiverSumoLogicReceiverUrlSecretInfoOneofModelAttributeMa
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: GlobalLogReceiverReceiverSumoLogicReceiverUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2134,8 +2150,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a global_log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of global_log_receiver) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a global_log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of global_log_receiver) etc. can be fetched",
+		MarkdownDescription: "Global Log Receiver is used to specify a receiver (s3 bucket, etc.) for periodic streaming of access logs",
+		Description:         "Global Log Receiver is used to specify a receiver (s3 bucket, etc.) for periodic streaming of access logs",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2203,21 +2219,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 			},
 			"filter_choice": schema.SingleNestedAttribute{
 				Description:         "Log Message Selection Log Message Selection",
-				MarkdownDescription: "Log Message Selection Log Message Selection",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Log Message Selection Log Message Selection<br>Exactly one of `ns_all`, `ns_current`, or `ns_list` must be specified when `filter_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"ns_all",
 						"ns_current",
 						"ns_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"ns_all": schema.BoolAttribute{
 						Description:         "Select logs from all namespaces",
-						MarkdownDescription: "Select logs from all namespaces",
+						MarkdownDescription: "Select logs from all namespaces<br>Conflicts with `ns_current` and `ns_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2227,7 +2246,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"ns_current": schema.BoolAttribute{
 						Description:         "Select logs from current namespace",
-						MarkdownDescription: "Select logs from current namespace",
+						MarkdownDescription: "Select logs from current namespace<br>Conflicts with `ns_all` and `ns_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2237,7 +2256,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"ns_list": schema.SingleNestedAttribute{
 						Description:         "Select logs in specific namespaces",
-						MarkdownDescription: "Select logs in specific namespaces",
+						MarkdownDescription: "Select logs in specific namespaces<br>Conflicts with `ns_all` and `ns_current`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2259,7 +2278,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 			},
 			"log_type_choice": schema.SingleNestedAttribute{
 				Description:         "Log Type Selection Log Type",
-				MarkdownDescription: "Log Type Selection Log Type",
+				MarkdownDescription: "Log Type Selection Log Type<br>Exactly one of `audit_logs`, `dns_logs`, `request_logs`, or `security_events` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -2274,7 +2293,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"audit_logs": schema.BoolAttribute{
 						Description:         "Audit Logs Send Audit Logs (corresponding to Public Audit and Authentication)",
-						MarkdownDescription: "Audit Logs Send Audit Logs (corresponding to Public Audit and Authentication)",
+						MarkdownDescription: "Audit Logs Send Audit Logs (corresponding to Public Audit and Authentication)<br>Conflicts with `dns_logs`, `request_logs`, and `security_events`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2284,7 +2303,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"dns_logs": schema.BoolAttribute{
 						Description:         "DNS Request Logs Send DNS Requests Logs (corresponding to DNS requests received)",
-						MarkdownDescription: "DNS Request Logs Send DNS Requests Logs (corresponding to DNS requests received)",
+						MarkdownDescription: "DNS Request Logs Send DNS Requests Logs (corresponding to DNS requests received)<br>Conflicts with `audit_logs`, `request_logs`, and `security_events`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2294,27 +2313,30 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"request_logs": schema.SingleNestedAttribute{
 						Description:         "Request Logs Send Request Logs (corresponding to Load Balancer access logs). Allows selection between sampled or unsampled (full) logs.",
-						MarkdownDescription: "Request Logs Send Request Logs (corresponding to Load Balancer access logs). Allows selection between sampled or unsampled (full) logs.",
+						MarkdownDescription: "Request Logs Send Request Logs (corresponding to Load Balancer access logs). Allows selection between sampled or unsampled (full) logs.<br>Conflicts with `audit_logs`, `dns_logs`, and `security_events`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"sampling_choice": schema.SingleNestedAttribute{
 								Description:         "Sampling Selection Choose how Request Logs are collected",
-								MarkdownDescription: "Sampling Selection Choose how Request Logs are collected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Sampling Selection Choose how Request Logs are collected<br>Exactly one of `sampled` or `unsampled` must be specified when `sampling_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"sampled",
 										"unsampled",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"sampled": schema.BoolAttribute{
 										Description:         "Sampled Request Logs Forward a sample of logs. Recommended for trend analysis and troubleshooting.",
-										MarkdownDescription: "Sampled Request Logs Forward a sample of logs. Recommended for trend analysis and troubleshooting.",
+										MarkdownDescription: "Sampled Request Logs Forward a sample of logs. Recommended for trend analysis and troubleshooting.<br>Conflicts with `unsampled`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2324,7 +2346,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"unsampled": schema.BoolAttribute{
 										Description:         "Unsampled Request Logs Forward all logs. Recommended for deep analysis and compliance, but will increase cost due to higher log volume.",
-										MarkdownDescription: "Unsampled Request Logs Forward all logs. Recommended for deep analysis and compliance, but will increase cost due to higher log volume.",
+										MarkdownDescription: "Unsampled Request Logs Forward all logs. Recommended for deep analysis and compliance, but will increase cost due to higher log volume.<br>Conflicts with `sampled`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2338,7 +2360,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"security_events": schema.BoolAttribute{
 						Description:         "Security Events Send Security Events (corresponding to e.g. WAF blocked events or malicious requests)",
-						MarkdownDescription: "Security Events Send Security Events (corresponding to e.g. WAF blocked events or malicious requests)",
+						MarkdownDescription: "Security Events Send Security Events (corresponding to e.g. WAF blocked events or malicious requests)<br>Conflicts with `audit_logs`, `dns_logs`, and `request_logs`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2350,7 +2372,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 			},
 			"receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Receiver Configuration Receiver Configuration",
-				MarkdownDescription: "Receiver Configuration Receiver Configuration",
+				MarkdownDescription: "Receiver Configuration Receiver Configuration<br>Exactly one of `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, or `sumo_logic_receiver` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -2373,7 +2395,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"aws_cloud_watch_receiver": schema.SingleNestedAttribute{
 						Description:         "AWS Cloudwatch Receiver Send logs to AWS Cloudwatch",
-						MarkdownDescription: "AWS Cloudwatch Receiver Send logs to AWS Cloudwatch",
+						MarkdownDescription: "AWS Cloudwatch Receiver Send logs to AWS Cloudwatch<br>Conflicts with `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2406,14 +2428,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
 							},
 							"aws_region": schema.StringAttribute{
 								Description:         "AWS Region AWS Region Name",
-								MarkdownDescription: "AWS Region AWS Region Name",
+								MarkdownDescription: "AWS Region AWS Region Name<br>**Allowed Values (choose one):** `['ap-northeast-1', 'ap-southeast-1', 'eu-central-1', 'eu-west-1', 'eu-west-3', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-2', 'ca-central-1', 'af-south-1', 'ap-east-1', 'ap-south-1', 'ap-northeast-2', 'ap-southeast-2', 'eu-south-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'us-west-1', 'ap-southeast-3']`",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2430,7 +2452,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2443,7 +2465,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2453,7 +2475,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2465,7 +2487,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2478,7 +2500,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2488,7 +2510,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2500,7 +2522,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2513,14 +2535,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2541,21 +2563,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2565,7 +2590,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2575,7 +2600,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2619,7 +2644,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"azure_event_hubs_receiver": schema.SingleNestedAttribute{
 						Description:         "Azure Event Hubs Receiver Send logs to Azure Event Hubs",
-						MarkdownDescription: "Azure Event Hubs Receiver Send logs to Azure Event Hubs",
+						MarkdownDescription: "Azure Event Hubs Receiver Send logs to Azure Event Hubs<br>Conflicts with `aws_cloud_watch_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2633,7 +2658,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -2641,12 +2666,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2664,6 +2690,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -2685,7 +2712,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2716,6 +2743,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -2754,7 +2791,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"azure_receiver": schema.SingleNestedAttribute{
 						Description:         "Azure Blob Storage Receiver Send logs to Azure Blob Storage",
-						MarkdownDescription: "Azure Blob Storage Receiver Send logs to Azure Blob Storage",
+						MarkdownDescription: "Azure Blob Storage Receiver Send logs to Azure Blob Storage<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2768,7 +2805,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2781,7 +2818,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2791,7 +2828,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2803,7 +2840,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2816,7 +2853,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2826,7 +2863,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2838,7 +2875,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2851,14 +2888,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2879,21 +2916,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2903,7 +2943,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2913,7 +2953,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2934,7 +2974,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -2942,12 +2982,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2965,6 +3006,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -2986,7 +3028,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3017,6 +3059,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -3046,7 +3098,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"folder_choice": schema.SingleNestedAttribute{
 										Description:         "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file",
-										MarkdownDescription: "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file",
+										MarkdownDescription: "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file<br>Exactly one of `custom_folder`, `log_type_folder`, or `no_folder` must be specified when `folder_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3060,7 +3112,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"custom_folder": schema.StringAttribute{
 												Description:         "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`",
-												MarkdownDescription: "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`",
+												MarkdownDescription: "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`<br>Conflicts with `log_type_folder` and `no_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3073,7 +3125,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"log_type_folder": schema.BoolAttribute{
 												Description:         "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns",
-												MarkdownDescription: "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns",
+												MarkdownDescription: "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns<br>Conflicts with `custom_folder` and `no_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3083,7 +3135,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"no_folder": schema.BoolAttribute{
 												Description:         "No Folder Do not use a folder path",
-												MarkdownDescription: "No Folder Do not use a folder path",
+												MarkdownDescription: "No Folder Do not use a folder path<br>Conflicts with `custom_folder` and `log_type_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3099,7 +3151,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"datadog_receiver": schema.SingleNestedAttribute{
 						Description:         "Datadog Receiver Send logs to a Datadog service",
-						MarkdownDescription: "Datadog Receiver Send logs to a Datadog service",
+						MarkdownDescription: "Datadog Receiver Send logs to a Datadog service<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3113,7 +3165,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3126,7 +3178,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3136,7 +3188,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3148,7 +3200,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3161,7 +3213,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3171,7 +3223,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3183,7 +3235,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3196,14 +3248,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3224,21 +3276,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3248,7 +3303,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3258,7 +3313,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3279,7 +3334,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -3287,12 +3342,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3310,6 +3366,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -3331,7 +3388,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3364,13 +3421,23 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 												},
 											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 										},
 									},
 								},
 							},
 							"endpoint_choice": schema.SingleNestedAttribute{
 								Description:         "Datadog Endpoint Selection Datadog Endpoint Selection",
-								MarkdownDescription: "Datadog Endpoint Selection Datadog Endpoint Selection",
+								MarkdownDescription: "Datadog Endpoint Selection Datadog Endpoint Selection<br>Exactly one of `endpoint` or `site` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3383,14 +3450,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"endpoint": schema.StringAttribute{
 										Description:         "Datadog Endpoint Datadog Endpoint, example: `example.com:9000`",
-										MarkdownDescription: "Datadog Endpoint Datadog Endpoint, example: `example.com:9000`",
+										MarkdownDescription: "Datadog Endpoint Datadog Endpoint, example: `example.com:9000`<br>Conflicts with `site`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 									},
 									"site": schema.StringAttribute{
 										Description:         "Datadog Site Datadog Site, example: `datadoghq.com`",
-										MarkdownDescription: "Datadog Site Datadog Site, example: `datadoghq.com`",
+										MarkdownDescription: "Datadog Site Datadog Site, example: `datadoghq.com`<br>Conflicts with `endpoint`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3405,7 +3472,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 							},
 							"tls_choice": schema.SingleNestedAttribute{
 								Description:         "Enable TLS",
-								MarkdownDescription: "Enable TLS",
+								MarkdownDescription: "Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3418,7 +3485,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"no_tls": schema.BoolAttribute{
 										Description:         "No TLS Do not use TLS for the client connection",
-										MarkdownDescription: "No TLS Do not use TLS for the client connection",
+										MarkdownDescription: "No TLS Do not use TLS for the client connection<br>Conflicts with `use_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3428,27 +3495,30 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"use_tls": schema.SingleNestedAttribute{
 										Description:         "Use TLS Use TLS for client connections to the endpoint",
-										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint",
+										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint<br>Conflicts with `no_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"ca_choice": schema.SingleNestedAttribute{
 												Description:         "Trusted CA Trusted CA for TLS server",
-												MarkdownDescription: "Trusted CA Trusted CA for TLS server",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Trusted CA Trusted CA for TLS server<br>Exactly one of `no_ca` or `trusted_ca_url` must be specified when `ca_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_ca",
 														"trusted_ca_url",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_ca": schema.BoolAttribute{
 														Description:         "No CA Certificate Do not use a CA Certificate",
-														MarkdownDescription: "No CA Certificate Do not use a CA Certificate",
+														MarkdownDescription: "No CA Certificate Do not use a CA Certificate<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3458,7 +3528,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
-														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.<br>Conflicts with `no_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3470,7 +3540,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS config Select to enable mTLS configuration",
-												MarkdownDescription: "mTLS config Select to enable mTLS configuration",
+												MarkdownDescription: "mTLS config Select to enable mTLS configuration<br>Exactly one of `mtls_disabled` or `mtls_enable` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -3483,7 +3553,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"mtls_disabled": schema.BoolAttribute{
 														Description:         "mTLS is Disabled mTLS is disabled",
-														MarkdownDescription: "mTLS is Disabled mTLS is disabled",
+														MarkdownDescription: "mTLS is Disabled mTLS is disabled<br>Conflicts with `mtls_enable`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3493,7 +3563,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"mtls_enable": schema.SingleNestedAttribute{
 														Description:         "Enable mTLS configuration Enable mTLS configuration",
-														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration",
+														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration<br>Conflicts with `mtls_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3521,7 +3591,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -3529,12 +3599,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3552,6 +3623,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -3573,7 +3645,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			},
 																			"clear_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3606,6 +3678,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																					},
 																				},
 																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
+																				},
+																			},
 																		},
 																	},
 																},
@@ -3616,7 +3698,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_certificate_choice": schema.SingleNestedAttribute{
 												Description:         "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
-												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
+												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.<br>Exactly one of `disable_verify_certificate` or `enable_verify_certificate` must be specified when `verify_certificate_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3629,7 +3711,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_certificate": schema.BoolAttribute{
 														Description:         "Skip Server Certificate Verification",
-														MarkdownDescription: "Skip Server Certificate Verification",
+														MarkdownDescription: "Skip Server Certificate Verification<br>Conflicts with `enable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3639,7 +3721,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_certificate": schema.BoolAttribute{
 														Description:         "Use Server Certificate Verification",
-														MarkdownDescription: "Use Server Certificate Verification",
+														MarkdownDescription: "Use Server Certificate Verification<br>Conflicts with `disable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3651,7 +3733,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_hostname_choice": schema.SingleNestedAttribute{
 												Description:         "Verify Server Hostname Verify Server Hostname",
-												MarkdownDescription: "Verify Server Hostname Verify Server Hostname",
+												MarkdownDescription: "Verify Server Hostname Verify Server Hostname<br>Exactly one of `disable_verify_hostname` or `enable_verify_hostname` must be specified when `verify_hostname_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3664,7 +3746,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_hostname": schema.BoolAttribute{
 														Description:         "Skip Verify Server Hostname",
-														MarkdownDescription: "Skip Verify Server Hostname",
+														MarkdownDescription: "Skip Verify Server Hostname<br>Conflicts with `enable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3674,7 +3756,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_hostname": schema.BoolAttribute{
 														Description:         "Enable Server Hostname Verification",
-														MarkdownDescription: "Enable Server Hostname Verification",
+														MarkdownDescription: "Enable Server Hostname Verification<br>Conflicts with `disable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3692,7 +3774,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"gcp_bucket_receiver": schema.SingleNestedAttribute{
 						Description:         "GCP Bucket Receiver Send logs to a GCP Bucket",
-						MarkdownDescription: "GCP Bucket Receiver Send logs to a GCP Bucket",
+						MarkdownDescription: "GCP Bucket Receiver Send logs to a GCP Bucket<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3706,7 +3788,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3719,7 +3801,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3729,7 +3811,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3741,7 +3823,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3754,7 +3836,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3764,7 +3846,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3776,7 +3858,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3789,14 +3871,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3831,21 +3913,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3855,7 +3940,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3865,7 +3950,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3886,7 +3971,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"folder_choice": schema.SingleNestedAttribute{
 										Description:         "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file",
-										MarkdownDescription: "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file",
+										MarkdownDescription: "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file<br>Exactly one of `custom_folder`, `log_type_folder`, or `no_folder` must be specified when `folder_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3900,7 +3985,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"custom_folder": schema.StringAttribute{
 												Description:         "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`",
-												MarkdownDescription: "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`",
+												MarkdownDescription: "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`<br>Conflicts with `log_type_folder` and `no_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3913,7 +3998,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"log_type_folder": schema.BoolAttribute{
 												Description:         "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns",
-												MarkdownDescription: "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns",
+												MarkdownDescription: "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns<br>Conflicts with `custom_folder` and `no_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3923,7 +4008,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"no_folder": schema.BoolAttribute{
 												Description:         "No Folder Do not use a folder path",
-												MarkdownDescription: "No Folder Do not use a folder path",
+												MarkdownDescription: "No Folder Do not use a folder path<br>Conflicts with `custom_folder` and `log_type_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3963,7 +4048,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -3972,14 +4057,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"http_receiver": schema.SingleNestedAttribute{
 						Description:         "HTTP Receiver Send logs to a generic HTTP(s) server",
-						MarkdownDescription: "HTTP Receiver Send logs to a generic HTTP(s) server",
+						MarkdownDescription: "HTTP Receiver Send logs to a generic HTTP(s) server<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"auth_choice": schema.SingleNestedAttribute{
 								Description:         "HTTP Authentication Method HTTP Authentication Method controls how to authenticate to the HTTP endpoint",
-								MarkdownDescription: "HTTP Authentication Method HTTP Authentication Method controls how to authenticate to the HTTP endpoint",
+								MarkdownDescription: "HTTP Authentication Method HTTP Authentication Method controls how to authenticate to the HTTP endpoint<br>Exactly one of `auth_basic`, `auth_none`, or `auth_token` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3993,7 +4078,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"auth_basic": schema.SingleNestedAttribute{
 										Description:         "Basic Authentication Use HTTP Basic Auth for authentication to the HTPP(s) server",
-										MarkdownDescription: "Basic Authentication Use HTTP Basic Auth for authentication to the HTPP(s) server",
+										MarkdownDescription: "Basic Authentication Use HTTP Basic Auth for authentication to the HTPP(s) server<br>Conflicts with `auth_none` and `auth_token`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4007,7 +4092,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -4015,12 +4100,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															exactlyoneofvalidator.RequiredExactlyOneOf(
 																"blindfold_secret_info",
 																"clear_secret_info",
+																"none",
 															),
 														},
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4038,6 +4124,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
+																		WriteOnly:           true,
 																		Validators: []validator.String{
 																			stringvalidator.RegexMatches(
 																				regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -4059,7 +4146,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4092,16 +4179,27 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																	},
 																},
 															},
+															"none": schema.BoolAttribute{
+																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+																Validators: []validator.Bool{
+																	boolvalidator.Equals(true),
+																},
+															},
 														},
 													},
 												},
 											},
 											"user_name": schema.StringAttribute{
 												Description:         "username HTTP Basic Auth User Name",
-												MarkdownDescription: "username HTTP Basic Auth User Name<br>**Validation:** `Length LengthAtMost(64)`",
+												MarkdownDescription: "username HTTP Basic Auth User Name<br>**Validation:** `Length LengthAtMost(64)`<br>**Default:** ``",
 												Required:            false,
 												Optional:            true,
-												Computed:            false,
+												Computed:            true,
+												Default:             stringdefault.StaticString(""),
 												Validators: []validator.String{
 													stringvalidator.LengthAtMost(64),
 												},
@@ -4110,7 +4208,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"auth_none": schema.BoolAttribute{
 										Description:         "No Authentication No Authentication",
-										MarkdownDescription: "No Authentication No Authentication",
+										MarkdownDescription: "No Authentication No Authentication<br>Conflicts with `auth_basic` and `auth_token`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4120,7 +4218,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"auth_token": schema.SingleNestedAttribute{
 										Description:         "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)",
-										MarkdownDescription: "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)",
+										MarkdownDescription: "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)<br>Conflicts with `auth_basic` and `auth_none`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4134,7 +4232,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -4142,12 +4240,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															exactlyoneofvalidator.RequiredExactlyOneOf(
 																"blindfold_secret_info",
 																"clear_secret_info",
+																"none",
 															),
 														},
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4165,6 +4264,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
+																		WriteOnly:           true,
 																		Validators: []validator.String{
 																			stringvalidator.RegexMatches(
 																				regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -4186,7 +4286,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4217,6 +4317,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			),
 																		},
 																	},
+																},
+															},
+															"none": schema.BoolAttribute{
+																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+																Validators: []validator.Bool{
+																	boolvalidator.Equals(true),
 																},
 															},
 														},
@@ -4236,7 +4346,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4249,7 +4359,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4259,7 +4369,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4271,7 +4381,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4284,7 +4394,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4294,7 +4404,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4306,7 +4416,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4319,14 +4429,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4347,21 +4457,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4371,7 +4484,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4381,7 +4494,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4395,7 +4508,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 							},
 							"tls_choice": schema.SingleNestedAttribute{
 								Description:         "Enable TLS",
-								MarkdownDescription: "Enable TLS",
+								MarkdownDescription: "Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -4408,7 +4521,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"no_tls": schema.BoolAttribute{
 										Description:         "No TLS Do not use TLS for the client connection",
-										MarkdownDescription: "No TLS Do not use TLS for the client connection",
+										MarkdownDescription: "No TLS Do not use TLS for the client connection<br>Conflicts with `use_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4418,27 +4531,30 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"use_tls": schema.SingleNestedAttribute{
 										Description:         "Use TLS Use TLS for client connections to the endpoint",
-										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint",
+										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint<br>Conflicts with `no_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"ca_choice": schema.SingleNestedAttribute{
 												Description:         "Trusted CA Trusted CA for TLS server",
-												MarkdownDescription: "Trusted CA Trusted CA for TLS server",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Trusted CA Trusted CA for TLS server<br>Exactly one of `no_ca` or `trusted_ca_url` must be specified when `ca_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_ca",
 														"trusted_ca_url",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_ca": schema.BoolAttribute{
 														Description:         "No CA Certificate Do not use a CA Certificate",
-														MarkdownDescription: "No CA Certificate Do not use a CA Certificate",
+														MarkdownDescription: "No CA Certificate Do not use a CA Certificate<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4448,7 +4564,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
-														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.<br>Conflicts with `no_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4460,7 +4576,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS config Select to enable mTLS configuration",
-												MarkdownDescription: "mTLS config Select to enable mTLS configuration",
+												MarkdownDescription: "mTLS config Select to enable mTLS configuration<br>Exactly one of `mtls_disabled` or `mtls_enable` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -4473,7 +4589,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"mtls_disabled": schema.BoolAttribute{
 														Description:         "mTLS is Disabled mTLS is disabled",
-														MarkdownDescription: "mTLS is Disabled mTLS is disabled",
+														MarkdownDescription: "mTLS is Disabled mTLS is disabled<br>Conflicts with `mtls_enable`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4483,7 +4599,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"mtls_enable": schema.SingleNestedAttribute{
 														Description:         "Enable mTLS configuration Enable mTLS configuration",
-														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration",
+														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration<br>Conflicts with `mtls_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4511,7 +4627,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -4519,12 +4635,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -4542,6 +4659,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -4563,7 +4681,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			},
 																			"clear_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -4596,6 +4714,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																					},
 																				},
 																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
+																				},
+																			},
 																		},
 																	},
 																},
@@ -4606,7 +4734,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_certificate_choice": schema.SingleNestedAttribute{
 												Description:         "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
-												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
+												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.<br>Exactly one of `disable_verify_certificate` or `enable_verify_certificate` must be specified when `verify_certificate_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4619,7 +4747,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_certificate": schema.BoolAttribute{
 														Description:         "Skip Server Certificate Verification",
-														MarkdownDescription: "Skip Server Certificate Verification",
+														MarkdownDescription: "Skip Server Certificate Verification<br>Conflicts with `enable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4629,7 +4757,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_certificate": schema.BoolAttribute{
 														Description:         "Use Server Certificate Verification",
-														MarkdownDescription: "Use Server Certificate Verification",
+														MarkdownDescription: "Use Server Certificate Verification<br>Conflicts with `disable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4641,7 +4769,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_hostname_choice": schema.SingleNestedAttribute{
 												Description:         "Verify Server Hostname Verify Server Hostname",
-												MarkdownDescription: "Verify Server Hostname Verify Server Hostname",
+												MarkdownDescription: "Verify Server Hostname Verify Server Hostname<br>Exactly one of `disable_verify_hostname` or `enable_verify_hostname` must be specified when `verify_hostname_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4654,7 +4782,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_hostname": schema.BoolAttribute{
 														Description:         "Skip Verify Server Hostname",
-														MarkdownDescription: "Skip Verify Server Hostname",
+														MarkdownDescription: "Skip Verify Server Hostname<br>Conflicts with `enable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4664,7 +4792,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_hostname": schema.BoolAttribute{
 														Description:         "Enable Server Hostname Verification",
-														MarkdownDescription: "Enable Server Hostname Verification",
+														MarkdownDescription: "Enable Server Hostname Verification<br>Conflicts with `disable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4695,7 +4823,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"kafka_receiver": schema.SingleNestedAttribute{
 						Description:         "Kafka Receiver Send logs to a Kafka cluster",
-						MarkdownDescription: "Kafka Receiver Send logs to a Kafka cluster",
+						MarkdownDescription: "Kafka Receiver Send logs to a Kafka cluster<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4709,7 +4837,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4722,7 +4850,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4732,7 +4860,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4744,7 +4872,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4757,7 +4885,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4767,7 +4895,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4779,7 +4907,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4792,14 +4920,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4837,21 +4965,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4861,7 +4992,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4871,7 +5002,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4899,7 +5030,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 							},
 							"tls_choice": schema.SingleNestedAttribute{
 								Description:         "Enable TLS",
-								MarkdownDescription: "Enable TLS",
+								MarkdownDescription: "Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -4912,7 +5043,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"no_tls": schema.BoolAttribute{
 										Description:         "No TLS Do not use TLS for the client connection",
-										MarkdownDescription: "No TLS Do not use TLS for the client connection",
+										MarkdownDescription: "No TLS Do not use TLS for the client connection<br>Conflicts with `use_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4922,27 +5053,30 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"use_tls": schema.SingleNestedAttribute{
 										Description:         "Use TLS Use TLS for client connections to the endpoint",
-										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint",
+										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint<br>Conflicts with `no_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"ca_choice": schema.SingleNestedAttribute{
 												Description:         "Trusted CA Trusted CA for TLS server",
-												MarkdownDescription: "Trusted CA Trusted CA for TLS server",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Trusted CA Trusted CA for TLS server<br>Exactly one of `no_ca` or `trusted_ca_url` must be specified when `ca_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_ca",
 														"trusted_ca_url",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_ca": schema.BoolAttribute{
 														Description:         "No CA Certificate Do not use a CA Certificate",
-														MarkdownDescription: "No CA Certificate Do not use a CA Certificate",
+														MarkdownDescription: "No CA Certificate Do not use a CA Certificate<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4952,7 +5086,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
-														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.<br>Conflicts with `no_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4964,7 +5098,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS config Select to enable mTLS configuration",
-												MarkdownDescription: "mTLS config Select to enable mTLS configuration",
+												MarkdownDescription: "mTLS config Select to enable mTLS configuration<br>Exactly one of `mtls_disabled` or `mtls_enable` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -4977,7 +5111,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"mtls_disabled": schema.BoolAttribute{
 														Description:         "mTLS is Disabled mTLS is disabled",
-														MarkdownDescription: "mTLS is Disabled mTLS is disabled",
+														MarkdownDescription: "mTLS is Disabled mTLS is disabled<br>Conflicts with `mtls_enable`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4987,7 +5121,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"mtls_enable": schema.SingleNestedAttribute{
 														Description:         "Enable mTLS configuration Enable mTLS configuration",
-														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration",
+														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration<br>Conflicts with `mtls_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5015,7 +5149,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -5023,12 +5157,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5046,6 +5181,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5067,7 +5203,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			},
 																			"clear_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5100,6 +5236,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																					},
 																				},
 																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
+																				},
+																			},
 																		},
 																	},
 																},
@@ -5110,7 +5256,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_certificate_choice": schema.SingleNestedAttribute{
 												Description:         "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
-												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
+												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.<br>Exactly one of `disable_verify_certificate` or `enable_verify_certificate` must be specified when `verify_certificate_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5123,7 +5269,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_certificate": schema.BoolAttribute{
 														Description:         "Skip Server Certificate Verification",
-														MarkdownDescription: "Skip Server Certificate Verification",
+														MarkdownDescription: "Skip Server Certificate Verification<br>Conflicts with `enable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5133,7 +5279,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_certificate": schema.BoolAttribute{
 														Description:         "Use Server Certificate Verification",
-														MarkdownDescription: "Use Server Certificate Verification",
+														MarkdownDescription: "Use Server Certificate Verification<br>Conflicts with `disable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5145,7 +5291,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_hostname_choice": schema.SingleNestedAttribute{
 												Description:         "Verify Server Hostname Verify Server Hostname",
-												MarkdownDescription: "Verify Server Hostname Verify Server Hostname",
+												MarkdownDescription: "Verify Server Hostname Verify Server Hostname<br>Exactly one of `disable_verify_hostname` or `enable_verify_hostname` must be specified when `verify_hostname_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5158,7 +5304,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_hostname": schema.BoolAttribute{
 														Description:         "Skip Verify Server Hostname",
-														MarkdownDescription: "Skip Verify Server Hostname",
+														MarkdownDescription: "Skip Verify Server Hostname<br>Conflicts with `enable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5168,7 +5314,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_hostname": schema.BoolAttribute{
 														Description:         "Enable Server Hostname Verification",
-														MarkdownDescription: "Enable Server Hostname Verification",
+														MarkdownDescription: "Enable Server Hostname Verification<br>Conflicts with `disable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5186,7 +5332,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"new_relic_receiver": schema.SingleNestedAttribute{
 						Description:         "NewRelic Receiver Send logs to NewRelic",
-						MarkdownDescription: "NewRelic Receiver Send logs to NewRelic",
+						MarkdownDescription: "NewRelic Receiver Send logs to NewRelic<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `qradar_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5200,7 +5346,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -5208,12 +5354,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5231,6 +5378,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5252,7 +5400,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5285,26 +5433,39 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 												},
 											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 										},
 									},
 								},
 							},
 							"endpoint_choice": schema.SingleNestedAttribute{
 								Description:         "NewRelic Account Endpoint The endpoint that's applicable for your New Relic account",
-								MarkdownDescription: "NewRelic Account Endpoint The endpoint that's applicable for your New Relic account",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "NewRelic Account Endpoint The endpoint that's applicable for your New Relic account<br>Exactly one of `eu` or `us` must be specified when `endpoint_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"eu",
 										"us",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"eu": schema.BoolAttribute{
 										Description:         "EU Endpoint EU Endpoint",
-										MarkdownDescription: "EU Endpoint EU Endpoint",
+										MarkdownDescription: "EU Endpoint EU Endpoint<br>Conflicts with `us`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5314,7 +5475,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"us": schema.BoolAttribute{
 										Description:         "US Endpoint US Endpoint",
-										MarkdownDescription: "US Endpoint US Endpoint",
+										MarkdownDescription: "US Endpoint US Endpoint<br>Conflicts with `eu`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5328,7 +5489,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"qradar_receiver": schema.SingleNestedAttribute{
 						Description:         "QRadar Receiver Send logs to IBM QRadar",
-						MarkdownDescription: "QRadar Receiver Send logs to IBM QRadar",
+						MarkdownDescription: "QRadar Receiver Send logs to IBM QRadar<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `s3_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5342,7 +5503,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5355,7 +5516,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5365,7 +5526,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5377,7 +5538,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5390,7 +5551,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5400,7 +5561,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5412,7 +5573,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5425,14 +5586,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5453,21 +5614,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5477,7 +5641,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5487,7 +5651,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5501,7 +5665,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 							},
 							"tls_choice": schema.SingleNestedAttribute{
 								Description:         "Enable TLS",
-								MarkdownDescription: "Enable TLS",
+								MarkdownDescription: "Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -5514,7 +5678,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"no_tls": schema.BoolAttribute{
 										Description:         "No TLS Do not use TLS for the client connection",
-										MarkdownDescription: "No TLS Do not use TLS for the client connection",
+										MarkdownDescription: "No TLS Do not use TLS for the client connection<br>Conflicts with `use_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5524,27 +5688,30 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"use_tls": schema.SingleNestedAttribute{
 										Description:         "Use TLS Use TLS for client connections to the endpoint",
-										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint",
+										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint<br>Conflicts with `no_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"ca_choice": schema.SingleNestedAttribute{
 												Description:         "Trusted CA Trusted CA for TLS server",
-												MarkdownDescription: "Trusted CA Trusted CA for TLS server",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Trusted CA Trusted CA for TLS server<br>Exactly one of `no_ca` or `trusted_ca_url` must be specified when `ca_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_ca",
 														"trusted_ca_url",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_ca": schema.BoolAttribute{
 														Description:         "No CA Certificate Do not use a CA Certificate",
-														MarkdownDescription: "No CA Certificate Do not use a CA Certificate",
+														MarkdownDescription: "No CA Certificate Do not use a CA Certificate<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5554,7 +5721,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
-														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.<br>Conflicts with `no_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5566,7 +5733,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS config Select to enable mTLS configuration",
-												MarkdownDescription: "mTLS config Select to enable mTLS configuration",
+												MarkdownDescription: "mTLS config Select to enable mTLS configuration<br>Exactly one of `mtls_disabled` or `mtls_enable` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -5579,7 +5746,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"mtls_disabled": schema.BoolAttribute{
 														Description:         "mTLS is Disabled mTLS is disabled",
-														MarkdownDescription: "mTLS is Disabled mTLS is disabled",
+														MarkdownDescription: "mTLS is Disabled mTLS is disabled<br>Conflicts with `mtls_enable`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5589,7 +5756,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"mtls_enable": schema.SingleNestedAttribute{
 														Description:         "Enable mTLS configuration Enable mTLS configuration",
-														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration",
+														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration<br>Conflicts with `mtls_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5617,7 +5784,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -5625,12 +5792,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5648,6 +5816,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -5669,7 +5838,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			},
 																			"clear_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5702,6 +5871,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																					},
 																				},
 																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
+																				},
+																			},
 																		},
 																	},
 																},
@@ -5712,7 +5891,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_certificate_choice": schema.SingleNestedAttribute{
 												Description:         "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
-												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
+												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.<br>Exactly one of `disable_verify_certificate` or `enable_verify_certificate` must be specified when `verify_certificate_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5725,7 +5904,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_certificate": schema.BoolAttribute{
 														Description:         "Skip Server Certificate Verification",
-														MarkdownDescription: "Skip Server Certificate Verification",
+														MarkdownDescription: "Skip Server Certificate Verification<br>Conflicts with `enable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5735,7 +5914,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_certificate": schema.BoolAttribute{
 														Description:         "Use Server Certificate Verification",
-														MarkdownDescription: "Use Server Certificate Verification",
+														MarkdownDescription: "Use Server Certificate Verification<br>Conflicts with `disable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5747,7 +5926,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_hostname_choice": schema.SingleNestedAttribute{
 												Description:         "Verify Server Hostname Verify Server Hostname",
-												MarkdownDescription: "Verify Server Hostname Verify Server Hostname",
+												MarkdownDescription: "Verify Server Hostname Verify Server Hostname<br>Exactly one of `disable_verify_hostname` or `enable_verify_hostname` must be specified when `verify_hostname_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5760,7 +5939,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_hostname": schema.BoolAttribute{
 														Description:         "Skip Verify Server Hostname",
-														MarkdownDescription: "Skip Verify Server Hostname",
+														MarkdownDescription: "Skip Verify Server Hostname<br>Conflicts with `enable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5770,7 +5949,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_hostname": schema.BoolAttribute{
 														Description:         "Enable Server Hostname Verification",
-														MarkdownDescription: "Enable Server Hostname Verification",
+														MarkdownDescription: "Enable Server Hostname Verification<br>Conflicts with `disable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5801,7 +5980,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"s3_receiver": schema.SingleNestedAttribute{
 						Description:         "S3 Receiver Send logs to an AWS S3 bucket",
-						MarkdownDescription: "S3 Receiver Send logs to an AWS S3 bucket",
+						MarkdownDescription: "S3 Receiver Send logs to an AWS S3 bucket<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `splunk_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5834,14 +6013,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
 							},
 							"aws_region": schema.StringAttribute{
 								Description:         "AWS Region AWS Region Name",
-								MarkdownDescription: "AWS Region AWS Region Name",
+								MarkdownDescription: "AWS Region AWS Region Name<br>**Allowed Values (choose one):** `['ap-northeast-1', 'ap-southeast-1', 'eu-central-1', 'eu-west-1', 'eu-west-3', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-2', 'ca-central-1', 'af-south-1', 'ap-east-1', 'ap-south-1', 'ap-northeast-2', 'ap-southeast-2', 'eu-south-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'us-west-1', 'ap-southeast-3']`",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -5858,7 +6037,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5871,7 +6050,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5881,7 +6060,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5893,7 +6072,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5906,7 +6085,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5916,7 +6095,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5928,7 +6107,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5941,14 +6120,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5983,21 +6162,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6007,7 +6189,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6017,7 +6199,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6038,7 +6220,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"folder_choice": schema.SingleNestedAttribute{
 										Description:         "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file",
-										MarkdownDescription: "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file",
+										MarkdownDescription: "Folder Folder may be used to apply a folder path prefix to the endpoint bucket or file<br>Exactly one of `custom_folder`, `log_type_folder`, or `no_folder` must be specified when `folder_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6052,7 +6234,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"custom_folder": schema.StringAttribute{
 												Description:         "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`",
-												MarkdownDescription: "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`",
+												MarkdownDescription: "Custom Folder Use your own folder name as the name of the folder in the endpoint bucket or file The folder name must match `/^[a-z_][a-z0-9\\\\-\\\\._]*$/i`<br>Conflicts with `log_type_folder` and `no_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6065,7 +6247,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"log_type_folder": schema.BoolAttribute{
 												Description:         "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns",
-												MarkdownDescription: "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns",
+												MarkdownDescription: "Log Type Folder Use the name of the selected LogType as the name of the folder in the endpoint bucket or file depending on LogType selection, this will be one of: access, security, audit or dns<br>Conflicts with `custom_folder` and `no_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6075,7 +6257,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"no_folder": schema.BoolAttribute{
 												Description:         "No Folder Do not use a folder path",
-												MarkdownDescription: "No Folder Do not use a folder path",
+												MarkdownDescription: "No Folder Do not use a folder path<br>Conflicts with `custom_folder` and `log_type_folder`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6091,7 +6273,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"splunk_receiver": schema.SingleNestedAttribute{
 						Description:         "Splunk Receiver Send logs to a Splunk HEC Logs service",
-						MarkdownDescription: "Splunk Receiver Send logs to a Splunk HEC Logs service",
+						MarkdownDescription: "Splunk Receiver Send logs to a Splunk HEC Logs service<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, and `sumo_logic_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6105,7 +6287,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"batch_bytes_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Bytes Batch Bytes is the maximum size (in bytes) of a batch before it is sent to the endpoint<br>Exactly one of `max_bytes` or `max_bytes_disabled` must be specified when `batch_bytes_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6118,7 +6300,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_bytes": schema.Int64Attribute{
 												Description:         "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
-												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes",
+												MarkdownDescription: "Max Bytes Send batch to endpoint after the batch is equal to or larger than this many bytes<br>Conflicts with `max_bytes_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6128,7 +6310,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_bytes_disabled": schema.BoolAttribute{
 												Description:         "Batch Bytes Disabled Batch Bytes Disabled",
-												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled",
+												MarkdownDescription: "Batch Bytes Disabled Batch Bytes Disabled<br>Conflicts with `max_bytes`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6140,7 +6322,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_events_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
-										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint",
+										MarkdownDescription: "Batch Events Batch Events is the maximum number of log messages in a batch before it is sent to the endpoint<br>Exactly one of `max_events` or `max_events_disabled` must be specified when `batch_events_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6153,7 +6335,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"max_events": schema.Int64Attribute{
 												Description:         "Max Events Send batch to endpoint after this many log messages are in the batch",
-												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch",
+												MarkdownDescription: "Max Events Send batch to endpoint after this many log messages are in the batch<br>Conflicts with `max_events_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6163,7 +6345,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"max_events_disabled": schema.BoolAttribute{
 												Description:         "Max Events Disabled Max Events Disabled",
-												MarkdownDescription: "Max Events Disabled Max Events Disabled",
+												MarkdownDescription: "Max Events Disabled Max Events Disabled<br>Conflicts with `max_events`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6175,7 +6357,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"batch_timeout_choice": schema.SingleNestedAttribute{
 										Description:         "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
-										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint",
+										MarkdownDescription: "Batch Timeout Batch Timeout is the maximum age of a batch before being sent to the endpoint<br>Exactly one of `timeout_seconds` or `timeout_seconds_default` must be specified when `batch_timeout_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6188,14 +6370,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 										Attributes: map[string]schema.Attribute{
 											"timeout_seconds": schema.Int64Attribute{
 												Description:         "Timeout Seconds Send batch to the endpoint after this many seconds",
-												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds",
+												MarkdownDescription: "Timeout Seconds Send batch to the endpoint after this many seconds<br>Conflicts with `timeout_seconds_default`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 											},
 											"timeout_seconds_default": schema.BoolAttribute{
 												Description:         "Default Timeout Seconds Use Default Timeout (300 seconds)",
-												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)",
+												MarkdownDescription: "Default Timeout Seconds Use Default Timeout (300 seconds)<br>Conflicts with `timeout_seconds`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6216,21 +6398,24 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"compression_choice": schema.SingleNestedAttribute{
 										Description:         "Compression Type Compression Type",
-										MarkdownDescription: "Compression Type Compression Type",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Compression Type Compression Type<br>Exactly one of `compression_default`, `compression_gzip`, or `compression_none` must be specified when `compression_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"compression_default",
 												"compression_gzip",
 												"compression_none",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"compression_default": schema.BoolAttribute{
 												Description:         "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
-												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar",
+												MarkdownDescription: "Default Compression Default Compression defaults to gzip for all endpoint types, except: HTTP, QRadar<br>Conflicts with `compression_gzip` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6240,7 +6425,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_gzip": schema.BoolAttribute{
 												Description:         "Gzip Compression Gzip Compression",
-												MarkdownDescription: "Gzip Compression Gzip Compression",
+												MarkdownDescription: "Gzip Compression Gzip Compression<br>Conflicts with `compression_default` and `compression_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6250,7 +6435,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"compression_none": schema.BoolAttribute{
 												Description:         "No Compression No Compression",
-												MarkdownDescription: "No Compression No Compression",
+												MarkdownDescription: "No Compression No Compression<br>Conflicts with `compression_default` and `compression_gzip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6284,7 +6469,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -6292,12 +6477,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6315,6 +6501,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -6336,7 +6523,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6369,13 +6556,23 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 												},
 											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
 										},
 									},
 								},
 							},
 							"tls_choice": schema.SingleNestedAttribute{
 								Description:         "Enable TLS",
-								MarkdownDescription: "Enable TLS",
+								MarkdownDescription: "Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -6388,7 +6585,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"no_tls": schema.BoolAttribute{
 										Description:         "No TLS Do not use TLS for the client connection",
-										MarkdownDescription: "No TLS Do not use TLS for the client connection",
+										MarkdownDescription: "No TLS Do not use TLS for the client connection<br>Conflicts with `use_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6398,27 +6595,30 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 									},
 									"use_tls": schema.SingleNestedAttribute{
 										Description:         "Use TLS Use TLS for client connections to the endpoint",
-										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint",
+										MarkdownDescription: "Use TLS Use TLS for client connections to the endpoint<br>Conflicts with `no_tls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"ca_choice": schema.SingleNestedAttribute{
 												Description:         "Trusted CA Trusted CA for TLS server",
-												MarkdownDescription: "Trusted CA Trusted CA for TLS server",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Trusted CA Trusted CA for TLS server<br>Exactly one of `no_ca` or `trusted_ca_url` must be specified when `ca_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_ca",
 														"trusted_ca_url",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_ca": schema.BoolAttribute{
 														Description:         "No CA Certificate Do not use a CA Certificate",
-														MarkdownDescription: "No CA Certificate Do not use a CA Certificate",
+														MarkdownDescription: "No CA Certificate Do not use a CA Certificate<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6428,7 +6628,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
-														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.<br>Conflicts with `no_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6440,7 +6640,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS config Select to enable mTLS configuration",
-												MarkdownDescription: "mTLS config Select to enable mTLS configuration",
+												MarkdownDescription: "mTLS config Select to enable mTLS configuration<br>Exactly one of `mtls_disabled` or `mtls_enable` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -6453,7 +6653,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"mtls_disabled": schema.BoolAttribute{
 														Description:         "mTLS is Disabled mTLS is disabled",
-														MarkdownDescription: "mTLS is Disabled mTLS is disabled",
+														MarkdownDescription: "mTLS is Disabled mTLS is disabled<br>Conflicts with `mtls_enable`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6463,7 +6663,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"mtls_enable": schema.SingleNestedAttribute{
 														Description:         "Enable mTLS configuration Enable mTLS configuration",
-														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration",
+														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration<br>Conflicts with `mtls_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6491,7 +6691,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -6499,12 +6699,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6522,6 +6723,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -6543,7 +6745,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																			},
 																			"clear_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6576,6 +6778,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 																					},
 																				},
 																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
+																				},
+																			},
 																		},
 																	},
 																},
@@ -6586,7 +6798,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_certificate_choice": schema.SingleNestedAttribute{
 												Description:         "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
-												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.",
+												MarkdownDescription: "Server verification choice Choose whether to perform certificate verifaction for the endpoint server.<br>Exactly one of `disable_verify_certificate` or `enable_verify_certificate` must be specified when `verify_certificate_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6599,7 +6811,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_certificate": schema.BoolAttribute{
 														Description:         "Skip Server Certificate Verification",
-														MarkdownDescription: "Skip Server Certificate Verification",
+														MarkdownDescription: "Skip Server Certificate Verification<br>Conflicts with `enable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6609,7 +6821,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_certificate": schema.BoolAttribute{
 														Description:         "Use Server Certificate Verification",
-														MarkdownDescription: "Use Server Certificate Verification",
+														MarkdownDescription: "Use Server Certificate Verification<br>Conflicts with `disable_verify_certificate`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6621,7 +6833,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"verify_hostname_choice": schema.SingleNestedAttribute{
 												Description:         "Verify Server Hostname Verify Server Hostname",
-												MarkdownDescription: "Verify Server Hostname Verify Server Hostname",
+												MarkdownDescription: "Verify Server Hostname Verify Server Hostname<br>Exactly one of `disable_verify_hostname` or `enable_verify_hostname` must be specified when `verify_hostname_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6634,7 +6846,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"disable_verify_hostname": schema.BoolAttribute{
 														Description:         "Skip Verify Server Hostname",
-														MarkdownDescription: "Skip Verify Server Hostname",
+														MarkdownDescription: "Skip Verify Server Hostname<br>Conflicts with `enable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6644,7 +6856,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 													},
 													"enable_verify_hostname": schema.BoolAttribute{
 														Description:         "Enable Server Hostname Verification",
-														MarkdownDescription: "Enable Server Hostname Verification",
+														MarkdownDescription: "Enable Server Hostname Verification<br>Conflicts with `disable_verify_hostname`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6662,7 +6874,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 					},
 					"sumo_logic_receiver": schema.SingleNestedAttribute{
 						Description:         "SumoLogic Receiver Send logs to SumoLogic",
-						MarkdownDescription: "SumoLogic Receiver Send logs to SumoLogic",
+						MarkdownDescription: "SumoLogic Receiver Send logs to SumoLogic<br>Conflicts with `aws_cloud_watch_receiver`, `azure_event_hubs_receiver`, `azure_receiver`, `datadog_receiver`, `gcp_bucket_receiver`, `http_receiver`, `kafka_receiver`, `new_relic_receiver`, `qradar_receiver`, `s3_receiver`, and `splunk_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6676,7 +6888,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -6684,12 +6896,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											exactlyoneofvalidator.RequiredExactlyOneOf(
 												"blindfold_secret_info",
 												"clear_secret_info",
+												"none",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6707,6 +6920,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
+														WriteOnly:           true,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
 																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -6728,7 +6942,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6759,6 +6973,16 @@ func (r *ResourceF5XCGlobalLogReceiver) Schema(ctx context.Context, request reso
 															),
 														},
 													},
+												},
+											},
+											"none": schema.BoolAttribute{
+												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -6831,9 +7055,17 @@ func (r *ResourceF5XCGlobalLogReceiver) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCGlobalLogReceiverModel
 
 	// Read Terraform plan data into the model
@@ -6841,6 +7073,17 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCGlobalLogReceiverModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.ReceiverChoice.IsNull() && !configData.ReceiverChoice.IsUnknown() {
+		data.ReceiverChoice = configData.ReceiverChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -6914,7 +7157,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> FilterChoice
+	// resource modelToSpecRoot OneOfField --> FilterChoice
 	if !data.FilterChoice.IsNull() && !data.FilterChoice.IsUnknown() {
 		filterChoiceModel := GlobalLogReceiverFilterChoice{}
 		response.Diagnostics.Append(data.FilterChoice.As(ctx, &filterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6960,6 +7203,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.FilterChoice = &ves_io_schema_global_log_receiver.CreateSpecType_NsCurrent{
+			NsCurrent: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> LogType
@@ -6993,9 +7240,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 			}
 			requestLogsOneOfSpec := &ves_io_schema_global_log_receiver.CreateSpecType_RequestLogs{}
 			requestLogsOneOfSpec.RequestLogs = &ves_io_schema_global_log_receiver.RequestLogsConfig{}
+			requestLogsOneOfSpec.RequestLogs.SamplingChoice = &ves_io_schema_global_log_receiver.RequestLogsConfig_Sampled{
+				Sampled: &ves_io_schema.Empty{},
+			}
 			spec.LogType = requestLogsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> SamplingChoice
+			// resource modelToSpecNested OneOfField --> SamplingChoice
 			if !globalLogReceiverReqLogsModel.SamplingChoice.IsNull() && !globalLogReceiverReqLogsModel.SamplingChoice.IsUnknown() {
 				requestLogsSamplingChoiceModel := GlobalLogReceiverSamplingChoice{}
 				response.Diagnostics.Append(globalLogReceiverReqLogsModel.SamplingChoice.As(ctx, &requestLogsSamplingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7171,9 +7421,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				awsCloudWatchReceiverOneOfSpec.AwsCloudWatchReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7299,6 +7552,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -7420,9 +7680,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				azureReceiverOneOfSpec.AzureReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7523,6 +7786,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -7685,9 +7955,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				datadogReceiverOneOfSpec.DatadogReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7790,6 +8063,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !datadogApiKeySecretInfoChoiceModel.None.IsNull() && !datadogApiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						datadogApiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -7842,9 +8122,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.DatadogConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					datadogReceiverOneOfSpec.DatadogReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverUseTlsModel.CaChoice.IsNull() && !globalLogReceiverUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7967,6 +8250,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -8141,9 +8431,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				gcpBucketReceiverOneOfSpec.GcpBucketReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8345,6 +8638,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwordSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -8352,6 +8652,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					// resource modelToSpecNested StringField --> UserName
 					if !globalLogReceiverAuthBasicModel.UserName.IsNull() && !globalLogReceiverAuthBasicModel.UserName.IsUnknown() {
 						authBasicOneOfSpec.AuthBasic.UserName = string(globalLogReceiverAuthBasicModel.UserName.ValueString())
+					} else {
+						authBasicOneOfSpec.AuthBasic.UserName = ""
 					}
 
 				}
@@ -8442,6 +8744,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								tokenSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -8546,9 +8855,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				httpReceiverOneOfSpec.HttpReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8605,9 +8917,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.HTTPConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					httpReceiverOneOfSpec.HttpReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverHTTPConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverHTTPConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverHTTPConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8730,6 +9045,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -8915,9 +9237,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				kafkaReceiverOneOfSpec.KafkaReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8979,9 +9304,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.KafkaConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					kafkaReceiverOneOfSpec.KafkaReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverKafkaConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverKafkaConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverKafkaConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9106,6 +9434,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -9177,6 +9512,9 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 			}
 			newRelicReceiverOneOfSpec := &ves_io_schema_global_log_receiver.CreateSpecType_NewRelicReceiver{}
 			newRelicReceiverOneOfSpec.NewRelicReceiver = &ves_io_schema_global_log_receiver.NewRelicConfig{}
+			newRelicReceiverOneOfSpec.NewRelicReceiver.EndpointChoice = &ves_io_schema_global_log_receiver.NewRelicConfig_Us{
+				Us: &ves_io_schema.Empty{},
+			}
 			spec.Receiver = newRelicReceiverOneOfSpec
 
 			// resource modelToSpecNested RequiredPointerField --> ApiKey
@@ -9249,11 +9587,18 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !apiKeySecretInfoChoiceModel.None.IsNull() && !apiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						apiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> EndpointChoice
+			// resource modelToSpecNested OneOfField --> EndpointChoice
 			if !globalLogReceiverNewRelicReceiverModel.EndpointChoice.IsNull() && !globalLogReceiverNewRelicReceiverModel.EndpointChoice.IsUnknown() {
 				newRelicReceiverEndpointChoiceModel := GlobalLogReceiverNewRelicConfigEndpointChoice{}
 				response.Diagnostics.Append(globalLogReceiverNewRelicReceiverModel.EndpointChoice.As(ctx, &newRelicReceiverEndpointChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9384,9 +9729,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				qradarReceiverOneOfSpec.QradarReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9443,9 +9791,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.QRadarConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					qradarReceiverOneOfSpec.QradarReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverQRadarConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverQRadarConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverQRadarConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9568,6 +9919,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -9775,9 +10133,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				s3ReceiverOneOfSpec.S3Receiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9961,9 +10322,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				splunkReceiverOneOfSpec.SplunkReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10071,6 +10435,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !splunkHecTokenSecretInfoChoiceModel.None.IsNull() && !splunkHecTokenSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						splunkHecTokenSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -10099,9 +10470,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.SplunkConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					splunkReceiverOneOfSpec.SplunkReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverSplunkConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverSplunkConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverSplunkConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10224,6 +10598,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -10369,6 +10750,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -10379,7 +10767,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -10402,7 +10790,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_global_log_receiver.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "global_log_receiver", err),
 		)
 		return
 	}
@@ -10520,7 +10908,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> FilterChoice
+	// resource SpecToModelRoot OneOfField --> FilterChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -10603,8 +10991,6 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.FilterChoice = types.ObjectNull(GlobalLogReceiverFilterChoiceModelAttributeMap)
 	}
 
@@ -10649,8 +11035,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 			if isRequestLogs && requestLogsOptionsWrapper != nil && requestLogsOptionsWrapper.RequestLogs != nil {
 				requestLogsElement := requestLogsOptionsWrapper.RequestLogs
 
-				// resource specToModelNested RequiredOneOfField --> SamplingChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SamplingChoice
 				if requestLogsElement.GetSamplingChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					requestLogssamplingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10998,8 +11383,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11209,6 +11593,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -11463,8 +11856,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11637,6 +12029,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -11966,8 +12367,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12142,6 +12542,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := datadogApiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -12259,8 +12668,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12445,6 +12853,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -12845,8 +13262,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13196,6 +13612,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -13234,12 +13659,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 
 							// resource specToModelNested StringField --> UserName
-							if authBasicElement.GetUserName() != "" {
-								authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
-							} else {
-								// Empty string, set to null
-								authBasicAttributeMap["user_name"] = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
 
 							authBasicObj, authBasicObjDiags := types.ObjectValue(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap, authBasicAttributeMap)
 							response.Diagnostics.Append(authBasicObjDiags...)
@@ -13370,6 +13791,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 										} else {
 											tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 										}
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -13617,8 +14047,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13722,8 +14151,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13908,6 +14336,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -14322,8 +14759,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14435,8 +14871,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14621,6 +15056,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -14936,6 +15380,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -14973,8 +15426,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 					newRelicReceiverAttributeMap["api_key"] = types.ObjectNull(GlobalLogReceiverReceiverNewRelicReceiverApiKeyModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> EndpointChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> EndpointChoice
 				if newRelicReceiverElement.GetEndpointChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					newRelicReceiverendpointChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15220,8 +15672,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15325,8 +15776,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15511,6 +15961,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -15977,8 +16436,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -16334,8 +16792,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -16518,6 +16975,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := splunkHecTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -16585,8 +17051,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -16771,6 +17236,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -17086,6 +17560,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Create(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -17200,14 +17683,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 	defer cancel()
 	priorReceiverChoice := data.ReceiverChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_global_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_global_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "global_log_receiver", err),
 		)
 		return
 	}
@@ -17325,7 +17804,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> FilterChoice
+	// resource SpecToModelRoot OneOfField --> FilterChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -17408,9 +17887,14 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.FilterChoice = types.ObjectNull(GlobalLogReceiverFilterChoiceModelAttributeMap)
+
+		if data.FilterChoice.IsNull() || data.FilterChoice.IsUnknown() || ((data.FilterChoice.Attributes()["ns_all"].IsNull() || data.FilterChoice.Attributes()["ns_all"].IsUnknown()) && (data.FilterChoice.Attributes()["ns_current"].IsNull() || data.FilterChoice.Attributes()["ns_current"].IsUnknown()) && (data.FilterChoice.Attributes()["ns_list"].(types.Object).IsNull() || data.FilterChoice.Attributes()["ns_list"].(types.Object).IsUnknown() || (data.FilterChoice.Attributes()["ns_list"].(types.Object).Attributes()["namespaces"].IsNull() || data.FilterChoice.Attributes()["ns_list"].(types.Object).Attributes()["namespaces"].IsUnknown()))) {
+			data.FilterChoice = types.ObjectValueMust(GlobalLogReceiverFilterChoiceModelAttributeMap, map[string]attr.Value{
+				"ns_all":     types.BoolNull(),
+				"ns_current": types.BoolValue(true),
+				"ns_list":    types.ObjectNull(GlobalLogReceiverFilterChoiceNsListModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogType
@@ -17454,8 +17938,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 			if isRequestLogs && requestLogsOptionsWrapper != nil && requestLogsOptionsWrapper.RequestLogs != nil {
 				requestLogsElement := requestLogsOptionsWrapper.RequestLogs
 
-				// resource specToModelNested RequiredOneOfField --> SamplingChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SamplingChoice
 				if requestLogsElement.GetSamplingChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					requestLogssamplingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17499,7 +17982,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					requestLogsAttributeMap["sampling_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					requestLogsAttributeMap["sampling_choice"] = types.ObjectNull(GlobalLogReceiverLogTypeRequestLogsSamplingChoiceModelAttributeMap)
+					requestLogsAttributeMap["sampling_choice"] = types.ObjectValueMust(GlobalLogReceiverLogTypeRequestLogsSamplingChoiceModelAttributeMap, map[string]attr.Value{
+						"sampled":   types.BoolValue(true),
+						"unsampled": types.BoolNull(),
+					})
 				}
 
 				requestLogsObj, requestLogsObjDiags := types.ObjectValue(GlobalLogReceiverLogTypeRequestLogsModelAttributeMap, requestLogsAttributeMap)
@@ -17541,7 +18027,20 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
 		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.LogTypeChoice = types.ObjectNull(GlobalLogReceiverLogTypeModelAttributeMap)
+
+		if data.LogTypeChoice.IsNull() || data.LogTypeChoice.IsUnknown() || ((data.LogTypeChoice.Attributes()["audit_logs"].IsNull() || data.LogTypeChoice.Attributes()["audit_logs"].IsUnknown()) && (data.LogTypeChoice.Attributes()["dns_logs"].IsNull() || data.LogTypeChoice.Attributes()["dns_logs"].IsUnknown()) && (data.LogTypeChoice.Attributes()["request_logs"].(types.Object).IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).IsUnknown() || (data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).IsUnknown() || ((data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["sampled"].IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["sampled"].IsUnknown()) && (data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["unsampled"].IsNull() || data.LogTypeChoice.Attributes()["request_logs"].(types.Object).Attributes()["sampling_choice"].(types.Object).Attributes()["unsampled"].IsUnknown())))) && (data.LogTypeChoice.Attributes()["security_events"].IsNull() || data.LogTypeChoice.Attributes()["security_events"].IsUnknown())) {
+			data.LogTypeChoice = types.ObjectValueMust(GlobalLogReceiverLogTypeModelAttributeMap, map[string]attr.Value{
+				"audit_logs": types.BoolNull(),
+				"dns_logs":   types.BoolNull(),
+				"request_logs": types.ObjectValueMust(GlobalLogReceiverLogTypeRequestLogsModelAttributeMap, map[string]attr.Value{
+					"sampling_choice": types.ObjectValueMust(GlobalLogReceiverLogTypeRequestLogsSamplingChoiceModelAttributeMap, map[string]attr.Value{
+						"sampled":   types.BoolValue(true),
+						"unsampled": types.BoolNull(),
+					}),
+				}),
+				"security_events": types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> Receiver
@@ -17803,8 +18302,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17857,7 +18355,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverAwsCloudWatchReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -18014,6 +18516,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -18280,8 +18791,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18334,7 +18844,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverAzureReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -18454,6 +18968,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -18795,8 +19318,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18849,7 +19371,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -18969,6 +19495,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							} else {
 								datadogApiKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverDatadogApiKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := datadogApiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -19100,8 +19635,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19146,7 +19680,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -19288,6 +19825,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -19364,7 +19910,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -19488,7 +20037,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					datadogReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					datadogReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceModelAttributeMap)
+					datadogReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				datadogReceiverObj, datadogReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverDatadogReceiverModelAttributeMap, datadogReceiverAttributeMap)
@@ -19698,8 +20250,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19752,7 +20303,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverGcpBucketReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverGcpBucketReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -20049,6 +20604,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -20099,12 +20663,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 
 							// resource specToModelNested StringField --> UserName
-							if authBasicElement.GetUserName() != "" {
-								authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
-							} else {
-								// Empty string, set to null
-								authBasicAttributeMap["user_name"] = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
 
 							authBasicObj, authBasicObjDiags := types.ObjectValue(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap, authBasicAttributeMap)
 							response.Diagnostics.Append(authBasicObjDiags...)
@@ -20237,6 +20797,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -20313,7 +20882,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					httpReceiverAttributeMap["auth_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpReceiverAttributeMap["auth_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceModelAttributeMap)
+					httpReceiverAttributeMap["auth_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverAuthChoiceModelAttributeMap, map[string]attr.Value{
+						"auth_basic": types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap),
+						"auth_none":  types.BoolValue(true),
+						"auth_token": types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested PointerField --> Batch
@@ -20494,8 +21067,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20548,7 +21120,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -20599,8 +21175,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20645,7 +21220,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -20787,6 +21365,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -20863,7 +21450,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -20987,7 +21577,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					httpReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					httpReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceModelAttributeMap)
+					httpReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverHttpReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredStringField --> Uri
@@ -21211,8 +21804,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21265,7 +21857,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -21324,8 +21920,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21370,7 +21965,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -21512,6 +22110,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -21588,7 +22195,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -21712,7 +22322,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					kafkaReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					kafkaReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceModelAttributeMap)
+					kafkaReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				kafkaReceiverObj, kafkaReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverKafkaReceiverModelAttributeMap, kafkaReceiverAttributeMap)
@@ -21837,6 +22450,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -21886,8 +22508,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					newRelicReceiverAttributeMap["api_key"] = types.ObjectNull(GlobalLogReceiverReceiverNewRelicReceiverApiKeyModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> EndpointChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> EndpointChoice
 				if newRelicReceiverElement.GetEndpointChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					newRelicReceiverendpointChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21931,7 +22552,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					newRelicReceiverAttributeMap["endpoint_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					newRelicReceiverAttributeMap["endpoint_choice"] = types.ObjectNull(GlobalLogReceiverReceiverNewRelicReceiverEndpointChoiceModelAttributeMap)
+					newRelicReceiverAttributeMap["endpoint_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverNewRelicReceiverEndpointChoiceModelAttributeMap, map[string]attr.Value{
+						"eu": types.BoolNull(),
+						"us": types.BoolValue(true),
+					})
 				}
 
 				newRelicReceiverObj, newRelicReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverNewRelicReceiverModelAttributeMap, newRelicReceiverAttributeMap)
@@ -22133,8 +22757,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22187,7 +22810,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -22238,8 +22865,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22284,7 +22910,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -22426,6 +23055,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -22502,7 +23140,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -22626,7 +23267,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					qradarReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					qradarReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceModelAttributeMap)
+					qradarReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverQradarReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredStringField --> Uri
@@ -22902,8 +23546,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22956,7 +23599,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverS3ReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverS3ReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -23259,8 +23906,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23313,7 +23959,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						globalLogReceiverCompressionTypeModel.CompressionChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverCompressionCompressionChoiceModelAttributeMap)
+						globalLogReceiverCompressionTypeModel.CompressionChoice = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverCompressionCompressionChoiceModelAttributeMap, map[string]attr.Value{
+							"compression_default": types.BoolNull(),
+							"compression_gzip":    types.BoolValue(true),
+							"compression_none":    types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -23443,6 +24093,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := splunkHecTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -23522,8 +24181,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23568,7 +24226,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["ca_choice"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap)
+								useTlsAttributeMap["ca_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsCaChoiceModelAttributeMap, map[string]attr.Value{
+									"no_ca":          types.BoolValue(true),
+									"trusted_ca_url": types.StringNull(),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -23710,6 +24371,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -23786,7 +24456,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 								useTlsAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								useTlsAttributeMap["mtls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap)
+								useTlsAttributeMap["mtls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
 							// resource specToModelNested OneOfField --> VerifyCertificate
@@ -23910,7 +24583,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 					splunkReceiverAttributeMap["tls_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					splunkReceiverAttributeMap["tls_choice"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceModelAttributeMap)
+					splunkReceiverAttributeMap["tls_choice"] = types.ObjectValueMust(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceModelAttributeMap, map[string]attr.Value{
+						"no_tls":  types.BoolValue(true),
+						"use_tls": types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsModelAttributeMap),
+					})
 				}
 
 				splunkReceiverObj, splunkReceiverObjDiags := types.ObjectValue(GlobalLogReceiverReceiverSplunkReceiverModelAttributeMap, splunkReceiverAttributeMap)
@@ -24035,6 +24711,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -24132,6 +24817,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCGlobalLogReceiverModel
@@ -24141,6 +24832,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planReceiverChoice := data.ReceiverChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -24160,7 +24852,11 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planReceiverChoice := data.ReceiverChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.ReceiverChoice.IsNull() && !configData.ReceiverChoice.IsUnknown() {
+		data.ReceiverChoice = configData.ReceiverChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -24233,7 +24929,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> FilterChoice
+	// resource modelToSpecRoot OneOfField --> FilterChoice
 	if !data.FilterChoice.IsNull() && !data.FilterChoice.IsUnknown() {
 		filterChoiceModel := GlobalLogReceiverFilterChoice{}
 		response.Diagnostics.Append(data.FilterChoice.As(ctx, &filterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24279,6 +24975,10 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.FilterChoice = &ves_io_schema_global_log_receiver.ReplaceSpecType_NsCurrent{
+			NsCurrent: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> LogType
@@ -24312,9 +25012,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 			}
 			requestLogsOneOfSpec := &ves_io_schema_global_log_receiver.ReplaceSpecType_RequestLogs{}
 			requestLogsOneOfSpec.RequestLogs = &ves_io_schema_global_log_receiver.RequestLogsConfig{}
+			requestLogsOneOfSpec.RequestLogs.SamplingChoice = &ves_io_schema_global_log_receiver.RequestLogsConfig_Sampled{
+				Sampled: &ves_io_schema.Empty{},
+			}
 			spec.LogType = requestLogsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> SamplingChoice
+			// resource modelToSpecNested OneOfField --> SamplingChoice
 			if !globalLogReceiverReqLogsModel.SamplingChoice.IsNull() && !globalLogReceiverReqLogsModel.SamplingChoice.IsUnknown() {
 				requestLogsSamplingChoiceModel := GlobalLogReceiverSamplingChoice{}
 				response.Diagnostics.Append(globalLogReceiverReqLogsModel.SamplingChoice.As(ctx, &requestLogsSamplingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24490,9 +25193,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				awsCloudWatchReceiverOneOfSpec.AwsCloudWatchReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24618,6 +25324,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -24739,9 +25452,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				azureReceiverOneOfSpec.AzureReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24842,6 +25558,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 						}
 
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !connectionStringSecretInfoChoiceModel.None.IsNull() && !connectionStringSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						connectionStringSpec.SecretInfoOneof = noneSpecBool
 					}
 
 				}
@@ -25004,9 +25727,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				datadogReceiverOneOfSpec.DatadogReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25109,6 +25835,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !datadogApiKeySecretInfoChoiceModel.None.IsNull() && !datadogApiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						datadogApiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -25161,9 +25894,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.DatadogConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					datadogReceiverOneOfSpec.DatadogReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverUseTlsModel.CaChoice.IsNull() && !globalLogReceiverUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25286,6 +26022,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -25460,9 +26203,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				gcpBucketReceiverOneOfSpec.GcpBucketReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25664,6 +26410,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 							}
 
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !passwordSecretInfoChoiceModel.None.IsNull() && !passwordSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								passwordSpec.SecretInfoOneof = noneSpecBool
+							}
+
 						}
 
 					}
@@ -25671,6 +26424,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					// resource modelToSpecNested StringField --> UserName
 					if !globalLogReceiverAuthBasicModel.UserName.IsNull() && !globalLogReceiverAuthBasicModel.UserName.IsUnknown() {
 						authBasicOneOfSpec.AuthBasic.UserName = string(globalLogReceiverAuthBasicModel.UserName.ValueString())
+					} else {
+						authBasicOneOfSpec.AuthBasic.UserName = ""
 					}
 
 				}
@@ -25761,6 +26516,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 									clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 								}
 
+							}
+
+							// resource modelToSpecNested BoolOfOneOfPointerField --> None
+							if !tokenSecretInfoChoiceModel.None.IsNull() && !tokenSecretInfoChoiceModel.None.IsUnknown() {
+								noneSpecBool := &ves_io_schema.SecretType_None{}
+								noneSpecBool.None = &ves_io_schema.Empty{}
+								tokenSpec.SecretInfoOneof = noneSpecBool
 							}
 
 						}
@@ -25865,9 +26627,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				httpReceiverOneOfSpec.HttpReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25924,9 +26689,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.HTTPConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					httpReceiverOneOfSpec.HttpReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverHTTPConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverHTTPConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverHTTPConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26049,6 +26817,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -26234,9 +27009,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				kafkaReceiverOneOfSpec.KafkaReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26298,9 +27076,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.KafkaConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					kafkaReceiverOneOfSpec.KafkaReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverKafkaConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverKafkaConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverKafkaConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26425,6 +27206,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -26496,6 +27284,9 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 			}
 			newRelicReceiverOneOfSpec := &ves_io_schema_global_log_receiver.ReplaceSpecType_NewRelicReceiver{}
 			newRelicReceiverOneOfSpec.NewRelicReceiver = &ves_io_schema_global_log_receiver.NewRelicConfig{}
+			newRelicReceiverOneOfSpec.NewRelicReceiver.EndpointChoice = &ves_io_schema_global_log_receiver.NewRelicConfig_Us{
+				Us: &ves_io_schema.Empty{},
+			}
 			spec.Receiver = newRelicReceiverOneOfSpec
 
 			// resource modelToSpecNested RequiredPointerField --> ApiKey
@@ -26568,11 +27359,18 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !apiKeySecretInfoChoiceModel.None.IsNull() && !apiKeySecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						apiKeySpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> EndpointChoice
+			// resource modelToSpecNested OneOfField --> EndpointChoice
 			if !globalLogReceiverNewRelicReceiverModel.EndpointChoice.IsNull() && !globalLogReceiverNewRelicReceiverModel.EndpointChoice.IsUnknown() {
 				newRelicReceiverEndpointChoiceModel := GlobalLogReceiverNewRelicConfigEndpointChoice{}
 				response.Diagnostics.Append(globalLogReceiverNewRelicReceiverModel.EndpointChoice.As(ctx, &newRelicReceiverEndpointChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26703,9 +27501,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				qradarReceiverOneOfSpec.QradarReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26762,9 +27563,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.QRadarConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					qradarReceiverOneOfSpec.QradarReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverQRadarConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverQRadarConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverQRadarConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26887,6 +27691,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -27094,9 +27905,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				s3ReceiverOneOfSpec.S3Receiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27280,9 +28094,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 				}
 
 				compressionSpec := &ves_io_schema_global_log_receiver.CompressionType{}
+				compressionSpec.CompressionChoice = &ves_io_schema_global_log_receiver.CompressionType_CompressionGzip{
+					CompressionGzip: &ves_io_schema.Empty{},
+				}
 				splunkReceiverOneOfSpec.SplunkReceiver.Compression = compressionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> CompressionChoice
+				// resource modelToSpecNested OneOfField --> CompressionChoice
 				if !compressionModel.CompressionChoice.IsNull() && !compressionModel.CompressionChoice.IsUnknown() {
 					compressionCompressionChoiceModel := GlobalLogReceiverCompressionChoice{}
 					response.Diagnostics.Append(compressionModel.CompressionChoice.As(ctx, &compressionCompressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27390,6 +28207,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !splunkHecTokenSecretInfoChoiceModel.None.IsNull() && !splunkHecTokenSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						splunkHecTokenSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -27418,9 +28242,12 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					}
 					useTlsOneOfSpec := &ves_io_schema_global_log_receiver.SplunkConfig_UseTls{}
 					useTlsOneOfSpec.UseTls = &ves_io_schema_global_log_receiver.TLSConfigType{}
+					useTlsOneOfSpec.UseTls.CaChoice = &ves_io_schema_global_log_receiver.TLSConfigType_NoCa{
+						NoCa: &ves_io_schema.Empty{},
+					}
 					splunkReceiverOneOfSpec.SplunkReceiver.TlsChoice = useTlsOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !globalLogReceiverSplunkConfigUseTlsModel.CaChoice.IsNull() && !globalLogReceiverSplunkConfigUseTlsModel.CaChoice.IsUnknown() {
 						useTlsCaChoiceModel := GlobalLogReceiverCaChoice{}
 						response.Diagnostics.Append(globalLogReceiverSplunkConfigUseTlsModel.CaChoice.As(ctx, &useTlsCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27543,6 +28370,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(globalLogReceiverClearSecretInfoModel.Url.ValueString())
 										}
 
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
 									}
 
 								}
@@ -27688,6 +28522,13 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> None
+					if !urlSecretInfoChoiceModel.None.IsNull() && !urlSecretInfoChoiceModel.None.IsUnknown() {
+						noneSpecBool := &ves_io_schema.SecretType_None{}
+						noneSpecBool.None = &ves_io_schema.Empty{}
+						urlSpec.SecretInfoOneof = noneSpecBool
+					}
+
 				}
 
 			}
@@ -27698,7 +28539,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -27706,24 +28547,20 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_global_log_receiver.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_global_log_receiver.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "global_log_receiver", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_global_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_global_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "global_log_receiver", err),
 		)
 		return
 	}
@@ -27840,7 +28677,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> FilterChoice
+	// resource SpecToModelRoot OneOfField --> FilterChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -27923,8 +28760,6 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.FilterChoice = types.ObjectNull(GlobalLogReceiverFilterChoiceModelAttributeMap)
 	}
 
@@ -27969,8 +28804,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 			if isRequestLogs && requestLogsOptionsWrapper != nil && requestLogsOptionsWrapper.RequestLogs != nil {
 				requestLogsElement := requestLogsOptionsWrapper.RequestLogs
 
-				// resource specToModelNested RequiredOneOfField --> SamplingChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SamplingChoice
 				if requestLogsElement.GetSamplingChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					requestLogssamplingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28318,8 +29152,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28529,6 +29362,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureEventHubsReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -28783,8 +29625,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28957,6 +29798,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							} else {
 								connectionStringsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverAzureReceiverConnectionStringSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := connectionStringsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							connectionStringsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -29286,8 +30136,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29462,6 +30311,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := datadogApiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							datadogApiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -29579,8 +30437,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29765,6 +30622,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverDatadogReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -30165,8 +31031,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30516,6 +31381,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										passwordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -30554,12 +31428,8 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 
 							// resource specToModelNested StringField --> UserName
-							if authBasicElement.GetUserName() != "" {
-								authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
-							} else {
-								// Empty string, set to null
-								authBasicAttributeMap["user_name"] = types.StringNull()
-							}
+							// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+							authBasicAttributeMap["user_name"] = types.StringValue(authBasicElement.GetUserName())
 
 							authBasicObj, authBasicObjDiags := types.ObjectValue(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthBasicModelAttributeMap, authBasicAttributeMap)
 							response.Diagnostics.Append(authBasicObjDiags...)
@@ -30690,6 +31560,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 										} else {
 											tokensecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap)
 										}
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										tokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -30937,8 +31816,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31042,8 +31920,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31228,6 +32105,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverHttpReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -31642,8 +32528,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31755,8 +32640,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31941,6 +32825,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverKafkaReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -32256,6 +33149,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							apiKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -32293,8 +33195,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 					newRelicReceiverAttributeMap["api_key"] = types.ObjectNull(GlobalLogReceiverReceiverNewRelicReceiverApiKeyModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> EndpointChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> EndpointChoice
 				if newRelicReceiverElement.GetEndpointChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					newRelicReceiverendpointChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32540,8 +33441,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32645,8 +33545,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32831,6 +33730,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverQradarReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -33297,8 +34205,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33654,8 +34561,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> CompressionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> CompressionChoice
 					if compressionElement.GetCompressionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						compressioncompressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33838,6 +34744,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := splunkHecTokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							splunkHecTokensecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -33905,8 +34820,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 						if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
 							useTlsElement := useTlsOptionsWrapper.UseTls
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if useTlsElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								useTlscaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34091,6 +35005,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(GlobalLogReceiverReceiverSplunkReceiverTlsChoiceUseTlsMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
+												}
+
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 												}
 
 												// --- End of Choices ---
@@ -34406,6 +35329,15 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 							}
 						}
 
+						// resource specToModelNested BoolOfOneOfPointerField --> None
+						_, isNone := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+						if isNone {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+						} else {
+							urlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+						}
+
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
@@ -34503,7 +35435,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Update(ctx context.Context, request reso
 	}
 	// Restore plan value for ReceiverChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.ReceiverChoice = planReceiverChoice
+	data.ReceiverChoice = utils.ResolveUnknowns(planReceiverChoice, data.ReceiverChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -34551,7 +35483,7 @@ func (r *ResourceF5XCGlobalLogReceiver) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "global_log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "global_log_receiver", err),
 		)
 		return
 	}

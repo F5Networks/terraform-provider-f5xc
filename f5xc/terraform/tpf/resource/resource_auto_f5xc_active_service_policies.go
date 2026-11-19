@@ -23,7 +23,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -76,8 +78,8 @@ func (r *ResourceF5XCActiveServicePolicies) Metadata(ctx context.Context, reques
 func (r *ResourceF5XCActiveServicePolicies) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		MarkdownDescription: "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names.<br><br>Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace<br><br>All monitoring is scoped by namespace<br><br>List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace<br><br>User roles can be scoped by namespace<br><br>The 'namespace' value of a namespace object itself is empty string",
+		Description:         "namespace creates logical independent workspace within a tenant. Within a namespace contained objects should have unique names. Object within a namespace can only refer to objects within the same namespace or shared namespace or ves-io/shared namespace All monitoring is scoped by namespace List within namespace lists objects within same namespace or shared namespace or ves-io/shared namespace User roles can be scoped by namespace The 'namespace' value of a namespace object itself is empty string",
 
 		Attributes: map[string]schema.Attribute{
 			"namespace": schema.StringAttribute{
@@ -118,8 +120,12 @@ func (r *ResourceF5XCActiveServicePolicies) Schema(ctx context.Context, request 
 							Required:            false,
 							Optional:            true,
 							Computed:            true,
+							Validators: []validator.String{
+								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+							},
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseNonNullStateForUnknown(),
+								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 							},
 						},
 					},
@@ -181,9 +187,17 @@ func (r *ResourceF5XCActiveServicePolicies) ModifyPlan(ctx context.Context, req 
 			return
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCActiveServicePolicies) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCActiveServicePoliciesModel
 
 	// Read Terraform plan data into the model
@@ -270,7 +284,7 @@ func (r *ResourceF5XCActiveServicePolicies) Create(ctx context.Context, request 
 	_, err = r.client.CustomAPI(ctx, "POST", customCreateURI, customCreateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "active_service_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "active_service_policies", err),
 		)
 		return
 	}
@@ -333,7 +347,7 @@ func (r *ResourceF5XCActiveServicePolicies) Read(ctx context.Context, request re
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "active_service_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "active_service_policies", err),
 		)
 		return
 	}
@@ -398,14 +412,12 @@ func (r *ResourceF5XCActiveServicePolicies) Read(ctx context.Context, request re
 			AttrTypes: ActiveServicePoliciesServicePoliciesObjectRefModelAttributeMap,
 		}
 		nullServicePoliciesList := basetypes.NewListNull(servicePoliciesObjectType)
-		var priorValServicePolicies types.List
-		_ = request.State.GetAttribute(ctx, path.Root("service_policies"), &priorValServicePolicies)
-		if !priorValServicePolicies.IsNull() && !priorValServicePolicies.IsUnknown() {
-			data.ServicePolicies = priorValServicePolicies
+		if !data.ServicePolicies.IsNull() && !data.ServicePolicies.IsUnknown() && len(data.ServicePolicies.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ServicePolicies = basetypes.NewListValueMust(servicePoliciesObjectType, nil)
 		} else {
 			data.ServicePolicies = nullServicePoliciesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -417,6 +429,12 @@ func (r *ResourceF5XCActiveServicePolicies) Read(ctx context.Context, request re
 }
 
 func (r *ResourceF5XCActiveServicePolicies) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCActiveServicePoliciesModel
@@ -505,7 +523,7 @@ func (r *ResourceF5XCActiveServicePolicies) Update(ctx context.Context, request 
 	_, err = r.client.CustomAPI(ctx, "POST", customUpdateURI, customUpdateRPCFQN, yamlReq)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to update %s, got error: %s", "active_service_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "update", "active_service_policies", err),
 		)
 		return
 	}
@@ -576,7 +594,7 @@ func (r *ResourceF5XCActiveServicePolicies) Delete(ctx context.Context, request 
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") {
 			response.Diagnostics.AddError(
-				"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "active_service_policies", err),
+				"Client Error", utils.SanitizeAPIError(ctx, "delete", "active_service_policies", err),
 			)
 			return
 		}
@@ -592,7 +610,7 @@ func (r *ResourceF5XCActiveServicePolicies) Delete(ctx context.Context, request 
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "active_service_policies", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "active_service_policies", err),
 		)
 		return
 	}

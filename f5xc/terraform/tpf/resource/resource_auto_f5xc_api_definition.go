@@ -26,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -34,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -45,6 +47,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	ves_io_schema_views_api_definition "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/api_definition"
@@ -118,7 +121,7 @@ var ApiDefinitionNonApiEndpointsModelAttributeMap = map[string]attr.Type{
 	"path": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SchemaUpdatesStrategy
+// Attribute map for OneOfField --> SchemaUpdatesStrategy
 var ApiDefinitionSchemaUpdatesStrategyModelAttributeMap = map[string]attr.Type{
 
 	"mixed_schema_origin":  types.BoolType,
@@ -136,8 +139,8 @@ func (r *ResourceF5XCApiDefinition) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a api_definition This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_definition) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a api_definition This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_definition) etc. can be fetched",
+		MarkdownDescription: "The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs.<br>Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls.<br>In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.",
+		Description:         "The api_definition construct provides a mechanism to create api_groups based on referred OpenAPI specs. Default api_groups, which are built automatically, include a group containing all the operations specified in swaggers; a group defining all possible requests for the given base urls. In addition, we create default api-groups by a predefined OpenAPI extension, for example  x-volterra-apigroup. http_loadbalancer can refer api_definition object and create access policy rules based on its api-groups.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -193,7 +196,7 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"shared", "user"}...),
+					namespacetypevalidator.AllowedIn("shared", "user"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -319,20 +322,23 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 			},
 			"schema_updates_strategy_choice": schema.SingleNestedAttribute{
 				Description:         "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.",
-				MarkdownDescription: "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.<br>Exactly one of `mixed_schema_origin` or `strict_schema_origin` must be specified when `schema_updates_strategy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"mixed_schema_origin",
 						"strict_schema_origin",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"mixed_schema_origin": schema.BoolAttribute{
 						Description:         "mixed_schema_origin The schema can be updated from all associated LBs",
-						MarkdownDescription: "mixed_schema_origin The schema can be updated from all associated LBs",
+						MarkdownDescription: "mixed_schema_origin The schema can be updated from all associated LBs<br>Conflicts with `strict_schema_origin`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -342,7 +348,7 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 					},
 					"strict_schema_origin": schema.BoolAttribute{
 						Description:         "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint",
-						MarkdownDescription: "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint",
+						MarkdownDescription: "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint<br>Conflicts with `mixed_schema_origin`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -431,9 +437,17 @@ func (r *ResourceF5XCApiDefinition) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCApiDefinitionModel
 
 	// Read Terraform plan data into the model
@@ -664,7 +678,7 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource modelToSpecRoot OneOfField --> SchemaUpdatesStrategy
 	if !data.SchemaUpdatesStrategyChoice.IsNull() && !data.SchemaUpdatesStrategyChoice.IsUnknown() {
 		schemaUpdatesStrategyChoiceModel := ApiDefSchemaUpdatesStrategyChoice{}
 		response.Diagnostics.Append(data.SchemaUpdatesStrategyChoice.As(ctx, &schemaUpdatesStrategyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -686,6 +700,10 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
 		}
 
+	} else {
+		spec.SchemaUpdatesStrategy = &ves_io_schema_views_api_definition.CreateSpecType_StrictSchemaOrigin{
+			StrictSchemaOrigin: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -701,7 +719,7 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -724,7 +742,7 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_api_definition.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "api_definition", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "api_definition", err),
 		)
 		return
 	}
@@ -894,14 +912,12 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			AttrTypes: ApiDefinitionApiInventoryExclusionListModelAttributeMap,
 		}
 		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
-		var priorValApiInventoryExclusionList types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_exclusion_list"), &priorValApiInventoryExclusionList)
-		if !priorValApiInventoryExclusionList.IsNull() && !priorValApiInventoryExclusionList.IsUnknown() {
-			data.ApiInventoryExclusionList = priorValApiInventoryExclusionList
+		if !data.ApiInventoryExclusionList.IsNull() && !data.ApiInventoryExclusionList.IsUnknown() && len(data.ApiInventoryExclusionList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ApiInventoryExclusionList = basetypes.NewListValueMust(apiInventoryExclusionListObjectType, nil)
 		} else {
 			data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
@@ -956,14 +972,12 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			AttrTypes: ApiDefinitionApiInventoryInclusionListModelAttributeMap,
 		}
 		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
-		var priorValApiInventoryInclusionList types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_inclusion_list"), &priorValApiInventoryInclusionList)
-		if !priorValApiInventoryInclusionList.IsNull() && !priorValApiInventoryInclusionList.IsUnknown() {
-			data.ApiInventoryInclusionList = priorValApiInventoryInclusionList
+		if !data.ApiInventoryInclusionList.IsNull() && !data.ApiInventoryInclusionList.IsUnknown() && len(data.ApiInventoryInclusionList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ApiInventoryInclusionList = basetypes.NewListValueMust(apiInventoryInclusionListObjectType, nil)
 		} else {
 			data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
@@ -1018,17 +1032,15 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			AttrTypes: ApiDefinitionNonApiEndpointsModelAttributeMap,
 		}
 		nullNonApiEndpointsList := basetypes.NewListNull(nonApiEndpointsObjectType)
-		var priorValNonApiEndpoints types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("non_api_endpoints"), &priorValNonApiEndpoints)
-		if !priorValNonApiEndpoints.IsNull() && !priorValNonApiEndpoints.IsUnknown() {
-			data.NonApiEndpoints = priorValNonApiEndpoints
+		if !data.NonApiEndpoints.IsNull() && !data.NonApiEndpoints.IsUnknown() && len(data.NonApiEndpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NonApiEndpoints = basetypes.NewListValueMust(nonApiEndpointsObjectType, nil)
 		} else {
 			data.NonApiEndpoints = nullNonApiEndpointsList
 		}
-
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource SpecToModelRoot OneOfField --> SchemaUpdatesStrategy
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1076,8 +1088,6 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
 	}
 
@@ -1091,7 +1101,12 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			}
 			data.SwaggerSpecs = listValue
 		} else {
-			data.SwaggerSpecs = types.ListNull(types.StringType)
+			if !data.SwaggerSpecs.IsNull() && !data.SwaggerSpecs.IsUnknown() && len(data.SwaggerSpecs.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.SwaggerSpecs = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.SwaggerSpecs = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -1138,14 +1153,10 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "api_definition", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "api_definition", err),
 		)
 		return
 	}
@@ -1315,14 +1326,12 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 			AttrTypes: ApiDefinitionApiInventoryExclusionListModelAttributeMap,
 		}
 		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
-		var priorValApiInventoryExclusionList types.List
-		_ = request.State.GetAttribute(ctx, path.Root("api_inventory_exclusion_list"), &priorValApiInventoryExclusionList)
-		if !priorValApiInventoryExclusionList.IsNull() && !priorValApiInventoryExclusionList.IsUnknown() {
-			data.ApiInventoryExclusionList = priorValApiInventoryExclusionList
+		if !data.ApiInventoryExclusionList.IsNull() && !data.ApiInventoryExclusionList.IsUnknown() && len(data.ApiInventoryExclusionList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ApiInventoryExclusionList = basetypes.NewListValueMust(apiInventoryExclusionListObjectType, nil)
 		} else {
 			data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
@@ -1377,14 +1386,12 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 			AttrTypes: ApiDefinitionApiInventoryInclusionListModelAttributeMap,
 		}
 		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
-		var priorValApiInventoryInclusionList types.List
-		_ = request.State.GetAttribute(ctx, path.Root("api_inventory_inclusion_list"), &priorValApiInventoryInclusionList)
-		if !priorValApiInventoryInclusionList.IsNull() && !priorValApiInventoryInclusionList.IsUnknown() {
-			data.ApiInventoryInclusionList = priorValApiInventoryInclusionList
+		if !data.ApiInventoryInclusionList.IsNull() && !data.ApiInventoryInclusionList.IsUnknown() && len(data.ApiInventoryInclusionList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ApiInventoryInclusionList = basetypes.NewListValueMust(apiInventoryInclusionListObjectType, nil)
 		} else {
 			data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
@@ -1439,17 +1446,15 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 			AttrTypes: ApiDefinitionNonApiEndpointsModelAttributeMap,
 		}
 		nullNonApiEndpointsList := basetypes.NewListNull(nonApiEndpointsObjectType)
-		var priorValNonApiEndpoints types.List
-		_ = request.State.GetAttribute(ctx, path.Root("non_api_endpoints"), &priorValNonApiEndpoints)
-		if !priorValNonApiEndpoints.IsNull() && !priorValNonApiEndpoints.IsUnknown() {
-			data.NonApiEndpoints = priorValNonApiEndpoints
+		if !data.NonApiEndpoints.IsNull() && !data.NonApiEndpoints.IsUnknown() && len(data.NonApiEndpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NonApiEndpoints = basetypes.NewListValueMust(nonApiEndpointsObjectType, nil)
 		} else {
 			data.NonApiEndpoints = nullNonApiEndpointsList
 		}
-
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource SpecToModelRoot OneOfField --> SchemaUpdatesStrategy
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1497,9 +1502,13 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
+
+		if data.SchemaUpdatesStrategyChoice.IsNull() || data.SchemaUpdatesStrategyChoice.IsUnknown() || ((data.SchemaUpdatesStrategyChoice.Attributes()["mixed_schema_origin"].IsNull() || data.SchemaUpdatesStrategyChoice.Attributes()["mixed_schema_origin"].IsUnknown()) && (data.SchemaUpdatesStrategyChoice.Attributes()["strict_schema_origin"].IsNull() || data.SchemaUpdatesStrategyChoice.Attributes()["strict_schema_origin"].IsUnknown())) {
+			data.SchemaUpdatesStrategyChoice = types.ObjectValueMust(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap, map[string]attr.Value{
+				"mixed_schema_origin":  types.BoolNull(),
+				"strict_schema_origin": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource specToModelRootOld ArrayOfStringField --> SwaggerSpecs
@@ -1512,7 +1521,12 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 			}
 			data.SwaggerSpecs = listValue
 		} else {
-			data.SwaggerSpecs = types.ListNull(types.StringType)
+			if !data.SwaggerSpecs.IsNull() && !data.SwaggerSpecs.IsUnknown() && len(data.SwaggerSpecs.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.SwaggerSpecs = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.SwaggerSpecs = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -1525,6 +1539,12 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCApiDefinitionModel
@@ -1775,7 +1795,7 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource modelToSpecRoot OneOfField --> SchemaUpdatesStrategy
 	if !data.SchemaUpdatesStrategyChoice.IsNull() && !data.SchemaUpdatesStrategyChoice.IsUnknown() {
 		schemaUpdatesStrategyChoiceModel := ApiDefSchemaUpdatesStrategyChoice{}
 		response.Diagnostics.Append(data.SchemaUpdatesStrategyChoice.As(ctx, &schemaUpdatesStrategyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1797,6 +1817,10 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
 		}
 
+	} else {
+		spec.SchemaUpdatesStrategy = &ves_io_schema_views_api_definition.ReplaceSpecType_StrictSchemaOrigin{
+			StrictSchemaOrigin: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -1812,7 +1836,7 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1820,24 +1844,20 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_api_definition.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_api_definition.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "api_definition", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "api_definition", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "api_definition", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "api_definition", err),
 		)
 		return
 	}
@@ -2006,14 +2026,12 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			AttrTypes: ApiDefinitionApiInventoryExclusionListModelAttributeMap,
 		}
 		nullApiInventoryExclusionListList := basetypes.NewListNull(apiInventoryExclusionListObjectType)
-		var priorValApiInventoryExclusionList types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_exclusion_list"), &priorValApiInventoryExclusionList)
-		if !priorValApiInventoryExclusionList.IsNull() && !priorValApiInventoryExclusionList.IsUnknown() {
-			data.ApiInventoryExclusionList = priorValApiInventoryExclusionList
+		if !data.ApiInventoryExclusionList.IsNull() && !data.ApiInventoryExclusionList.IsUnknown() && len(data.ApiInventoryExclusionList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ApiInventoryExclusionList = basetypes.NewListValueMust(apiInventoryExclusionListObjectType, nil)
 		} else {
 			data.ApiInventoryExclusionList = nullApiInventoryExclusionListList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> ApiInventoryInclusionList
@@ -2068,14 +2086,12 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			AttrTypes: ApiDefinitionApiInventoryInclusionListModelAttributeMap,
 		}
 		nullApiInventoryInclusionListList := basetypes.NewListNull(apiInventoryInclusionListObjectType)
-		var priorValApiInventoryInclusionList types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("api_inventory_inclusion_list"), &priorValApiInventoryInclusionList)
-		if !priorValApiInventoryInclusionList.IsNull() && !priorValApiInventoryInclusionList.IsUnknown() {
-			data.ApiInventoryInclusionList = priorValApiInventoryInclusionList
+		if !data.ApiInventoryInclusionList.IsNull() && !data.ApiInventoryInclusionList.IsUnknown() && len(data.ApiInventoryInclusionList.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ApiInventoryInclusionList = basetypes.NewListValueMust(apiInventoryInclusionListObjectType, nil)
 		} else {
 			data.ApiInventoryInclusionList = nullApiInventoryInclusionListList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> NonApiEndpoints
@@ -2130,17 +2146,15 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			AttrTypes: ApiDefinitionNonApiEndpointsModelAttributeMap,
 		}
 		nullNonApiEndpointsList := basetypes.NewListNull(nonApiEndpointsObjectType)
-		var priorValNonApiEndpoints types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("non_api_endpoints"), &priorValNonApiEndpoints)
-		if !priorValNonApiEndpoints.IsNull() && !priorValNonApiEndpoints.IsUnknown() {
-			data.NonApiEndpoints = priorValNonApiEndpoints
+		if !data.NonApiEndpoints.IsNull() && !data.NonApiEndpoints.IsUnknown() && len(data.NonApiEndpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NonApiEndpoints = basetypes.NewListValueMust(nonApiEndpointsObjectType, nil)
 		} else {
 			data.NonApiEndpoints = nullNonApiEndpointsList
 		}
-
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource SpecToModelRoot OneOfField --> SchemaUpdatesStrategy
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -2188,8 +2202,6 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
 	}
 
@@ -2203,7 +2215,12 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			}
 			data.SwaggerSpecs = listValue
 		} else {
-			data.SwaggerSpecs = types.ListNull(types.StringType)
+			if !data.SwaggerSpecs.IsNull() && !data.SwaggerSpecs.IsUnknown() && len(data.SwaggerSpecs.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.SwaggerSpecs = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.SwaggerSpecs = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -2279,7 +2296,7 @@ func (r *ResourceF5XCApiDefinition) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "api_definition", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "api_definition", err),
 		)
 		return
 	}

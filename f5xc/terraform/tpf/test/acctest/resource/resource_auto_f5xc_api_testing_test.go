@@ -31,7 +31,7 @@ func TestAccResourceAutoF5XCApiTesting_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-testing-" + acctest.RandString(t, 8)
+	name := "example-api-testing-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -42,10 +42,10 @@ func TestAccResourceAutoF5XCApiTesting_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -57,10 +57,10 @@ func TestAccResourceAutoF5XCApiTesting_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -78,7 +78,7 @@ func TestAccResourceAutoF5XCApiTesting_withFrequencyTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-testing-" + acctest.RandString(t, 8)
+	name := "example-api-testing-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -89,10 +89,10 @@ func TestAccResourceAutoF5XCApiTesting_withFrequencyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_withFrequency(name, namespace, "every_week"),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -104,10 +104,10 @@ func TestAccResourceAutoF5XCApiTesting_withFrequencyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_withFrequency(name, namespace, "every_day"),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -119,10 +119,10 @@ func TestAccResourceAutoF5XCApiTesting_withFrequencyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_withFrequency(name, namespace, "every_month"),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -140,7 +140,7 @@ func TestAccResourceAutoF5XCApiTesting_withRoleTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-testing-" + acctest.RandString(t, 8)
+	name := "example-api-testing-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -151,10 +151,10 @@ func TestAccResourceAutoF5XCApiTesting_withRoleTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_withRole(name, namespace, "standard"),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -166,10 +166,10 @@ func TestAccResourceAutoF5XCApiTesting_withRoleTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_withRole(name, namespace, "admin"),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -187,7 +187,7 @@ func TestAccResourceAutoF5XCApiTesting_withCredentialTypeTransition(t *testing.T
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-testing-" + acctest.RandString(t, 8)
+	name := "example-api-testing-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -198,10 +198,10 @@ func TestAccResourceAutoF5XCApiTesting_withCredentialTypeTransition(t *testing.T
 				Config: testAccResourceAutoF5XCApiTestingConfig_withBasicAuth(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -213,10 +213,10 @@ func TestAccResourceAutoF5XCApiTesting_withCredentialTypeTransition(t *testing.T
 				Config: testAccResourceAutoF5XCApiTestingConfig_withApiKey(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.api_key.value.secret_info_choice.clear_secret_info.url",
@@ -228,10 +228,10 @@ func TestAccResourceAutoF5XCApiTesting_withCredentialTypeTransition(t *testing.T
 				Config: testAccResourceAutoF5XCApiTestingConfig_withBearerToken(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.bearer_token.token.secret_info_choice.clear_secret_info.url",
@@ -249,7 +249,7 @@ func TestAccResourceAutoF5XCApiTesting_withLoginEndpoint(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-testing-" + acctest.RandString(t, 8)
+	name := "example-api-testing-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -260,10 +260,10 @@ func TestAccResourceAutoF5XCApiTesting_withLoginEndpoint(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_withLoginEndpoint(name, namespace, "/api/v1/login", "POST"),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.login_endpoint.json_payload.secret_info_choice.clear_secret_info.url",
@@ -275,10 +275,10 @@ func TestAccResourceAutoF5XCApiTesting_withLoginEndpoint(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_withLoginEndpoint(name, namespace, "/auth/token", "GET"),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.login_endpoint.json_payload.secret_info_choice.clear_secret_info.url",
@@ -297,9 +297,9 @@ func TestAccResourceAutoF5XCApiTesting_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-api-testing-" + acctest.RandString(t, 8)
+	name := "example-api-testing-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckApiTestingDestroyProducer(t),
@@ -308,10 +308,10 @@ func TestAccResourceAutoF5XCApiTesting_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -329,10 +329,10 @@ func TestAccResourceAutoF5XCApiTesting_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCApiTestingConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_api_testing.test",
+				ResourceName:                         "f5xc_api_testing.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_api_testing.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore: []string{
 					"domains.0.credentials.0.credentials_choice.basic_auth.password.secret_info_choice.clear_secret_info.url",
@@ -347,7 +347,11 @@ func TestAccResourceAutoF5XCApiTesting_full(t *testing.T) {
 				},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCApiTestingConfig_full("example-api-testing", "default"),
+		})
 }
 
 // ── Destroy producer ──────────────────────────────────────────────────────────
@@ -360,7 +364,7 @@ func testAccCheckApiTestingDestroyProducer(t *testing.T) func(*terraform.State) 
 
 func testAccResourceAutoF5XCApiTestingConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name      = %q
   namespace = %q
 
@@ -399,10 +403,10 @@ resource "f5xc_api_testing" "test" {
 
 func testAccResourceAutoF5XCApiTestingConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name        = %q
   namespace   = %q
-  description = "API testing updated"
+  description = "API testing example updated"
 
   domains = [
     {
@@ -440,7 +444,7 @@ resource "f5xc_api_testing" "test" {
 func testAccResourceAutoF5XCApiTestingConfig_withFrequency(name, namespace, frequency string) string {
 	freqBlock := fmt.Sprintf("    %s = true", frequency)
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name      = %q
   namespace = %q
 
@@ -480,7 +484,7 @@ resource "f5xc_api_testing" "test" {
 func testAccResourceAutoF5XCApiTestingConfig_withRole(name, namespace, role string) string {
 	roleBlock := fmt.Sprintf("    %s = true", role)
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name      = %q
   namespace = %q
 
@@ -519,7 +523,7 @@ resource "f5xc_api_testing" "test" {
 
 func testAccResourceAutoF5XCApiTestingConfig_withBasicAuth(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name      = %q
   namespace = %q
 
@@ -558,7 +562,7 @@ resource "f5xc_api_testing" "test" {
 
 func testAccResourceAutoF5XCApiTestingConfig_withApiKey(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name      = %q
   namespace = %q
 
@@ -597,7 +601,7 @@ resource "f5xc_api_testing" "test" {
 
 func testAccResourceAutoF5XCApiTestingConfig_withBearerToken(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name      = %q
   namespace = %q
 
@@ -635,7 +639,7 @@ resource "f5xc_api_testing" "test" {
 
 func testAccResourceAutoF5XCApiTestingConfig_withLoginEndpoint(name, namespace, path, method string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name      = %q
   namespace = %q
 
@@ -676,14 +680,14 @@ resource "f5xc_api_testing" "test" {
 
 func testAccResourceAutoF5XCApiTestingConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name                = %q
   namespace           = %q
-  description         = "Full API testing configuration"
+  description         = "API testing example"
   custom_header_value = "my-test-header-value"
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "api"
   }
 
@@ -763,14 +767,14 @@ resource "f5xc_api_testing" "test" {
 
 func testAccResourceAutoF5XCApiTestingConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_api_testing" "test" {
+resource "f5xc_api_testing" "example" {
   name                = %q
   namespace           = %q
-  description         = "Full API testing configuration updated"
+  description         = "API testing example updated"
   custom_header_value = "updated-test-header-value"
 
   labels = {
-    env     = "test"
+    env     = "example"
     tier    = "api"
     updated = "true"
   }

@@ -26,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -34,9 +35,11 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -81,7 +84,6 @@ type ResourceF5XCProtocolInspectionModel struct {
 	Namespace                     types.String   `tfsdk:"namespace"`
 	Uid                           types.String   `tfsdk:"uid"`
 	Action                        types.List     `tfsdk:"action"`
-	DnsProxies                    types.List     `tfsdk:"dns_proxies"`
 	EnableDisableComplianceChecks types.Object   `tfsdk:"enable_disable_compliance_checks"`
 	EnableDisableSignatures       types.Object   `tfsdk:"enable_disable_signatures"`
 	Timeouts                      timeouts.Value `tfsdk:"timeouts"`
@@ -97,14 +99,6 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> DnsProxies
-var ProtocolInspectionDnsProxiesObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
-}
-
 // Attribute map for RequiredPointerField --> EnableDisableComplianceChecks
 var ProtocolInspectionEnableDisableComplianceChecksModelAttributeMap = map[string]attr.Type{
 
@@ -138,7 +132,7 @@ var ProtocolInspectionEnableDisableSignaturesModelAttributeMap = map[string]attr
 	},
 }
 
-// Attribute map for RequiredOneOfField --> SignatureChoice
+// Attribute map for OneOfField --> SignatureChoice
 var ProtocolInspectionEnableDisableSignaturesSignatureChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_signature": types.BoolType,
@@ -156,8 +150,8 @@ func (r *ResourceF5XCProtocolInspection) Metadata(ctx context.Context, request r
 func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a protocol_inspection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protocol_inspection) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a protocol_inspection This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of protocol_inspection) etc. can be fetched",
+		MarkdownDescription: "Protocol Inspection view defines the required parameters that can be used in CRUD, to create and manage Protocol Inspection.<br>It can be used to create Protocol Inspection.<br><br>View will create the following child objects.<br><br>* DNS Compliance Checks",
+		Description:         "Protocol Inspection view defines the required parameters that can be used in CRUD, to create and manage Protocol Inspection. It can be used to create Protocol Inspection. View will create the following child objects. DNS Compliance Checks",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -236,44 +230,6 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 					listvalidator.SizeAtMost(1),
 				},
 			},
-			"dns_proxies": schema.ListNestedAttribute{
-				Description:         "backref_obj The DNS proxy associated with Protocol Inspection",
-				MarkdownDescription: "backref_obj The DNS proxy associated with Protocol Inspection",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(32),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            true,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseNonNullStateForUnknown(),
-							},
-						},
-					},
-				},
-			},
 			"enable_disable_compliance_checks": schema.SingleNestedAttribute{
 				Description:         "Enable/Disable Compliance Checks Enable or Disable Compliance Checks",
 				MarkdownDescription: "Enable/Disable Compliance Checks Enable or Disable Compliance Checks",
@@ -283,7 +239,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 				Attributes: map[string]schema.Attribute{
 					"compliance_check_choice": schema.SingleNestedAttribute{
 						Description:         "Enable Compliance Check",
-						MarkdownDescription: "Enable Compliance Check",
+						MarkdownDescription: "Enable Compliance Check<br>Exactly one of `disable_compliance_checks` or `enable_compliance_checks` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -296,7 +252,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 						Attributes: map[string]schema.Attribute{
 							"disable_compliance_checks": schema.BoolAttribute{
 								Description:         "Disable Compliance Check",
-								MarkdownDescription: "Disable Compliance Check",
+								MarkdownDescription: "Disable Compliance Check<br>Conflicts with `enable_compliance_checks`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -306,7 +262,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 							},
 							"enable_compliance_checks": schema.SingleNestedAttribute{
 								Description:         "Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks)",
-								MarkdownDescription: "Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks)",
+								MarkdownDescription: "Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks)<br>Conflicts with `disable_compliance_checks`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -331,8 +287,12 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
+										Validators: []validator.String{
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+										},
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseNonNullStateForUnknown(),
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 										},
 									},
 								},
@@ -350,20 +310,23 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 				Attributes: map[string]schema.Attribute{
 					"signature_choice": schema.SingleNestedAttribute{
 						Description:         "Enable Signature",
-						MarkdownDescription: "Enable Signature",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Enable Signature<br>Exactly one of `disable_signature` or `enable_signature` must be specified when `signature_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"disable_signature",
 								"enable_signature",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"disable_signature": schema.BoolAttribute{
 								Description:         "Disable Signature",
-								MarkdownDescription: "Disable Signature",
+								MarkdownDescription: "Disable Signature<br>Conflicts with `enable_signature`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -373,7 +336,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 							},
 							"enable_signature": schema.BoolAttribute{
 								Description:         "Enable Signature",
-								MarkdownDescription: "Enable Signature",
+								MarkdownDescription: "Enable Signature<br>Conflicts with `disable_signature`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -447,9 +410,17 @@ func (r *ResourceF5XCProtocolInspection) ModifyPlan(ctx context.Context, req res
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCProtocolInspectionModel
 
 	// Read Terraform plan data into the model
@@ -621,6 +592,9 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 		// resource modelToSpecRoot RequiredPointerField --> EnableDisableSignatures
 		if !data.EnableDisableSignatures.IsNull() && !data.EnableDisableSignatures.IsUnknown() {
 			enableDisableSignaturesSpec := &ves_io_schema_protocol_inspection.EnableDisableSignatures{}
+			enableDisableSignaturesSpec.SignatureChoice = &ves_io_schema_protocol_inspection.EnableDisableSignatures_EnableSignature{
+				EnableSignature: &ves_io_schema.Empty{},
+			}
 			spec.EnableDisableSignatures = enableDisableSignaturesSpec
 			var enableDisableSignaturesModel ProtoInspectionEnableDisableSignatures
 
@@ -631,7 +605,7 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignatureChoice
+			// resource modelToSpecNested OneOfField --> SignatureChoice
 			if !enableDisableSignaturesModel.SignatureChoice.IsNull() && !enableDisableSignaturesModel.SignatureChoice.IsUnknown() {
 				enableDisableSignaturesSignatureChoiceModel := ProtoInspectionSignatureChoice{}
 				response.Diagnostics.Append(enableDisableSignaturesModel.SignatureChoice.As(ctx, &enableDisableSignaturesSignatureChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -661,7 +635,7 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -684,7 +658,7 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_protocol_inspection.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "protocol_inspection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "protocol_inspection", err),
 		)
 		return
 	}
@@ -819,68 +793,6 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 		}
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsProxies
-	if len(specData.GetDnsProxies()) > 0 {
-		dnsProxiesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsProxies()))
-		for _, dnsProxiesElement := range specData.GetDnsProxies() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsProxiesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsProxiesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsProxiesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsProxiesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsProxiesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsProxiesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			dnsProxiesElements = append(dnsProxiesElements, objectRefTypeModelModel)
-		}
-
-		{
-			dnsProxiesList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				ProtocolInspectionDnsProxiesObjectRefModelAttributeMap,
-				dnsProxiesElements,
-			)
-
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			data.DnsProxies = dnsProxiesList
-		}
-	} else {
-		var dnsProxiesObjectType = basetypes.ObjectType{
-			AttrTypes: ProtocolInspectionDnsProxiesObjectRefModelAttributeMap,
-		}
-		nullDnsProxiesList := basetypes.NewListNull(dnsProxiesObjectType)
-		var priorValDnsProxies types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_proxies"), &priorValDnsProxies)
-		if !priorValDnsProxies.IsNull() && !priorValDnsProxies.IsUnknown() {
-			data.DnsProxies = priorValDnsProxies
-		} else {
-			data.DnsProxies = nullDnsProxiesList
-		}
-
-	}
-
 	// resource SpecToModelRoot RequiredPointerField --> EnableDisableComplianceChecks
 	if specData.GetEnableDisableComplianceChecks() != nil {
 		var protoInspectionEnableDisableComplianceChecksModel = &ProtoInspectionEnableDisableComplianceChecks{}
@@ -989,8 +901,7 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 		var protoInspectionEnableDisableSignaturesModel = &ProtoInspectionEnableDisableSignatures{}
 		enableDisableSignaturesElement := specData.GetEnableDisableSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignatureChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignatureChoice
 		if enableDisableSignaturesElement.GetSignatureChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			enableDisableSignaturessignatureChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1094,14 +1005,10 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "protocol_inspection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "protocol_inspection", err),
 		)
 		return
 	}
@@ -1236,68 +1143,6 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 		}
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsProxies
-	if len(specData.GetDnsProxies()) > 0 {
-		dnsProxiesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsProxies()))
-		for _, dnsProxiesElement := range specData.GetDnsProxies() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsProxiesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsProxiesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsProxiesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsProxiesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsProxiesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsProxiesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			dnsProxiesElements = append(dnsProxiesElements, objectRefTypeModelModel)
-		}
-
-		{
-			dnsProxiesList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				ProtocolInspectionDnsProxiesObjectRefModelAttributeMap,
-				dnsProxiesElements,
-			)
-
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			data.DnsProxies = dnsProxiesList
-		}
-	} else {
-		var dnsProxiesObjectType = basetypes.ObjectType{
-			AttrTypes: ProtocolInspectionDnsProxiesObjectRefModelAttributeMap,
-		}
-		nullDnsProxiesList := basetypes.NewListNull(dnsProxiesObjectType)
-		var priorValDnsProxies types.List
-		_ = request.State.GetAttribute(ctx, path.Root("dns_proxies"), &priorValDnsProxies)
-		if !priorValDnsProxies.IsNull() && !priorValDnsProxies.IsUnknown() {
-			data.DnsProxies = priorValDnsProxies
-		} else {
-			data.DnsProxies = nullDnsProxiesList
-		}
-
-	}
-
 	// resource SpecToModelRoot RequiredPointerField --> EnableDisableComplianceChecks
 	if specData.GetEnableDisableComplianceChecks() != nil {
 		var protoInspectionEnableDisableComplianceChecksModel = &ProtoInspectionEnableDisableComplianceChecks{}
@@ -1406,8 +1251,7 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 		var protoInspectionEnableDisableSignaturesModel = &ProtoInspectionEnableDisableSignatures{}
 		enableDisableSignaturesElement := specData.GetEnableDisableSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignatureChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> SignatureChoice
 		if enableDisableSignaturesElement.GetSignatureChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			enableDisableSignaturessignatureChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1451,7 +1295,10 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 			protoInspectionEnableDisableSignaturesModel.SignatureChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			protoInspectionEnableDisableSignaturesModel.SignatureChoice = types.ObjectNull(ProtocolInspectionEnableDisableSignaturesSignatureChoiceModelAttributeMap)
+			protoInspectionEnableDisableSignaturesModel.SignatureChoice = types.ObjectValueMust(ProtocolInspectionEnableDisableSignaturesSignatureChoiceModelAttributeMap, map[string]attr.Value{
+				"disable_signature": types.BoolNull(),
+				"enable_signature":  types.BoolValue(true),
+			})
 		}
 
 		enableDisableSignaturesObj, enableDisableSignaturesDiags := utils.GoStructToObjectValue(
@@ -1465,7 +1312,15 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 		}
 		data.EnableDisableSignatures = enableDisableSignaturesObj
 	} else {
-		data.EnableDisableSignatures = types.ObjectNull(ProtocolInspectionEnableDisableSignaturesModelAttributeMap)
+
+		if data.EnableDisableSignatures.IsNull() || data.EnableDisableSignatures.IsUnknown() || (data.EnableDisableSignatures.Attributes()["signature_choice"].(types.Object).IsNull() || data.EnableDisableSignatures.Attributes()["signature_choice"].(types.Object).IsUnknown() || ((data.EnableDisableSignatures.Attributes()["signature_choice"].(types.Object).Attributes()["disable_signature"].IsNull() || data.EnableDisableSignatures.Attributes()["signature_choice"].(types.Object).Attributes()["disable_signature"].IsUnknown()) && (data.EnableDisableSignatures.Attributes()["signature_choice"].(types.Object).Attributes()["enable_signature"].IsNull() || data.EnableDisableSignatures.Attributes()["signature_choice"].(types.Object).Attributes()["enable_signature"].IsUnknown()))) {
+			data.EnableDisableSignatures = types.ObjectValueMust(ProtocolInspectionEnableDisableSignaturesModelAttributeMap, map[string]attr.Value{
+				"signature_choice": types.ObjectValueMust(ProtocolInspectionEnableDisableSignaturesSignatureChoiceModelAttributeMap, map[string]attr.Value{
+					"disable_signature": types.BoolNull(),
+					"enable_signature":  types.BoolValue(true),
+				}),
+			})
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1477,6 +1332,12 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 }
 
 func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCProtocolInspectionModel
@@ -1668,6 +1529,9 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 		// resource modelToSpecRoot RequiredPointerField --> EnableDisableSignatures
 		if !data.EnableDisableSignatures.IsNull() && !data.EnableDisableSignatures.IsUnknown() {
 			enableDisableSignaturesSpec := &ves_io_schema_protocol_inspection.EnableDisableSignatures{}
+			enableDisableSignaturesSpec.SignatureChoice = &ves_io_schema_protocol_inspection.EnableDisableSignatures_EnableSignature{
+				EnableSignature: &ves_io_schema.Empty{},
+			}
 			spec.EnableDisableSignatures = enableDisableSignaturesSpec
 			var enableDisableSignaturesModel ProtoInspectionEnableDisableSignatures
 
@@ -1678,7 +1542,7 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignatureChoice
+			// resource modelToSpecNested OneOfField --> SignatureChoice
 			if !enableDisableSignaturesModel.SignatureChoice.IsNull() && !enableDisableSignaturesModel.SignatureChoice.IsUnknown() {
 				enableDisableSignaturesSignatureChoiceModel := ProtoInspectionSignatureChoice{}
 				response.Diagnostics.Append(enableDisableSignaturesModel.SignatureChoice.As(ctx, &enableDisableSignaturesSignatureChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1708,7 +1572,7 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1716,24 +1580,20 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_inspection.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_inspection.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "protocol_inspection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "protocol_inspection", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "protocol_inspection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "protocol_inspection", err),
 		)
 		return
 	}
@@ -1867,68 +1727,6 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 		}
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsProxies
-	if len(specData.GetDnsProxies()) > 0 {
-		dnsProxiesElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsProxies()))
-		for _, dnsProxiesElement := range specData.GetDnsProxies() {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsProxiesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsProxiesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsProxiesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsProxiesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsProxiesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsProxiesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			dnsProxiesElements = append(dnsProxiesElements, objectRefTypeModelModel)
-		}
-
-		{
-			dnsProxiesList, listDiags := utils.GoStructSliceToListValue(
-				ctx,
-				ProtocolInspectionDnsProxiesObjectRefModelAttributeMap,
-				dnsProxiesElements,
-			)
-
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			data.DnsProxies = dnsProxiesList
-		}
-	} else {
-		var dnsProxiesObjectType = basetypes.ObjectType{
-			AttrTypes: ProtocolInspectionDnsProxiesObjectRefModelAttributeMap,
-		}
-		nullDnsProxiesList := basetypes.NewListNull(dnsProxiesObjectType)
-		var priorValDnsProxies types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_proxies"), &priorValDnsProxies)
-		if !priorValDnsProxies.IsNull() && !priorValDnsProxies.IsUnknown() {
-			data.DnsProxies = priorValDnsProxies
-		} else {
-			data.DnsProxies = nullDnsProxiesList
-		}
-
-	}
-
 	// resource SpecToModelRoot RequiredPointerField --> EnableDisableComplianceChecks
 	if specData.GetEnableDisableComplianceChecks() != nil {
 		var protoInspectionEnableDisableComplianceChecksModel = &ProtoInspectionEnableDisableComplianceChecks{}
@@ -2037,8 +1835,7 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 		var protoInspectionEnableDisableSignaturesModel = &ProtoInspectionEnableDisableSignatures{}
 		enableDisableSignaturesElement := specData.GetEnableDisableSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignatureChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignatureChoice
 		if enableDisableSignaturesElement.GetSignatureChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			enableDisableSignaturessignatureChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2171,7 +1968,7 @@ func (r *ResourceF5XCProtocolInspection) Delete(ctx context.Context, request res
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "protocol_inspection", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "protocol_inspection", err),
 		)
 		return
 	}

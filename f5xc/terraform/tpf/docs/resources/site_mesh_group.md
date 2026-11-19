@@ -14,35 +14,99 @@
 page_title: "f5xc_site_mesh_group Resource - F5 XC Distributed Cloud"
 subcategory: "Cloud & Infrastructure Sites"
 description: |-
-  Site mesh group Site mesh group is a configuration tool to provide Site to Site connectivity Set of sites in a site mesh group are defined by a virtual site. The site mesh groups can be of type HUB or SPOKE. Where, - SITE_MESH_GROUP_TYPE_HUB_FULL_MESH 'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group A HUB Site will route traffic between all its Spoke Sites. Current release can support only a single site in Site Mesh Group of this type - SITE_MESH_GROUP_TYPE_SPOKE 'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is routed thru Hub Sites. 'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the Hub Sites - SITE_MESH_GROUP_TYPE_FULL_MESH 'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that are member of virtual_site NOTE : - The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs' - The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only - A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
+  Site mesh group is a configuration tool to provide Site to Site<br>connectivity<br><br>Set of sites in a site mesh group are defined by a virtual site.<br><br>The site mesh groups can be of type HUB or SPOKE. Where,<br>- SITE_MESH_GROUP_TYPE_HUB_FULL_MESH<br>'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group<br>A HUB Site will route traffic between all its Spoke Sites.<br><br>Current release can support only a single site in Site Mesh Group of this type<br><br>- SITE_MESH_GROUP_TYPE_SPOKE<br>'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is<br>routed thru Hub Sites.<br><br>'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group<br>gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the<br>Hub Sites<br><br>- SITE_MESH_GROUP_TYPE_FULL_MESH<br>'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that<br>are member of virtual_site<br><br>NOTE :<br>- The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs'<br>- The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only<br>- A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
 ---
 
 # f5xc_site_mesh_group (Resource)
 
-Site mesh group Site mesh group is a configuration tool to provide Site to Site connectivity Set of sites in a site mesh group are defined by a virtual site. The site mesh groups can be of type HUB or SPOKE. Where, - SITE_MESH_GROUP_TYPE_HUB_FULL_MESH 'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group A HUB Site will route traffic between all its Spoke Sites. Current release can support only a single site in Site Mesh Group of this type - SITE_MESH_GROUP_TYPE_SPOKE 'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is routed thru Hub Sites. 'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the Hub Sites - SITE_MESH_GROUP_TYPE_FULL_MESH 'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that are member of virtual_site NOTE : - The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs' - The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only - A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
+Site mesh group is a configuration tool to provide Site to Site<br>connectivity<br><br>Set of sites in a site mesh group are defined by a virtual site.<br><br>The site mesh groups can be of type HUB or SPOKE. Where,<br>- SITE_MESH_GROUP_TYPE_HUB_FULL_MESH<br>'virtual_site' in the Site Mesh Group defines list of HUB Sites for the Site Mesh Group<br>A HUB Site will route traffic between all its Spoke Sites.<br><br>Current release can support only a single site in Site Mesh Group of this type<br><br>- SITE_MESH_GROUP_TYPE_SPOKE<br>'virtual_site' selects list of Spoke sites. Traffic between two Spoke sites is<br>routed thru Hub Sites.<br><br>'hub' field refers to another Site Mesh Group. The 'virtual_site' in this Site Mesh Group<br>gives list of Hub Sites for the Spokes. Every Spoke site will create tunnels with all the<br>Hub Sites<br><br>- SITE_MESH_GROUP_TYPE_FULL_MESH<br>'virtual_site' selects list of Sites. Full mesh of tunnels is created between all sites that<br>are member of virtual_site<br><br>NOTE :<br>- The tunnels created by Site Mesh Group are in addition to the tunnels created from CE to its 'Connected REs'<br>- The tunnels can be setup over either public network or a private network and tunnels can be of type IPSec only<br>- A site can be member of either SITE_MESH_GROUP_TYPE_HUB_FULL_MESH or SITE_MESH_GROUP_TYPE_SPOKE. Not both
 
 To get more information about f5xc_site_mesh_group, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/site-mesh-group)
 
+## Example Usage
 
+```terraform
+# Example: Site Mesh Group - Basic
+
+resource "f5xc_site_mesh_group" "example" {
+  name      = "example-site-mesh-group"
+  namespace = "system"
+
+  mesh_choice = {
+    full_mesh = {
+      full_mesh_choice = {
+        data_plane_mesh = true
+      }
+    }
+  }
+
+  re_fallback_choice = {
+    enable_re_fallback = true
+  }
+
+  bfd_choice = {
+    bfd_disabled = true
+  }
+}
+```
+
+```terraform
+# Example: Site Mesh Group - Full
+
+resource "f5xc_site_mesh_group" "example" {
+  name        = "example-site-mesh-group"
+  namespace   = "system"
+  description = "Site mesh group full example"
+
+  labels = {
+    env  = "example"
+    team = "platform"
+  }
+
+  annotations = {
+    owner = "mesh-owner"
+  }
+
+  mesh_choice = {
+    full_mesh = {
+      full_mesh_choice = {
+        data_plane_mesh = true
+      }
+    }
+  }
+
+  re_fallback_choice = {
+    enable_re_fallback = true
+  }
+
+  bfd_choice = {
+    bfd_enabled = {
+      transmit_interval_milliseconds = 1200
+      receive_interval_milliseconds  = 1200
+      multiplier                     = 4
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
 
 ### Required
 
-- `bfd_choice` (Attributes) BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection. (see [below for nested schema](#nestedatt--bfd_choice))
+- `bfd_choice` (Attributes) BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.<br>Exactly one of `bfd_disabled` or `bfd_enabled` must be specified. (see [below for nested schema](#nestedatt--bfd_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `re_fallback_choice` (Attributes) RE Fallback Fallback to RE Connectivity when the SMG fails (see [below for nested schema](#nestedatt--re_fallback_choice))
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `mesh_choice` (Attributes) Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh) (see [below for nested schema](#nestedatt--mesh_choice))
+- `mesh_choice` (Attributes) Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh)<br>Exactly one of `full_mesh`, `hub_mesh`, or `spoke_mesh` must be specified when `mesh_choice` is configured. (see [below for nested schema](#nestedatt--mesh_choice))
+- `re_fallback_choice` (Attributes) RE Fallback Fallback to RE Connectivity when the SMG fails<br>Exactly one of `disable_re_fallback` or `enable_re_fallback` must be specified when `re_fallback_choice` is configured. (see [below for nested schema](#nestedatt--re_fallback_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `virtual_site` (Attributes List) virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh. (see [below for nested schema](#nestedatt--virtual_site))
 
@@ -55,8 +119,8 @@ To get more information about f5xc_site_mesh_group, refer:
 
 Optional:
 
-- `bfd_disabled` (Boolean) BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.
-- `bfd_enabled` (Attributes) BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group. (see [below for nested schema](#nestedatt--bfd_choice--bfd_enabled))
+- `bfd_disabled` (Boolean) BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.<br>Conflicts with `bfd_enabled`.
+- `bfd_enabled` (Attributes) BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.<br>Conflicts with `bfd_disabled`. (see [below for nested schema](#nestedatt--bfd_choice--bfd_enabled))
 
 <a id="nestedatt--bfd_choice--bfd_enabled"></a>
 ### Nested Schema for `bfd_choice.bfd_enabled`
@@ -69,55 +133,29 @@ Optional:
 
 
 
-<a id="nestedatt--re_fallback_choice"></a>
-### Nested Schema for `re_fallback_choice`
-
-Optional:
-
-- `disable_re_fallback` (Boolean) disable Disable RE Fallback connectivity when SMG fails
-- `enable_re_fallback` (Boolean) enable Enable RE Fallback connectivity when SMG fails
-
-
 <a id="nestedatt--mesh_choice"></a>
 ### Nested Schema for `mesh_choice`
 
 Optional:
 
-- `full_mesh` (Attributes) full_mesh Full mesh of tunnels are created between all sites (see [below for nested schema](#nestedatt--mesh_choice--full_mesh))
-- `hub_mesh` (Attributes) hub Mesh of Type Hub (see [below for nested schema](#nestedatt--mesh_choice--hub_mesh))
-- `spoke_mesh` (Attributes) spoke Mesh of Type Spoke (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh))
+- `full_mesh` (Attributes) full_mesh Full mesh of tunnels are created between all sites<br>Conflicts with `hub_mesh` and `spoke_mesh`. (see [below for nested schema](#nestedatt--mesh_choice--full_mesh))
+- `hub_mesh` (Boolean) hub Mesh of Type Hub<br>Conflicts with `full_mesh` and `spoke_mesh`.
+- `spoke_mesh` (Attributes) spoke Mesh of Type Spoke<br>Conflicts with `full_mesh` and `hub_mesh`. (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh))
 
 <a id="nestedatt--mesh_choice--full_mesh"></a>
 ### Nested Schema for `mesh_choice.full_mesh`
 
 Optional:
 
-- `full_mesh_choice` (Attributes) Full Mesh Choice Choice of data plane, data plane and control plane full mesh (see [below for nested schema](#nestedatt--mesh_choice--full_mesh--full_mesh_choice))
+- `full_mesh_choice` (Attributes) Full Mesh Choice Choice of data plane, data plane and control plane full mesh<br>Exactly one of `control_and_data_plane_mesh` or `data_plane_mesh` must be specified when `full_mesh_choice` is configured. (see [below for nested schema](#nestedatt--mesh_choice--full_mesh--full_mesh_choice))
 
 <a id="nestedatt--mesh_choice--full_mesh--full_mesh_choice"></a>
 ### Nested Schema for `mesh_choice.full_mesh.full_mesh_choice`
 
 Optional:
 
-- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites
-- `data_plane_mesh` (Boolean) Data Plane Mesh Full Mesh of data plane tunnels across sites
-
-
-
-<a id="nestedatt--mesh_choice--hub_mesh"></a>
-### Nested Schema for `mesh_choice.hub_mesh`
-
-Optional:
-
-- `hub_full_mesh_choice` (Attributes) Hub Full Mesh Choice Choice of data plane, data plane and control plane hub full mesh (see [below for nested schema](#nestedatt--mesh_choice--hub_mesh--hub_full_mesh_choice))
-
-<a id="nestedatt--mesh_choice--hub_mesh--hub_full_mesh_choice"></a>
-### Nested Schema for `mesh_choice.hub_mesh.hub_full_mesh_choice`
-
-Optional:
-
-- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites
-- `data_plane_mesh` (Boolean) Data Plane Mesh Hub Full Mesh of data plane tunnels across sites
+- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites<br>Conflicts with `data_plane_mesh`.
+- `data_plane_mesh` (Boolean) Data Plane Mesh Full Mesh of data plane tunnels across sites<br>Conflicts with `control_and_data_plane_mesh`.
 
 
 
@@ -127,10 +165,6 @@ Optional:
 Required:
 
 - `hub_mesh_group` (Attributes) hub_mesh_group 'hub_mesh_group' refers to a Site Mesh Group of 'type' Hub. Spoke sites will connect to all the member sites of Hub Site Mesh Group (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh--hub_mesh_group))
-
-Optional:
-
-- `spoke_hub_mesh_choice` (Attributes) Spoke Hub Mesh Choice Choice of data plane, data plane and control plane mesh (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh--spoke_hub_mesh_choice))
 
 <a id="nestedatt--mesh_choice--spoke_mesh--hub_mesh_group"></a>
 ### Nested Schema for `mesh_choice.spoke_mesh.hub_mesh_group`
@@ -145,15 +179,15 @@ Read-Only:
 - `tenant` (String)
 
 
-<a id="nestedatt--mesh_choice--spoke_mesh--spoke_hub_mesh_choice"></a>
-### Nested Schema for `mesh_choice.spoke_mesh.spoke_hub_mesh_choice`
+
+
+<a id="nestedatt--re_fallback_choice"></a>
+### Nested Schema for `re_fallback_choice`
 
 Optional:
 
-- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s
-- `data_plane_mesh` (Boolean) Data Plane Mesh Mesh of data plane tunnels to the hub site/s
-
-
+- `disable_re_fallback` (Boolean) disable Disable RE Fallback connectivity when SMG fails<br>Conflicts with `enable_re_fallback`.
+- `enable_re_fallback` (Boolean) enable Enable RE Fallback connectivity when SMG fails<br>Conflicts with `disable_re_fallback`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -184,7 +218,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -192,13 +226,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_site_mesh_group.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_site_mesh_group.example"
+	to = f5xc_site_mesh_group.example
 }
 ```

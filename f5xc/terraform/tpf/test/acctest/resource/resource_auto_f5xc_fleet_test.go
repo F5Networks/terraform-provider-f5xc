@@ -29,7 +29,7 @@ func TestAccResourceAutoF5XCFleet_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system" //acctest.DefaultNamespace()
-	name := "tf-acc-fleet-" + acctest.RandString(t, 6)
+	name := "example-fleet-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -40,20 +40,20 @@ func TestAccResourceAutoF5XCFleet_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCFleetConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCFleetConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCFleet_withGpuTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system" //acctest.DefaultNamespace()
-	name := "tf-acc-fleet-" + acctest.RandString(t, 6)
+	name := "example-fleet-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -75,20 +75,20 @@ func TestAccResourceAutoF5XCFleet_withGpuTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCFleetConfig_withGpuDisabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCFleetConfig_withGpuEnabled(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -99,7 +99,7 @@ func TestAccResourceAutoF5XCFleet_withUsbPolicyTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system" //acctest.DefaultNamespace()
-	name := "tf-acc-fleet-" + acctest.RandString(t, 6)
+	name := "example-fleet-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -110,20 +110,20 @@ func TestAccResourceAutoF5XCFleet_withUsbPolicyTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCFleetConfig_withAllowUsb(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCFleetConfig_withDenyUsb(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -134,7 +134,7 @@ func TestAccResourceAutoF5XCFleet_withLabels(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system" //acctest.DefaultNamespace()
-	name := "tf-acc-fleet-" + acctest.RandString(t, 6)
+	name := "example-fleet-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -145,20 +145,20 @@ func TestAccResourceAutoF5XCFleet_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCFleetConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCFleetConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -169,7 +169,7 @@ func TestAccResourceAutoF5XCFleet_withLogsReceiver(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system" //acctest.DefaultNamespace()
-	name := "tf-acc-fleet-" + acctest.RandString(t, 6)
+	name := "example-fleet-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -180,20 +180,20 @@ func TestAccResourceAutoF5XCFleet_withLogsReceiver(t *testing.T) {
 				Config: testAccResourceAutoF5XCFleetConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCFleetConfig_withDescription(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -204,9 +204,9 @@ func TestAccResourceAutoF5XCFleet_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system" //acctest.DefaultNamespace()
-	name := "tf-acc-fleet-" + acctest.RandString(t, 6)
+	name := "example-fleet-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckFleetDestroyProducer(t),
@@ -215,25 +215,29 @@ func TestAccResourceAutoF5XCFleet_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCFleetConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCFleetConfig_basicWithDescription(name, namespace, "Full acceptance test fleet"),
+				Config: testAccResourceAutoF5XCFleetConfig_basicWithDescription(name, namespace, "Updated full fleet example"),
 			},
 			{
-				ResourceName:                         "f5xc_fleet.test",
+				ResourceName:                         "f5xc_fleet.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.test"),
+				ImportStateIdFunc:                    testAccResourceImportStateID("f5xc_fleet.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"labels.%", "labels.env", "labels.tier"},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCFleetConfig_full("example-fleet", namespace),
+		})
 }
 
 func testAccCheckFleetDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -242,7 +246,7 @@ func testAccCheckFleetDestroyProducer(t *testing.T) func(*terraform.State) error
 
 func testAccResourceAutoF5XCFleetConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
@@ -297,7 +301,7 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_basicWithDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -353,7 +357,7 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
@@ -408,7 +412,7 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_withGpuDisabled(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
@@ -463,7 +467,7 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_withGpuEnabled(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
@@ -520,7 +524,7 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_withAllowUsb(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
@@ -575,7 +579,7 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_withDenyUsb(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
@@ -630,14 +634,14 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
   fleet_label = %q
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "shared"
   }
 
@@ -690,14 +694,14 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name      = %q
   namespace = %q
 
   fleet_label = %q
 
   labels = {
-    env     = "staging"
+    env     = "example"
     project = "infra"
   }
 
@@ -750,10 +754,10 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_withDescription(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test fleet with description"
+  description = "Updated fleet example with description"
 
   fleet_label = %q
 
@@ -806,15 +810,15 @@ resource "f5xc_fleet" "test" {
 
 func testAccResourceAutoF5XCFleetConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_fleet" "test" {
+resource "f5xc_fleet" "example" {
   name        = %q
   namespace   = %q
-  description = "Full acceptance test fleet"
+  description = "Full fleet example"
 
   fleet_label = %q
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "full"
   }
 

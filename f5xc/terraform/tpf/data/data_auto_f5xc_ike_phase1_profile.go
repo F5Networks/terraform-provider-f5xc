@@ -29,31 +29,31 @@ type DataSourceF5XCIkePhase1Profile struct {
 	client *client.APIClient
 }
 
-type IkePhase1ProfileGlobalSpecTypeIkeKeyLifetimeChoice struct {
+type IkePhase1ProfileIkeKeyLifetimeChoice struct {
 	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
 	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
 	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours struct {
+type IkePhase1ProfileIkeKeylifetimeHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
+type IkePhase1ProfileIkeKeylifetimeMinutes struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice struct {
+type IkePhase1ProfileIkeReauthTimeoutChoice struct {
 	ReauthDisabled     types.Bool   `tfsdk:"reauth_disabled"`
 	ReauthTimeoutDays  types.Object `tfsdk:"reauth_timeout_days"`
 	ReauthTimeoutHours types.Object `tfsdk:"reauth_timeout_hours"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeReauthTimeoutDays struct {
+type IkePhase1ProfileReauthTimeoutDays struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeReauthTimeoutHours struct {
+type IkePhase1ProfileReauthTimeoutHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
@@ -137,8 +137,8 @@ func (d *DataSourceF5XCIkePhase1Profile) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a ike_phase1_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase1_profile) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a ike_phase1_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase1_profile) etc. can be fetched",
+		MarkdownDescription: "IKE Phase1 profile mainly includes the following<br>1. Encryption protocols to be used for IKE SA<br>2. Authentication Protocols to be used for IKE SA<br>3. DH group<br>4. PRF<br>5. Key lifetime etc",
+		Description:         "IKE Phase1 profile mainly includes the following 1. Encryption protocols to be used for IKE SA 2. Authentication Protocols to be used for IKE SA 3. DH group 4. PRF 5. Key lifetime etc",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -348,7 +348,7 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_ike_phase1_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "ike_phase1_profile", err))
 		return
 	}
 
@@ -479,7 +479,7 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 		ikeKeyLifetimeChoiceChoices := specData.GetIkeKeyLifetime()
 
 		// The model struct that will be populated by the nested template.
-		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeKeyLifetimeChoice{}
+		var ikeKeyLifetimeChoiceChoicesModel = &IkePhase1ProfileIkeKeyLifetimeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -570,7 +570,7 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 		ikeReauthTimeoutChoiceChoices := specData.GetIkeReauthTimeout()
 
 		// The model struct that will be populated by the nested template.
-		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileIkeReauthTimeoutChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

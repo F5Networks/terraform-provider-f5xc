@@ -27,10 +27,10 @@ import (
 func TestAccResourceAutoF5XCDiscovery_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-disc-" + acctest.RandString(t, 8)
+	name := "example-discovery-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDiscoveryDestroyProducer(t),
@@ -39,30 +39,33 @@ func TestAccResourceAutoF5XCDiscovery_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDiscoveryConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_discovery.test",
+				ResourceName:                         "f5xc_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDiscoveryConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_discovery.test",
+				ResourceName:                         "f5xc_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDiscoveryConfig_basic("example-discovery", "default"),
 	})
 }
 
 func TestAccResourceAutoF5XCDiscovery_k8s(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-disc-" + acctest.RandString(t, 8)
+	name := "example-discovery-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,12 +77,31 @@ func TestAccResourceAutoF5XCDiscovery_k8s(t *testing.T) {
 				Config: testAccResourceAutoF5XCDiscoveryConfig_k8s(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_discovery.test",
+				ResourceName:                         "f5xc_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
+		},
+	})
+}
+
+func TestAccResourceAutoF5XCDiscovery_stateHealingConsulPasswordSecret(t *testing.T) {
+	t.Parallel()
+
+	name := "example-discovery-secret-" + acctest.RandString(t, 8)
+	namespace := acctest.DefaultNamespace()
+	config := testAccResourceAutoF5XCDiscoveryConfigWithConsulPasswordSecret(name, namespace, "string:///dGVzdC1zZWNyZXQ=")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckDiscoveryDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: config},
+			{RefreshState: true},
+			{Config: config, PlanOnly: true, ExpectNonEmptyPlan: false},
 		},
 	})
 }
@@ -90,10 +112,10 @@ func testAccCheckDiscoveryDestroyProducer(t *testing.T) func(*terraform.State) e
 
 func testAccResourceAutoF5XCDiscoveryConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_discovery" "test" {
+resource "f5xc_discovery" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test discovery"
+  description = "Discovery basic example"
 
   cluster_identifier_choice = {
     no_cluster_id = true
@@ -133,10 +155,10 @@ resource "f5xc_discovery" "test" {
 
 func testAccResourceAutoF5XCDiscoveryConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_discovery" "test" {
+resource "f5xc_discovery" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test discovery updated"
+  description = "Discovery basic example updated"
 
   cluster_identifier_choice = {
     no_cluster_id = true
@@ -176,10 +198,10 @@ resource "f5xc_discovery" "test" {
 
 func testAccResourceAutoF5XCDiscoveryConfig_k8s(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_discovery" "test" {
+resource "f5xc_discovery" "example" {
   name        = %q
   namespace   = %q
-  description = "Acceptance test discovery with k8s"
+  description = "Discovery with Kubernetes integration"
 
   cluster_identifier_choice = {
     no_cluster_id = true
@@ -222,4 +244,41 @@ resource "f5xc_discovery" "test" {
   }
 }
 `, name, namespace)
+}
+
+func testAccResourceAutoF5XCDiscoveryConfigWithConsulPasswordSecret(name, namespace, secretURL string) string {
+	return fmt.Sprintf(`
+resource "f5xc_discovery" "example" {
+  name      = %q
+  namespace = %q
+
+  cluster_identifier_choice = { no_cluster_id = true }
+  where = {
+    ref_or_selector_choice = {
+      virtual_site = {
+        internet_vip_choice = { disable_internet_vip = true }
+        ref = [{ name = "ves-io-all-res", namespace = "shared" }]
+      }
+    }
+  }
+  discovery_choice = {
+    discovery_consul = {
+      access_info = {
+        connection_info = { api_server = "consul.example.com:8500" }
+        http_basic_auth_info = {
+          user_name = "state-user"
+          passwd_url = {
+            secret_info_choice = {
+              clear_secret_info = { url = %q }
+            }
+          }
+        }
+      }
+      publish_info = {
+        publish_choice = { publish = true }
+      }
+    }
+  }
+}
+`, name, namespace, secretURL)
 }

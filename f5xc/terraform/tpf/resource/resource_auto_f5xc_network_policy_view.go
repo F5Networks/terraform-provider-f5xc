@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/oneofbranchplanmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
@@ -46,6 +47,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_network_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_policy"
 	ves_io_schema_network_policy_rule "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_policy_rule"
@@ -490,8 +492,8 @@ func (r *ResourceF5XCNetworkPolicyView) Metadata(ctx context.Context, request re
 func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Network Policy Hits ID NetworkPolicyHitsId uniquely identifies an entry in the response to network policy hits request. Network policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
-		Description:         "Network Policy Hits ID NetworkPolicyHitsId uniquely identifies an entry in the response to network policy hits request. Network policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the feields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		MarkdownDescription: "Network policy site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Network policy.<br>It can be used to either automatically create or Manually assisted site creation in Network policy.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "Network policy site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in Network policy. It can be used to either automatically create or Manually assisted site creation in Network policy. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -547,7 +549,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -663,7 +665,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 						},
 						"other_endpoint_choice": schema.SingleNestedAttribute{
 							Description:         "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
-							MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
+							MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.<br>Exactly one of `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified when `other_endpoint_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -680,7 +682,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"any": schema.BoolAttribute{
 									Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-									MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+									MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -690,7 +692,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"inside_endpoints": schema.BoolAttribute{
 									Description:         "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
-									MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
+									MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -700,7 +702,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"ip_prefix_set": schema.SingleNestedAttribute{
 									Description:         "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-									MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+									MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -737,7 +739,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 														Optional:            false,
 														Computed:            true,
 														PlanModifiers: []planmodifier.String{
-															stringplanmodifier.UseStateForUnknown(),
+															stringplanmodifier.UseNonNullStateForUnknown(),
 														},
 													},
 												},
@@ -747,7 +749,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"label_selector": schema.SingleNestedAttribute{
 									Description:         "prefix Label selector local end point is set of prefixes determined by label selector expression",
-									MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+									MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -768,7 +770,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"outside_endpoints": schema.BoolAttribute{
 									Description:         "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
-									MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
+									MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -778,7 +780,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"prefix_list": schema.SingleNestedAttribute{
 									Description:         "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
-									MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
+									MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `outside_endpoints`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -793,7 +795,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 											Validators: []validator.List{
 												listvalidator.SizeAtMost(128),
 												listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+													regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 													"must be a valid IPv6 prefix",
 												)),
 												listvalidator.UniqueValues(),
@@ -821,7 +823,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 						},
 						"traffic_choice": schema.SingleNestedAttribute{
 							Description:         "Traffic Type Select type of traffic to match",
-							MarkdownDescription: "Traffic Type Select type of traffic to match",
+							MarkdownDescription: "Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -837,7 +839,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"all_tcp_traffic": schema.BoolAttribute{
 									Description:         "All TCP Traffic Select all TCP traffic to match",
-									MarkdownDescription: "All TCP Traffic Select all TCP traffic to match",
+									MarkdownDescription: "All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -847,7 +849,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"all_traffic": schema.BoolAttribute{
 									Description:         "All Traffic Select all traffic to match",
-									MarkdownDescription: "All Traffic Select all traffic to match",
+									MarkdownDescription: "All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -857,7 +859,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"all_udp_traffic": schema.BoolAttribute{
 									Description:         "All UDP Traffic Select all UDP traffic to match",
-									MarkdownDescription: "All UDP Traffic Select all UDP traffic to match",
+									MarkdownDescription: "All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -867,19 +869,18 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"applications": schema.SingleNestedAttribute{
 									Description:         "Specific Applications Select Application traffic to match",
-									MarkdownDescription: "Specific Applications Select Application traffic to match",
+									MarkdownDescription: "Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"applications": schema.ListAttribute{
 											Description:         "Applications Application protocols like HTTP, SNMP",
-											MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`",
+											MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("APPLICATION_HTTP")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPLICATION_DNS", "APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP"}...)),
 											},
@@ -888,7 +889,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"protocol_port_range": schema.SingleNestedAttribute{
 									Description:         "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-									MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+									MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -910,7 +911,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 										},
 										"protocol": schema.StringAttribute{
 											Description:         "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-											MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`",
+											MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`",
 											Required:            false,
 											Optional:            true,
 											Computed:            true,
@@ -935,7 +936,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"endpoint_choice": schema.SingleNestedAttribute{
 						Description:         "endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints.",
-						MarkdownDescription: "endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints.",
+						MarkdownDescription: "endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints.<br>Exactly one of `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -954,7 +955,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 						Attributes: map[string]schema.Attribute{
 							"any": schema.BoolAttribute{
 								Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-								MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+								MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -964,7 +965,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							},
 							"inside_endpoints": schema.BoolAttribute{
 								Description:         "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
-								MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
+								MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -974,7 +975,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							},
 							"label_selector": schema.SingleNestedAttribute{
 								Description:         "prefix Label selector local end point is set of prefixes determined by label selector expression",
-								MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+								MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `outside_endpoints`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -995,7 +996,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							},
 							"outside_endpoints": schema.BoolAttribute{
 								Description:         "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
-								MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
+								MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1005,7 +1006,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							},
 							"prefix_list": schema.SingleNestedAttribute{
 								Description:         "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
-								MarkdownDescription: "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
+								MarkdownDescription: "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, and `outside_endpoints`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -1020,7 +1021,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 										Validators: []validator.List{
 											listvalidator.SizeAtMost(128),
 											listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-												regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+												regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 												"must be a valid IPv6 prefix",
 											)),
 											listvalidator.UniqueValues(),
@@ -1151,7 +1152,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 						},
 						"other_endpoint_choice": schema.SingleNestedAttribute{
 							Description:         "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
-							MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
+							MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.<br>Exactly one of `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified when `other_endpoint_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -1168,7 +1169,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"any": schema.BoolAttribute{
 									Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-									MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+									MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1178,7 +1179,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"inside_endpoints": schema.BoolAttribute{
 									Description:         "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
-									MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
+									MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1188,7 +1189,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"ip_prefix_set": schema.SingleNestedAttribute{
 									Description:         "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-									MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+									MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1225,7 +1226,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 														Optional:            false,
 														Computed:            true,
 														PlanModifiers: []planmodifier.String{
-															stringplanmodifier.UseStateForUnknown(),
+															stringplanmodifier.UseNonNullStateForUnknown(),
 														},
 													},
 												},
@@ -1235,7 +1236,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"label_selector": schema.SingleNestedAttribute{
 									Description:         "prefix Label selector local end point is set of prefixes determined by label selector expression",
-									MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+									MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `outside_endpoints`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1256,7 +1257,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"outside_endpoints": schema.BoolAttribute{
 									Description:         "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
-									MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
+									MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1266,7 +1267,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"prefix_list": schema.SingleNestedAttribute{
 									Description:         "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
-									MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
+									MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `outside_endpoints`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1281,7 +1282,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 											Validators: []validator.List{
 												listvalidator.SizeAtMost(128),
 												listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-													regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+													regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 													"must be a valid IPv6 prefix",
 												)),
 												listvalidator.UniqueValues(),
@@ -1309,7 +1310,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 						},
 						"traffic_choice": schema.SingleNestedAttribute{
 							Description:         "Traffic Type Select type of traffic to match",
-							MarkdownDescription: "Traffic Type Select type of traffic to match",
+							MarkdownDescription: "Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -1325,7 +1326,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"all_tcp_traffic": schema.BoolAttribute{
 									Description:         "All TCP Traffic Select all TCP traffic to match",
-									MarkdownDescription: "All TCP Traffic Select all TCP traffic to match",
+									MarkdownDescription: "All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1335,7 +1336,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"all_traffic": schema.BoolAttribute{
 									Description:         "All Traffic Select all traffic to match",
-									MarkdownDescription: "All Traffic Select all traffic to match",
+									MarkdownDescription: "All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1345,7 +1346,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"all_udp_traffic": schema.BoolAttribute{
 									Description:         "All UDP Traffic Select all UDP traffic to match",
-									MarkdownDescription: "All UDP Traffic Select all UDP traffic to match",
+									MarkdownDescription: "All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1355,19 +1356,18 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"applications": schema.SingleNestedAttribute{
 									Description:         "Specific Applications Select Application traffic to match",
-									MarkdownDescription: "Specific Applications Select Application traffic to match",
+									MarkdownDescription: "Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"applications": schema.ListAttribute{
 											Description:         "Applications Application protocols like HTTP, SNMP",
-											MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`",
+											MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("APPLICATION_HTTP")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPLICATION_DNS", "APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP"}...)),
 											},
@@ -1376,7 +1376,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 								},
 								"protocol_port_range": schema.SingleNestedAttribute{
 									Description:         "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-									MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+									MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1398,7 +1398,7 @@ func (r *ResourceF5XCNetworkPolicyView) Schema(ctx context.Context, request reso
 										},
 										"protocol": schema.StringAttribute{
 											Description:         "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-											MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`",
+											MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`",
 											Required:            false,
 											Optional:            true,
 											Computed:            true,
@@ -1476,9 +1476,17 @@ func (r *ResourceF5XCNetworkPolicyView) ModifyPlan(ctx context.Context, req reso
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCNetworkPolicyView) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCNetworkPolicyViewModel
 
 	// Read Terraform plan data into the model
@@ -2419,7 +2427,7 @@ func (r *ResourceF5XCNetworkPolicyView) Create(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2442,7 +2450,7 @@ func (r *ResourceF5XCNetworkPolicyView) Create(ctx context.Context, request reso
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_network_policy_view.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "network_policy_view", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "network_policy_view", err),
 		)
 		return
 	}
@@ -3079,14 +3087,12 @@ func (r *ResourceF5XCNetworkPolicyView) Create(ctx context.Context, request reso
 			AttrTypes: NetworkPolicyViewEgressRulesModelAttributeMap,
 		}
 		nullEgressRulesList := basetypes.NewListNull(egressRulesObjectType)
-		var priorValEgressRules types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("egress_rules"), &priorValEgressRules)
-		if !priorValEgressRules.IsNull() && !priorValEgressRules.IsUnknown() {
-			data.EgressRules = priorValEgressRules
+		if !data.EgressRules.IsNull() && !data.EgressRules.IsUnknown() && len(data.EgressRules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EgressRules = basetypes.NewListValueMust(egressRulesObjectType, nil)
 		} else {
 			data.EgressRules = nullEgressRulesList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredPointerField --> Endpoint
@@ -3807,14 +3813,12 @@ func (r *ResourceF5XCNetworkPolicyView) Create(ctx context.Context, request reso
 			AttrTypes: NetworkPolicyViewIngressRulesModelAttributeMap,
 		}
 		nullIngressRulesList := basetypes.NewListNull(ingressRulesObjectType)
-		var priorValIngressRules types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("ingress_rules"), &priorValIngressRules)
-		if !priorValIngressRules.IsNull() && !priorValIngressRules.IsUnknown() {
-			data.IngressRules = priorValIngressRules
+		if !data.IngressRules.IsNull() && !data.IngressRules.IsUnknown() && len(data.IngressRules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.IngressRules = basetypes.NewListValueMust(ingressRulesObjectType, nil)
 		} else {
 			data.IngressRules = nullIngressRulesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3860,14 +3864,10 @@ func (r *ResourceF5XCNetworkPolicyView) Read(ctx context.Context, request resour
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_network_policy_view.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_network_policy_view.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "network_policy_view", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "network_policy_view", err),
 		)
 		return
 	}
@@ -4504,14 +4504,12 @@ func (r *ResourceF5XCNetworkPolicyView) Read(ctx context.Context, request resour
 			AttrTypes: NetworkPolicyViewEgressRulesModelAttributeMap,
 		}
 		nullEgressRulesList := basetypes.NewListNull(egressRulesObjectType)
-		var priorValEgressRules types.List
-		_ = request.State.GetAttribute(ctx, path.Root("egress_rules"), &priorValEgressRules)
-		if !priorValEgressRules.IsNull() && !priorValEgressRules.IsUnknown() {
-			data.EgressRules = priorValEgressRules
+		if !data.EgressRules.IsNull() && !data.EgressRules.IsUnknown() && len(data.EgressRules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EgressRules = basetypes.NewListValueMust(egressRulesObjectType, nil)
 		} else {
 			data.EgressRules = nullEgressRulesList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredPointerField --> Endpoint
@@ -5232,14 +5230,12 @@ func (r *ResourceF5XCNetworkPolicyView) Read(ctx context.Context, request resour
 			AttrTypes: NetworkPolicyViewIngressRulesModelAttributeMap,
 		}
 		nullIngressRulesList := basetypes.NewListNull(ingressRulesObjectType)
-		var priorValIngressRules types.List
-		_ = request.State.GetAttribute(ctx, path.Root("ingress_rules"), &priorValIngressRules)
-		if !priorValIngressRules.IsNull() && !priorValIngressRules.IsUnknown() {
-			data.IngressRules = priorValIngressRules
+		if !data.IngressRules.IsNull() && !data.IngressRules.IsUnknown() && len(data.IngressRules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.IngressRules = basetypes.NewListValueMust(ingressRulesObjectType, nil)
 		} else {
 			data.IngressRules = nullIngressRulesList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -5251,6 +5247,12 @@ func (r *ResourceF5XCNetworkPolicyView) Read(ctx context.Context, request resour
 }
 
 func (r *ResourceF5XCNetworkPolicyView) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCNetworkPolicyViewModel
@@ -6211,7 +6213,7 @@ func (r *ResourceF5XCNetworkPolicyView) Update(ctx context.Context, request reso
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -6219,24 +6221,20 @@ func (r *ResourceF5XCNetworkPolicyView) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_network_policy_view.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_network_policy_view.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "network_policy_view", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "network_policy_view", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_network_policy_view.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_network_policy_view.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "network_policy_view", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "network_policy_view", err),
 		)
 		return
 	}
@@ -6872,14 +6870,12 @@ func (r *ResourceF5XCNetworkPolicyView) Update(ctx context.Context, request reso
 			AttrTypes: NetworkPolicyViewEgressRulesModelAttributeMap,
 		}
 		nullEgressRulesList := basetypes.NewListNull(egressRulesObjectType)
-		var priorValEgressRules types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("egress_rules"), &priorValEgressRules)
-		if !priorValEgressRules.IsNull() && !priorValEgressRules.IsUnknown() {
-			data.EgressRules = priorValEgressRules
+		if !data.EgressRules.IsNull() && !data.EgressRules.IsUnknown() && len(data.EgressRules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EgressRules = basetypes.NewListValueMust(egressRulesObjectType, nil)
 		} else {
 			data.EgressRules = nullEgressRulesList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredPointerField --> Endpoint
@@ -7600,14 +7596,12 @@ func (r *ResourceF5XCNetworkPolicyView) Update(ctx context.Context, request reso
 			AttrTypes: NetworkPolicyViewIngressRulesModelAttributeMap,
 		}
 		nullIngressRulesList := basetypes.NewListNull(ingressRulesObjectType)
-		var priorValIngressRules types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("ingress_rules"), &priorValIngressRules)
-		if !priorValIngressRules.IsNull() && !priorValIngressRules.IsUnknown() {
-			data.IngressRules = priorValIngressRules
+		if !data.IngressRules.IsNull() && !data.IngressRules.IsUnknown() && len(data.IngressRules.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.IngressRules = basetypes.NewListValueMust(ingressRulesObjectType, nil)
 		} else {
 			data.IngressRules = nullIngressRulesList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -7682,7 +7676,7 @@ func (r *ResourceF5XCNetworkPolicyView) Delete(ctx context.Context, request reso
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "network_policy_view", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "network_policy_view", err),
 		)
 		return
 	}

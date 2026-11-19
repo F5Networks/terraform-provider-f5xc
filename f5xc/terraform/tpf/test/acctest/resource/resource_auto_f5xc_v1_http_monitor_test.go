@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCV1HttpMonitor_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-http-monitor-" + testAccRunSuffix(t)
+	name := "example-v1-http-monitor-" + testAccRunSuffix(t)
 	url := fmt.Sprintf("https://%s.example.com/health", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -40,20 +40,20 @@ func TestAccResourceAutoF5XCV1HttpMonitor_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_basic(name, namespace, url),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withDescription(name, namespace, url, "http monitor basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withIntervalChoiceTransition(t *testin
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-http-monitor-" + testAccRunSuffix(t)
+	name := "example-v1-http-monitor-" + testAccRunSuffix(t)
 	url := fmt.Sprintf("https://%s.example.com/status", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,20 +76,20 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withIntervalChoiceTransition(t *testin
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withInterval(name, namespace, url, "interval_30_secs = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withInterval(name, namespace, url, "interval_5_mins = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -100,7 +100,7 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withMethodChoiceTransition(t *testing.
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-http-monitor-" + testAccRunSuffix(t)
+	name := "example-v1-http-monitor-" + testAccRunSuffix(t)
 	url := fmt.Sprintf("https://%s.example.com/ping", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -112,20 +112,20 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withMethodChoiceTransition(t *testing.
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withMethod(name, namespace, url, "get = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withMethod(name, namespace, url, `post = { request_body = "{\"status\":\"ok\"}" }`),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -136,7 +136,7 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withSourceChoiceTransition(t *testing.
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-http-monitor-" + testAccRunSuffix(t)
+	name := "example-v1-http-monitor-" + testAccRunSuffix(t)
 	url := fmt.Sprintf("https://%s.example.com/source", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -148,20 +148,20 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withSourceChoiceTransition(t *testing.
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withSource(name, namespace, url, `aws = { regions = ["ca-central-1"] }`),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withSource(name, namespace, url, `f5xc = { regions = ["ves-io-newyork"] }`),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -172,7 +172,7 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withResponseCodesTransition(t *testing
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-http-monitor-" + testAccRunSuffix(t)
+	name := "example-v1-http-monitor-" + testAccRunSuffix(t)
 	url := fmt.Sprintf("https://%s.example.com/codes", name)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -184,20 +184,20 @@ func TestAccResourceAutoF5XCV1HttpMonitor_withResponseCodesTransition(t *testing
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withResponseCodes(name, namespace, url, `"2**"`),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_withResponseCodes(name, namespace, url, `"2**", "3**"`),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -208,10 +208,10 @@ func TestAccResourceAutoF5XCV1HttpMonitor_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-v1-http-monitor-" + testAccRunSuffix(t)
+	name := "example-v1-http-monitor-" + testAccRunSuffix(t)
 	url := fmt.Sprintf("https://%s.example.com/full", name)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckV1HttpMonitorDestroyProducer(t),
@@ -220,24 +220,28 @@ func TestAccResourceAutoF5XCV1HttpMonitor_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_full(name, namespace, url, "on", `post = { request_body = "{\"message\":\"ok\"}" }`),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCV1HttpMonitorConfig_full(name, namespace, url, "off", "head = true"),
 			},
 			{
-				ResourceName:                         "f5xc_v1_http_monitor.test",
+				ResourceName:                         "f5xc_v1_http_monitor.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_v1_http_monitor.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCV1HttpMonitorConfig_full("example-v1-http-monitor", acctest.SystemNamespace(), "https://example.example.com/full", "on", `post = { request_body = "{\"message\":\"ok\"}" }`),
+		})
 }
 
 func testAccCheckV1HttpMonitorDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -276,8 +280,9 @@ func testAccResourceAutoF5XCV1HttpMonitorConfig_full(name, namespace, url, redir
 
 	return testAccResourceAutoF5XCV1HttpMonitorConfig_base(name, namespace, url, "interval_15_mins = true", method, `"2**", "3**"`, `f5xc = { regions = ["ves-io-newyork"] }`, fmt.Sprintf(`
   labels = {
-    env = "test"
+    env = "example"
   }
+
   annotations = {
     owner = "platform"
   }
@@ -300,7 +305,7 @@ func testAccResourceAutoF5XCV1HttpMonitorConfig_full(name, namespace, url, redir
 
 func testAccResourceAutoF5XCV1HttpMonitorConfig_base(name, namespace, url, interval, method, responseCodes, sourceChoice, extra string) string {
 	return fmt.Sprintf(`
-resource "f5xc_v1_http_monitor" "test" {
+resource "f5xc_v1_http_monitor" "example" {
   name      = %q
   namespace = %q
   url       = %q

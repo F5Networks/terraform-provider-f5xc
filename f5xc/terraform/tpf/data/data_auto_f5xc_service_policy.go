@@ -33,7 +33,7 @@ type DataSourceF5XCServicePolicy struct {
 	client *client.APIClient
 }
 
-type ServicePolicyGlobalSpecTypeRuleChoice struct {
+type SvcPolicyRuleChoice struct {
 	AllowAllRequests types.Bool   `tfsdk:"allow_all_requests"`
 	AllowList        types.Object `tfsdk:"allow_list"`
 	DenyAllRequests  types.Bool   `tfsdk:"deny_all_requests"`
@@ -42,7 +42,7 @@ type ServicePolicyGlobalSpecTypeRuleChoice struct {
 	RuleList         types.Object `tfsdk:"rule_list"`
 }
 
-type ServicePolicyGlobalSpecTypeAllowList struct {
+type SvcPolicyAllowList struct {
 	AsnList               types.Object `tfsdk:"asn_list"`
 	AsnSet                types.List   `tfsdk:"asn_set"`
 	CountryList           types.List   `tfsdk:"country_list"`
@@ -53,22 +53,22 @@ type ServicePolicyGlobalSpecTypeAllowList struct {
 	TlsFingerprintValues  types.List   `tfsdk:"tls_fingerprint_values"`
 }
 
-type ServicePolicyPolicyAsnMatchList struct {
+type SvcPolicyAsnMatchList struct {
 	AsNumbers types.List `tfsdk:"as_numbers"`
 }
 
-type ServicePolicySourceListDefaultActionChoice struct {
+type SvcPolicyDefaultActionChoice struct {
 	DefaultActionAllow      types.Bool `tfsdk:"default_action_allow"`
 	DefaultActionDeny       types.Bool `tfsdk:"default_action_deny"`
 	DefaultActionNextPolicy types.Bool `tfsdk:"default_action_next_policy"`
 }
 
-type ServicePolicyViewsPrefixStringListType struct {
+type SvcPolicyPrefixStringListType struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 	Prefixes     types.List `tfsdk:"prefixes"`
 }
 
-type ServicePolicyGlobalSpecTypeDenyList struct {
+type SvcPolicyDenyList struct {
 	AsnList               types.Object `tfsdk:"asn_list"`
 	AsnSet                types.List   `tfsdk:"asn_set"`
 	CountryList           types.List   `tfsdk:"country_list"`
@@ -79,25 +79,25 @@ type ServicePolicyGlobalSpecTypeDenyList struct {
 	TlsFingerprintValues  types.List   `tfsdk:"tls_fingerprint_values"`
 }
 
-type ServicePolicyGlobalSpecTypeLegacyRuleList struct {
+type SvcPolicyLegacyRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type ServicePolicyGlobalSpecTypeRuleList struct {
+type SvcPolicyRuleList struct {
 	Rules types.List `tfsdk:"rules"`
 }
 
-type ServicePolicyServicePolicyRule struct {
+type SvcPolicyRule struct {
 	Metadata types.Object `tfsdk:"metadata"`
 	Spec     types.Object `tfsdk:"spec"`
 }
 
-type ServicePolicyMessageMetaType struct {
+type SvcPolicyMessageMetaType struct {
 	Description types.String `tfsdk:"description"`
 	Name        types.String `tfsdk:"name"`
 }
 
-type ServicePolicyServicePolicyRuleGlobalSpecType struct {
+type SvcPolicyGst struct {
 	Action               types.List        `tfsdk:"action"`
 	ApiGroupMatcher      types.Object      `tfsdk:"api_group_matcher"`
 	ArgMatchers          types.List        `tfsdk:"arg_matchers"`
@@ -125,59 +125,59 @@ type ServicePolicyServicePolicyRuleGlobalSpecType struct {
 	WafAction            types.Object      `tfsdk:"waf_action"`
 }
 
-type ServicePolicyPolicyStringMatcherType struct {
+type SvcPolicyStringMatcherType struct {
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
 	Match         types.List `tfsdk:"match"`
 }
 
-type ServicePolicyPolicyArgMatcherType struct {
+type SvcPolicyArgMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 	Name          types.String `tfsdk:"name"`
 }
 
-type ServicePolicyArgMatcherTypeMatchChoice struct {
+type SvcPolicyMatchChoice struct {
 	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
 	CheckPresent    types.Bool   `tfsdk:"check_present"`
 	Item            types.Object `tfsdk:"item"`
 }
 
-type ServicePolicyArgMatcherTypeItem struct {
+type SvcPolicyItem struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyGlobalSpecTypeAsnChoice struct {
+type SvcPolicyAsnChoice struct {
 	AnyAsn     types.Bool   `tfsdk:"any_asn"`
 	AsnList    types.Object `tfsdk:"asn_list"`
 	AsnMatcher types.Object `tfsdk:"asn_matcher"`
 }
 
-type ServicePolicyGlobalSpecTypeAsnList struct {
+type SvcPolicyAsnList struct {
 	AsNumbers types.List `tfsdk:"as_numbers"`
 }
 
-type ServicePolicyGlobalSpecTypeAsnMatcher struct {
+type SvcPolicyAsnMatcher struct {
 	AsnSets types.List `tfsdk:"asn_sets"`
 }
 
-type ServicePolicyPolicyMatcherType struct {
+type SvcPolicyMatcherType struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyPolicyBotAction struct {
+type SvcPolicyBotAction struct {
 	ActionTypeChoice types.Object `tfsdk:"action_type_choice"`
 }
 
-type ServicePolicyBotActionActionTypeChoice struct {
+type SvcPolicyActionTypeChoice struct {
 	BotSkipProcessing types.Bool `tfsdk:"bot_skip_processing"`
 	None              types.Bool `tfsdk:"none"`
 }
 
-type ServicePolicyGlobalSpecTypeClientChoice struct {
+type SvcPolicyClientChoice struct {
 	AnyClient            types.Bool   `tfsdk:"any_client"`
 	ClientName           types.String `tfsdk:"client_name"`
 	ClientNameMatcher    types.Object `tfsdk:"client_name_matcher"`
@@ -185,110 +185,110 @@ type ServicePolicyGlobalSpecTypeClientChoice struct {
 	IpThreatCategoryList types.Object `tfsdk:"ip_threat_category_list"`
 }
 
-type ServicePolicyGlobalSpecTypeClientNameMatcher struct {
+type SvcPolicyClientNameMatcher struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyGlobalSpecTypeClientSelector struct {
+type SvcPolicyClientSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
-type ServicePolicyGlobalSpecTypeIpThreatCategoryList struct {
+type SvcPolicyIpThreatCategoryList struct {
 	IpThreatCategories types.List `tfsdk:"ip_threat_categories"`
 }
 
-type ServicePolicyPolicyCookieMatcherType struct {
+type SvcPolicyCookieMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 	Name          types.String `tfsdk:"name"`
 }
 
-type ServicePolicyCookieMatcherTypeMatchChoice struct {
+type SvcPolicyCookieMatcherTypeMatchChoice struct {
 	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
 	CheckPresent    types.Bool   `tfsdk:"check_present"`
 	Item            types.Object `tfsdk:"item"`
 }
 
-type ServicePolicyCookieMatcherTypeItem struct {
+type SvcPolicyCookieMatcherTypeItem struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyPolicyHeaderMatcherType struct {
+type SvcPolicyHeaderMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 	Name          types.String `tfsdk:"name"`
 }
 
-type ServicePolicyHeaderMatcherTypeMatchChoice struct {
+type SvcPolicyHeaderMatcherTypeMatchChoice struct {
 	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
 	CheckPresent    types.Bool   `tfsdk:"check_present"`
 	Item            types.Object `tfsdk:"item"`
 }
 
-type ServicePolicyHeaderMatcherTypeItem struct {
+type SvcPolicyHeaderMatcherTypeItem struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyPolicyHttpMethodMatcherType struct {
+type SvcPolicyHttpMethodMatcherType struct {
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
 	Methods       types.List `tfsdk:"methods"`
 }
 
-type ServicePolicyGlobalSpecTypeIpChoice struct {
+type SvcPolicyIpChoice struct {
 	AnyIp        types.Bool   `tfsdk:"any_ip"`
 	IpMatcher    types.Object `tfsdk:"ip_matcher"`
 	IpPrefixList types.Object `tfsdk:"ip_prefix_list"`
 }
 
-type ServicePolicyGlobalSpecTypeIpMatcher struct {
+type SvcPolicyIpMatcher struct {
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
 	PrefixSets    types.List `tfsdk:"prefix_sets"`
 }
 
-type ServicePolicyGlobalSpecTypeIpPrefixList struct {
+type SvcPolicyIpPrefixList struct {
 	InvertMatch  types.Bool `tfsdk:"invert_match"`
 	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
-type ServicePolicyPolicyJWTClaimMatcherType struct {
+type SvcPolicyJWTClaimMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 	Name          types.String `tfsdk:"name"`
 }
 
-type ServicePolicyJWTClaimMatcherTypeMatchChoice struct {
+type SvcPolicyJWTClaimMatcherTypeMatchChoice struct {
 	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
 	CheckPresent    types.Bool   `tfsdk:"check_present"`
 	Item            types.Object `tfsdk:"item"`
 }
 
-type ServicePolicyJWTClaimMatcherTypeItem struct {
+type SvcPolicyJWTClaimMatcherTypeItem struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyLabelMatcherType struct {
+type SvcPolicyLabelMatcherType struct {
 	Keys types.List `tfsdk:"keys"`
 }
 
-type ServicePolicyPolicyModifyAction struct {
+type SvcPolicyModifyAction struct {
 	ActionTypeChoice types.Object `tfsdk:"action_type_choice"`
 }
 
-type ServicePolicyModifyActionActionTypeChoice struct {
+type SvcPolicyModifyActionActionTypeChoice struct {
 	Default        types.Bool `tfsdk:"default"`
 	SkipProcessing types.Bool `tfsdk:"skip_processing"`
 }
 
-type ServicePolicyPolicyPathMatcherType struct {
+type SvcPolicyPathMatcherType struct {
 	EncodedPathMatcher types.Bool `tfsdk:"encoded_path_matcher"`
 	ExactValues        types.List `tfsdk:"exact_values"`
 	InvertMatcher      types.Bool `tfsdk:"invert_matcher"`
@@ -298,30 +298,30 @@ type ServicePolicyPolicyPathMatcherType struct {
 	Transformers       types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyPolicyPortMatcherType struct {
+type SvcPolicyPortMatcherType struct {
 	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
 	Ports         types.List `tfsdk:"ports"`
 }
 
-type ServicePolicyPolicyQueryParameterMatcherType struct {
+type SvcPolicyQueryParamMatcherType struct {
 	InvertMatcher types.Bool   `tfsdk:"invert_matcher"`
 	Key           types.String `tfsdk:"key"`
 	MatchChoice   types.Object `tfsdk:"match_choice"`
 }
 
-type ServicePolicyQueryParameterMatcherTypeMatchChoice struct {
+type SvcPolicyQueryParamMatcherTypeMatchChoice struct {
 	CheckNotPresent types.Bool   `tfsdk:"check_not_present"`
 	CheckPresent    types.Bool   `tfsdk:"check_present"`
 	Item            types.Object `tfsdk:"item"`
 }
 
-type ServicePolicyQueryParameterMatcherTypeItem struct {
+type SvcPolicyQueryParamMatcherTypeItem struct {
 	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
 }
 
-type ServicePolicyPolicyRequestConstraintType struct {
+type SvcPolicyReqConstraintType struct {
 	MaxCookieCountChoice        types.Object `tfsdk:"max_cookie_count_choice"`
 	MaxCookieKeySizeChoice      types.Object `tfsdk:"max_cookie_key_size_choice"`
 	MaxCookieValueSizeChoice    types.Object `tfsdk:"max_cookie_value_size_choice"`
@@ -337,167 +337,156 @@ type ServicePolicyPolicyRequestConstraintType struct {
 	MaxUrlSizeChoice            types.Object `tfsdk:"max_url_size_choice"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxCookieCountChoice struct {
+type SvcPolicyMaxCookieCountChoice struct {
 	MaxCookieCountExceeds types.Int64 `tfsdk:"max_cookie_count_exceeds"`
 	MaxCookieCountNone    types.Bool  `tfsdk:"max_cookie_count_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxCookieKeySizeChoice struct {
+type SvcPolicyMaxCookieKeySizeChoice struct {
 	MaxCookieKeySizeExceeds types.Int64 `tfsdk:"max_cookie_key_size_exceeds"`
 	MaxCookieKeySizeNone    types.Bool  `tfsdk:"max_cookie_key_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxCookieValueSizeChoice struct {
+type SvcPolicyMaxCookieValueSizeChoice struct {
 	MaxCookieValueSizeExceeds types.Int64 `tfsdk:"max_cookie_value_size_exceeds"`
 	MaxCookieValueSizeNone    types.Bool  `tfsdk:"max_cookie_value_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxHeaderCountChoice struct {
+type SvcPolicyMaxHeaderCountChoice struct {
 	MaxHeaderCountExceeds types.Int64 `tfsdk:"max_header_count_exceeds"`
 	MaxHeaderCountNone    types.Bool  `tfsdk:"max_header_count_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxHeaderKeySizeChoice struct {
+type SvcPolicyMaxHeaderKeySizeChoice struct {
 	MaxHeaderKeySizeExceeds types.Int64 `tfsdk:"max_header_key_size_exceeds"`
 	MaxHeaderKeySizeNone    types.Bool  `tfsdk:"max_header_key_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxHeaderValueSizeChoice struct {
+type SvcPolicyMaxHeaderValueSizeChoice struct {
 	MaxHeaderValueSizeExceeds types.Int64 `tfsdk:"max_header_value_size_exceeds"`
 	MaxHeaderValueSizeNone    types.Bool  `tfsdk:"max_header_value_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxParameterCountChoice struct {
+type SvcPolicyMaxParamCountChoice struct {
 	MaxParameterCountExceeds types.Int64 `tfsdk:"max_parameter_count_exceeds"`
 	MaxParameterCountNone    types.Bool  `tfsdk:"max_parameter_count_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxParameterNameSizeChoice struct {
+type SvcPolicyMaxParamNameSizeChoice struct {
 	MaxParameterNameSizeExceeds types.Int64 `tfsdk:"max_parameter_name_size_exceeds"`
 	MaxParameterNameSizeNone    types.Bool  `tfsdk:"max_parameter_name_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxParameterValueSizeChoice struct {
+type SvcPolicyMaxParamValueSizeChoice struct {
 	MaxParameterValueSizeExceeds types.Int64 `tfsdk:"max_parameter_value_size_exceeds"`
 	MaxParameterValueSizeNone    types.Bool  `tfsdk:"max_parameter_value_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxQuerySizeChoice struct {
+type SvcPolicyMaxQuerySizeChoice struct {
 	MaxQuerySizeExceeds types.Int64 `tfsdk:"max_query_size_exceeds"`
 	MaxQuerySizeNone    types.Bool  `tfsdk:"max_query_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxRequestLineSizeChoice struct {
+type SvcPolicyMaxReqLineSizeChoice struct {
 	MaxRequestLineSizeExceeds types.Int64 `tfsdk:"max_request_line_size_exceeds"`
 	MaxRequestLineSizeNone    types.Bool  `tfsdk:"max_request_line_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxRequestSizeChoice struct {
+type SvcPolicyMaxReqSizeChoice struct {
 	MaxRequestSizeExceeds types.Int64 `tfsdk:"max_request_size_exceeds"`
 	MaxRequestSizeNone    types.Bool  `tfsdk:"max_request_size_none"`
 }
 
-type ServicePolicyRequestConstraintTypeMaxUrlSizeChoice struct {
+type SvcPolicyMaxUrlSizeChoice struct {
 	MaxUrlSizeExceeds types.Int64 `tfsdk:"max_url_size_exceeds"`
 	MaxUrlSizeNone    types.Bool  `tfsdk:"max_url_size_none"`
 }
 
-type ServicePolicyPolicySegmentPolicyType struct {
-	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
+type SvcPolicySegmentPolicyType struct {
 	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
 }
 
-type ServicePolicySegmentPolicyTypeDstSegmentChoice struct {
-	DstAny       types.Bool   `tfsdk:"dst_any"`
-	DstSegments  types.Object `tfsdk:"dst_segments"`
-	IntraSegment types.Bool   `tfsdk:"intra_segment"`
-}
-
-type ServicePolicySegmentPolicyTypeDstSegments struct {
-	Segments types.List `tfsdk:"segments"`
-}
-
-type ServicePolicySegmentPolicyTypeSrcSegmentChoice struct {
+type SvcPolicySrcSegmentChoice struct {
 	SrcAny      types.Bool   `tfsdk:"src_any"`
 	SrcSegments types.Object `tfsdk:"src_segments"`
 }
 
-type ServicePolicySegmentPolicyTypeSrcSegments struct {
+type SvcPolicySrcSegments struct {
 	Segments types.List `tfsdk:"segments"`
 }
 
-type ServicePolicyGlobalSpecTypeTlsFingerprintChoice struct {
+type SvcPolicyTlsFingerprintChoice struct {
 	Ja4TlsFingerprint     types.Object `tfsdk:"ja4_tls_fingerprint"`
 	TlsFingerprintMatcher types.Object `tfsdk:"tls_fingerprint_matcher"`
 }
 
-type ServicePolicyGlobalSpecTypeJa4TlsFingerprint struct {
+type SvcPolicyJa4TlsFingerprint struct {
 	ExactValues types.List `tfsdk:"exact_values"`
 }
 
-type ServicePolicyGlobalSpecTypeTlsFingerprintMatcher struct {
+type SvcPolicyTlsFingerprintMatcher struct {
 	Classes        types.List `tfsdk:"classes"`
 	ExactValues    types.List `tfsdk:"exact_values"`
 	ExcludedValues types.List `tfsdk:"excluded_values"`
 }
 
-type ServicePolicyPolicyMatcherTypeBasic struct {
+type SvcPolicyMatcherTypeBasic struct {
 	ExactValues types.List `tfsdk:"exact_values"`
 	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type ServicePolicyPolicyWafAction struct {
+type SvcPolicyWafAction struct {
 	ActionTypeChoice types.Object `tfsdk:"action_type_choice"`
 }
 
-type ServicePolicyWafActionActionTypeChoice struct {
+type SvcPolicyWafActionActionTypeChoice struct {
 	AppFirewallDetectionControl types.Object `tfsdk:"app_firewall_detection_control"`
 	None                        types.Bool   `tfsdk:"none"`
 	WafSkipProcessing           types.Bool   `tfsdk:"waf_skip_processing"`
 }
 
-type ServicePolicyWafActionAppFirewallDetectionControl struct {
+type SvcPolicyAppFirewallDetectionControl struct {
 	ExcludeAttackTypeContexts types.List `tfsdk:"exclude_attack_type_contexts"`
 	ExcludeBotNameContexts    types.List `tfsdk:"exclude_bot_name_contexts"`
 	ExcludeSignatureContexts  types.List `tfsdk:"exclude_signature_contexts"`
 	ExcludeViolationContexts  types.List `tfsdk:"exclude_violation_contexts"`
 }
 
-type ServicePolicyPolicyAppFirewallAttackTypeContext struct {
+type SvcPolicyAppFirewallAttackTypeContext struct {
 	Context           types.List   `tfsdk:"context"`
 	ContextName       types.String `tfsdk:"context_name"`
 	ExcludeAttackType types.List   `tfsdk:"exclude_attack_type"`
 }
 
-type ServicePolicyPolicyBotNameContext struct {
+type SvcPolicyBotNameContext struct {
 	BotName types.String `tfsdk:"bot_name"`
 }
 
-type ServicePolicyPolicyAppFirewallSignatureContext struct {
+type SvcPolicyAppFirewallSignatureContext struct {
 	Context     types.List   `tfsdk:"context"`
 	ContextName types.String `tfsdk:"context_name"`
 	SignatureId types.Int64  `tfsdk:"signature_id"`
 }
 
-type ServicePolicyPolicyAppFirewallViolationContext struct {
+type SvcPolicyAppFirewallViolationContext struct {
 	Context          types.List   `tfsdk:"context"`
 	ContextName      types.String `tfsdk:"context_name"`
 	ExcludeViolation types.List   `tfsdk:"exclude_violation"`
 }
 
-type ServicePolicyGlobalSpecTypeServerChoice struct {
+type SvcPolicyServerChoice struct {
 	AnyServer         types.Bool   `tfsdk:"any_server"`
 	ServerName        types.String `tfsdk:"server_name"`
 	ServerNameMatcher types.Object `tfsdk:"server_name_matcher"`
 	ServerSelector    types.Object `tfsdk:"server_selector"`
 }
 
-type ServicePolicyGlobalSpecTypeServerNameMatcher struct {
+type SvcPolicyServerNameMatcher struct {
 	ExactValues types.List `tfsdk:"exact_values"`
 	RegexValues types.List `tfsdk:"regex_values"`
 }
 
-type ServicePolicyGlobalSpecTypeServerSelector struct {
+type SvcPolicyServerSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
 }
 
@@ -929,9 +918,6 @@ var ServicePolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.Type{
 								}},
 						}, "segment_policy": types.ObjectType{
 							AttrTypes: map[string]attr.Type{
-								"dst_segment_choice": types.ObjectType{
-									AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-								},
 								"src_segment_choice": types.ObjectType{
 									AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
 								}},
@@ -1156,9 +1142,6 @@ var ServicePolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]attr.Type
 					}},
 			}, "segment_policy": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					"dst_segment_choice": types.ObjectType{
-						AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-					},
 					"src_segment_choice": types.ObjectType{
 						AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
 					}},
@@ -1382,9 +1365,6 @@ var ServicePolicyRuleChoiceRuleListRulesSpecModelAttributeMap = map[string]attr.
 			}},
 	}, "segment_policy": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"dst_segment_choice": types.ObjectType{
-				AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-			},
 			"src_segment_choice": types.ObjectType{
 				AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
 			}},
@@ -1967,45 +1947,9 @@ var ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxUrlSizeChoiceMo
 // Attribute map for PointerField --> SegmentPolicy
 var ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyModelAttributeMap = map[string]attr.Type{
 
-	"dst_segment_choice": types.ObjectType{
-		AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap,
-	},
 	"src_segment_choice": types.ObjectType{
 		AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap,
 	},
-}
-
-// Attribute map for OneOfField --> DstSegmentChoice
-var ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
-
-	"dst_any": types.BoolType,
-	"dst_segments": types.ObjectType{
-		AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
-	},
-	"intra_segment": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> DstSegments
-var ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
-
-	"segments": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"namespace": types.StringType,
-				"tenant":    types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Segments
-var ServicePolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"namespace": types.StringType,
-	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> SrcSegmentChoice
@@ -2030,6 +1974,14 @@ var ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicySrcSegmentChoiceSrcSegm
 			},
 		},
 	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Segments
+var ServicePolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> TlsFingerprintChoice
@@ -2233,8 +2185,8 @@ func (d *DataSourceF5XCServicePolicy) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCServicePolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "simple rule A SimpleRule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced. A SimpleRule does not currently support any predicates that contain references to objects.",
-		Description:         "simple rule A SimpleRule consists of an unordered list of predicates and an action. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. A request API is considered to match the simple rule if all predicates in the rule evaluate to true for that request. Any predicates that are not specified in a rule are implicitly considered to be true. If a request API matches a simple rule, the action for the simple rule is enforced. A SimpleRule does not currently support any predicates that contain references to objects.",
+		MarkdownDescription: "A service_policy object consists of an unordered list of predicates and a list of service policy rules. The predicates are evaluated against a set of input<br>fields that are extracted from or derived from an L7 request API. Any predicates that are not specified in a policy are implicitly considered to be true. The<br>rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining<br>algorithm. A request API is considered to match a policy if all predicates in the policy evaluate to true and the request API matches one of the rules in the<br>policy.<br><br>If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule<br>combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with<br>a DENY action are evaluated prior to rules with a ALLOW action.<br><br>A service policy is part of an ordered list of policies in one or more service policy sets. If a request API matches a policy, the resulting action for the<br>policy is the action configured in the matching rule. If a request API does not match a given policy, the next policy in the service policy set is evaluated.",
+		Description:         "A service_policy object consists of an unordered list of predicates and a list of service policy rules. The predicates are evaluated against a set of input fields that are extracted from or derived from an L7 request API. Any predicates that are not specified in a policy are implicitly considered to be true. The rules in the policy are also evaluated against the input fields. They are treated as an ordered or unordered list depending on the value of the rule combining algorithm. A request API is considered to match a policy if all predicates in the policy evaluate to true and the request API matches one of the rules in the policy. If the configured rule combining algorithm is FIRST_MATCH, the rules in the policy are evaluated sequentially till a matching rule is identified. If the rule combining algorithm is ALLOW_OVERRIDES all rules with an ALLOW action are evaluated prior to rules with a DENY action. If it is DENY_OVERRIDES, all rules with a DENY action are evaluated prior to rules with a ALLOW action. A service policy is part of an ordered list of policies in one or more service policy sets. If a request API matches a policy, the resulting action for the policy is the action configured in the matching rule. If a request API does not match a given policy, the next policy in the service policy set is evaluated.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -3788,62 +3740,6 @@ func (r *DataSourceF5XCServicePolicy) Schema(ctx context.Context, request dataso
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"dst_segment_choice": schema.SingleNestedAttribute{
-															Description: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"dst_any": schema.BoolAttribute{
-																	Description: "Any segment Traffic is not matched against any segment",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"dst_segments": schema.SingleNestedAttribute{
-																	Description: "List of segments Traffic is matched against destination segment in selected segments",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"segments": schema.ListNestedAttribute{
-																			Description: "Segments Select list of segments",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																			NestedObject: schema.NestedAttributeObject{
-																				Attributes: map[string]schema.Attribute{
-																					"name": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"namespace": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																					"tenant": schema.StringAttribute{
-																						Description: "",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
-																"intra_segment": schema.BoolAttribute{
-																	Description: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
 														"src_segment_choice": schema.SingleNestedAttribute{
 															Description: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
 															Required:    false,
@@ -4234,7 +4130,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_service_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "service_policy", err))
 		return
 	}
 
@@ -4305,7 +4201,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 		ruleChoiceChoices := specData.GetRuleChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ruleChoiceChoicesModel = &ServicePolicyGlobalSpecTypeRuleChoice{}
+		var ruleChoiceChoicesModel = &SvcPolicyRuleChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4331,7 +4227,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AsnList
 				if allowListElement.GetAsnList() != nil {
 					// Create the nested Go struct
-					servicePolicyPolicyAsnMatchListModel := &ServicePolicyPolicyAsnMatchList{}
+					svcPolicyAsnMatchListModel := &SvcPolicyAsnMatchList{}
 					asnListElement := allowListElement.GetAsnList()
 
 					// Recursively populate the nested struct
@@ -4344,18 +4240,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						servicePolicyPolicyAsnMatchListModel.AsNumbers = listValue
+						svcPolicyAsnMatchListModel.AsNumbers = listValue
 					} else {
-						servicePolicyPolicyAsnMatchListModel.AsNumbers = types.ListNull(types.Int64Type)
+						svcPolicyAsnMatchListModel.AsNumbers = types.ListNull(types.Int64Type)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					servicePolicyPolicyAsnMatchListModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceAllowListAsnListModelAttributeMap, servicePolicyPolicyAsnMatchListModel)
+					svcPolicyAsnMatchListModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceAllowListAsnListModelAttributeMap, svcPolicyAsnMatchListModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					allowListAttributeMap["asn_list"] = servicePolicyPolicyAsnMatchListModelObj
+					allowListAttributeMap["asn_list"] = svcPolicyAsnMatchListModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -4546,7 +4442,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> PrefixList
 				if allowListElement.GetPrefixList() != nil {
 					// Create the nested Go struct
-					servicePolicyViewsPrefixStringListTypeModel := &ServicePolicyViewsPrefixStringListType{}
+					svcPolicyPrefixStringListTypeModel := &SvcPolicyPrefixStringListType{}
 					prefixListElement := allowListElement.GetPrefixList()
 
 					// Recursively populate the nested struct
@@ -4558,9 +4454,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						servicePolicyViewsPrefixStringListTypeModel.Ipv6Prefixes = listValue
+						svcPolicyPrefixStringListTypeModel.Ipv6Prefixes = listValue
 					} else {
-						servicePolicyViewsPrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
+						svcPolicyPrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
 					}
 
 					// data specToModelNested ArrayOfStringField --> Prefixes
@@ -4570,18 +4466,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						servicePolicyViewsPrefixStringListTypeModel.Prefixes = listValue
+						svcPolicyPrefixStringListTypeModel.Prefixes = listValue
 					} else {
-						servicePolicyViewsPrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
+						svcPolicyPrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					servicePolicyViewsPrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceAllowListPrefixListModelAttributeMap, servicePolicyViewsPrefixStringListTypeModel)
+					svcPolicyPrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceAllowListPrefixListModelAttributeMap, svcPolicyPrefixStringListTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					allowListAttributeMap["prefix_list"] = servicePolicyViewsPrefixStringListTypeModelObj
+					allowListAttributeMap["prefix_list"] = svcPolicyPrefixStringListTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -4656,7 +4552,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> AsnList
 				if denyListElement.GetAsnList() != nil {
 					// Create the nested Go struct
-					servicePolicyPolicyAsnMatchListModel := &ServicePolicyPolicyAsnMatchList{}
+					svcPolicyAsnMatchListModel := &SvcPolicyAsnMatchList{}
 					asnListElement := denyListElement.GetAsnList()
 
 					// Recursively populate the nested struct
@@ -4669,18 +4565,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						servicePolicyPolicyAsnMatchListModel.AsNumbers = listValue
+						svcPolicyAsnMatchListModel.AsNumbers = listValue
 					} else {
-						servicePolicyPolicyAsnMatchListModel.AsNumbers = types.ListNull(types.Int64Type)
+						svcPolicyAsnMatchListModel.AsNumbers = types.ListNull(types.Int64Type)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					servicePolicyPolicyAsnMatchListModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceDenyListAsnListModelAttributeMap, servicePolicyPolicyAsnMatchListModel)
+					svcPolicyAsnMatchListModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceDenyListAsnListModelAttributeMap, svcPolicyAsnMatchListModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					denyListAttributeMap["asn_list"] = servicePolicyPolicyAsnMatchListModelObj
+					denyListAttributeMap["asn_list"] = svcPolicyAsnMatchListModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -4871,7 +4767,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 				// data specToModelNested PointerField --> PrefixList
 				if denyListElement.GetPrefixList() != nil {
 					// Create the nested Go struct
-					servicePolicyViewsPrefixStringListTypeModel := &ServicePolicyViewsPrefixStringListType{}
+					svcPolicyPrefixStringListTypeModel := &SvcPolicyPrefixStringListType{}
 					prefixListElement := denyListElement.GetPrefixList()
 
 					// Recursively populate the nested struct
@@ -4883,9 +4779,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						servicePolicyViewsPrefixStringListTypeModel.Ipv6Prefixes = listValue
+						svcPolicyPrefixStringListTypeModel.Ipv6Prefixes = listValue
 					} else {
-						servicePolicyViewsPrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
+						svcPolicyPrefixStringListTypeModel.Ipv6Prefixes = types.ListNull(types.StringType)
 					}
 
 					// data specToModelNested ArrayOfStringField --> Prefixes
@@ -4895,18 +4791,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 						if response.Diagnostics.HasError() {
 							return
 						}
-						servicePolicyViewsPrefixStringListTypeModel.Prefixes = listValue
+						svcPolicyPrefixStringListTypeModel.Prefixes = listValue
 					} else {
-						servicePolicyViewsPrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
+						svcPolicyPrefixStringListTypeModel.Prefixes = types.ListNull(types.StringType)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					servicePolicyViewsPrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceDenyListPrefixListModelAttributeMap, servicePolicyViewsPrefixStringListTypeModel)
+					svcPolicyPrefixStringListTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceDenyListPrefixListModelAttributeMap, svcPolicyPrefixStringListTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					denyListAttributeMap["prefix_list"] = servicePolicyViewsPrefixStringListTypeModelObj
+					denyListAttributeMap["prefix_list"] = svcPolicyPrefixStringListTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -5044,41 +4940,41 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 				if len(ruleListElement.GetRules()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					rulesElements := make([]ServicePolicyServicePolicyRule, 0, len(ruleListElement.GetRules()))
+					rulesElements := make([]SvcPolicyRule, 0, len(ruleListElement.GetRules()))
 					for _, rulesElement := range ruleListElement.GetRules() {
-						servicePolicyServicePolicyRuleModel := ServicePolicyServicePolicyRule{}
+						svcPolicyRuleModel := SvcPolicyRule{}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if rulesElement.GetMetadata() != nil {
 							// Create the nested Go struct
-							servicePolicyMessageMetaTypeModel := &ServicePolicyMessageMetaType{}
+							svcPolicyMessageMetaTypeModel := &SvcPolicyMessageMetaType{}
 							metadataElement := rulesElement.GetMetadata()
 
 							// Recursively populate the nested struct
 
 							// data specToModelNested StringField --> Description
 							if metadataElement.GetDescription() != "" {
-								servicePolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+								svcPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
 							} else {
 								// Empty string, set to null
-								servicePolicyMessageMetaTypeModel.Description = types.StringNull()
+								svcPolicyMessageMetaTypeModel.Description = types.StringNull()
 							}
 
 							// data specToModelNested RequiredStringField --> Name
 							if metadataElement.GetName() != "" {
-								servicePolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+								svcPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
 							} else {
 								// Empty string, set to null
-								servicePolicyMessageMetaTypeModel.Name = types.StringNull()
+								svcPolicyMessageMetaTypeModel.Name = types.StringNull()
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							servicePolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, servicePolicyMessageMetaTypeModel)
+							svcPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesMetadataModelAttributeMap, svcPolicyMessageMetaTypeModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							servicePolicyServicePolicyRuleModel.Metadata = servicePolicyMessageMetaTypeModelObj
+							svcPolicyRuleModel.Metadata = svcPolicyMessageMetaTypeModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -5087,13 +4983,13 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							servicePolicyServicePolicyRuleModel.Metadata = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
+							svcPolicyRuleModel.Metadata = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredPointerField --> Spec
 						if rulesElement.GetSpec() != nil {
 							// Create the nested Go struct
-							servicePolicyServicePolicyRuleGlobalSpecTypeModel := &ServicePolicyServicePolicyRuleGlobalSpecType{}
+							svcPolicyGstModel := &SvcPolicyGst{}
 							specElement := rulesElement.GetSpec()
 
 							// Recursively populate the nested struct
@@ -5107,21 +5003,21 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.Action = listValue
+								svcPolicyGstModel.Action = listValue
 							} else {
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.Action = types.ListNull(types.StringType)
+								svcPolicyGstModel.Action = types.ListNull(types.StringType)
 							}
 
 							// data specToModelNested PointerField --> ApiGroupMatcher
 							if specElement.GetApiGroupMatcher() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyStringMatcherTypeModel := &ServicePolicyPolicyStringMatcherType{}
+								svcPolicyStringMatcherTypeModel := &SvcPolicyStringMatcherType{}
 								apiGroupMatcherElement := specElement.GetApiGroupMatcher()
 
 								// Recursively populate the nested struct
 
 								// data specToModelNested BoolField --> InvertMatcher
-								servicePolicyPolicyStringMatcherTypeModel.InvertMatcher = types.BoolValue(bool(apiGroupMatcherElement.GetInvertMatcher()))
+								svcPolicyStringMatcherTypeModel.InvertMatcher = types.BoolValue(bool(apiGroupMatcherElement.GetInvertMatcher()))
 
 								// data specToModelNested RequiredArrayOfStringField --> Match
 								if len(apiGroupMatcherElement.GetMatch()) > 0 {
@@ -5130,18 +5026,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyStringMatcherTypeModel.Match = listValue
+									svcPolicyStringMatcherTypeModel.Match = listValue
 								} else {
-									servicePolicyPolicyStringMatcherTypeModel.Match = types.ListNull(types.StringType)
+									svcPolicyStringMatcherTypeModel.Match = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyStringMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecApiGroupMatcherModelAttributeMap, servicePolicyPolicyStringMatcherTypeModel)
+								svcPolicyStringMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecApiGroupMatcherModelAttributeMap, svcPolicyStringMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ApiGroupMatcher = servicePolicyPolicyStringMatcherTypeModelObj
+								svcPolicyGstModel.ApiGroupMatcher = svcPolicyStringMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -5150,19 +5046,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ApiGroupMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecApiGroupMatcherModelAttributeMap)
+								svcPolicyGstModel.ApiGroupMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecApiGroupMatcherModelAttributeMap)
 							}
 
 							// data specToModelNested ArrayOfPointerField --> ArgMatchers
 							if len(specElement.GetArgMatchers()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								argMatchersElements := make([]ServicePolicyPolicyArgMatcherType, 0, len(specElement.GetArgMatchers()))
+								argMatchersElements := make([]SvcPolicyArgMatcherType, 0, len(specElement.GetArgMatchers()))
 								for _, argMatchersElement := range specElement.GetArgMatchers() {
-									servicePolicyPolicyArgMatcherTypeModel := ServicePolicyPolicyArgMatcherType{}
+									svcPolicyArgMatcherTypeModel := SvcPolicyArgMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									servicePolicyPolicyArgMatcherTypeModel.InvertMatcher = types.BoolValue(bool(argMatchersElement.GetInvertMatcher()))
+									svcPolicyArgMatcherTypeModel.InvertMatcher = types.BoolValue(bool(argMatchersElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -5270,21 +5166,21 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										servicePolicyPolicyArgMatcherTypeModel.MatchChoice = finalObj
+										svcPolicyArgMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										servicePolicyPolicyArgMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecArgMatchersMatchModelAttributeMap)
+										svcPolicyArgMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecArgMatchersMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if argMatchersElement.GetName() != "" {
-										servicePolicyPolicyArgMatcherTypeModel.Name = types.StringValue(argMatchersElement.GetName())
+										svcPolicyArgMatcherTypeModel.Name = types.StringValue(argMatchersElement.GetName())
 									} else {
 										// Empty string, set to null
-										servicePolicyPolicyArgMatcherTypeModel.Name = types.StringNull()
+										svcPolicyArgMatcherTypeModel.Name = types.StringNull()
 									}
 
-									argMatchersElements = append(argMatchersElements, servicePolicyPolicyArgMatcherTypeModel)
+									argMatchersElements = append(argMatchersElements, svcPolicyArgMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5293,13 +5189,13 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ArgMatchers = argMatchersListValue
+								svcPolicyGstModel.ArgMatchers = argMatchersListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ArgMatchers = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecArgMatchersModelAttributeMap})
+								svcPolicyGstModel.ArgMatchers = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecArgMatchersModelAttributeMap})
 							}
 
 							// data specToModelNested RequiredOneOfField --> AsnChoice
@@ -5441,16 +5337,16 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.AsnChoice = finalObj
+								svcPolicyGstModel.AsnChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.AsnChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecAsnChoiceModelAttributeMap)
+								svcPolicyGstModel.AsnChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecAsnChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> BodyMatcher
 							if specElement.GetBodyMatcher() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyMatcherTypeModel := &ServicePolicyPolicyMatcherType{}
+								svcPolicyMatcherTypeModel := &SvcPolicyMatcherType{}
 								bodyMatcherElement := specElement.GetBodyMatcher()
 
 								// Recursively populate the nested struct
@@ -5462,9 +5358,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeModel.ExactValues = listValue
+									svcPolicyMatcherTypeModel.ExactValues = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> RegexValues
@@ -5474,9 +5370,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeModel.RegexValues = listValue
+									svcPolicyMatcherTypeModel.RegexValues = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
 								}
 
 								// data SpecToModelNested ArrayOfEnumField --> Transformers
@@ -5492,18 +5388,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeModel.Transformers = listValue
+									svcPolicyMatcherTypeModel.Transformers = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeModel.Transformers = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeModel.Transformers = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecBodyMatcherModelAttributeMap, servicePolicyPolicyMatcherTypeModel)
+								svcPolicyMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecBodyMatcherModelAttributeMap, svcPolicyMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.BodyMatcher = servicePolicyPolicyMatcherTypeModelObj
+								svcPolicyGstModel.BodyMatcher = svcPolicyMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -5512,13 +5408,13 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.BodyMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecBodyMatcherModelAttributeMap)
+								svcPolicyGstModel.BodyMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecBodyMatcherModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> BotAction
 							if specElement.GetBotAction() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyBotActionModel := &ServicePolicyPolicyBotAction{}
+								svcPolicyBotActionModel := &SvcPolicyBotAction{}
 								botActionElement := specElement.GetBotAction()
 
 								// Recursively populate the nested struct
@@ -5566,19 +5462,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyBotActionModel.ActionTypeChoice = finalObj
+									svcPolicyBotActionModel.ActionTypeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyBotActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecBotActionActionTypeModelAttributeMap)
+									svcPolicyBotActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecBotActionActionTypeModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyBotActionModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecBotActionModelAttributeMap, servicePolicyPolicyBotActionModel)
+								svcPolicyBotActionModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecBotActionModelAttributeMap, svcPolicyBotActionModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.BotAction = servicePolicyPolicyBotActionModelObj
+								svcPolicyGstModel.BotAction = svcPolicyBotActionModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -5587,7 +5483,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.BotAction = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecBotActionModelAttributeMap)
+								svcPolicyGstModel.BotAction = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecBotActionModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredOneOfField --> ClientChoice
@@ -5769,22 +5665,22 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ClientChoice = finalObj
+								svcPolicyGstModel.ClientChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ClientChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
+								svcPolicyGstModel.ClientChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested ArrayOfPointerField --> CookieMatchers
 							if len(specElement.GetCookieMatchers()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								cookieMatchersElements := make([]ServicePolicyPolicyCookieMatcherType, 0, len(specElement.GetCookieMatchers()))
+								cookieMatchersElements := make([]SvcPolicyCookieMatcherType, 0, len(specElement.GetCookieMatchers()))
 								for _, cookieMatchersElement := range specElement.GetCookieMatchers() {
-									servicePolicyPolicyCookieMatcherTypeModel := ServicePolicyPolicyCookieMatcherType{}
+									svcPolicyCookieMatcherTypeModel := SvcPolicyCookieMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									servicePolicyPolicyCookieMatcherTypeModel.InvertMatcher = types.BoolValue(bool(cookieMatchersElement.GetInvertMatcher()))
+									svcPolicyCookieMatcherTypeModel.InvertMatcher = types.BoolValue(bool(cookieMatchersElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -5892,21 +5788,21 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										servicePolicyPolicyCookieMatcherTypeModel.MatchChoice = finalObj
+										svcPolicyCookieMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										servicePolicyPolicyCookieMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecCookieMatchersMatchModelAttributeMap)
+										svcPolicyCookieMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecCookieMatchersMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if cookieMatchersElement.GetName() != "" {
-										servicePolicyPolicyCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
+										svcPolicyCookieMatcherTypeModel.Name = types.StringValue(cookieMatchersElement.GetName())
 									} else {
 										// Empty string, set to null
-										servicePolicyPolicyCookieMatcherTypeModel.Name = types.StringNull()
+										svcPolicyCookieMatcherTypeModel.Name = types.StringNull()
 									}
 
-									cookieMatchersElements = append(cookieMatchersElements, servicePolicyPolicyCookieMatcherTypeModel)
+									cookieMatchersElements = append(cookieMatchersElements, svcPolicyCookieMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5915,19 +5811,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.CookieMatchers = cookieMatchersListValue
+								svcPolicyGstModel.CookieMatchers = cookieMatchersListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecCookieMatchersModelAttributeMap})
+								svcPolicyGstModel.CookieMatchers = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecCookieMatchersModelAttributeMap})
 							}
 
 							// data specToModelNested PointerField --> DomainMatcher
 							if specElement.GetDomainMatcher() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyMatcherTypeModel := &ServicePolicyPolicyMatcherType{}
+								svcPolicyMatcherTypeModel := &SvcPolicyMatcherType{}
 								domainMatcherElement := specElement.GetDomainMatcher()
 
 								// Recursively populate the nested struct
@@ -5939,9 +5835,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeModel.ExactValues = listValue
+									svcPolicyMatcherTypeModel.ExactValues = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> RegexValues
@@ -5951,9 +5847,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeModel.RegexValues = listValue
+									svcPolicyMatcherTypeModel.RegexValues = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
 								}
 
 								// data SpecToModelNested ArrayOfEnumField --> Transformers
@@ -5969,18 +5865,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeModel.Transformers = listValue
+									svcPolicyMatcherTypeModel.Transformers = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeModel.Transformers = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeModel.Transformers = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecDomainMatcherModelAttributeMap, servicePolicyPolicyMatcherTypeModel)
+								svcPolicyMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecDomainMatcherModelAttributeMap, svcPolicyMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.DomainMatcher = servicePolicyPolicyMatcherTypeModelObj
+								svcPolicyGstModel.DomainMatcher = svcPolicyMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -5989,26 +5885,26 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.DomainMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecDomainMatcherModelAttributeMap)
+								svcPolicyGstModel.DomainMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecDomainMatcherModelAttributeMap)
 							}
 
 							// data specToModelNested TimeStampField --> ExpirationTimestamp
 							if specElement.GetExpirationTimestamp() != nil {
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specElement.GetExpirationTimestamp())
+								svcPolicyGstModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specElement.GetExpirationTimestamp())
 							} else {
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
+								svcPolicyGstModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
 							}
 
 							// data specToModelNested ArrayOfPointerField --> Headers
 							if len(specElement.GetHeaders()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								headersElements := make([]ServicePolicyPolicyHeaderMatcherType, 0, len(specElement.GetHeaders()))
+								headersElements := make([]SvcPolicyHeaderMatcherType, 0, len(specElement.GetHeaders()))
 								for _, headersElement := range specElement.GetHeaders() {
-									servicePolicyPolicyHeaderMatcherTypeModel := ServicePolicyPolicyHeaderMatcherType{}
+									svcPolicyHeaderMatcherTypeModel := SvcPolicyHeaderMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									servicePolicyPolicyHeaderMatcherTypeModel.InvertMatcher = types.BoolValue(bool(headersElement.GetInvertMatcher()))
+									svcPolicyHeaderMatcherTypeModel.InvertMatcher = types.BoolValue(bool(headersElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -6116,21 +6012,21 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										servicePolicyPolicyHeaderMatcherTypeModel.MatchChoice = finalObj
+										svcPolicyHeaderMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										servicePolicyPolicyHeaderMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecHeadersMatchModelAttributeMap)
+										svcPolicyHeaderMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecHeadersMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if headersElement.GetName() != "" {
-										servicePolicyPolicyHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
+										svcPolicyHeaderMatcherTypeModel.Name = types.StringValue(headersElement.GetName())
 									} else {
 										// Empty string, set to null
-										servicePolicyPolicyHeaderMatcherTypeModel.Name = types.StringNull()
+										svcPolicyHeaderMatcherTypeModel.Name = types.StringNull()
 									}
 
-									headersElements = append(headersElements, servicePolicyPolicyHeaderMatcherTypeModel)
+									headersElements = append(headersElements, svcPolicyHeaderMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6139,25 +6035,25 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.Headers = headersListValue
+								svcPolicyGstModel.Headers = headersListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.Headers = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecHeadersModelAttributeMap})
+								svcPolicyGstModel.Headers = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecHeadersModelAttributeMap})
 							}
 
 							// data specToModelNested PointerField --> HttpMethod
 							if specElement.GetHttpMethod() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyHttpMethodMatcherTypeModel := &ServicePolicyPolicyHttpMethodMatcherType{}
+								svcPolicyHttpMethodMatcherTypeModel := &SvcPolicyHttpMethodMatcherType{}
 								httpMethodElement := specElement.GetHttpMethod()
 
 								// Recursively populate the nested struct
 
 								// data specToModelNested BoolField --> InvertMatcher
-								servicePolicyPolicyHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(httpMethodElement.GetInvertMatcher()))
+								svcPolicyHttpMethodMatcherTypeModel.InvertMatcher = types.BoolValue(bool(httpMethodElement.GetInvertMatcher()))
 
 								// data SpecToModelNested ArrayOfEnumField --> Methods
 								if len(httpMethodElement.GetMethods()) > 0 {
@@ -6172,18 +6068,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyHttpMethodMatcherTypeModel.Methods = listValue
+									svcPolicyHttpMethodMatcherTypeModel.Methods = listValue
 								} else {
-									servicePolicyPolicyHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
+									svcPolicyHttpMethodMatcherTypeModel.Methods = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyHttpMethodMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecHttpMethodModelAttributeMap, servicePolicyPolicyHttpMethodMatcherTypeModel)
+								svcPolicyHttpMethodMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecHttpMethodModelAttributeMap, svcPolicyHttpMethodMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.HttpMethod = servicePolicyPolicyHttpMethodMatcherTypeModelObj
+								svcPolicyGstModel.HttpMethod = svcPolicyHttpMethodMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -6192,7 +6088,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.HttpMethod = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecHttpMethodModelAttributeMap)
+								svcPolicyGstModel.HttpMethod = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecHttpMethodModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredOneOfField --> IpChoice
@@ -6351,22 +6247,22 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.IpChoice = finalObj
+								svcPolicyGstModel.IpChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.IpChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecIpChoiceModelAttributeMap)
+								svcPolicyGstModel.IpChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecIpChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested ArrayOfPointerField --> JwtClaims
 							if len(specElement.GetJwtClaims()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								jwtClaimsElements := make([]ServicePolicyPolicyJWTClaimMatcherType, 0, len(specElement.GetJwtClaims()))
+								jwtClaimsElements := make([]SvcPolicyJWTClaimMatcherType, 0, len(specElement.GetJwtClaims()))
 								for _, jwtClaimsElement := range specElement.GetJwtClaims() {
-									servicePolicyPolicyJWTClaimMatcherTypeModel := ServicePolicyPolicyJWTClaimMatcherType{}
+									svcPolicyJWTClaimMatcherTypeModel := SvcPolicyJWTClaimMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									servicePolicyPolicyJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
+									svcPolicyJWTClaimMatcherTypeModel.InvertMatcher = types.BoolValue(bool(jwtClaimsElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredOneOfField --> Match
 									// <no value>
@@ -6474,21 +6370,21 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										servicePolicyPolicyJWTClaimMatcherTypeModel.MatchChoice = finalObj
+										svcPolicyJWTClaimMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										servicePolicyPolicyJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecJwtClaimsMatchModelAttributeMap)
+										svcPolicyJWTClaimMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecJwtClaimsMatchModelAttributeMap)
 									}
 
 									// data specToModelNested RequiredStringField --> Name
 									if jwtClaimsElement.GetName() != "" {
-										servicePolicyPolicyJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
+										svcPolicyJWTClaimMatcherTypeModel.Name = types.StringValue(jwtClaimsElement.GetName())
 									} else {
 										// Empty string, set to null
-										servicePolicyPolicyJWTClaimMatcherTypeModel.Name = types.StringNull()
+										svcPolicyJWTClaimMatcherTypeModel.Name = types.StringNull()
 									}
 
-									jwtClaimsElements = append(jwtClaimsElements, servicePolicyPolicyJWTClaimMatcherTypeModel)
+									jwtClaimsElements = append(jwtClaimsElements, svcPolicyJWTClaimMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6497,19 +6393,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.JwtClaims = jwtClaimsListValue
+								svcPolicyGstModel.JwtClaims = jwtClaimsListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecJwtClaimsModelAttributeMap})
+								svcPolicyGstModel.JwtClaims = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecJwtClaimsModelAttributeMap})
 							}
 
 							// data specToModelNested PointerField --> LabelMatcher
 							if specElement.GetLabelMatcher() != nil {
 								// Create the nested Go struct
-								servicePolicyLabelMatcherTypeModel := &ServicePolicyLabelMatcherType{}
+								svcPolicyLabelMatcherTypeModel := &SvcPolicyLabelMatcherType{}
 								labelMatcherElement := specElement.GetLabelMatcher()
 
 								// Recursively populate the nested struct
@@ -6521,18 +6417,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyLabelMatcherTypeModel.Keys = listValue
+									svcPolicyLabelMatcherTypeModel.Keys = listValue
 								} else {
-									servicePolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
+									svcPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyLabelMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecLabelMatcherModelAttributeMap, servicePolicyLabelMatcherTypeModel)
+								svcPolicyLabelMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecLabelMatcherModelAttributeMap, svcPolicyLabelMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.LabelMatcher = servicePolicyLabelMatcherTypeModelObj
+								svcPolicyGstModel.LabelMatcher = svcPolicyLabelMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -6541,16 +6437,16 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.LabelMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecLabelMatcherModelAttributeMap)
+								svcPolicyGstModel.LabelMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecLabelMatcherModelAttributeMap)
 							}
 
 							// data specToModelNested BoolField --> LogRuleEvaluation
-							servicePolicyServicePolicyRuleGlobalSpecTypeModel.LogRuleEvaluation = types.BoolValue(bool(specElement.GetLogRuleEvaluation()))
+							svcPolicyGstModel.LogRuleEvaluation = types.BoolValue(bool(specElement.GetLogRuleEvaluation()))
 
 							// data specToModelNested PointerField --> MumAction
 							if specElement.GetMumAction() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyModifyActionModel := &ServicePolicyPolicyModifyAction{}
+								svcPolicyModifyActionModel := &SvcPolicyModifyAction{}
 								mumActionElement := specElement.GetMumAction()
 
 								// Recursively populate the nested struct
@@ -6598,19 +6494,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyModifyActionModel.ActionTypeChoice = finalObj
+									svcPolicyModifyActionModel.ActionTypeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyModifyActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecMumActionActionTypeModelAttributeMap)
+									svcPolicyModifyActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecMumActionActionTypeModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyModifyActionModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecMumActionModelAttributeMap, servicePolicyPolicyModifyActionModel)
+								svcPolicyModifyActionModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecMumActionModelAttributeMap, svcPolicyModifyActionModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.MumAction = servicePolicyPolicyModifyActionModelObj
+								svcPolicyGstModel.MumAction = svcPolicyModifyActionModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -6619,19 +6515,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.MumAction = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecMumActionModelAttributeMap)
+								svcPolicyGstModel.MumAction = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecMumActionModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> Path
 							if specElement.GetPath() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyPathMatcherTypeModel := &ServicePolicyPolicyPathMatcherType{}
+								svcPolicyPathMatcherTypeModel := &SvcPolicyPathMatcherType{}
 								pathElement := specElement.GetPath()
 
 								// Recursively populate the nested struct
 
 								// data specToModelNested BoolField --> EncodedPathMatcher
-								servicePolicyPolicyPathMatcherTypeModel.EncodedPathMatcher = types.BoolValue(bool(pathElement.GetEncodedPathMatcher()))
+								svcPolicyPathMatcherTypeModel.EncodedPathMatcher = types.BoolValue(bool(pathElement.GetEncodedPathMatcher()))
 
 								// data specToModelNested ArrayOfStringField --> ExactValues
 								if len(pathElement.GetExactValues()) > 0 {
@@ -6640,13 +6536,13 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyPathMatcherTypeModel.ExactValues = listValue
+									svcPolicyPathMatcherTypeModel.ExactValues = listValue
 								} else {
-									servicePolicyPolicyPathMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
+									svcPolicyPathMatcherTypeModel.ExactValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested BoolField --> InvertMatcher
-								servicePolicyPolicyPathMatcherTypeModel.InvertMatcher = types.BoolValue(bool(pathElement.GetInvertMatcher()))
+								svcPolicyPathMatcherTypeModel.InvertMatcher = types.BoolValue(bool(pathElement.GetInvertMatcher()))
 
 								// data specToModelNested ArrayOfStringField --> PrefixValues
 								if len(pathElement.GetPrefixValues()) > 0 {
@@ -6655,9 +6551,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyPathMatcherTypeModel.PrefixValues = listValue
+									svcPolicyPathMatcherTypeModel.PrefixValues = listValue
 								} else {
-									servicePolicyPolicyPathMatcherTypeModel.PrefixValues = types.ListNull(types.StringType)
+									svcPolicyPathMatcherTypeModel.PrefixValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> RegexValues
@@ -6667,9 +6563,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyPathMatcherTypeModel.RegexValues = listValue
+									svcPolicyPathMatcherTypeModel.RegexValues = listValue
 								} else {
-									servicePolicyPolicyPathMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
+									svcPolicyPathMatcherTypeModel.RegexValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> SuffixValues
@@ -6679,9 +6575,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyPathMatcherTypeModel.SuffixValues = listValue
+									svcPolicyPathMatcherTypeModel.SuffixValues = listValue
 								} else {
-									servicePolicyPolicyPathMatcherTypeModel.SuffixValues = types.ListNull(types.StringType)
+									svcPolicyPathMatcherTypeModel.SuffixValues = types.ListNull(types.StringType)
 								}
 
 								// data SpecToModelNested ArrayOfEnumField --> Transformers
@@ -6697,18 +6593,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyPathMatcherTypeModel.Transformers = listValue
+									svcPolicyPathMatcherTypeModel.Transformers = listValue
 								} else {
-									servicePolicyPolicyPathMatcherTypeModel.Transformers = types.ListNull(types.StringType)
+									svcPolicyPathMatcherTypeModel.Transformers = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecPathModelAttributeMap, servicePolicyPolicyPathMatcherTypeModel)
+								svcPolicyPathMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecPathModelAttributeMap, svcPolicyPathMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.Path = servicePolicyPolicyPathMatcherTypeModelObj
+								svcPolicyGstModel.Path = svcPolicyPathMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -6717,19 +6613,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.Path = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecPathModelAttributeMap)
+								svcPolicyGstModel.Path = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecPathModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> PortMatcher
 							if specElement.GetPortMatcher() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyPortMatcherTypeModel := &ServicePolicyPolicyPortMatcherType{}
+								svcPolicyPortMatcherTypeModel := &SvcPolicyPortMatcherType{}
 								portMatcherElement := specElement.GetPortMatcher()
 
 								// Recursively populate the nested struct
 
 								// data specToModelNested BoolField --> InvertMatcher
-								servicePolicyPolicyPortMatcherTypeModel.InvertMatcher = types.BoolValue(bool(portMatcherElement.GetInvertMatcher()))
+								svcPolicyPortMatcherTypeModel.InvertMatcher = types.BoolValue(bool(portMatcherElement.GetInvertMatcher()))
 
 								// data specToModelNested RequiredArrayOfStringField --> Ports
 								if len(portMatcherElement.GetPorts()) > 0 {
@@ -6738,18 +6634,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyPortMatcherTypeModel.Ports = listValue
+									svcPolicyPortMatcherTypeModel.Ports = listValue
 								} else {
-									servicePolicyPolicyPortMatcherTypeModel.Ports = types.ListNull(types.StringType)
+									svcPolicyPortMatcherTypeModel.Ports = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyPortMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecPortMatcherModelAttributeMap, servicePolicyPolicyPortMatcherTypeModel)
+								svcPolicyPortMatcherTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecPortMatcherModelAttributeMap, svcPolicyPortMatcherTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.PortMatcher = servicePolicyPolicyPortMatcherTypeModelObj
+								svcPolicyGstModel.PortMatcher = svcPolicyPortMatcherTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -6758,26 +6654,26 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.PortMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecPortMatcherModelAttributeMap)
+								svcPolicyGstModel.PortMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecPortMatcherModelAttributeMap)
 							}
 
 							// data specToModelNested ArrayOfPointerField --> QueryParams
 							if len(specElement.GetQueryParams()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								queryParamsElements := make([]ServicePolicyPolicyQueryParameterMatcherType, 0, len(specElement.GetQueryParams()))
+								queryParamsElements := make([]SvcPolicyQueryParamMatcherType, 0, len(specElement.GetQueryParams()))
 								for _, queryParamsElement := range specElement.GetQueryParams() {
-									servicePolicyPolicyQueryParameterMatcherTypeModel := ServicePolicyPolicyQueryParameterMatcherType{}
+									svcPolicyQueryParamMatcherTypeModel := SvcPolicyQueryParamMatcherType{}
 
 									// data specToModelNested BoolField --> InvertMatcher
-									servicePolicyPolicyQueryParameterMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
+									svcPolicyQueryParamMatcherTypeModel.InvertMatcher = types.BoolValue(bool(queryParamsElement.GetInvertMatcher()))
 
 									// data specToModelNested RequiredStringField --> Key
 									if queryParamsElement.GetKey() != "" {
-										servicePolicyPolicyQueryParameterMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
+										svcPolicyQueryParamMatcherTypeModel.Key = types.StringValue(queryParamsElement.GetKey())
 									} else {
 										// Empty string, set to null
-										servicePolicyPolicyQueryParameterMatcherTypeModel.Key = types.StringNull()
+										svcPolicyQueryParamMatcherTypeModel.Key = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> Match
@@ -6886,13 +6782,13 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										servicePolicyPolicyQueryParameterMatcherTypeModel.MatchChoice = finalObj
+										svcPolicyQueryParamMatcherTypeModel.MatchChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										servicePolicyPolicyQueryParameterMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecQueryParamsMatchModelAttributeMap)
+										svcPolicyQueryParamMatcherTypeModel.MatchChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecQueryParamsMatchModelAttributeMap)
 									}
 
-									queryParamsElements = append(queryParamsElements, servicePolicyPolicyQueryParameterMatcherTypeModel)
+									queryParamsElements = append(queryParamsElements, svcPolicyQueryParamMatcherTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6901,19 +6797,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.QueryParams = queryParamsListValue
+								svcPolicyGstModel.QueryParams = queryParamsListValue
 
 							} else {
 								// The source list is empty or nil.
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// Assign a null `types.ListValue`.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecQueryParamsModelAttributeMap})
+								svcPolicyGstModel.QueryParams = types.ListNull(types.ObjectType{AttrTypes: ServicePolicyRuleChoiceRuleListRulesSpecQueryParamsModelAttributeMap})
 							}
 
 							// data specToModelNested PointerField --> RequestConstraints
 							if specElement.GetRequestConstraints() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyRequestConstraintTypeModel := &ServicePolicyPolicyRequestConstraintType{}
+								svcPolicyReqConstraintTypeModel := &SvcPolicyReqConstraintType{}
 								requestConstraintsElement := specElement.GetRequestConstraints()
 
 								// Recursively populate the nested struct
@@ -6962,10 +6858,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxCookieCountChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxCookieCountChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxCookieCountChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxCookieCountChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxCookieCountChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxCookieCountChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxCookieKeySizeChoice
@@ -7012,10 +6908,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxCookieKeySizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxCookieKeySizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxCookieValueSizeChoice
@@ -7062,10 +6958,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxCookieValueSizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxCookieValueSizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxHeaderCountChoice
@@ -7112,10 +7008,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxHeaderCountChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxHeaderCountChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxHeaderCountChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxHeaderCountChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxHeaderCountChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxHeaderCountChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxHeaderKeySizeChoice
@@ -7162,10 +7058,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxHeaderKeySizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxHeaderKeySizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxHeaderValueSizeChoice
@@ -7212,10 +7108,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxHeaderValueSizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxHeaderValueSizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxParameterCountChoice
@@ -7262,10 +7158,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxParameterCountChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxParameterCountChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxParameterCountChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxParameterCountChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxParameterCountChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxParameterCountChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxParameterNameSizeChoice
@@ -7312,10 +7208,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxParameterNameSizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxParameterNameSizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxParameterValueSizeChoice
@@ -7362,10 +7258,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxParameterValueSizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxParameterValueSizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxQuerySizeChoice
@@ -7412,10 +7308,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxQuerySizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxQuerySizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxQuerySizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxQuerySizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxQuerySizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxQuerySizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxRequestLineSizeChoice
@@ -7462,10 +7358,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxRequestLineSizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxRequestLineSizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxRequestSizeChoice
@@ -7512,10 +7408,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxRequestSizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxRequestSizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxRequestSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxRequestSizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxRequestSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxRequestSizeChoiceModelAttributeMap)
 								}
 
 								// data specToModelNested RequiredOneOfField --> MaxUrlSizeChoice
@@ -7562,19 +7458,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyRequestConstraintTypeModel.MaxUrlSizeChoice = finalObj
+									svcPolicyReqConstraintTypeModel.MaxUrlSizeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyRequestConstraintTypeModel.MaxUrlSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxUrlSizeChoiceModelAttributeMap)
+									svcPolicyReqConstraintTypeModel.MaxUrlSizeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsMaxUrlSizeChoiceModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyRequestConstraintTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsModelAttributeMap, servicePolicyPolicyRequestConstraintTypeModel)
+								svcPolicyReqConstraintTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsModelAttributeMap, svcPolicyReqConstraintTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.RequestConstraints = servicePolicyPolicyRequestConstraintTypeModelObj
+								svcPolicyGstModel.RequestConstraints = svcPolicyReqConstraintTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -7583,135 +7479,16 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.RequestConstraints = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsModelAttributeMap)
+								svcPolicyGstModel.RequestConstraints = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecRequestConstraintsModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> SegmentPolicy
 							if specElement.GetSegmentPolicy() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicySegmentPolicyTypeModel := &ServicePolicyPolicySegmentPolicyType{}
+								svcPolicySegmentPolicyTypeModel := &SvcPolicySegmentPolicyType{}
 								segmentPolicyElement := specElement.GetSegmentPolicy()
 
 								// Recursively populate the nested struct
-
-								// data specToModelNested OneOfField --> DstSegmentChoice
-								if segmentPolicyElement.GetDstSegmentChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested BoolOfOneOfPointerField --> DstAny
-									_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-
-									if isDstAny {
-										segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-									} else {
-										segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-									}
-
-									// data specToModelNested PointerOfOneOfField --> DstSegments
-									// <no value>
-									// false
-									{
-										dstSegmentsOptionsWrapper, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-										dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-										if isDstSegments && dstSegmentsOptionsWrapper != nil && dstSegmentsOptionsWrapper.DstSegments != nil {
-											dstSegmentsElement := dstSegmentsOptionsWrapper.DstSegments
-
-											// data specToModelNested RequiredArrayOfPointerField --> Segments
-											if len(dstSegmentsElement.GetSegments()) > 0 {
-												// Step 1: Always create a slice of model structs from the spec data.
-												// This slice serves as an intermediate representation.
-												segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsElement.GetSegments()))
-												for _, segmentsElement := range dstSegmentsElement.GetSegments() {
-													objectRefTypeModelModel := ObjectRefTypeModel{}
-
-													// data specToModelNested RequiredStringField --> Name
-													if segmentsElement.GetName() != "" {
-														objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-													} else {
-														// Empty string, set to null
-														objectRefTypeModelModel.Name = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Namespace
-													if segmentsElement.GetNamespace() != "" {
-														objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-													} else {
-														// Empty string, set to null
-														objectRefTypeModelModel.Namespace = types.StringNull()
-													}
-
-													// data specToModelNested StringField --> Tenant
-													if segmentsElement.GetTenant() != "" {
-														objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-													} else {
-														// Empty string, set to null
-														objectRefTypeModelModel.Tenant = types.StringNull()
-													}
-
-													segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-												}
-												// CASE 1: The target field is a `types.List` or an attribute map.
-												// The intermediate slice of structs must be converted to a `types.ListValue`.
-												segmentsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ServicePolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-												response.Diagnostics.Append(listDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-											} else {
-												// The source list is empty or nil.
-												// CASE 1: The target field is a `types.List` or an attribute map.
-												// Assign a null `types.ListValue`.
-												dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: ServicePolicySegmentsObjectRefModelAttributeMap})
-											}
-
-											dstSegmentsObj, dstSegmentsObjDiags := types.ObjectValue(ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-											response.Diagnostics.Append(dstSegmentsObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-										} else {
-											segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-										}
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> IntraSegment
-									_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-
-									if isIntraSegment {
-										segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-									} else {
-										segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-										ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										segmentPolicydstSegmentChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyDstSegmentChoiceModelAttributeMap)
-								}
 
 								// data specToModelNested OneOfField --> SrcSegmentChoice
 								if segmentPolicyElement.GetSrcSegmentChoice() != nil {
@@ -7817,19 +7594,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
+									svcPolicySegmentPolicyTypeModel.SrcSegmentChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap)
+									svcPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicySrcSegmentChoiceModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicySegmentPolicyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyModelAttributeMap, servicePolicyPolicySegmentPolicyTypeModel)
+								svcPolicySegmentPolicyTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyModelAttributeMap, svcPolicySegmentPolicyTypeModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.SegmentPolicy = servicePolicyPolicySegmentPolicyTypeModelObj
+								svcPolicyGstModel.SegmentPolicy = svcPolicySegmentPolicyTypeModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -7838,7 +7615,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.SegmentPolicy = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyModelAttributeMap)
+								svcPolicyGstModel.SegmentPolicy = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecSegmentPolicyModelAttributeMap)
 							}
 
 							// data specToModelNested OneOfField --> TlsFingerprintChoice
@@ -7961,16 +7738,16 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.TlsFingerprintChoice = finalObj
+								svcPolicyGstModel.TlsFingerprintChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.TlsFingerprintChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecTlsFingerprintChoiceModelAttributeMap)
+								svcPolicyGstModel.TlsFingerprintChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecTlsFingerprintChoiceModelAttributeMap)
 							}
 
 							// data specToModelNested PointerField --> UserIdentityMatcher
 							if specElement.GetUserIdentityMatcher() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyMatcherTypeBasicModel := &ServicePolicyPolicyMatcherTypeBasic{}
+								svcPolicyMatcherTypeBasicModel := &SvcPolicyMatcherTypeBasic{}
 								userIdentityMatcherElement := specElement.GetUserIdentityMatcher()
 
 								// Recursively populate the nested struct
@@ -7982,9 +7759,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeBasicModel.ExactValues = listValue
+									svcPolicyMatcherTypeBasicModel.ExactValues = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeBasicModel.ExactValues = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeBasicModel.ExactValues = types.ListNull(types.StringType)
 								}
 
 								// data specToModelNested ArrayOfStringField --> RegexValues
@@ -7994,18 +7771,18 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									servicePolicyPolicyMatcherTypeBasicModel.RegexValues = listValue
+									svcPolicyMatcherTypeBasicModel.RegexValues = listValue
 								} else {
-									servicePolicyPolicyMatcherTypeBasicModel.RegexValues = types.ListNull(types.StringType)
+									svcPolicyMatcherTypeBasicModel.RegexValues = types.ListNull(types.StringType)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyMatcherTypeBasicModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecUserIdentityMatcherModelAttributeMap, servicePolicyPolicyMatcherTypeBasicModel)
+								svcPolicyMatcherTypeBasicModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecUserIdentityMatcherModelAttributeMap, svcPolicyMatcherTypeBasicModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.UserIdentityMatcher = servicePolicyPolicyMatcherTypeBasicModelObj
+								svcPolicyGstModel.UserIdentityMatcher = svcPolicyMatcherTypeBasicModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -8014,13 +7791,13 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// because the API may always return a non-nil struct (with REDACTED values) for this field,
 								// making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.UserIdentityMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecUserIdentityMatcherModelAttributeMap)
+								svcPolicyGstModel.UserIdentityMatcher = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecUserIdentityMatcherModelAttributeMap)
 							}
 
 							// data specToModelNested RequiredPointerField --> WafAction
 							if specElement.GetWafAction() != nil {
 								// Create the nested Go struct
-								servicePolicyPolicyWafActionModel := &ServicePolicyPolicyWafAction{}
+								svcPolicyWafActionModel := &SvcPolicyWafAction{}
 								wafActionElement := specElement.GetWafAction()
 
 								// Recursively populate the nested struct
@@ -8051,9 +7828,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 											if len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												excludeAttackTypeContextsElements := make([]ServicePolicyPolicyAppFirewallAttackTypeContext, 0, len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()))
+												excludeAttackTypeContextsElements := make([]SvcPolicyAppFirewallAttackTypeContext, 0, len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()))
 												for _, excludeAttackTypeContextsElement := range appFirewallDetectionControlElement.GetExcludeAttackTypeContexts() {
-													servicePolicyPolicyAppFirewallAttackTypeContextModel := ServicePolicyPolicyAppFirewallAttackTypeContext{}
+													svcPolicyAppFirewallAttackTypeContextModel := SvcPolicyAppFirewallAttackTypeContext{}
 
 													// data specToModelNested RequiredEnumField --> Context
 													if excludeAttackTypeContextsElement.GetContext().String() != "" {
@@ -8064,17 +7841,17 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 														if response.Diagnostics.HasError() {
 															return
 														}
-														servicePolicyPolicyAppFirewallAttackTypeContextModel.Context = listValue
+														svcPolicyAppFirewallAttackTypeContextModel.Context = listValue
 													} else {
-														servicePolicyPolicyAppFirewallAttackTypeContextModel.Context = types.ListNull(types.StringType)
+														svcPolicyAppFirewallAttackTypeContextModel.Context = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested StringField --> ContextName
 													if excludeAttackTypeContextsElement.GetContextName() != "" {
-														servicePolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
+														svcPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
 													} else {
 														// Empty string, set to null
-														servicePolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
+														svcPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
 													}
 
 													// data specToModelNested RequiredEnumField --> ExcludeAttackType
@@ -8086,12 +7863,12 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 														if response.Diagnostics.HasError() {
 															return
 														}
-														servicePolicyPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = listValue
+														svcPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = listValue
 													} else {
-														servicePolicyPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = types.ListNull(types.StringType)
+														svcPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = types.ListNull(types.StringType)
 													}
 
-													excludeAttackTypeContextsElements = append(excludeAttackTypeContextsElements, servicePolicyPolicyAppFirewallAttackTypeContextModel)
+													excludeAttackTypeContextsElements = append(excludeAttackTypeContextsElements, svcPolicyAppFirewallAttackTypeContextModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8113,19 +7890,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 											if len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												excludeBotNameContextsElements := make([]ServicePolicyPolicyBotNameContext, 0, len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()))
+												excludeBotNameContextsElements := make([]SvcPolicyBotNameContext, 0, len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()))
 												for _, excludeBotNameContextsElement := range appFirewallDetectionControlElement.GetExcludeBotNameContexts() {
-													servicePolicyPolicyBotNameContextModel := ServicePolicyPolicyBotNameContext{}
+													svcPolicyBotNameContextModel := SvcPolicyBotNameContext{}
 
 													// data specToModelNested RequiredStringField --> BotName
 													if excludeBotNameContextsElement.GetBotName() != "" {
-														servicePolicyPolicyBotNameContextModel.BotName = types.StringValue(excludeBotNameContextsElement.GetBotName())
+														svcPolicyBotNameContextModel.BotName = types.StringValue(excludeBotNameContextsElement.GetBotName())
 													} else {
 														// Empty string, set to null
-														servicePolicyPolicyBotNameContextModel.BotName = types.StringNull()
+														svcPolicyBotNameContextModel.BotName = types.StringNull()
 													}
 
-													excludeBotNameContextsElements = append(excludeBotNameContextsElements, servicePolicyPolicyBotNameContextModel)
+													excludeBotNameContextsElements = append(excludeBotNameContextsElements, svcPolicyBotNameContextModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8147,9 +7924,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 											if len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												excludeSignatureContextsElements := make([]ServicePolicyPolicyAppFirewallSignatureContext, 0, len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()))
+												excludeSignatureContextsElements := make([]SvcPolicyAppFirewallSignatureContext, 0, len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()))
 												for _, excludeSignatureContextsElement := range appFirewallDetectionControlElement.GetExcludeSignatureContexts() {
-													servicePolicyPolicyAppFirewallSignatureContextModel := ServicePolicyPolicyAppFirewallSignatureContext{}
+													svcPolicyAppFirewallSignatureContextModel := SvcPolicyAppFirewallSignatureContext{}
 
 													// data specToModelNested RequiredEnumField --> Context
 													if excludeSignatureContextsElement.GetContext().String() != "" {
@@ -8160,23 +7937,23 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 														if response.Diagnostics.HasError() {
 															return
 														}
-														servicePolicyPolicyAppFirewallSignatureContextModel.Context = listValue
+														svcPolicyAppFirewallSignatureContextModel.Context = listValue
 													} else {
-														servicePolicyPolicyAppFirewallSignatureContextModel.Context = types.ListNull(types.StringType)
+														svcPolicyAppFirewallSignatureContextModel.Context = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested StringField --> ContextName
 													if excludeSignatureContextsElement.GetContextName() != "" {
-														servicePolicyPolicyAppFirewallSignatureContextModel.ContextName = types.StringValue(excludeSignatureContextsElement.GetContextName())
+														svcPolicyAppFirewallSignatureContextModel.ContextName = types.StringValue(excludeSignatureContextsElement.GetContextName())
 													} else {
 														// Empty string, set to null
-														servicePolicyPolicyAppFirewallSignatureContextModel.ContextName = types.StringNull()
+														svcPolicyAppFirewallSignatureContextModel.ContextName = types.StringNull()
 													}
 
 													// data specToModelNested RequiredUintField --> SignatureId
-													servicePolicyPolicyAppFirewallSignatureContextModel.SignatureId = types.Int64Value(int64(excludeSignatureContextsElement.GetSignatureId()))
+													svcPolicyAppFirewallSignatureContextModel.SignatureId = types.Int64Value(int64(excludeSignatureContextsElement.GetSignatureId()))
 
-													excludeSignatureContextsElements = append(excludeSignatureContextsElements, servicePolicyPolicyAppFirewallSignatureContextModel)
+													excludeSignatureContextsElements = append(excludeSignatureContextsElements, svcPolicyAppFirewallSignatureContextModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8198,9 +7975,9 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 											if len(appFirewallDetectionControlElement.GetExcludeViolationContexts()) > 0 {
 												// Step 1: Always create a slice of model structs from the spec data.
 												// This slice serves as an intermediate representation.
-												excludeViolationContextsElements := make([]ServicePolicyPolicyAppFirewallViolationContext, 0, len(appFirewallDetectionControlElement.GetExcludeViolationContexts()))
+												excludeViolationContextsElements := make([]SvcPolicyAppFirewallViolationContext, 0, len(appFirewallDetectionControlElement.GetExcludeViolationContexts()))
 												for _, excludeViolationContextsElement := range appFirewallDetectionControlElement.GetExcludeViolationContexts() {
-													servicePolicyPolicyAppFirewallViolationContextModel := ServicePolicyPolicyAppFirewallViolationContext{}
+													svcPolicyAppFirewallViolationContextModel := SvcPolicyAppFirewallViolationContext{}
 
 													// data specToModelNested RequiredEnumField --> Context
 													if excludeViolationContextsElement.GetContext().String() != "" {
@@ -8211,17 +7988,17 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 														if response.Diagnostics.HasError() {
 															return
 														}
-														servicePolicyPolicyAppFirewallViolationContextModel.Context = listValue
+														svcPolicyAppFirewallViolationContextModel.Context = listValue
 													} else {
-														servicePolicyPolicyAppFirewallViolationContextModel.Context = types.ListNull(types.StringType)
+														svcPolicyAppFirewallViolationContextModel.Context = types.ListNull(types.StringType)
 													}
 
 													// data specToModelNested StringField --> ContextName
 													if excludeViolationContextsElement.GetContextName() != "" {
-														servicePolicyPolicyAppFirewallViolationContextModel.ContextName = types.StringValue(excludeViolationContextsElement.GetContextName())
+														svcPolicyAppFirewallViolationContextModel.ContextName = types.StringValue(excludeViolationContextsElement.GetContextName())
 													} else {
 														// Empty string, set to null
-														servicePolicyPolicyAppFirewallViolationContextModel.ContextName = types.StringNull()
+														svcPolicyAppFirewallViolationContextModel.ContextName = types.StringNull()
 													}
 
 													// data specToModelNested RequiredEnumField --> ExcludeViolation
@@ -8233,12 +8010,12 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 														if response.Diagnostics.HasError() {
 															return
 														}
-														servicePolicyPolicyAppFirewallViolationContextModel.ExcludeViolation = listValue
+														svcPolicyAppFirewallViolationContextModel.ExcludeViolation = listValue
 													} else {
-														servicePolicyPolicyAppFirewallViolationContextModel.ExcludeViolation = types.ListNull(types.StringType)
+														svcPolicyAppFirewallViolationContextModel.ExcludeViolation = types.ListNull(types.StringType)
 													}
 
-													excludeViolationContextsElements = append(excludeViolationContextsElements, servicePolicyPolicyAppFirewallViolationContextModel)
+													excludeViolationContextsElements = append(excludeViolationContextsElements, svcPolicyAppFirewallViolationContextModel)
 												}
 												// CASE 1: The target field is a `types.List` or an attribute map.
 												// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8298,19 +8075,19 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									servicePolicyPolicyWafActionModel.ActionTypeChoice = finalObj
+									svcPolicyWafActionModel.ActionTypeChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									servicePolicyPolicyWafActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecWafActionActionTypeModelAttributeMap)
+									svcPolicyWafActionModel.ActionTypeChoice = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecWafActionActionTypeModelAttributeMap)
 								}
 
 								// This field needs to be converted to a types.ObjectValue before assignment.
-								servicePolicyPolicyWafActionModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecWafActionModelAttributeMap, servicePolicyPolicyWafActionModel)
+								svcPolicyWafActionModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecWafActionModelAttributeMap, svcPolicyWafActionModel)
 								response.Diagnostics.Append(objDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.WafAction = servicePolicyPolicyWafActionModelObj
+								svcPolicyGstModel.WafAction = svcPolicyWafActionModelObj
 
 							} else {
 								// The source field is nil (e.g. redacted by the API).
@@ -8319,16 +8096,16 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 								// here because the API may always return a non-nil struct (with REDACTED values) for this
 								// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 								// The target is a types.Object, so we use types.ObjectNull.
-								servicePolicyServicePolicyRuleGlobalSpecTypeModel.WafAction = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecWafActionModelAttributeMap)
+								svcPolicyGstModel.WafAction = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecWafActionModelAttributeMap)
 							}
 
 							// This field needs to be converted to a types.ObjectValue before assignment.
-							servicePolicyServicePolicyRuleGlobalSpecTypeModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecModelAttributeMap, servicePolicyServicePolicyRuleGlobalSpecTypeModel)
+							svcPolicyGstModelObj, objDiags := types.ObjectValueFrom(ctx, ServicePolicyRuleChoiceRuleListRulesSpecModelAttributeMap, svcPolicyGstModel)
 							response.Diagnostics.Append(objDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							servicePolicyServicePolicyRuleModel.Spec = servicePolicyServicePolicyRuleGlobalSpecTypeModelObj
+							svcPolicyRuleModel.Spec = svcPolicyGstModelObj
 
 						} else {
 							// The source field is nil (e.g. redacted by the API).
@@ -8337,10 +8114,10 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 							// here because the API may always return a non-nil struct (with REDACTED values) for this
 							// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
-							servicePolicyServicePolicyRuleModel.Spec = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
+							svcPolicyRuleModel.Spec = types.ObjectNull(ServicePolicyRuleChoiceRuleListRulesSpecModelAttributeMap)
 						}
 
-						rulesElements = append(rulesElements, servicePolicyServicePolicyRuleModel)
+						rulesElements = append(rulesElements, svcPolicyRuleModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8399,7 +8176,7 @@ func (d *DataSourceF5XCServicePolicy) Read(ctx context.Context, request datasour
 		serverChoiceChoices := specData.GetServerChoice()
 
 		// The model struct that will be populated by the nested template.
-		var serverChoiceChoicesModel = &ServicePolicyGlobalSpecTypeServerChoice{}
+		var serverChoiceChoicesModel = &SvcPolicyServerChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

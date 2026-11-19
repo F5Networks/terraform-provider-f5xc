@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -38,6 +39,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -207,6 +209,7 @@ type ClusterSecretType struct {
 type ClusterSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type ClusterBlindfoldSecretInfo struct {
@@ -246,8 +249,6 @@ type ResourceF5XCClusterModel struct {
 	CircuitBreaker                 types.Object   `tfsdk:"circuit_breaker"`
 	ConnectionTimeout              types.Int64    `tfsdk:"connection_timeout"`
 	DefaultSubset                  types.Map      `tfsdk:"default_subset"`
-	DnsDiscoveryType               types.List     `tfsdk:"dns_discovery_type"`
-	DnsLookupFamily                types.List     `tfsdk:"dns_lookup_family"`
 	EndpointSelection              types.List     `tfsdk:"endpoint_selection"`
 	EndpointSubsets                types.List     `tfsdk:"endpoint_subsets"`
 	Endpoints                      types.List     `tfsdk:"endpoints"`
@@ -342,7 +343,7 @@ var ClusterHttpProtocolTypeHttp1ConfigHeaderTransformationModelAttributeMap = ma
 	},
 }
 
-// Attribute map for RequiredOneOfField --> HeaderTransformationChoice
+// Attribute map for OneOfField --> HeaderTransformationChoice
 var ClusterHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_header_transformation":       types.BoolType,
@@ -410,7 +411,7 @@ var ClusterTlsParametersModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MaxSessionKeysType
+// Attribute map for OneOfField --> MaxSessionKeysType
 var ClusterTlsParametersMaxSessionKeysTypeModelAttributeMap = map[string]attr.Type{
 
 	"default_session_key_caching": types.BoolType,
@@ -616,6 +617,7 @@ var ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeySecr
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -677,7 +679,7 @@ var ClusterUpstreamConnPoolReuseTypeModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+// Attribute map for OneOfField --> MapDownstreamToUpstreamConnPoolType
 var ClusterUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap = map[string]attr.Type{
 
 	"disable_conn_pool_reuse": types.BoolType,
@@ -695,8 +697,8 @@ func (r *ResourceF5XCCluster) Metadata(ctx context.Context, request resource.Met
 func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "OutlierDetectionType Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. Algorithm 1. A endpoint is determined to be an outlier (based on configured number of consecutive_5xx or consecutive_gateway_failures) . 2. If no endpoints have been ejected, loadbalancer will eject the host immediately. Otherwise, it checks to make sure the number of ejected hosts is below the allowed threshold (specified via max_ejection_percent setting). If the number of ejected hosts is above the threshold, the host is not ejected. 3. The endpoint is ejected for some number of milliseconds. Ejection means that the endpoint is marked unhealthy and will not be used during load balancing. The number of milliseconds is equal to the base_ejection_time value multiplied by the number of times the host has been ejected. 4. An ejected endpoint will automatically be brought back into service after the ejection time has been satisfied",
-		Description:         "OutlierDetectionType Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. Algorithm 1. A endpoint is determined to be an outlier (based on configured number of consecutive_5xx or consecutive_gateway_failures) . 2. If no endpoints have been ejected, loadbalancer will eject the host immediately. Otherwise, it checks to make sure the number of ejected hosts is below the allowed threshold (specified via max_ejection_percent setting). If the number of ejected hosts is above the threshold, the host is not ejected. 3. The endpoint is ejected for some number of milliseconds. Ejection means that the endpoint is marked unhealthy and will not be used during load balancing. The number of milliseconds is equal to the base_ejection_time value multiplied by the number of times the host has been ejected. 4. An ejected endpoint will automatically be brought back into service after the ejection time has been satisfied",
+		MarkdownDescription: "cluster object represent common set of endpoints (providers of service) that can serve given route for virtual_host<br>Cluster has list of references to Endpoint which forms the set<br>Cluster has common properties for this collection<br>* Reference to healthcheck object<br>* load balancer algorithm<br>* Circuit breaker based on<br>* Number of concurrent connections<br>* Outstanding requests<br>* Number of retries<br>* Subset of endpoints<br>* TLS parameter for the endpoints<br>* Protocol Timeouts",
+		Description:         "cluster object represent common set of endpoints (providers of service) that can serve given route for virtual_host Cluster has list of references to Endpoint which forms the set Cluster has common properties for this collection Reference to healthcheck object load balancer algorithm Circuit breaker based on Number of concurrent connections Outstanding requests Number of retries Subset of endpoints TLS parameter for the endpoints Protocol Timeouts",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -830,10 +832,11 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 			},
 			"connection_timeout": schema.Int64Attribute{
 				Description:         "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds",
-				MarkdownDescription: "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds",
+				MarkdownDescription: "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds<br>**Default:** `0`",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             int64default.StaticInt64(0),
 				Validators: []validator.Int64{
 					int64validator.AtMost(600000),
 				},
@@ -851,32 +854,6 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				},
 				PlanModifiers: []planmodifier.Map{
 					mapplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"dns_discovery_type": schema.ListAttribute{
-				Description:         "dns_discovery_type Specifies how DNS resolution has to be done on members of cluster",
-				MarkdownDescription: "dns_discovery_type Specifies how DNS resolution has to be done on members of cluster<br>**Allowed Values (choose one):** `['LOGICAL_DNS', 'STRICT_DNS']`<br>**Default:** `STRICT_DNS`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("STRICT_DNS")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"LOGICAL_DNS", "STRICT_DNS"}...)),
-					listvalidator.SizeAtMost(1),
-				},
-			},
-			"dns_lookup_family": schema.ListAttribute{
-				Description:         "dns_lookup_family IP address family within which the DNS resolution is attempted. Default is AUTO mode",
-				MarkdownDescription: "dns_lookup_family IP address family within which the DNS resolution is attempted. Default is AUTO mode<br>**Allowed Values (choose one):** `['AUTO', 'V4_ONLY', 'V6_ONLY']`<br>**Default:** `AUTO`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AUTO")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AUTO", "V4_ONLY", "V6_ONLY"}...)),
-					listvalidator.SizeAtMost(1),
 				},
 			},
 			"endpoint_selection": schema.ListAttribute{
@@ -950,7 +927,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -1001,7 +978,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -1009,17 +986,18 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 			},
 			"http_idle_timeout": schema.Int64Attribute{
 				Description:         "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.",
-				MarkdownDescription: "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.",
+				MarkdownDescription: "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.<br>**Default:** `0`",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             int64default.StaticInt64(0),
 				Validators: []validator.Int64{
 					int64validator.AtMost(600000),
 				},
 			},
 			"http_protocol_type_choice": schema.SingleNestedAttribute{
 				Description:         "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections",
-				MarkdownDescription: "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections",
+				MarkdownDescription: "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections<br>Exactly one of `auto_http_config`, `http1_config`, or `http2_options` must be specified when `http_protocol_type_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -1033,7 +1011,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"auto_http_config": schema.BoolAttribute{
 						Description:         "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.",
-						MarkdownDescription: "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.",
+						MarkdownDescription: "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.<br>Conflicts with `http1_config` and `http2_options`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1043,7 +1021,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"http1_config": schema.SingleNestedAttribute{
 						Description:         "http1_config Enable HTTP/1.1 for upstream connections",
-						MarkdownDescription: "http1_config Enable HTTP/1.1 for upstream connections",
+						MarkdownDescription: "http1_config Enable HTTP/1.1 for upstream connections<br>Conflicts with `auto_http_config` and `http2_options`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1057,22 +1035,25 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 								Attributes: map[string]schema.Attribute{
 									"header_transformation_choice": schema.SingleNestedAttribute{
 										Description:         "Header transformation Select header transformation options for HTTP/1.1",
-										MarkdownDescription: "Header transformation Select header transformation options for HTTP/1.1",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Header transformation Select header transformation options for HTTP/1.1<br>Exactly one of `default_header_transformation`, `legacy_header_transformation`, `preserve_case_header_transformation`, or `proper_case_header_transformation` must be specified when `header_transformation_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"default_header_transformation",
 												"legacy_header_transformation",
 												"preserve_case_header_transformation",
 												"proper_case_header_transformation",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"default_header_transformation": schema.BoolAttribute{
 												Description:         "Default header transformation Normalize the headers to lower case",
-												MarkdownDescription: "Default header transformation Normalize the headers to lower case",
+												MarkdownDescription: "Default header transformation Normalize the headers to lower case<br>Conflicts with `legacy_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1082,7 +1063,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 											},
 											"legacy_header_transformation": schema.BoolAttribute{
 												Description:         "Legacy header transformations Use old header transformation if configured earlier",
-												MarkdownDescription: "Legacy header transformations Use old header transformation if configured earlier",
+												MarkdownDescription: "Legacy header transformations Use old header transformation if configured earlier<br>Conflicts with `default_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1092,7 +1073,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 											},
 											"preserve_case_header_transformation": schema.BoolAttribute{
 												Description:         "Preserve case header transformation Preserves the original case of headers without any modifications.",
-												MarkdownDescription: "Preserve case header transformation Preserves the original case of headers without any modifications.",
+												MarkdownDescription: "Preserve case header transformation Preserves the original case of headers without any modifications.<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `proper_case_header_transformation`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1102,7 +1083,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 											},
 											"proper_case_header_transformation": schema.BoolAttribute{
 												Description:         "Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
-												MarkdownDescription: "Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
+												MarkdownDescription: "Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `preserve_case_header_transformation`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1118,7 +1099,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"http2_options": schema.SingleNestedAttribute{
 						Description:         "http2_options Enable HTTP/2 for upstream connections",
-						MarkdownDescription: "http2_options Enable HTTP/2 for upstream connections",
+						MarkdownDescription: "http2_options Enable HTTP/2 for upstream connections<br>Conflicts with `auto_http_config` and `http1_config`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1139,34 +1120,25 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Description:         "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
 				MarkdownDescription: "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Validators: []validator.Object{
-					exactlyoneofvalidator.ExactlyOneOf(
-						"disable_lb_source_ip_persistance",
-						"enable_lb_source_ip_persistance",
-					),
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"disable_lb_source_ip_persistance": schema.BoolAttribute{
 						Description:         "disable_lb_source_ip_persistence Disable LB source IP persistence",
 						MarkdownDescription: "disable_lb_source_ip_persistence Disable LB source IP persistence",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
+						Optional:            false,
+						Computed:            true,
 					},
 					"enable_lb_source_ip_persistance": schema.BoolAttribute{
 						Description:         "enable_lb_source_ip_persistence Enable LB source IP persistence",
 						MarkdownDescription: "enable_lb_source_ip_persistence Enable LB source IP persistence",
 						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
+						Optional:            false,
+						Computed:            true,
 					},
 				},
 			},
@@ -1185,7 +1157,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 			},
 			"max_requests_per_connection_choice": schema.SingleNestedAttribute{
 				Description:         "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.",
-				MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.",
+				MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.<br>Exactly one of `max_requests_per_connection` or `no_request_limit_per_connection` must be specified when `max_requests_per_connection_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -1198,7 +1170,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"max_requests_per_connection": schema.Int64Attribute{
 						Description:         "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.",
-						MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.",
+						MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.<br>Conflicts with `no_request_limit_per_connection`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1208,7 +1180,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"no_request_limit_per_connection": schema.BoolAttribute{
 						Description:         "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
-						MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
+						MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.<br>Conflicts with `max_requests_per_connection`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1227,50 +1199,55 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"base_ejection_time": schema.Int64Attribute{
 						Description:         "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
-						MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
+						MarkdownDescription: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(1800000),
 						},
 					},
 					"consecutive_5xx": schema.Int64Attribute{
 						Description:         "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
-						MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
+						MarkdownDescription: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(1024),
 						},
 					},
 					"consecutive_gateway_failure": schema.Int64Attribute{
 						Description:         "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
-						MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
+						MarkdownDescription: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(1024),
 						},
 					},
 					"interval": schema.Int64Attribute{
 						Description:         "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
-						MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
+						MarkdownDescription: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(600000),
 						},
 					},
 					"max_ejection_percent": schema.Int64Attribute{
 						Description:         "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
-						MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
+						MarkdownDescription: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.<br>**Default:** `0`",
 						Required:            false,
 						Optional:            true,
-						Computed:            false,
+						Computed:            true,
+						Default:             int64default.StaticInt64(0),
 						Validators: []validator.Int64{
 							int64validator.AtMost(100),
 						},
@@ -1279,7 +1256,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 			},
 			"panic_threshold_type_choice": schema.SingleNestedAttribute{
 				Description:         "Panic threshold During loadbalancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and loadbalance either amongst all endpoints or no endpoints. This is known as the panic threshold.",
-				MarkdownDescription: "Panic threshold During loadbalancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and loadbalance either amongst all endpoints or no endpoints. This is known as the panic threshold.",
+				MarkdownDescription: "Panic threshold During loadbalancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and loadbalance either amongst all endpoints or no endpoints. This is known as the panic threshold.<br>Exactly one of `no_panic_threshold` or `panic_threshold` must be specified when `panic_threshold_type_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -1292,7 +1269,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"no_panic_threshold": schema.BoolAttribute{
 						Description:         "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for loadbalancing.",
-						MarkdownDescription: "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for loadbalancing.",
+						MarkdownDescription: "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for loadbalancing.<br>Conflicts with `panic_threshold`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1302,7 +1279,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"panic_threshold": schema.Int64Attribute{
 						Description:         "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for loadbalancing ignoring its health status.",
-						MarkdownDescription: "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for loadbalancing ignoring its health status.",
+						MarkdownDescription: "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for loadbalancing ignoring its health status.<br>Conflicts with `no_panic_threshold`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1314,7 +1291,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 			},
 			"proxy_protocol_type_choice": schema.SingleNestedAttribute{
 				Description:         "Proxy Protocol Configuration Proxy protocol configuration options for upstream connections",
-				MarkdownDescription: "Proxy Protocol Configuration Proxy protocol configuration options for upstream connections",
+				MarkdownDescription: "Proxy Protocol Configuration Proxy protocol configuration options for upstream connections<br>Exactly one of `disable_proxy_protocol`, `proxy_protocol_v1`, or `proxy_protocol_v2` must be specified when `proxy_protocol_type_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -1328,7 +1305,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"disable_proxy_protocol": schema.BoolAttribute{
 						Description:         "disable_proxy_protocol Disable Proxy Protocol for upstream connections",
-						MarkdownDescription: "disable_proxy_protocol Disable Proxy Protocol for upstream connections",
+						MarkdownDescription: "disable_proxy_protocol Disable Proxy Protocol for upstream connections<br>Conflicts with `proxy_protocol_v1` and `proxy_protocol_v2`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1338,7 +1315,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"proxy_protocol_v1": schema.BoolAttribute{
 						Description:         "proxy_protocol_v1 Enable Proxy Protocol V1 for upstream connections",
-						MarkdownDescription: "proxy_protocol_v1 Enable Proxy Protocol V1 for upstream connections",
+						MarkdownDescription: "proxy_protocol_v1 Enable Proxy Protocol V1 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v2`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1348,7 +1325,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"proxy_protocol_v2": schema.BoolAttribute{
 						Description:         "proxy_protocol_v2 Enable Proxy Protocol V2 for upstream connections",
-						MarkdownDescription: "proxy_protocol_v2 Enable Proxy Protocol V2 for upstream connections",
+						MarkdownDescription: "proxy_protocol_v2 Enable Proxy Protocol V2 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v1`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1367,21 +1344,24 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"max_session_keys_type_choice": schema.SingleNestedAttribute{
 						Description:         "Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.",
-						MarkdownDescription: "Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.<br>Exactly one of `default_session_key_caching`, `disable_session_key_caching`, or `max_session_keys` must be specified when `max_session_keys_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_session_key_caching",
 								"disable_session_key_caching",
 								"max_session_keys",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_session_key_caching": schema.BoolAttribute{
 								Description:         "Default Session Key Caching Default session key caching. Only one session key will be cached.",
-								MarkdownDescription: "Default Session Key Caching Default session key caching. Only one session key will be cached.",
+								MarkdownDescription: "Default Session Key Caching Default session key caching. Only one session key will be cached.<br>Conflicts with `disable_session_key_caching` and `max_session_keys`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1391,7 +1371,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							},
 							"disable_session_key_caching": schema.BoolAttribute{
 								Description:         "Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.",
-								MarkdownDescription: "Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.",
+								MarkdownDescription: "Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.<br>Conflicts with `default_session_key_caching` and `max_session_keys`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1401,7 +1381,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							},
 							"max_session_keys": schema.Int64Attribute{
 								Description:         "Max Session Keys Cached Number of session keys that are cached.",
-								MarkdownDescription: "Max Session Keys Cached Number of session keys that are cached.",
+								MarkdownDescription: "Max Session Keys Cached Number of session keys that are cached.<br>Conflicts with `default_session_key_caching` and `disable_session_key_caching`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1413,7 +1393,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"sni_choice": schema.SingleNestedAttribute{
 						Description:         "sni choice SNI to be used while connecting to upstream service.",
-						MarkdownDescription: "sni choice SNI to be used while connecting to upstream service.",
+						MarkdownDescription: "sni choice SNI to be used while connecting to upstream service.<br>Exactly one of `disable_sni`, `sni`, or `use_host_header_as_sni` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -1427,7 +1407,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 						Attributes: map[string]schema.Attribute{
 							"disable_sni": schema.BoolAttribute{
 								Description:         "disable_sni Do not use SNI.",
-								MarkdownDescription: "disable_sni Do not use SNI.",
+								MarkdownDescription: "disable_sni Do not use SNI.<br>Conflicts with `sni` and `use_host_header_as_sni`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1437,7 +1417,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							},
 							"sni": schema.StringAttribute{
 								Description:         "sni SNI value to be used.",
-								MarkdownDescription: "sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`",
+								MarkdownDescription: "sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `disable_sni` and `use_host_header_as_sni`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1451,7 +1431,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							},
 							"use_host_header_as_sni": schema.BoolAttribute{
 								Description:         "use_host_headers_as_sni Use the host header as SNI",
-								MarkdownDescription: "use_host_headers_as_sni Use the host header as SNI",
+								MarkdownDescription: "use_host_headers_as_sni Use the host header as SNI<br>Conflicts with `disable_sni` and `sni`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1463,7 +1443,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 					},
 					"tls_params_choice": schema.SingleNestedAttribute{
 						Description:         "TLS Parameters Select TLS Certificate object, or specify TLS Certificate Parameters inline (legacy)",
-						MarkdownDescription: "TLS Parameters Select TLS Certificate object, or specify TLS Certificate Parameters inline (legacy)",
+						MarkdownDescription: "TLS Parameters Select TLS Certificate object, or specify TLS Certificate Parameters inline (legacy)<br>Exactly one of `cert_params` or `common_params` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -1476,7 +1456,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 						Attributes: map[string]schema.Attribute{
 							"cert_params": schema.SingleNestedAttribute{
 								Description:         "TLS Certificate Parameters TLS certificate parameters for upstream connections",
-								MarkdownDescription: "TLS Certificate Parameters TLS certificate parameters for upstream connections",
+								MarkdownDescription: "TLS Certificate Parameters TLS certificate parameters for upstream connections<br>Conflicts with `common_params`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1510,7 +1490,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -1518,7 +1498,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 									},
 									"cipher_suites": schema.ListAttribute{
 										Description:         "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
-										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
+										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 										ElementType:         types.StringType,
 										Required:            false,
 										Optional:            true,
@@ -1556,7 +1536,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 									},
 									"server_validation_choice": schema.SingleNestedAttribute{
 										Description:         "server_validation_choice Choose whether to perform TLS verification.",
-										MarkdownDescription: "server_validation_choice Choose whether to perform TLS verification.",
+										MarkdownDescription: "server_validation_choice Choose whether to perform TLS verification.<br>Exactly one of `skip_server_verification`, `tls_validation_params`, or `volterra_trusted_ca` must be specified when `server_validation_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1570,7 +1550,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 										Attributes: map[string]schema.Attribute{
 											"skip_server_verification": schema.BoolAttribute{
 												Description:         "Skip Server Verification Skip server verification",
-												MarkdownDescription: "Skip Server Verification Skip server verification",
+												MarkdownDescription: "Skip Server Verification Skip server verification<br>Conflicts with `tls_validation_params` and `volterra_trusted_ca`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1580,7 +1560,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 											},
 											"tls_validation_params": schema.SingleNestedAttribute{
 												Description:         "tls_validation_params This includes URL for a trust store, whether SAN verification is required and list of Subject Alt Names for verification",
-												MarkdownDescription: "tls_validation_params This includes URL for a trust store, whether SAN verification is required and list of Subject Alt Names for verification",
+												MarkdownDescription: "tls_validation_params This includes URL for a trust store, whether SAN verification is required and list of Subject Alt Names for verification<br>Conflicts with `skip_server_verification` and `volterra_trusted_ca`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1595,7 +1575,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 													},
 													"trusted_ca_choice": schema.SingleNestedAttribute{
 														Description:         "trusted_ca_choice Root CA configuration for downstream TLS connections",
-														MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+														MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -1608,7 +1588,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 														Attributes: map[string]schema.Attribute{
 															"trusted_ca": schema.SingleNestedAttribute{
 																Description:         "trusted_ca Root CA Certificate",
-																MarkdownDescription: "trusted_ca Root CA Certificate",
+																MarkdownDescription: "trusted_ca Root CA Certificate<br>Conflicts with `trusted_ca_url`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1645,7 +1625,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																					Optional:            false,
 																					Computed:            true,
 																					PlanModifiers: []planmodifier.String{
-																						stringplanmodifier.UseStateForUnknown(),
+																						stringplanmodifier.UseNonNullStateForUnknown(),
 																					},
 																				},
 																			},
@@ -1655,7 +1635,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 															},
 															"trusted_ca_url": schema.StringAttribute{
 																Description:         "trusted_ca_url Inline Root CA Certificate",
-																MarkdownDescription: "trusted_ca_url Inline Root CA Certificate",
+																MarkdownDescription: "trusted_ca_url Inline Root CA Certificate<br>Conflicts with `trusted_ca`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1677,7 +1657,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 											},
 											"volterra_trusted_ca": schema.BoolAttribute{
 												Description:         "F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate",
-												MarkdownDescription: "F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate",
+												MarkdownDescription: "F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate<br>Conflicts with `skip_server_verification` and `tls_validation_params`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1691,14 +1671,14 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							},
 							"common_params": schema.SingleNestedAttribute{
 								Description:         "common_params Common TLS parameters used in upstream connections",
-								MarkdownDescription: "common_params Common TLS parameters used in upstream connections",
+								MarkdownDescription: "common_params Common TLS parameters used in upstream connections<br>Conflicts with `cert_params`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"cipher_suites": schema.ListAttribute{
 										Description:         "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
-										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.",
+										MarkdownDescription: "cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)",
 										ElementType:         types.StringType,
 										Required:            false,
 										Optional:            true,
@@ -1765,7 +1745,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 												},
 												"ocsp_stapling_choice": schema.SingleNestedAttribute{
 													Description:         "OCSP Response choice OCSP Stapling choice",
-													MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+													MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1779,7 +1759,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 													Attributes: map[string]schema.Attribute{
 														"custom_hash_algorithms": schema.SingleNestedAttribute{
 															Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-															MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+															MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1793,13 +1773,15 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																	Computed:            false,
 																	Validators: []validator.List{
 																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA1", "SHA256"}...)),
+																		listvalidator.SizeBetween(1, 4),
+																		listvalidator.UniqueValues(),
 																	},
 																},
 															},
 														},
 														"disable_ocsp_stapling": schema.BoolAttribute{
 															Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-															MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+															MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1809,7 +1791,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 														},
 														"use_system_defaults": schema.BoolAttribute{
 															Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-															MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+															MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1828,7 +1810,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 													Attributes: map[string]schema.Attribute{
 														"secret_info_choice": schema.SingleNestedAttribute{
 															Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -1836,12 +1818,13 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																exactlyoneofvalidator.RequiredExactlyOneOf(
 																	"blindfold_secret_info",
 																	"clear_secret_info",
+																	"none",
 																),
 															},
 															Attributes: map[string]schema.Attribute{
 																"blindfold_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1859,6 +1842,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
+																			WriteOnly:           true,
 																			Validators: []validator.String{
 																				stringvalidator.RegexMatches(
 																					regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -1880,7 +1864,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																},
 																"clear_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1913,6 +1897,16 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																		},
 																	},
 																},
+																"none": schema.BoolAttribute{
+																	Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            false,
+																	Validators: []validator.Bool{
+																		boolvalidator.Equals(true),
+																	},
+																},
 															},
 														},
 													},
@@ -1937,7 +1931,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 											},
 											"trusted_ca_choice": schema.SingleNestedAttribute{
 												Description:         "trusted_ca_choice Root CA configuration for downstream TLS connections",
-												MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+												MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -1950,7 +1944,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 												Attributes: map[string]schema.Attribute{
 													"trusted_ca": schema.SingleNestedAttribute{
 														Description:         "trusted_ca Root CA Certificate",
-														MarkdownDescription: "trusted_ca Root CA Certificate",
+														MarkdownDescription: "trusted_ca Root CA Certificate<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1987,7 +1981,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 																			Optional:            false,
 																			Computed:            true,
 																			PlanModifiers: []planmodifier.String{
-																				stringplanmodifier.UseStateForUnknown(),
+																				stringplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																		},
 																	},
@@ -1997,7 +1991,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "trusted_ca_url Inline Root CA Certificate",
-														MarkdownDescription: "trusted_ca_url Inline Root CA Certificate",
+														MarkdownDescription: "trusted_ca_url Inline Root CA Certificate<br>Conflicts with `trusted_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2032,20 +2026,23 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"map_downstream_to_upstream_conn_pool_type_choice": schema.SingleNestedAttribute{
 						Description:         "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
-						MarkdownDescription: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.<br>Exactly one of `disable_conn_pool_reuse` or `enable_conn_pool_reuse` must be specified when `map_downstream_to_upstream_conn_pool_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"disable_conn_pool_reuse",
 								"enable_conn_pool_reuse",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"disable_conn_pool_reuse": schema.BoolAttribute{
 								Description:         "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection",
-								MarkdownDescription: "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection",
+								MarkdownDescription: "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection<br>Conflicts with `enable_conn_pool_reuse`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2055,7 +2052,7 @@ func (r *ResourceF5XCCluster) Schema(ctx context.Context, request resource.Schem
 							},
 							"enable_conn_pool_reuse": schema.BoolAttribute{
 								Description:         "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections",
-								MarkdownDescription: "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections",
+								MarkdownDescription: "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections<br>Conflicts with `disable_conn_pool_reuse`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2129,9 +2126,17 @@ func (r *ResourceF5XCCluster) ModifyPlan(ctx context.Context, req resource.Modif
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCClusterModel
 
 	// Read Terraform plan data into the model
@@ -2139,6 +2144,17 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCClusterModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.TlsParameters.IsNull() && !configData.TlsParameters.IsUnknown() {
+		data.TlsParameters = configData.TlsParameters
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -2485,9 +2501,12 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 				}
 
 				headerTransformationSpec := &ves_io_schema.HeaderTransformationType{}
+				headerTransformationSpec.HeaderTransformationChoice = &ves_io_schema.HeaderTransformationType_LegacyHeaderTransformation{
+					LegacyHeaderTransformation: &ves_io_schema.Empty{},
+				}
 				http1ConfigOneOfSpec.Http1Config.HeaderTransformation = headerTransformationSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> HeaderTransformationChoice
+				// resource modelToSpecNested OneOfField --> HeaderTransformationChoice
 				if !headerTransformationModel.HeaderTransformationChoice.IsNull() && !headerTransformationModel.HeaderTransformationChoice.IsUnknown() {
 					headerTransformationHeaderTransformationChoiceModel := ClusterHeaderTransformationChoice{}
 					response.Diagnostics.Append(headerTransformationModel.HeaderTransformationChoice.As(ctx, &headerTransformationHeaderTransformationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2617,26 +2636,36 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			// resource modelToSpecNested UintField --> BaseEjectionTime
 			if !outlierDetectionModel.BaseEjectionTime.IsNull() && !outlierDetectionModel.BaseEjectionTime.IsUnknown() {
 				outlierDetectionSpec.BaseEjectionTime = uint32(uint32(outlierDetectionModel.BaseEjectionTime.ValueInt64()))
+			} else {
+				outlierDetectionSpec.BaseEjectionTime = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Consecutive_5Xx
 			if !outlierDetectionModel.Consecutive_5Xx.IsNull() && !outlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 				outlierDetectionSpec.Consecutive_5Xx = uint32(uint32(outlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Consecutive_5Xx = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 			if !outlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !outlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(uint32(outlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+			} else {
+				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Interval
 			if !outlierDetectionModel.Interval.IsNull() && !outlierDetectionModel.Interval.IsUnknown() {
 				outlierDetectionSpec.Interval = uint32(uint32(outlierDetectionModel.Interval.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Interval = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> MaxEjectionPercent
 			if !outlierDetectionModel.MaxEjectionPercent.IsNull() && !outlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 				outlierDetectionSpec.MaxEjectionPercent = uint32(uint32(outlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+			} else {
+				outlierDetectionSpec.MaxEjectionPercent = uint32(0)
 			}
 
 		}
@@ -2701,6 +2730,9 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 		// resource modelToSpecRoot PointerField --> TlsParameters
 		if !data.TlsParameters.IsNull() && !data.TlsParameters.IsUnknown() {
 			tlsParametersSpec := &ves_io_schema.UpstreamTlsParamsType{}
+			tlsParametersSpec.MaxSessionKeysType = &ves_io_schema.UpstreamTlsParamsType_DefaultSessionKeyCaching{
+				DefaultSessionKeyCaching: &ves_io_schema.Empty{},
+			}
 			spec.TlsParameters = tlsParametersSpec
 			var tlsParametersModel ClusterUpstreamTlsParamsType
 
@@ -2711,7 +2743,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxSessionKeysType
+			// resource modelToSpecNested OneOfField --> MaxSessionKeysType
 			if !tlsParametersModel.MaxSessionKeysTypeChoice.IsNull() && !tlsParametersModel.MaxSessionKeysTypeChoice.IsUnknown() {
 				tlsParametersMaxSessionKeysTypeChoiceModel := ClusterMaxSessionKeysTypeChoice{}
 				response.Diagnostics.Append(tlsParametersModel.MaxSessionKeysTypeChoice.As(ctx, &tlsParametersMaxSessionKeysTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3240,6 +3272,13 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -3354,6 +3393,9 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 		// resource modelToSpecRoot PointerField --> UpstreamConnPoolReuseType
 		if !data.UpstreamConnPoolReuseType.IsNull() && !data.UpstreamConnPoolReuseType.IsUnknown() {
 			upstreamConnPoolReuseTypeSpec := &ves_io_schema.UpstreamConnPoolReuseType{}
+			upstreamConnPoolReuseTypeSpec.MapDownstreamToUpstreamConnPoolType = &ves_io_schema.UpstreamConnPoolReuseType_EnableConnPoolReuse{
+				EnableConnPoolReuse: &ves_io_schema.Empty{},
+			}
 			spec.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeSpec
 			var upstreamConnPoolReuseTypeModel ClusterUpstreamConnPoolReuseType
 
@@ -3364,7 +3406,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+			// resource modelToSpecNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 			if !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsNull() && !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsUnknown() {
 				upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel := ClusterMapDownstreamToUpstreamConnPoolTypeChoice{}
 				response.Diagnostics.Append(upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.As(ctx, &upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3394,7 +3436,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3417,7 +3459,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_cluster.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "cluster", err),
 		)
 		return
 	}
@@ -3586,7 +3628,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 	connectionTimeoutValue := specData.GetConnectionTimeout()
 	if connectionTimeoutValue > 0 {
 		data.ConnectionTimeout = types.Int64Value(int64(connectionTimeoutValue))
-	} else {
+	} else if data.ConnectionTimeout.IsNull() || data.ConnectionTimeout.IsUnknown() {
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
@@ -3607,46 +3649,11 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			data.DefaultSubset = types.MapNull(types.StringType)
 		}
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.DefaultSubset.IsNull() || data.DefaultSubset.IsUnknown() {
 			data.DefaultSubset = types.MapNull(types.StringType)
 		} else {
 			data.DefaultSubset = types.MapValueMust(types.StringType, map[string]attr.Value{})
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsDiscoveryType
-	{
-		if specData.GetDnsDiscoveryType().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsDiscoveryType().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsDiscoveryType = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsDiscoveryType = types.ListNull(types.StringType)
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsLookupFamily
-	{
-		if specData.GetDnsLookupFamily().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsLookupFamily().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsLookupFamily = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsLookupFamily = types.ListNull(types.StringType)
 		}
 	}
 
@@ -3709,14 +3716,12 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			AttrTypes: ClusterEndpointSubsetsModelAttributeMap,
 		}
 		nullEndpointSubsetsList := basetypes.NewListNull(endpointSubsetsObjectType)
-		var priorValEndpointSubsets types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoint_subsets"), &priorValEndpointSubsets)
-		if !priorValEndpointSubsets.IsNull() && !priorValEndpointSubsets.IsUnknown() {
-			data.EndpointSubsets = priorValEndpointSubsets
+		if !data.EndpointSubsets.IsNull() && !data.EndpointSubsets.IsUnknown() && len(data.EndpointSubsets.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EndpointSubsets = basetypes.NewListValueMust(endpointSubsetsObjectType, nil)
 		} else {
 			data.EndpointSubsets = nullEndpointSubsetsList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Endpoints
@@ -3771,14 +3776,12 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			AttrTypes: ClusterEndpointsObjectRefModelAttributeMap,
 		}
 		nullEndpointsList := basetypes.NewListNull(endpointsObjectType)
-		var priorValEndpoints types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoints"), &priorValEndpoints)
-		if !priorValEndpoints.IsNull() && !priorValEndpoints.IsUnknown() {
-			data.Endpoints = priorValEndpoints
+		if !data.Endpoints.IsNull() && !data.Endpoints.IsUnknown() && len(data.Endpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Endpoints = basetypes.NewListValueMust(endpointsObjectType, nil)
 		} else {
 			data.Endpoints = nullEndpointsList
 		}
-
 	}
 
 	// resource SpecToModelRoot EnumField --> FallbackPolicy
@@ -3850,21 +3853,19 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 			AttrTypes: ClusterHealthChecksObjectRefModelAttributeMap,
 		}
 		nullHealthChecksList := basetypes.NewListNull(healthChecksObjectType)
-		var priorValHealthChecks types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("health_checks"), &priorValHealthChecks)
-		if !priorValHealthChecks.IsNull() && !priorValHealthChecks.IsUnknown() {
-			data.HealthChecks = priorValHealthChecks
+		if !data.HealthChecks.IsNull() && !data.HealthChecks.IsUnknown() && len(data.HealthChecks.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HealthChecks = basetypes.NewListValueMust(healthChecksObjectType, nil)
 		} else {
 			data.HealthChecks = nullHealthChecksList
 		}
-
 	}
 
 	// resource SpecToModelRoot UintField --> HttpIdleTimeout
 	httpIdleTimeoutValue := specData.GetHttpIdleTimeout()
 	if httpIdleTimeoutValue > 0 {
 		data.HttpIdleTimeout = types.Int64Value(int64(httpIdleTimeoutValue))
-	} else {
+	} else if data.HttpIdleTimeout.IsNull() || data.HttpIdleTimeout.IsUnknown() {
 		data.HttpIdleTimeout = types.Int64Null()
 	}
 
@@ -3908,8 +3909,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> HeaderTransformationChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> HeaderTransformationChoice
 					if headerTransformationElement.GetHeaderTransformationChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4318,8 +4318,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 		var clusterUpstreamTlsParamsTypeModel = &ClusterUpstreamTlsParamsType{}
 		tlsParametersElement := specData.GetTlsParameters()
 
-		// resource specToModelNested RequiredOneOfField --> MaxSessionKeysType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MaxSessionKeysType
 		if tlsParametersElement.GetMaxSessionKeysType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			tlsParametersmaxSessionKeysTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5028,6 +5027,15 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -5287,8 +5295,7 @@ func (r *ResourceF5XCCluster) Create(ctx context.Context, request resource.Creat
 		var clusterUpstreamConnPoolReuseTypeModel = &ClusterUpstreamConnPoolReuseType{}
 		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
 
-		// resource specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5393,14 +5400,10 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 	defer cancel()
 	priorTlsParameters := data.TlsParameters
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cluster.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cluster.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "cluster", err),
 		)
 		return
 	}
@@ -5569,7 +5572,7 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 	connectionTimeoutValue := specData.GetConnectionTimeout()
 	if connectionTimeoutValue > 0 {
 		data.ConnectionTimeout = types.Int64Value(int64(connectionTimeoutValue))
-	} else {
+	} else if data.ConnectionTimeout.IsNull() || data.ConnectionTimeout.IsUnknown() {
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
@@ -5590,46 +5593,11 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			data.DefaultSubset = types.MapNull(types.StringType)
 		}
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.DefaultSubset.IsNull() || data.DefaultSubset.IsUnknown() {
 			data.DefaultSubset = types.MapNull(types.StringType)
 		} else {
 			data.DefaultSubset = types.MapValueMust(types.StringType, map[string]attr.Value{})
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsDiscoveryType
-	{
-		if specData.GetDnsDiscoveryType().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsDiscoveryType().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsDiscoveryType = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsDiscoveryType = types.ListNull(types.StringType)
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsLookupFamily
-	{
-		if specData.GetDnsLookupFamily().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsLookupFamily().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsLookupFamily = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsLookupFamily = types.ListNull(types.StringType)
 		}
 	}
 
@@ -5692,14 +5660,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: ClusterEndpointSubsetsModelAttributeMap,
 		}
 		nullEndpointSubsetsList := basetypes.NewListNull(endpointSubsetsObjectType)
-		var priorValEndpointSubsets types.List
-		_ = request.State.GetAttribute(ctx, path.Root("endpoint_subsets"), &priorValEndpointSubsets)
-		if !priorValEndpointSubsets.IsNull() && !priorValEndpointSubsets.IsUnknown() {
-			data.EndpointSubsets = priorValEndpointSubsets
+		if !data.EndpointSubsets.IsNull() && !data.EndpointSubsets.IsUnknown() && len(data.EndpointSubsets.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EndpointSubsets = basetypes.NewListValueMust(endpointSubsetsObjectType, nil)
 		} else {
 			data.EndpointSubsets = nullEndpointSubsetsList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Endpoints
@@ -5754,14 +5720,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: ClusterEndpointsObjectRefModelAttributeMap,
 		}
 		nullEndpointsList := basetypes.NewListNull(endpointsObjectType)
-		var priorValEndpoints types.List
-		_ = request.State.GetAttribute(ctx, path.Root("endpoints"), &priorValEndpoints)
-		if !priorValEndpoints.IsNull() && !priorValEndpoints.IsUnknown() {
-			data.Endpoints = priorValEndpoints
+		if !data.Endpoints.IsNull() && !data.Endpoints.IsUnknown() && len(data.Endpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Endpoints = basetypes.NewListValueMust(endpointsObjectType, nil)
 		} else {
 			data.Endpoints = nullEndpointsList
 		}
-
 	}
 
 	// resource SpecToModelRoot EnumField --> FallbackPolicy
@@ -5833,21 +5797,19 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			AttrTypes: ClusterHealthChecksObjectRefModelAttributeMap,
 		}
 		nullHealthChecksList := basetypes.NewListNull(healthChecksObjectType)
-		var priorValHealthChecks types.List
-		_ = request.State.GetAttribute(ctx, path.Root("health_checks"), &priorValHealthChecks)
-		if !priorValHealthChecks.IsNull() && !priorValHealthChecks.IsUnknown() {
-			data.HealthChecks = priorValHealthChecks
+		if !data.HealthChecks.IsNull() && !data.HealthChecks.IsUnknown() && len(data.HealthChecks.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HealthChecks = basetypes.NewListValueMust(healthChecksObjectType, nil)
 		} else {
 			data.HealthChecks = nullHealthChecksList
 		}
-
 	}
 
 	// resource SpecToModelRoot UintField --> HttpIdleTimeout
 	httpIdleTimeoutValue := specData.GetHttpIdleTimeout()
 	if httpIdleTimeoutValue > 0 {
 		data.HttpIdleTimeout = types.Int64Value(int64(httpIdleTimeoutValue))
-	} else {
+	} else if data.HttpIdleTimeout.IsNull() || data.HttpIdleTimeout.IsUnknown() {
 		data.HttpIdleTimeout = types.Int64Null()
 	}
 
@@ -5891,8 +5853,7 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> HeaderTransformationChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> HeaderTransformationChoice
 					if headerTransformationElement.GetHeaderTransformationChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5954,7 +5915,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 						clusterHeaderTransformationTypeModel.HeaderTransformationChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						clusterHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectNull(ClusterHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap)
+						clusterHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectValueMust(ClusterHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap, map[string]attr.Value{
+							"default_header_transformation":       types.BoolNull(),
+							"legacy_header_transformation":        types.BoolValue(true),
+							"preserve_case_header_transformation": types.BoolNull(),
+							"proper_case_header_transformation":   types.BoolNull(),
+						})
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -6301,8 +6267,7 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 		var clusterUpstreamTlsParamsTypeModel = &ClusterUpstreamTlsParamsType{}
 		tlsParametersElement := specData.GetTlsParameters()
 
-		// resource specToModelNested RequiredOneOfField --> MaxSessionKeysType
-		// <no value>
+		// resource specToModelNested OneOfField --> MaxSessionKeysType
 		if tlsParametersElement.GetMaxSessionKeysType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			tlsParametersmaxSessionKeysTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6356,7 +6321,11 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			clusterUpstreamTlsParamsTypeModel.MaxSessionKeysTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			clusterUpstreamTlsParamsTypeModel.MaxSessionKeysTypeChoice = types.ObjectNull(ClusterTlsParametersMaxSessionKeysTypeModelAttributeMap)
+			clusterUpstreamTlsParamsTypeModel.MaxSessionKeysTypeChoice = types.ObjectValueMust(ClusterTlsParametersMaxSessionKeysTypeModelAttributeMap, map[string]attr.Value{
+				"default_session_key_caching": types.BoolValue(true),
+				"disable_session_key_caching": types.BoolNull(),
+				"max_session_keys":            types.Int64Null(),
+			})
 		}
 
 		// resource specToModelNested RequiredOneOfField --> SniChoice
@@ -7009,6 +6978,15 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 										} else {
 											privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(ClusterTlsParametersTlsParamsChoiceCommonParamsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
 										}
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
 									}
 
 									// --- End of Choices ---
@@ -7282,8 +7260,7 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 		var clusterUpstreamConnPoolReuseTypeModel = &ClusterUpstreamConnPoolReuseType{}
 		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
 
-		// resource specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-		// <no value>
+		// resource specToModelNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7327,7 +7304,10 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 			clusterUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			clusterUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectNull(ClusterUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap)
+			clusterUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectValueMust(ClusterUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, map[string]attr.Value{
+				"disable_conn_pool_reuse": types.BoolNull(),
+				"enable_conn_pool_reuse":  types.BoolValue(true),
+			})
 		}
 
 		upstreamConnPoolReuseTypeObj, upstreamConnPoolReuseTypeDiags := utils.GoStructToObjectValue(
@@ -7359,6 +7339,12 @@ func (r *ResourceF5XCCluster) Read(ctx context.Context, request resource.ReadReq
 }
 
 func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCClusterModel
@@ -7368,6 +7354,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planTlsParameters := data.TlsParameters
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -7387,7 +7374,11 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planTlsParameters := data.TlsParameters
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.TlsParameters.IsNull() && !configData.TlsParameters.IsUnknown() {
+		data.TlsParameters = configData.TlsParameters
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -7733,9 +7724,12 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 				}
 
 				headerTransformationSpec := &ves_io_schema.HeaderTransformationType{}
+				headerTransformationSpec.HeaderTransformationChoice = &ves_io_schema.HeaderTransformationType_LegacyHeaderTransformation{
+					LegacyHeaderTransformation: &ves_io_schema.Empty{},
+				}
 				http1ConfigOneOfSpec.Http1Config.HeaderTransformation = headerTransformationSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> HeaderTransformationChoice
+				// resource modelToSpecNested OneOfField --> HeaderTransformationChoice
 				if !headerTransformationModel.HeaderTransformationChoice.IsNull() && !headerTransformationModel.HeaderTransformationChoice.IsUnknown() {
 					headerTransformationHeaderTransformationChoiceModel := ClusterHeaderTransformationChoice{}
 					response.Diagnostics.Append(headerTransformationModel.HeaderTransformationChoice.As(ctx, &headerTransformationHeaderTransformationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7865,26 +7859,36 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			// resource modelToSpecNested UintField --> BaseEjectionTime
 			if !outlierDetectionModel.BaseEjectionTime.IsNull() && !outlierDetectionModel.BaseEjectionTime.IsUnknown() {
 				outlierDetectionSpec.BaseEjectionTime = uint32(uint32(outlierDetectionModel.BaseEjectionTime.ValueInt64()))
+			} else {
+				outlierDetectionSpec.BaseEjectionTime = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Consecutive_5Xx
 			if !outlierDetectionModel.Consecutive_5Xx.IsNull() && !outlierDetectionModel.Consecutive_5Xx.IsUnknown() {
 				outlierDetectionSpec.Consecutive_5Xx = uint32(uint32(outlierDetectionModel.Consecutive_5Xx.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Consecutive_5Xx = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> ConsecutiveGatewayFailure
 			if !outlierDetectionModel.ConsecutiveGatewayFailure.IsNull() && !outlierDetectionModel.ConsecutiveGatewayFailure.IsUnknown() {
 				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(uint32(outlierDetectionModel.ConsecutiveGatewayFailure.ValueInt64()))
+			} else {
+				outlierDetectionSpec.ConsecutiveGatewayFailure = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> Interval
 			if !outlierDetectionModel.Interval.IsNull() && !outlierDetectionModel.Interval.IsUnknown() {
 				outlierDetectionSpec.Interval = uint32(uint32(outlierDetectionModel.Interval.ValueInt64()))
+			} else {
+				outlierDetectionSpec.Interval = uint32(0)
 			}
 
 			// resource modelToSpecNested UintField --> MaxEjectionPercent
 			if !outlierDetectionModel.MaxEjectionPercent.IsNull() && !outlierDetectionModel.MaxEjectionPercent.IsUnknown() {
 				outlierDetectionSpec.MaxEjectionPercent = uint32(uint32(outlierDetectionModel.MaxEjectionPercent.ValueInt64()))
+			} else {
+				outlierDetectionSpec.MaxEjectionPercent = uint32(0)
 			}
 
 		}
@@ -7949,6 +7953,9 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 		// resource modelToSpecRoot PointerField --> TlsParameters
 		if !data.TlsParameters.IsNull() && !data.TlsParameters.IsUnknown() {
 			tlsParametersSpec := &ves_io_schema.UpstreamTlsParamsType{}
+			tlsParametersSpec.MaxSessionKeysType = &ves_io_schema.UpstreamTlsParamsType_DefaultSessionKeyCaching{
+				DefaultSessionKeyCaching: &ves_io_schema.Empty{},
+			}
 			spec.TlsParameters = tlsParametersSpec
 			var tlsParametersModel ClusterUpstreamTlsParamsType
 
@@ -7959,7 +7966,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxSessionKeysType
+			// resource modelToSpecNested OneOfField --> MaxSessionKeysType
 			if !tlsParametersModel.MaxSessionKeysTypeChoice.IsNull() && !tlsParametersModel.MaxSessionKeysTypeChoice.IsUnknown() {
 				tlsParametersMaxSessionKeysTypeChoiceModel := ClusterMaxSessionKeysTypeChoice{}
 				response.Diagnostics.Append(tlsParametersModel.MaxSessionKeysTypeChoice.As(ctx, &tlsParametersMaxSessionKeysTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8488,6 +8495,13 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !privateKeySecretInfoChoiceModel.None.IsNull() && !privateKeySecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										privateKeySpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -8602,6 +8616,9 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 		// resource modelToSpecRoot PointerField --> UpstreamConnPoolReuseType
 		if !data.UpstreamConnPoolReuseType.IsNull() && !data.UpstreamConnPoolReuseType.IsUnknown() {
 			upstreamConnPoolReuseTypeSpec := &ves_io_schema.UpstreamConnPoolReuseType{}
+			upstreamConnPoolReuseTypeSpec.MapDownstreamToUpstreamConnPoolType = &ves_io_schema.UpstreamConnPoolReuseType_EnableConnPoolReuse{
+				EnableConnPoolReuse: &ves_io_schema.Empty{},
+			}
 			spec.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeSpec
 			var upstreamConnPoolReuseTypeModel ClusterUpstreamConnPoolReuseType
 
@@ -8612,7 +8629,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+			// resource modelToSpecNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 			if !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsNull() && !upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.IsUnknown() {
 				upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel := ClusterMapDownstreamToUpstreamConnPoolTypeChoice{}
 				response.Diagnostics.Append(upstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice.As(ctx, &upstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8642,7 +8659,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -8650,24 +8667,20 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_cluster.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_cluster.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cluster", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cluster.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cluster.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cluster", err),
 		)
 		return
 	}
@@ -8835,7 +8848,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	connectionTimeoutValue := specData.GetConnectionTimeout()
 	if connectionTimeoutValue > 0 {
 		data.ConnectionTimeout = types.Int64Value(int64(connectionTimeoutValue))
-	} else {
+	} else if data.ConnectionTimeout.IsNull() || data.ConnectionTimeout.IsUnknown() {
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
@@ -8856,46 +8869,11 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			data.DefaultSubset = types.MapNull(types.StringType)
 		}
 	} else {
-		// API returned nil (Protobuf omits empty maps).
-		// Preserve the plan value: if plan was null/unknown keep null; if plan was an empty map keep empty map.
+		// Protobuf omits empty maps, so keep the plan's null vs empty-map distinction.
 		if data.DefaultSubset.IsNull() || data.DefaultSubset.IsUnknown() {
 			data.DefaultSubset = types.MapNull(types.StringType)
 		} else {
 			data.DefaultSubset = types.MapValueMust(types.StringType, map[string]attr.Value{})
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsDiscoveryType
-	{
-		if specData.GetDnsDiscoveryType().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsDiscoveryType().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsDiscoveryType = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsDiscoveryType = types.ListNull(types.StringType)
-		}
-	}
-
-	// resource SpecToModelRoot EnumField --> DnsLookupFamily
-	{
-		if specData.GetDnsLookupFamily().String() != "" {
-			stringValue := types.StringValue(specData.GetDnsLookupFamily().String())
-			stringSlice := []types.String{stringValue}
-			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(listDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			data.DnsLookupFamily = listValue
-		} else {
-			// Empty string, set to null
-			data.DnsLookupFamily = types.ListNull(types.StringType)
 		}
 	}
 
@@ -8958,14 +8936,12 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			AttrTypes: ClusterEndpointSubsetsModelAttributeMap,
 		}
 		nullEndpointSubsetsList := basetypes.NewListNull(endpointSubsetsObjectType)
-		var priorValEndpointSubsets types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoint_subsets"), &priorValEndpointSubsets)
-		if !priorValEndpointSubsets.IsNull() && !priorValEndpointSubsets.IsUnknown() {
-			data.EndpointSubsets = priorValEndpointSubsets
+		if !data.EndpointSubsets.IsNull() && !data.EndpointSubsets.IsUnknown() && len(data.EndpointSubsets.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EndpointSubsets = basetypes.NewListValueMust(endpointSubsetsObjectType, nil)
 		} else {
 			data.EndpointSubsets = nullEndpointSubsetsList
 		}
-
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> Endpoints
@@ -9020,14 +8996,12 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			AttrTypes: ClusterEndpointsObjectRefModelAttributeMap,
 		}
 		nullEndpointsList := basetypes.NewListNull(endpointsObjectType)
-		var priorValEndpoints types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("endpoints"), &priorValEndpoints)
-		if !priorValEndpoints.IsNull() && !priorValEndpoints.IsUnknown() {
-			data.Endpoints = priorValEndpoints
+		if !data.Endpoints.IsNull() && !data.Endpoints.IsUnknown() && len(data.Endpoints.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Endpoints = basetypes.NewListValueMust(endpointsObjectType, nil)
 		} else {
 			data.Endpoints = nullEndpointsList
 		}
-
 	}
 
 	// resource SpecToModelRoot EnumField --> FallbackPolicy
@@ -9099,21 +9073,19 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 			AttrTypes: ClusterHealthChecksObjectRefModelAttributeMap,
 		}
 		nullHealthChecksList := basetypes.NewListNull(healthChecksObjectType)
-		var priorValHealthChecks types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("health_checks"), &priorValHealthChecks)
-		if !priorValHealthChecks.IsNull() && !priorValHealthChecks.IsUnknown() {
-			data.HealthChecks = priorValHealthChecks
+		if !data.HealthChecks.IsNull() && !data.HealthChecks.IsUnknown() && len(data.HealthChecks.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.HealthChecks = basetypes.NewListValueMust(healthChecksObjectType, nil)
 		} else {
 			data.HealthChecks = nullHealthChecksList
 		}
-
 	}
 
 	// resource SpecToModelRoot UintField --> HttpIdleTimeout
 	httpIdleTimeoutValue := specData.GetHttpIdleTimeout()
 	if httpIdleTimeoutValue > 0 {
 		data.HttpIdleTimeout = types.Int64Value(int64(httpIdleTimeoutValue))
-	} else {
+	} else if data.HttpIdleTimeout.IsNull() || data.HttpIdleTimeout.IsUnknown() {
 		data.HttpIdleTimeout = types.Int64Null()
 	}
 
@@ -9157,8 +9129,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> HeaderTransformationChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> HeaderTransformationChoice
 					if headerTransformationElement.GetHeaderTransformationChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9567,8 +9538,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 		var clusterUpstreamTlsParamsTypeModel = &ClusterUpstreamTlsParamsType{}
 		tlsParametersElement := specData.GetTlsParameters()
 
-		// resource specToModelNested RequiredOneOfField --> MaxSessionKeysType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MaxSessionKeysType
 		if tlsParametersElement.GetMaxSessionKeysType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			tlsParametersmaxSessionKeysTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10277,6 +10247,15 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 										}
 									}
 
+									// resource specToModelNested BoolOfOneOfPointerField --> None
+									_, isNone := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+									if isNone {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+									} else {
+										privateKeysecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+									}
+
 									// --- End of Choices ---
 
 									// Create the final ObjectValue for this OneOf field
@@ -10536,8 +10515,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 		var clusterUpstreamConnPoolReuseTypeModel = &ClusterUpstreamConnPoolReuseType{}
 		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
 
-		// resource specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> MapDownstreamToUpstreamConnPoolType
 		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10625,7 +10603,7 @@ func (r *ResourceF5XCCluster) Update(ctx context.Context, request resource.Updat
 	}
 	// Restore plan value for TlsParameters. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.TlsParameters = planTlsParameters
+	data.TlsParameters = utils.ResolveUnknowns(planTlsParameters, data.TlsParameters)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -10673,7 +10651,7 @@ func (r *ResourceF5XCCluster) Delete(ctx context.Context, request resource.Delet
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "cluster", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "cluster", err),
 		)
 		return
 	}

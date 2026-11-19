@@ -1467,7 +1467,8 @@ var CustomAPISwaggerJSON string = `{
                 "UNIT_REQUESTS_PER_SECOND",
                 "UNIT_PACKETS",
                 "UNIT_PERCENTAGE",
-                "UNIT_COUNT"
+                "UNIT_COUNT",
+                "UNIT_SESSIONS"
             ],
             "default": "UNIT_MILLISECONDS",
             "x-displayname": "Unit",

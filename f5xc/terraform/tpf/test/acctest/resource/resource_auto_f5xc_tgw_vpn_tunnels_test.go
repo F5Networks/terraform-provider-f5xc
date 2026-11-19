@@ -27,7 +27,7 @@ func TestAccResourceAutoF5XCTgwVpnTunnels_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -48,7 +48,7 @@ func TestAccResourceAutoF5XCTgwVpnTunnels_withTypeTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -69,7 +69,7 @@ func TestAccResourceAutoF5XCTgwVpnTunnels_withRemoteIpTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -90,7 +90,7 @@ func TestAccResourceAutoF5XCTgwVpnTunnels_withTwoTunnelEntries(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -111,9 +111,9 @@ func TestAccResourceAutoF5XCTgwVpnTunnels_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
+	name := "example-aws-tgw-vpn-tunnels-" + acctest.RandString(t, 6)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             acctest.CheckDestroyProducerReplayAware(t, "f5xc_tgw_vpn_tunnels", "", "tgw vpn tunnels"),
@@ -125,14 +125,18 @@ func TestAccResourceAutoF5XCTgwVpnTunnels_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCTgwVpnTunnelsConfig_withTwoRemoteIps(name, namespace),
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCTgwVpnTunnelsConfig_full(name, namespace),
+		})
 }
 
 func testAccResourceAutoF5XCTgwVpnTunnelsConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpn_tunnels" "test" {
+resource "f5xc_tgw_vpn_tunnels" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -150,7 +154,7 @@ func testAccResourceAutoF5XCTgwVpnTunnelsConfig_withHubType(name, namespace stri
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpn_tunnels" "test" {
+resource "f5xc_tgw_vpn_tunnels" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -168,7 +172,7 @@ func testAccResourceAutoF5XCTgwVpnTunnelsConfig_withServicesType(name, namespace
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpn_tunnels" "test" {
+resource "f5xc_tgw_vpn_tunnels" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -186,7 +190,7 @@ func testAccResourceAutoF5XCTgwVpnTunnelsConfig_withTwoRemoteIps(name, namespace
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpn_tunnels" "test" {
+resource "f5xc_tgw_vpn_tunnels" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -204,7 +208,7 @@ func testAccResourceAutoF5XCTgwVpnTunnelsConfig_withTwoTunnels(name, namespace s
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpn_tunnels" "test" {
+resource "f5xc_tgw_vpn_tunnels" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 
@@ -230,7 +234,7 @@ func testAccResourceAutoF5XCTgwVpnTunnelsConfig_full(name, namespace string) str
 	return fmt.Sprintf(`
 %s
 
-resource "f5xc_tgw_vpn_tunnels" "test" {
+resource "f5xc_tgw_vpn_tunnels" "example" {
 	name      = f5xc_aws_tgw_site.site.name
   namespace = %q
 

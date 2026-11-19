@@ -6,12 +6,6 @@ package code_base_integration
 import (
 	context "context"
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -22,6 +16,11 @@ import (
 	status "google.golang.org/grpc/status"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -162,11 +161,529 @@ func (m *UpdateCodeBaseIntegrationResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UpdateCodeBaseIntegrationResp proto.InternalMessageInfo
 
+type UpdateScanStatusReq struct {
+	Tenant                string           `protobuf:"bytes,1,opt,name=tenant,proto3" json:"tenant,omitempty"`
+	Namespace             string           `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	Name                  string           `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	ProjectName           string           `protobuf:"bytes,4,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`
+	Status                string           `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	KafkaMessageCreatedAt *types.Timestamp `protobuf:"bytes,6,opt,name=kafka_message_created_at,json=kafkaMessageCreatedAt,proto3" json:"kafka_message_created_at,omitempty"`
+	// Types that are valid to be assigned to StatusMetadata:
+	//	*UpdateScanStatusReq_Pending
+	//	*UpdateScanStatusReq_InProgress
+	//	*UpdateScanStatusReq_Done
+	//	*UpdateScanStatusReq_Failed
+	//	*UpdateScanStatusReq_Cancelled
+	//	*UpdateScanStatusReq_TimedOut
+	StatusMetadata isUpdateScanStatusReq_StatusMetadata `protobuf_oneof:"status_metadata"`
+}
+
+func (m *UpdateScanStatusReq) Reset()      { *m = UpdateScanStatusReq{} }
+func (*UpdateScanStatusReq) ProtoMessage() {}
+func (*UpdateScanStatusReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{2}
+}
+func (m *UpdateScanStatusReq) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateScanStatusReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateScanStatusReq.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateScanStatusReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateScanStatusReq.Merge(m, src)
+}
+func (m *UpdateScanStatusReq) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateScanStatusReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateScanStatusReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateScanStatusReq proto.InternalMessageInfo
+
+type isUpdateScanStatusReq_StatusMetadata interface {
+	isUpdateScanStatusReq_StatusMetadata()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type UpdateScanStatusReq_Pending struct {
+	Pending *ScanStatusPending `protobuf:"bytes,7,opt,name=pending,proto3,oneof" json:"pending,omitempty"`
+}
+type UpdateScanStatusReq_InProgress struct {
+	InProgress *ScanStatusInProgress `protobuf:"bytes,8,opt,name=in_progress,json=inProgress,proto3,oneof" json:"in_progress,omitempty"`
+}
+type UpdateScanStatusReq_Done struct {
+	Done *ScanStatusDone `protobuf:"bytes,9,opt,name=done,proto3,oneof" json:"done,omitempty"`
+}
+type UpdateScanStatusReq_Failed struct {
+	Failed *ScanStatusFailed `protobuf:"bytes,10,opt,name=failed,proto3,oneof" json:"failed,omitempty"`
+}
+type UpdateScanStatusReq_Cancelled struct {
+	Cancelled *ScanStatusCancelled `protobuf:"bytes,11,opt,name=cancelled,proto3,oneof" json:"cancelled,omitempty"`
+}
+type UpdateScanStatusReq_TimedOut struct {
+	TimedOut *ScanStatusTimedOut `protobuf:"bytes,12,opt,name=timed_out,json=timedOut,proto3,oneof" json:"timed_out,omitempty"`
+}
+
+func (*UpdateScanStatusReq_Pending) isUpdateScanStatusReq_StatusMetadata()    {}
+func (*UpdateScanStatusReq_InProgress) isUpdateScanStatusReq_StatusMetadata() {}
+func (*UpdateScanStatusReq_Done) isUpdateScanStatusReq_StatusMetadata()       {}
+func (*UpdateScanStatusReq_Failed) isUpdateScanStatusReq_StatusMetadata()     {}
+func (*UpdateScanStatusReq_Cancelled) isUpdateScanStatusReq_StatusMetadata()  {}
+func (*UpdateScanStatusReq_TimedOut) isUpdateScanStatusReq_StatusMetadata()   {}
+
+func (m *UpdateScanStatusReq) GetStatusMetadata() isUpdateScanStatusReq_StatusMetadata {
+	if m != nil {
+		return m.StatusMetadata
+	}
+	return nil
+}
+
+func (m *UpdateScanStatusReq) GetTenant() string {
+	if m != nil {
+		return m.Tenant
+	}
+	return ""
+}
+
+func (m *UpdateScanStatusReq) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *UpdateScanStatusReq) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *UpdateScanStatusReq) GetProjectName() string {
+	if m != nil {
+		return m.ProjectName
+	}
+	return ""
+}
+
+func (m *UpdateScanStatusReq) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+func (m *UpdateScanStatusReq) GetKafkaMessageCreatedAt() *types.Timestamp {
+	if m != nil {
+		return m.KafkaMessageCreatedAt
+	}
+	return nil
+}
+
+func (m *UpdateScanStatusReq) GetPending() *ScanStatusPending {
+	if x, ok := m.GetStatusMetadata().(*UpdateScanStatusReq_Pending); ok {
+		return x.Pending
+	}
+	return nil
+}
+
+func (m *UpdateScanStatusReq) GetInProgress() *ScanStatusInProgress {
+	if x, ok := m.GetStatusMetadata().(*UpdateScanStatusReq_InProgress); ok {
+		return x.InProgress
+	}
+	return nil
+}
+
+func (m *UpdateScanStatusReq) GetDone() *ScanStatusDone {
+	if x, ok := m.GetStatusMetadata().(*UpdateScanStatusReq_Done); ok {
+		return x.Done
+	}
+	return nil
+}
+
+func (m *UpdateScanStatusReq) GetFailed() *ScanStatusFailed {
+	if x, ok := m.GetStatusMetadata().(*UpdateScanStatusReq_Failed); ok {
+		return x.Failed
+	}
+	return nil
+}
+
+func (m *UpdateScanStatusReq) GetCancelled() *ScanStatusCancelled {
+	if x, ok := m.GetStatusMetadata().(*UpdateScanStatusReq_Cancelled); ok {
+		return x.Cancelled
+	}
+	return nil
+}
+
+func (m *UpdateScanStatusReq) GetTimedOut() *ScanStatusTimedOut {
+	if x, ok := m.GetStatusMetadata().(*UpdateScanStatusReq_TimedOut); ok {
+		return x.TimedOut
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*UpdateScanStatusReq) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*UpdateScanStatusReq_Pending)(nil),
+		(*UpdateScanStatusReq_InProgress)(nil),
+		(*UpdateScanStatusReq_Done)(nil),
+		(*UpdateScanStatusReq_Failed)(nil),
+		(*UpdateScanStatusReq_Cancelled)(nil),
+		(*UpdateScanStatusReq_TimedOut)(nil),
+	}
+}
+
+type ScanStatusPending struct {
+	CreatedAt *types.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+}
+
+func (m *ScanStatusPending) Reset()      { *m = ScanStatusPending{} }
+func (*ScanStatusPending) ProtoMessage() {}
+func (*ScanStatusPending) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{3}
+}
+func (m *ScanStatusPending) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ScanStatusPending) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ScanStatusPending.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ScanStatusPending) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScanStatusPending.Merge(m, src)
+}
+func (m *ScanStatusPending) XXX_Size() int {
+	return m.Size()
+}
+func (m *ScanStatusPending) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScanStatusPending.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScanStatusPending proto.InternalMessageInfo
+
+func (m *ScanStatusPending) GetCreatedAt() *types.Timestamp {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+type ScanStatusInProgress struct {
+	StartedAt *types.Timestamp `protobuf:"bytes,1,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
+	Progress  int32            `protobuf:"varint,2,opt,name=progress,proto3" json:"progress,omitempty"`
+}
+
+func (m *ScanStatusInProgress) Reset()      { *m = ScanStatusInProgress{} }
+func (*ScanStatusInProgress) ProtoMessage() {}
+func (*ScanStatusInProgress) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{4}
+}
+func (m *ScanStatusInProgress) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ScanStatusInProgress) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ScanStatusInProgress.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ScanStatusInProgress) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScanStatusInProgress.Merge(m, src)
+}
+func (m *ScanStatusInProgress) XXX_Size() int {
+	return m.Size()
+}
+func (m *ScanStatusInProgress) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScanStatusInProgress.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScanStatusInProgress proto.InternalMessageInfo
+
+func (m *ScanStatusInProgress) GetStartedAt() *types.Timestamp {
+	if m != nil {
+		return m.StartedAt
+	}
+	return nil
+}
+
+func (m *ScanStatusInProgress) GetProgress() int32 {
+	if m != nil {
+		return m.Progress
+	}
+	return 0
+}
+
+type ScanStatusDone struct {
+	CompletedAt       *types.Timestamp `protobuf:"bytes,1,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	ApiEndpointsFound int32            `protobuf:"varint,2,opt,name=api_endpoints_found,json=apiEndpointsFound,proto3" json:"api_endpoints_found,omitempty"`
+}
+
+func (m *ScanStatusDone) Reset()      { *m = ScanStatusDone{} }
+func (*ScanStatusDone) ProtoMessage() {}
+func (*ScanStatusDone) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{5}
+}
+func (m *ScanStatusDone) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ScanStatusDone) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ScanStatusDone.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ScanStatusDone) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScanStatusDone.Merge(m, src)
+}
+func (m *ScanStatusDone) XXX_Size() int {
+	return m.Size()
+}
+func (m *ScanStatusDone) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScanStatusDone.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScanStatusDone proto.InternalMessageInfo
+
+func (m *ScanStatusDone) GetCompletedAt() *types.Timestamp {
+	if m != nil {
+		return m.CompletedAt
+	}
+	return nil
+}
+
+func (m *ScanStatusDone) GetApiEndpointsFound() int32 {
+	if m != nil {
+		return m.ApiEndpointsFound
+	}
+	return 0
+}
+
+type ScanStatusFailed struct {
+	Error string `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+}
+
+func (m *ScanStatusFailed) Reset()      { *m = ScanStatusFailed{} }
+func (*ScanStatusFailed) ProtoMessage() {}
+func (*ScanStatusFailed) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{6}
+}
+func (m *ScanStatusFailed) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ScanStatusFailed) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ScanStatusFailed.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ScanStatusFailed) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScanStatusFailed.Merge(m, src)
+}
+func (m *ScanStatusFailed) XXX_Size() int {
+	return m.Size()
+}
+func (m *ScanStatusFailed) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScanStatusFailed.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScanStatusFailed proto.InternalMessageInfo
+
+func (m *ScanStatusFailed) GetError() string {
+	if m != nil {
+		return m.Error
+	}
+	return ""
+}
+
+type ScanStatusCancelled struct {
+	Reason string `protobuf:"bytes,1,opt,name=reason,proto3" json:"reason,omitempty"`
+}
+
+func (m *ScanStatusCancelled) Reset()      { *m = ScanStatusCancelled{} }
+func (*ScanStatusCancelled) ProtoMessage() {}
+func (*ScanStatusCancelled) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{7}
+}
+func (m *ScanStatusCancelled) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ScanStatusCancelled) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ScanStatusCancelled.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ScanStatusCancelled) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScanStatusCancelled.Merge(m, src)
+}
+func (m *ScanStatusCancelled) XXX_Size() int {
+	return m.Size()
+}
+func (m *ScanStatusCancelled) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScanStatusCancelled.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScanStatusCancelled proto.InternalMessageInfo
+
+func (m *ScanStatusCancelled) GetReason() string {
+	if m != nil {
+		return m.Reason
+	}
+	return ""
+}
+
+type ScanStatusTimedOut struct {
+	StartedAt   *types.Timestamp `protobuf:"bytes,1,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
+	CompletedAt *types.Timestamp `protobuf:"bytes,2,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+}
+
+func (m *ScanStatusTimedOut) Reset()      { *m = ScanStatusTimedOut{} }
+func (*ScanStatusTimedOut) ProtoMessage() {}
+func (*ScanStatusTimedOut) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{8}
+}
+func (m *ScanStatusTimedOut) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ScanStatusTimedOut) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ScanStatusTimedOut.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ScanStatusTimedOut) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScanStatusTimedOut.Merge(m, src)
+}
+func (m *ScanStatusTimedOut) XXX_Size() int {
+	return m.Size()
+}
+func (m *ScanStatusTimedOut) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScanStatusTimedOut.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScanStatusTimedOut proto.InternalMessageInfo
+
+func (m *ScanStatusTimedOut) GetStartedAt() *types.Timestamp {
+	if m != nil {
+		return m.StartedAt
+	}
+	return nil
+}
+
+func (m *ScanStatusTimedOut) GetCompletedAt() *types.Timestamp {
+	if m != nil {
+		return m.CompletedAt
+	}
+	return nil
+}
+
+type UpdateScanStatusResp struct {
+}
+
+func (m *UpdateScanStatusResp) Reset()      { *m = UpdateScanStatusResp{} }
+func (*UpdateScanStatusResp) ProtoMessage() {}
+func (*UpdateScanStatusResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9445dec7a853dafc, []int{9}
+}
+func (m *UpdateScanStatusResp) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UpdateScanStatusResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UpdateScanStatusResp.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UpdateScanStatusResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateScanStatusResp.Merge(m, src)
+}
+func (m *UpdateScanStatusResp) XXX_Size() int {
+	return m.Size()
+}
+func (m *UpdateScanStatusResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateScanStatusResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateScanStatusResp proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*UpdateCodeBaseIntegrationReq)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateCodeBaseIntegrationReq")
 	golang_proto.RegisterType((*UpdateCodeBaseIntegrationReq)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateCodeBaseIntegrationReq")
 	proto.RegisterType((*UpdateCodeBaseIntegrationResp)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateCodeBaseIntegrationResp")
 	golang_proto.RegisterType((*UpdateCodeBaseIntegrationResp)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateCodeBaseIntegrationResp")
+	proto.RegisterType((*UpdateScanStatusReq)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateScanStatusReq")
+	golang_proto.RegisterType((*UpdateScanStatusReq)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateScanStatusReq")
+	proto.RegisterType((*ScanStatusPending)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusPending")
+	golang_proto.RegisterType((*ScanStatusPending)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusPending")
+	proto.RegisterType((*ScanStatusInProgress)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusInProgress")
+	golang_proto.RegisterType((*ScanStatusInProgress)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusInProgress")
+	proto.RegisterType((*ScanStatusDone)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusDone")
+	golang_proto.RegisterType((*ScanStatusDone)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusDone")
+	proto.RegisterType((*ScanStatusFailed)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusFailed")
+	golang_proto.RegisterType((*ScanStatusFailed)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusFailed")
+	proto.RegisterType((*ScanStatusCancelled)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusCancelled")
+	golang_proto.RegisterType((*ScanStatusCancelled)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusCancelled")
+	proto.RegisterType((*ScanStatusTimedOut)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusTimedOut")
+	golang_proto.RegisterType((*ScanStatusTimedOut)(nil), "ves.io.schema.api_sec.code_base_integration.ScanStatusTimedOut")
+	proto.RegisterType((*UpdateScanStatusResp)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateScanStatusResp")
+	golang_proto.RegisterType((*UpdateScanStatusResp)(nil), "ves.io.schema.api_sec.code_base_integration.UpdateScanStatusResp")
 }
 
 func init() {
@@ -177,47 +694,75 @@ func init() {
 }
 
 var fileDescriptor_9445dec7a853dafc = []byte{
-	// 633 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0xcf, 0x6b, 0x13, 0x41,
-	0x14, 0xc7, 0x33, 0x71, 0x1b, 0x93, 0x11, 0x31, 0xae, 0x20, 0xdb, 0x18, 0xa7, 0x21, 0x07, 0x29,
-	0x4a, 0x76, 0xa1, 0x22, 0xa2, 0x88, 0x98, 0xf6, 0xa0, 0xcd, 0xa5, 0x25, 0xe8, 0x45, 0x90, 0x65,
-	0x76, 0xf3, 0xb2, 0x59, 0xcd, 0xee, 0x8c, 0x3b, 0x93, 0x58, 0x91, 0x82, 0xf4, 0x2f, 0x10, 0x3c,
-	0xf8, 0x2f, 0xf8, 0x3f, 0xf4, 0xd2, 0xa3, 0x27, 0x29, 0xf5, 0xd2, 0xa3, 0xdd, 0x78, 0xf0, 0xd8,
-	0x7b, 0x2f, 0x92, 0xd9, 0x4d, 0xf3, 0x03, 0x5b, 0x0c, 0x78, 0x7b, 0x3f, 0xbe, 0xf3, 0xd9, 0x37,
-	0x6f, 0xde, 0x5b, 0xbc, 0xd6, 0x07, 0x61, 0xfa, 0xcc, 0x12, 0x6e, 0x07, 0x02, 0x6a, 0x51, 0xee,
-	0xdb, 0x02, 0x5c, 0xcb, 0x65, 0x2d, 0xb0, 0x1d, 0x2a, 0xc0, 0xf6, 0x43, 0x09, 0x5e, 0x44, 0xa5,
-	0xcf, 0x42, 0x8b, 0x47, 0x7e, 0x9f, 0x4a, 0xb0, 0xdd, 0x9e, 0x90, 0x2c, 0xa0, 0xdc, 0x37, 0x79,
-	0xc4, 0x24, 0xd3, 0xef, 0x24, 0x10, 0x33, 0x81, 0x98, 0x29, 0xc4, 0xfc, 0x2b, 0xa4, 0x54, 0xf3,
-	0x7c, 0xd9, 0xe9, 0x39, 0xa6, 0xcb, 0x02, 0xcb, 0x63, 0x1e, 0xb3, 0x14, 0xc3, 0xe9, 0xb5, 0x95,
-	0xa7, 0x1c, 0x65, 0x25, 0xec, 0x52, 0xd9, 0x63, 0xcc, 0xeb, 0xc2, 0xb0, 0x32, 0x8b, 0x86, 0x21,
-	0x93, 0x8a, 0x22, 0xd2, 0xec, 0x52, 0x9a, 0x3d, 0x65, 0x48, 0x3f, 0x00, 0x21, 0x69, 0xc0, 0x53,
-	0xc1, 0xfd, 0x79, 0xee, 0x27, 0xdf, 0x73, 0x18, 0x91, 0x6f, 0x4c, 0x1f, 0x64, 0x7c, 0xf2, 0xb3,
-	0x8b, 0xd3, 0xc9, 0xc9, 0x73, 0xe5, 0xe9, 0x54, 0x9f, 0x76, 0xfd, 0x16, 0x95, 0x90, 0x66, 0xab,
-	0x33, 0x59, 0x10, 0x10, 0xf6, 0x67, 0xe0, 0x95, 0x19, 0x8d, 0x0f, 0xef, 0xec, 0x29, 0x45, 0xf5,
-	0x24, 0x8b, 0xcb, 0x2f, 0xf8, 0x10, 0xbb, 0xc6, 0x5a, 0xb0, 0x4a, 0x05, 0xac, 0x8f, 0x6f, 0xd1,
-	0x84, 0xb7, 0x7a, 0x19, 0x17, 0x42, 0x1a, 0x80, 0xe0, 0xd4, 0x05, 0x03, 0x55, 0xd0, 0x72, 0xa1,
-	0x39, 0x0e, 0xe8, 0x3a, 0xd6, 0x86, 0x8e, 0x91, 0x55, 0x09, 0x65, 0xeb, 0x01, 0xd6, 0x27, 0x3a,
-	0x61, 0x77, 0x80, 0x76, 0x65, 0xc7, 0x28, 0x54, 0xd0, 0xf2, 0xa5, 0x95, 0xc7, 0xe6, 0x1c, 0xef,
-	0x6b, 0x4e, 0x94, 0xf2, 0x4c, 0x51, 0x9a, 0x57, 0xfd, 0xd9, 0x90, 0x7e, 0x0b, 0x5f, 0x09, 0x7b,
-	0x81, 0x03, 0x91, 0xcd, 0xda, 0x76, 0x04, 0x9c, 0x09, 0x23, 0x57, 0x41, 0xcb, 0x0b, 0xcd, 0xcb,
-	0x49, 0x78, 0xa3, 0xdd, 0x1c, 0x06, 0xf5, 0x1a, 0xbe, 0x36, 0xd6, 0x0d, 0xbf, 0x9b, 0x68, 0x2f,
-	0x2a, 0x6d, 0x71, 0xa4, 0xad, 0x73, 0x3f, 0x91, 0x3f, 0xc0, 0xb8, 0xa7, 0xfa, 0xd2, 0xb2, 0xa9,
-	0x34, 0xf2, 0xaa, 0xfa, 0x92, 0x99, 0xcc, 0x88, 0x39, 0x9a, 0x11, 0xf3, 0xf9, 0x68, 0x46, 0x9a,
-	0x85, 0x54, 0x5d, 0x97, 0xfa, 0x75, 0x9c, 0x93, 0x10, 0xd2, 0x50, 0x1a, 0x58, 0xb5, 0x25, 0xf5,
-	0x1a, 0x5a, 0xfe, 0x42, 0x51, 0x6b, 0x68, 0x79, 0xad, 0xb8, 0xd0, 0xd0, 0xf2, 0x0b, 0xc5, 0x5c,
-	0x75, 0x09, 0xdf, 0x3c, 0xa7, 0xf9, 0x82, 0xaf, 0x1c, 0x64, 0x71, 0x71, 0x33, 0x59, 0x95, 0x35,
-	0xb5, 0x29, 0xf5, 0xcd, 0x75, 0xfd, 0x04, 0xe1, 0xc5, 0x33, 0x8f, 0xe9, 0xeb, 0x73, 0xb5, 0xf8,
-	0xbc, 0xb7, 0x2f, 0x35, 0xfe, 0x17, 0x4a, 0xf0, 0xea, 0xd3, 0x9d, 0x1f, 0xbf, 0x3e, 0x67, 0xeb,
-	0xd5, 0x47, 0xa3, 0xd5, 0xb7, 0x4e, 0xa7, 0x48, 0x58, 0x1f, 0x4e, 0xed, 0xed, 0x33, 0xf6, 0x49,
-	0x29, 0xb6, 0x1f, 0xa2, 0xdb, 0xa5, 0x27, 0x7b, 0xbb, 0x48, 0x3b, 0xd8, 0x45, 0x2b, 0xf3, 0xd4,
-	0xb6, 0xe1, 0xbc, 0x06, 0x57, 0xee, 0x7c, 0x37, 0xb2, 0x45, 0xb4, 0xfa, 0x05, 0xed, 0x1f, 0x91,
-	0xcc, 0xe1, 0x11, 0xc9, 0x1c, 0x1f, 0x11, 0xf4, 0x31, 0x26, 0xe8, 0x6b, 0x4c, 0xd0, 0xb7, 0x98,
-	0xa0, 0xfd, 0x98, 0xa0, 0x9f, 0x31, 0x41, 0xbf, 0x63, 0x92, 0x39, 0x8e, 0x09, 0xfa, 0x34, 0x20,
-	0x99, 0xbd, 0x01, 0x41, 0xfb, 0x03, 0x92, 0x39, 0x1c, 0x90, 0xcc, 0xcb, 0x57, 0x1e, 0xe3, 0x6f,
-	0x3c, 0xb3, 0xcf, 0xba, 0x12, 0xa2, 0x88, 0x9a, 0x3d, 0x61, 0x29, 0xa3, 0xcd, 0xa2, 0xa0, 0xc6,
-	0x23, 0xd6, 0xf7, 0x5b, 0x10, 0xd5, 0xda, 0xf7, 0xb6, 0x5c, 0x8b, 0x3b, 0x1e, 0xb3, 0x60, 0x4b,
-	0xa6, 0xbb, 0xf7, 0x2f, 0x7f, 0x0d, 0x27, 0xa7, 0x06, 0xeb, 0xee, 0x9f, 0x00, 0x00, 0x00, 0xff,
-	0xff, 0x24, 0xfc, 0x31, 0x11, 0x4b, 0x05, 0x00, 0x00,
+	// 1079 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x96, 0xcf, 0x6f, 0x1b, 0x45,
+	0x14, 0xc7, 0x77, 0x5c, 0xc7, 0xb5, 0xc7, 0x85, 0x3a, 0x93, 0x10, 0xb9, 0x26, 0x6c, 0xc3, 0x1e,
+	0x50, 0x54, 0x94, 0x5d, 0x29, 0x08, 0x21, 0x0a, 0x85, 0x38, 0x81, 0xe2, 0x44, 0x6a, 0x13, 0x36,
+	0x20, 0xa4, 0x4a, 0xb0, 0x8c, 0x77, 0xc7, 0x9b, 0x25, 0xde, 0x99, 0x61, 0x67, 0x6c, 0x8a, 0x50,
+	0x05, 0xea, 0x1f, 0x80, 0x90, 0x38, 0xf0, 0x2f, 0x70, 0xe6, 0xda, 0x4b, 0xb9, 0x71, 0x42, 0x11,
+	0x5c, 0x7a, 0x24, 0x0e, 0x07, 0x0e, 0x1c, 0x7a, 0xef, 0x05, 0xed, 0xec, 0xae, 0x7f, 0x25, 0x69,
+	0x63, 0x87, 0xdb, 0xbc, 0x79, 0x6f, 0x3e, 0x6f, 0xf6, 0xbd, 0xef, 0xce, 0x0c, 0xdc, 0xe8, 0x12,
+	0x61, 0x06, 0xcc, 0x12, 0xee, 0x1e, 0x09, 0xb1, 0x85, 0x79, 0xe0, 0x08, 0xe2, 0x5a, 0x2e, 0xf3,
+	0x88, 0xd3, 0xc4, 0x82, 0x38, 0x01, 0x95, 0xc4, 0x8f, 0xb0, 0x0c, 0x18, 0xb5, 0x78, 0x14, 0x74,
+	0xb1, 0x24, 0x8e, 0xdb, 0x11, 0x92, 0x85, 0x98, 0x07, 0x26, 0x8f, 0x98, 0x64, 0xe8, 0xd5, 0x04,
+	0x62, 0x26, 0x10, 0x33, 0x85, 0x98, 0x27, 0x42, 0x6a, 0x2b, 0x7e, 0x20, 0xf7, 0x3a, 0x4d, 0xd3,
+	0x65, 0xa1, 0xe5, 0x33, 0x9f, 0x59, 0x8a, 0xd1, 0xec, 0xb4, 0x94, 0xa5, 0x0c, 0x35, 0x4a, 0xd8,
+	0xb5, 0x45, 0x9f, 0x31, 0xbf, 0x4d, 0xe2, 0x9d, 0x59, 0x98, 0x52, 0x26, 0x15, 0x45, 0xa4, 0xde,
+	0xab, 0xa9, 0xb7, 0xcf, 0x90, 0x41, 0x48, 0x84, 0xc4, 0x21, 0x4f, 0x03, 0xde, 0x98, 0xe4, 0xfb,
+	0xe4, 0xd7, 0x9c, 0x64, 0xe4, 0x17, 0x47, 0x17, 0x32, 0x3e, 0x9c, 0xf6, 0xca, 0xa8, 0x73, 0x78,
+	0xdd, 0xe2, 0xa8, 0xab, 0x8b, 0xdb, 0x81, 0x87, 0x25, 0x49, 0xbd, 0xc6, 0x98, 0x97, 0x08, 0x42,
+	0xbb, 0x63, 0xf0, 0xa5, 0xb1, 0x98, 0x80, 0x7c, 0xe5, 0x8c, 0x44, 0x18, 0x4f, 0x72, 0x70, 0xf1,
+	0x63, 0x1e, 0x63, 0x37, 0x98, 0x47, 0xd6, 0xb1, 0x20, 0x9b, 0x83, 0xaf, 0xb0, 0xc9, 0x97, 0x68,
+	0x11, 0x96, 0x28, 0x0e, 0x89, 0xe0, 0xd8, 0x25, 0x55, 0xb0, 0x04, 0x96, 0x4b, 0xf6, 0x60, 0x02,
+	0x21, 0x98, 0x8f, 0x8d, 0x6a, 0x4e, 0x39, 0xd4, 0x18, 0x85, 0x10, 0x0d, 0x55, 0xc2, 0xd9, 0x23,
+	0xb8, 0x2d, 0xf7, 0xaa, 0xa5, 0x25, 0xb0, 0x5c, 0x5e, 0x7d, 0xc7, 0x9c, 0xa0, 0xbf, 0xe6, 0xd0,
+	0x56, 0x1a, 0x8a, 0x62, 0xcf, 0x06, 0xe3, 0x53, 0xe8, 0x15, 0x78, 0x99, 0x76, 0xc2, 0x26, 0x89,
+	0x1c, 0xd6, 0x72, 0x22, 0xc2, 0x99, 0xa8, 0x16, 0x96, 0xc0, 0xf2, 0x8c, 0xfd, 0x5c, 0x32, 0xbd,
+	0xdd, 0xb2, 0xe3, 0x49, 0xb4, 0x02, 0xe7, 0x06, 0x71, 0x71, 0xde, 0x24, 0xf6, 0xa2, 0x8a, 0xad,
+	0x64, 0xb1, 0x75, 0x1e, 0x24, 0xe1, 0x6f, 0x42, 0xd8, 0x51, 0x75, 0xf1, 0x1c, 0x2c, 0xab, 0x45,
+	0xb5, 0xfb, 0x9a, 0x99, 0x68, 0xc4, 0xcc, 0x34, 0x62, 0x7e, 0x94, 0x69, 0xc4, 0x2e, 0xa5, 0xd1,
+	0x75, 0x89, 0x16, 0x60, 0x41, 0x12, 0x8a, 0xa9, 0xac, 0x42, 0x55, 0x96, 0xd4, 0xda, 0xca, 0x17,
+	0x2f, 0x54, 0xf2, 0x5b, 0xf9, 0x62, 0xbe, 0x32, 0xb3, 0x95, 0x2f, 0xce, 0x54, 0x0a, 0xc6, 0x55,
+	0xf8, 0xd2, 0x53, 0x8a, 0x2f, 0xb8, 0xf1, 0x4b, 0x01, 0xce, 0x25, 0x11, 0xbb, 0x2e, 0xa6, 0xbb,
+	0x12, 0xcb, 0x8e, 0x88, 0xbb, 0x32, 0x48, 0x01, 0x86, 0x53, 0x8c, 0x76, 0x2b, 0x77, 0x5a, 0xb7,
+	0x2e, 0x0c, 0x75, 0xeb, 0x65, 0x78, 0x89, 0x47, 0xec, 0x0b, 0xe2, 0x4a, 0x47, 0xf9, 0xf2, 0xca,
+	0x57, 0x4e, 0xe7, 0x6e, 0xc7, 0x21, 0x0b, 0xb0, 0x20, 0x54, 0xe6, 0xea, 0x4c, 0x92, 0x2c, 0xb1,
+	0xd0, 0x2e, 0xac, 0xee, 0xe3, 0xd6, 0x3e, 0x76, 0x42, 0x22, 0x04, 0xf6, 0x89, 0xe3, 0x46, 0x24,
+	0x2b, 0x58, 0xe1, 0x99, 0x05, 0x7b, 0x41, 0xad, 0xbd, 0x95, 0x2c, 0xdd, 0x48, 0x56, 0xd6, 0x25,
+	0xba, 0x03, 0x2f, 0x72, 0x42, 0xbd, 0x80, 0xfa, 0xaa, 0x35, 0x93, 0x4a, 0x66, 0x50, 0xa6, 0x9d,
+	0x84, 0xd2, 0xd0, 0xec, 0x0c, 0x88, 0x3c, 0x58, 0x0e, 0xa8, 0xc3, 0x23, 0xe6, 0x47, 0x44, 0x88,
+	0xb4, 0xa9, 0xf5, 0x29, 0xf9, 0x9b, 0x74, 0x27, 0x05, 0x35, 0x34, 0x1b, 0x06, 0x7d, 0x0b, 0x7d,
+	0x08, 0xf3, 0x1e, 0xa3, 0x24, 0x55, 0xfc, 0x5b, 0x53, 0xe2, 0xdf, 0x63, 0x94, 0x34, 0x34, 0x5b,
+	0xa1, 0xd0, 0x27, 0xb0, 0xd0, 0xc2, 0x41, 0x9b, 0x78, 0x4a, 0x51, 0xe5, 0xd5, 0x1b, 0x53, 0x42,
+	0x6f, 0x2a, 0x48, 0x43, 0xb3, 0x53, 0x1c, 0xfa, 0x1c, 0x96, 0x5c, 0x4c, 0x5d, 0xd2, 0x8e, 0xd9,
+	0x65, 0xc5, 0x5e, 0x9b, 0x92, 0xbd, 0x91, 0x71, 0x1a, 0x9a, 0x3d, 0x80, 0xa2, 0xcf, 0x60, 0x29,
+	0x3e, 0x48, 0x3d, 0x87, 0x75, 0x64, 0xf5, 0x92, 0xca, 0xf0, 0xee, 0x94, 0x19, 0x62, 0xed, 0x78,
+	0xdb, 0x1d, 0xd9, 0xd0, 0xec, 0xa2, 0x4c, 0xc7, 0xeb, 0xb3, 0xf0, 0x72, 0x22, 0x47, 0x27, 0x24,
+	0x12, 0x7b, 0x58, 0x62, 0xe3, 0x36, 0x9c, 0x3d, 0x26, 0x83, 0xf8, 0x7f, 0x1e, 0x92, 0x27, 0x78,
+	0xf6, 0xff, 0xec, 0x66, 0x92, 0x34, 0x42, 0x38, 0x7f, 0x52, 0xdb, 0x63, 0xa4, 0x90, 0x38, 0x3a,
+	0x3b, 0x32, 0x8d, 0xae, 0x4b, 0x54, 0x83, 0xc5, 0xbe, 0x0c, 0x73, 0xea, 0x04, 0xea, 0xdb, 0xc6,
+	0xb7, 0xf0, 0xf9, 0x51, 0x19, 0xa0, 0x1b, 0xf0, 0x92, 0xcb, 0x42, 0xde, 0x26, 0x67, 0x4e, 0x55,
+	0xee, 0xc7, 0xd7, 0x25, 0x32, 0xe1, 0x5c, 0x5c, 0x62, 0x42, 0x3d, 0xce, 0x02, 0x2a, 0x85, 0xd3,
+	0x62, 0x1d, 0xea, 0xa5, 0x79, 0x67, 0x31, 0x0f, 0xde, 0xcf, 0x3c, 0x37, 0x63, 0x87, 0xb1, 0x0c,
+	0x2b, 0xe3, 0x92, 0x41, 0xf3, 0x70, 0x86, 0x44, 0x11, 0x8b, 0xd2, 0xf3, 0x26, 0x31, 0x8c, 0x15,
+	0x38, 0x77, 0x82, 0x00, 0xe2, 0x03, 0x23, 0x22, 0x58, 0x30, 0x9a, 0x9d, 0x4e, 0x89, 0x65, 0x7c,
+	0x0f, 0x20, 0x3a, 0xde, 0xce, 0xf3, 0xd4, 0x71, 0xbc, 0x32, 0xb9, 0x89, 0x2a, 0x63, 0x2c, 0xc0,
+	0xf9, 0xe3, 0xa7, 0xab, 0xe0, 0xab, 0xbf, 0xe6, 0x61, 0x65, 0x27, 0x79, 0xa1, 0x6c, 0xa8, 0x07,
+	0x4a, 0x7d, 0x67, 0x13, 0x3d, 0x01, 0xf0, 0xca, 0xa9, 0xa7, 0x35, 0xda, 0x9c, 0x48, 0xd4, 0x4f,
+	0xbb, 0x72, 0x6b, 0x5b, 0xff, 0x17, 0x4a, 0x70, 0xe3, 0x83, 0xfb, 0x7f, 0xfe, 0xfd, 0x63, 0xae,
+	0x6e, 0xbc, 0x9d, 0xbd, 0xb8, 0xac, 0xfe, 0x75, 0x20, 0xac, 0x6f, 0xfa, 0xe3, 0x7b, 0xa7, 0x3c,
+	0x63, 0x54, 0xc4, 0xbd, 0xeb, 0xe0, 0x1a, 0xfa, 0x17, 0xc0, 0xca, 0x78, 0xad, 0xd0, 0xda, 0x14,
+	0x3b, 0x1d, 0xb9, 0xc8, 0x6a, 0xf5, 0x73, 0x12, 0x04, 0x37, 0x76, 0xd5, 0x27, 0xde, 0x32, 0x1a,
+	0xe7, 0xf9, 0x44, 0x4b, 0xb8, 0x98, 0x5a, 0xc9, 0x1d, 0x7e, 0x1d, 0x5c, 0xab, 0xad, 0x3d, 0x7c,
+	0x00, 0xf2, 0x7f, 0x3c, 0x00, 0xab, 0x93, 0x6c, 0x6f, 0xbb, 0x19, 0xdf, 0x99, 0xf7, 0x7f, 0xaf,
+	0xe6, 0x2a, 0x60, 0xfd, 0x27, 0x70, 0x70, 0xa8, 0x6b, 0x8f, 0x0e, 0x75, 0xed, 0xf1, 0xa1, 0x0e,
+	0xbe, 0xeb, 0xe9, 0xe0, 0xe7, 0x9e, 0x0e, 0x7e, 0xeb, 0xe9, 0xe0, 0xa0, 0xa7, 0x83, 0xbf, 0x7a,
+	0x3a, 0xf8, 0xa7, 0xa7, 0x6b, 0x8f, 0x7b, 0x3a, 0xf8, 0xe1, 0x48, 0xd7, 0x1e, 0x1e, 0xe9, 0xe0,
+	0xe0, 0x48, 0xd7, 0x1e, 0x1d, 0xe9, 0xda, 0x9d, 0x4f, 0x7d, 0xc6, 0xf7, 0x7d, 0xb3, 0xcb, 0xda,
+	0x92, 0x44, 0x11, 0x36, 0x3b, 0xc2, 0x52, 0x83, 0x16, 0x8b, 0xc2, 0x15, 0x1e, 0xb1, 0x6e, 0xe0,
+	0x91, 0x68, 0xa5, 0xf5, 0xfa, 0x5d, 0xd7, 0xe2, 0x4d, 0x9f, 0x59, 0xe4, 0xae, 0x4c, 0x5f, 0x78,
+	0x67, 0x79, 0x9b, 0x36, 0x0b, 0xea, 0xb7, 0x78, 0xed, 0xbf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x78,
+	0xb5, 0xa8, 0x8f, 0xb1, 0x0b, 0x00, 0x00,
 }
 
 func (this *UpdateCodeBaseIntegrationReq) Equal(that interface{}) bool {
@@ -283,6 +828,372 @@ func (this *UpdateCodeBaseIntegrationResp) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *UpdateScanStatusReq) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusReq)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusReq)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Tenant != that1.Tenant {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.ProjectName != that1.ProjectName {
+		return false
+	}
+	if this.Status != that1.Status {
+		return false
+	}
+	if !this.KafkaMessageCreatedAt.Equal(that1.KafkaMessageCreatedAt) {
+		return false
+	}
+	if that1.StatusMetadata == nil {
+		if this.StatusMetadata != nil {
+			return false
+		}
+	} else if this.StatusMetadata == nil {
+		return false
+	} else if !this.StatusMetadata.Equal(that1.StatusMetadata) {
+		return false
+	}
+	return true
+}
+func (this *UpdateScanStatusReq_Pending) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusReq_Pending)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusReq_Pending)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Pending.Equal(that1.Pending) {
+		return false
+	}
+	return true
+}
+func (this *UpdateScanStatusReq_InProgress) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusReq_InProgress)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusReq_InProgress)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.InProgress.Equal(that1.InProgress) {
+		return false
+	}
+	return true
+}
+func (this *UpdateScanStatusReq_Done) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusReq_Done)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusReq_Done)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Done.Equal(that1.Done) {
+		return false
+	}
+	return true
+}
+func (this *UpdateScanStatusReq_Failed) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusReq_Failed)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusReq_Failed)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Failed.Equal(that1.Failed) {
+		return false
+	}
+	return true
+}
+func (this *UpdateScanStatusReq_Cancelled) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusReq_Cancelled)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusReq_Cancelled)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Cancelled.Equal(that1.Cancelled) {
+		return false
+	}
+	return true
+}
+func (this *UpdateScanStatusReq_TimedOut) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusReq_TimedOut)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusReq_TimedOut)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.TimedOut.Equal(that1.TimedOut) {
+		return false
+	}
+	return true
+}
+func (this *ScanStatusPending) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ScanStatusPending)
+	if !ok {
+		that2, ok := that.(ScanStatusPending)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.CreatedAt.Equal(that1.CreatedAt) {
+		return false
+	}
+	return true
+}
+func (this *ScanStatusInProgress) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ScanStatusInProgress)
+	if !ok {
+		that2, ok := that.(ScanStatusInProgress)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StartedAt.Equal(that1.StartedAt) {
+		return false
+	}
+	if this.Progress != that1.Progress {
+		return false
+	}
+	return true
+}
+func (this *ScanStatusDone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ScanStatusDone)
+	if !ok {
+		that2, ok := that.(ScanStatusDone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.CompletedAt.Equal(that1.CompletedAt) {
+		return false
+	}
+	if this.ApiEndpointsFound != that1.ApiEndpointsFound {
+		return false
+	}
+	return true
+}
+func (this *ScanStatusFailed) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ScanStatusFailed)
+	if !ok {
+		that2, ok := that.(ScanStatusFailed)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Error != that1.Error {
+		return false
+	}
+	return true
+}
+func (this *ScanStatusCancelled) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ScanStatusCancelled)
+	if !ok {
+		that2, ok := that.(ScanStatusCancelled)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Reason != that1.Reason {
+		return false
+	}
+	return true
+}
+func (this *ScanStatusTimedOut) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ScanStatusTimedOut)
+	if !ok {
+		that2, ok := that.(ScanStatusTimedOut)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StartedAt.Equal(that1.StartedAt) {
+		return false
+	}
+	if !this.CompletedAt.Equal(that1.CompletedAt) {
+		return false
+	}
+	return true
+}
+func (this *UpdateScanStatusResp) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UpdateScanStatusResp)
+	if !ok {
+		that2, ok := that.(UpdateScanStatusResp)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	return true
+}
 func (this *UpdateCodeBaseIntegrationReq) GoString() string {
 	if this == nil {
 		return "nil"
@@ -312,6 +1223,156 @@ func (this *UpdateCodeBaseIntegrationResp) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *UpdateScanStatusReq) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 16)
+	s = append(s, "&code_base_integration.UpdateScanStatusReq{")
+	s = append(s, "Tenant: "+fmt.Sprintf("%#v", this.Tenant)+",\n")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "ProjectName: "+fmt.Sprintf("%#v", this.ProjectName)+",\n")
+	s = append(s, "Status: "+fmt.Sprintf("%#v", this.Status)+",\n")
+	if this.KafkaMessageCreatedAt != nil {
+		s = append(s, "KafkaMessageCreatedAt: "+fmt.Sprintf("%#v", this.KafkaMessageCreatedAt)+",\n")
+	}
+	if this.StatusMetadata != nil {
+		s = append(s, "StatusMetadata: "+fmt.Sprintf("%#v", this.StatusMetadata)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateScanStatusReq_Pending) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&code_base_integration.UpdateScanStatusReq_Pending{` +
+		`Pending:` + fmt.Sprintf("%#v", this.Pending) + `}`}, ", ")
+	return s
+}
+func (this *UpdateScanStatusReq_InProgress) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&code_base_integration.UpdateScanStatusReq_InProgress{` +
+		`InProgress:` + fmt.Sprintf("%#v", this.InProgress) + `}`}, ", ")
+	return s
+}
+func (this *UpdateScanStatusReq_Done) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&code_base_integration.UpdateScanStatusReq_Done{` +
+		`Done:` + fmt.Sprintf("%#v", this.Done) + `}`}, ", ")
+	return s
+}
+func (this *UpdateScanStatusReq_Failed) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&code_base_integration.UpdateScanStatusReq_Failed{` +
+		`Failed:` + fmt.Sprintf("%#v", this.Failed) + `}`}, ", ")
+	return s
+}
+func (this *UpdateScanStatusReq_Cancelled) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&code_base_integration.UpdateScanStatusReq_Cancelled{` +
+		`Cancelled:` + fmt.Sprintf("%#v", this.Cancelled) + `}`}, ", ")
+	return s
+}
+func (this *UpdateScanStatusReq_TimedOut) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&code_base_integration.UpdateScanStatusReq_TimedOut{` +
+		`TimedOut:` + fmt.Sprintf("%#v", this.TimedOut) + `}`}, ", ")
+	return s
+}
+func (this *ScanStatusPending) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&code_base_integration.ScanStatusPending{")
+	if this.CreatedAt != nil {
+		s = append(s, "CreatedAt: "+fmt.Sprintf("%#v", this.CreatedAt)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ScanStatusInProgress) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&code_base_integration.ScanStatusInProgress{")
+	if this.StartedAt != nil {
+		s = append(s, "StartedAt: "+fmt.Sprintf("%#v", this.StartedAt)+",\n")
+	}
+	s = append(s, "Progress: "+fmt.Sprintf("%#v", this.Progress)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ScanStatusDone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&code_base_integration.ScanStatusDone{")
+	if this.CompletedAt != nil {
+		s = append(s, "CompletedAt: "+fmt.Sprintf("%#v", this.CompletedAt)+",\n")
+	}
+	s = append(s, "ApiEndpointsFound: "+fmt.Sprintf("%#v", this.ApiEndpointsFound)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ScanStatusFailed) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&code_base_integration.ScanStatusFailed{")
+	s = append(s, "Error: "+fmt.Sprintf("%#v", this.Error)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ScanStatusCancelled) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&code_base_integration.ScanStatusCancelled{")
+	s = append(s, "Reason: "+fmt.Sprintf("%#v", this.Reason)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ScanStatusTimedOut) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&code_base_integration.ScanStatusTimedOut{")
+	if this.StartedAt != nil {
+		s = append(s, "StartedAt: "+fmt.Sprintf("%#v", this.StartedAt)+",\n")
+	}
+	if this.CompletedAt != nil {
+		s = append(s, "CompletedAt: "+fmt.Sprintf("%#v", this.CompletedAt)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UpdateScanStatusResp) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&code_base_integration.UpdateScanStatusResp{")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func valueToGoStringPrivateCustomapi(v interface{}, typ string) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -334,6 +1395,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type PrivateCustomAPIClient interface {
 	UpdateCodeBaseIntegration(ctx context.Context, in *UpdateCodeBaseIntegrationReq, opts ...grpc.CallOption) (*UpdateCodeBaseIntegrationResp, error)
+	UpdateScanStatus(ctx context.Context, in *UpdateScanStatusReq, opts ...grpc.CallOption) (*UpdateScanStatusResp, error)
 }
 
 type privateCustomAPIClient struct {
@@ -353,9 +1415,19 @@ func (c *privateCustomAPIClient) UpdateCodeBaseIntegration(ctx context.Context, 
 	return out, nil
 }
 
+func (c *privateCustomAPIClient) UpdateScanStatus(ctx context.Context, in *UpdateScanStatusReq, opts ...grpc.CallOption) (*UpdateScanStatusResp, error) {
+	out := new(UpdateScanStatusResp)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.api_sec.code_base_integration.PrivateCustomAPI/UpdateScanStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PrivateCustomAPIServer is the server API for PrivateCustomAPI service.
 type PrivateCustomAPIServer interface {
 	UpdateCodeBaseIntegration(context.Context, *UpdateCodeBaseIntegrationReq) (*UpdateCodeBaseIntegrationResp, error)
+	UpdateScanStatus(context.Context, *UpdateScanStatusReq) (*UpdateScanStatusResp, error)
 }
 
 // UnimplementedPrivateCustomAPIServer can be embedded to have forward compatible implementations.
@@ -364,6 +1436,9 @@ type UnimplementedPrivateCustomAPIServer struct {
 
 func (*UnimplementedPrivateCustomAPIServer) UpdateCodeBaseIntegration(ctx context.Context, req *UpdateCodeBaseIntegrationReq) (*UpdateCodeBaseIntegrationResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCodeBaseIntegration not implemented")
+}
+func (*UnimplementedPrivateCustomAPIServer) UpdateScanStatus(ctx context.Context, req *UpdateScanStatusReq) (*UpdateScanStatusResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateScanStatus not implemented")
 }
 
 func RegisterPrivateCustomAPIServer(s *grpc.Server, srv PrivateCustomAPIServer) {
@@ -388,6 +1463,24 @@ func _PrivateCustomAPI_UpdateCodeBaseIntegration_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PrivateCustomAPI_UpdateScanStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateScanStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrivateCustomAPIServer).UpdateScanStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.api_sec.code_base_integration.PrivateCustomAPI/UpdateScanStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrivateCustomAPIServer).UpdateScanStatus(ctx, req.(*UpdateScanStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _PrivateCustomAPI_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ves.io.schema.api_sec.code_base_integration.PrivateCustomAPI",
 	HandlerType: (*PrivateCustomAPIServer)(nil),
@@ -395,6 +1488,10 @@ var _PrivateCustomAPI_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateCodeBaseIntegration",
 			Handler:    _PrivateCustomAPI_UpdateCodeBaseIntegration_Handler,
+		},
+		{
+			MethodName: "UpdateScanStatus",
+			Handler:    _PrivateCustomAPI_UpdateScanStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -502,6 +1599,456 @@ func (m *UpdateCodeBaseIntegrationResp) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
+func (m *UpdateScanStatusReq) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateScanStatusReq) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.StatusMetadata != nil {
+		{
+			size := m.StatusMetadata.Size()
+			i -= size
+			if _, err := m.StatusMetadata.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.KafkaMessageCreatedAt != nil {
+		{
+			size, err := m.KafkaMessageCreatedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Status) > 0 {
+		i -= len(m.Status)
+		copy(dAtA[i:], m.Status)
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(len(m.Status)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.ProjectName) > 0 {
+		i -= len(m.ProjectName)
+		copy(dAtA[i:], m.ProjectName)
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(len(m.ProjectName)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Tenant) > 0 {
+		i -= len(m.Tenant)
+		copy(dAtA[i:], m.Tenant)
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(len(m.Tenant)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateScanStatusReq_Pending) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusReq_Pending) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Pending != nil {
+		{
+			size, err := m.Pending.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UpdateScanStatusReq_InProgress) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusReq_InProgress) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.InProgress != nil {
+		{
+			size, err := m.InProgress.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UpdateScanStatusReq_Done) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusReq_Done) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Done != nil {
+		{
+			size, err := m.Done.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x4a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UpdateScanStatusReq_Failed) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusReq_Failed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Failed != nil {
+		{
+			size, err := m.Failed.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x52
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UpdateScanStatusReq_Cancelled) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusReq_Cancelled) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Cancelled != nil {
+		{
+			size, err := m.Cancelled.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x5a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UpdateScanStatusReq_TimedOut) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusReq_TimedOut) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.TimedOut != nil {
+		{
+			size, err := m.TimedOut.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x62
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ScanStatusPending) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ScanStatusPending) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ScanStatusPending) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.CreatedAt != nil {
+		{
+			size, err := m.CreatedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ScanStatusInProgress) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ScanStatusInProgress) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ScanStatusInProgress) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Progress != 0 {
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(m.Progress))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.StartedAt != nil {
+		{
+			size, err := m.StartedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ScanStatusDone) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ScanStatusDone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ScanStatusDone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ApiEndpointsFound != 0 {
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(m.ApiEndpointsFound))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.CompletedAt != nil {
+		{
+			size, err := m.CompletedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ScanStatusFailed) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ScanStatusFailed) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ScanStatusFailed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Error) > 0 {
+		i -= len(m.Error)
+		copy(dAtA[i:], m.Error)
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(len(m.Error)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ScanStatusCancelled) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ScanStatusCancelled) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ScanStatusCancelled) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Reason) > 0 {
+		i -= len(m.Reason)
+		copy(dAtA[i:], m.Reason)
+		i = encodeVarintPrivateCustomapi(dAtA, i, uint64(len(m.Reason)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ScanStatusTimedOut) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ScanStatusTimedOut) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ScanStatusTimedOut) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.CompletedAt != nil {
+		{
+			size, err := m.CompletedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.StartedAt != nil {
+		{
+			size, err := m.StartedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPrivateCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UpdateScanStatusResp) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UpdateScanStatusResp) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateScanStatusResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintPrivateCustomapi(dAtA []byte, offset int, v uint64) int {
 	offset -= sovPrivateCustomapi(v)
 	base := offset
@@ -557,6 +2104,211 @@ func (m *UpdateCodeBaseIntegrationResp) Size() (n int) {
 	return n
 }
 
+func (m *UpdateScanStatusReq) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Tenant)
+	if l > 0 {
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	l = len(m.ProjectName)
+	if l > 0 {
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	l = len(m.Status)
+	if l > 0 {
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	if m.KafkaMessageCreatedAt != nil {
+		l = m.KafkaMessageCreatedAt.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	if m.StatusMetadata != nil {
+		n += m.StatusMetadata.Size()
+	}
+	return n
+}
+
+func (m *UpdateScanStatusReq_Pending) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Pending != nil {
+		l = m.Pending.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *UpdateScanStatusReq_InProgress) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.InProgress != nil {
+		l = m.InProgress.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *UpdateScanStatusReq_Done) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Done != nil {
+		l = m.Done.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *UpdateScanStatusReq_Failed) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Failed != nil {
+		l = m.Failed.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *UpdateScanStatusReq_Cancelled) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Cancelled != nil {
+		l = m.Cancelled.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *UpdateScanStatusReq_TimedOut) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TimedOut != nil {
+		l = m.TimedOut.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *ScanStatusPending) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CreatedAt != nil {
+		l = m.CreatedAt.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *ScanStatusInProgress) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StartedAt != nil {
+		l = m.StartedAt.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	if m.Progress != 0 {
+		n += 1 + sovPrivateCustomapi(uint64(m.Progress))
+	}
+	return n
+}
+
+func (m *ScanStatusDone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CompletedAt != nil {
+		l = m.CompletedAt.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	if m.ApiEndpointsFound != 0 {
+		n += 1 + sovPrivateCustomapi(uint64(m.ApiEndpointsFound))
+	}
+	return n
+}
+
+func (m *ScanStatusFailed) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Error)
+	if l > 0 {
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *ScanStatusCancelled) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Reason)
+	if l > 0 {
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *ScanStatusTimedOut) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StartedAt != nil {
+		l = m.StartedAt.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	if m.CompletedAt != nil {
+		l = m.CompletedAt.Size()
+		n += 1 + l + sovPrivateCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *UpdateScanStatusResp) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
 func sovPrivateCustomapi(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -584,6 +2336,154 @@ func (this *UpdateCodeBaseIntegrationResp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&UpdateCodeBaseIntegrationResp{`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusReq) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusReq{`,
+		`Tenant:` + fmt.Sprintf("%v", this.Tenant) + `,`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`ProjectName:` + fmt.Sprintf("%v", this.ProjectName) + `,`,
+		`Status:` + fmt.Sprintf("%v", this.Status) + `,`,
+		`KafkaMessageCreatedAt:` + strings.Replace(fmt.Sprintf("%v", this.KafkaMessageCreatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`StatusMetadata:` + fmt.Sprintf("%v", this.StatusMetadata) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusReq_Pending) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusReq_Pending{`,
+		`Pending:` + strings.Replace(fmt.Sprintf("%v", this.Pending), "ScanStatusPending", "ScanStatusPending", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusReq_InProgress) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusReq_InProgress{`,
+		`InProgress:` + strings.Replace(fmt.Sprintf("%v", this.InProgress), "ScanStatusInProgress", "ScanStatusInProgress", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusReq_Done) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusReq_Done{`,
+		`Done:` + strings.Replace(fmt.Sprintf("%v", this.Done), "ScanStatusDone", "ScanStatusDone", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusReq_Failed) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusReq_Failed{`,
+		`Failed:` + strings.Replace(fmt.Sprintf("%v", this.Failed), "ScanStatusFailed", "ScanStatusFailed", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusReq_Cancelled) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusReq_Cancelled{`,
+		`Cancelled:` + strings.Replace(fmt.Sprintf("%v", this.Cancelled), "ScanStatusCancelled", "ScanStatusCancelled", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusReq_TimedOut) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusReq_TimedOut{`,
+		`TimedOut:` + strings.Replace(fmt.Sprintf("%v", this.TimedOut), "ScanStatusTimedOut", "ScanStatusTimedOut", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ScanStatusPending) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ScanStatusPending{`,
+		`CreatedAt:` + strings.Replace(fmt.Sprintf("%v", this.CreatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ScanStatusInProgress) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ScanStatusInProgress{`,
+		`StartedAt:` + strings.Replace(fmt.Sprintf("%v", this.StartedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`Progress:` + fmt.Sprintf("%v", this.Progress) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ScanStatusDone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ScanStatusDone{`,
+		`CompletedAt:` + strings.Replace(fmt.Sprintf("%v", this.CompletedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`ApiEndpointsFound:` + fmt.Sprintf("%v", this.ApiEndpointsFound) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ScanStatusFailed) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ScanStatusFailed{`,
+		`Error:` + fmt.Sprintf("%v", this.Error) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ScanStatusCancelled) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ScanStatusCancelled{`,
+		`Reason:` + fmt.Sprintf("%v", this.Reason) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ScanStatusTimedOut) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ScanStatusTimedOut{`,
+		`StartedAt:` + strings.Replace(fmt.Sprintf("%v", this.StartedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`CompletedAt:` + strings.Replace(fmt.Sprintf("%v", this.CompletedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UpdateScanStatusResp) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UpdateScanStatusResp{`,
 		`}`,
 	}, "")
 	return s
@@ -879,6 +2779,1094 @@ func (m *UpdateCodeBaseIntegrationResp) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: UpdateCodeBaseIntegrationResp: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateScanStatusReq) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateScanStatusReq: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateScanStatusReq: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tenant", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Tenant = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProjectName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ProjectName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Status = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field KafkaMessageCreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.KafkaMessageCreatedAt == nil {
+				m.KafkaMessageCreatedAt = &types.Timestamp{}
+			}
+			if err := m.KafkaMessageCreatedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pending", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ScanStatusPending{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatusMetadata = &UpdateScanStatusReq_Pending{v}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field InProgress", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ScanStatusInProgress{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatusMetadata = &UpdateScanStatusReq_InProgress{v}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Done", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ScanStatusDone{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatusMetadata = &UpdateScanStatusReq_Done{v}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Failed", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ScanStatusFailed{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatusMetadata = &UpdateScanStatusReq_Failed{v}
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Cancelled", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ScanStatusCancelled{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatusMetadata = &UpdateScanStatusReq_Cancelled{v}
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TimedOut", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ScanStatusTimedOut{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatusMetadata = &UpdateScanStatusReq_TimedOut{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ScanStatusPending) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ScanStatusPending: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ScanStatusPending: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = &types.Timestamp{}
+			}
+			if err := m.CreatedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ScanStatusInProgress) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ScanStatusInProgress: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ScanStatusInProgress: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.StartedAt == nil {
+				m.StartedAt = &types.Timestamp{}
+			}
+			if err := m.StartedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Progress", wireType)
+			}
+			m.Progress = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Progress |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ScanStatusDone) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ScanStatusDone: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ScanStatusDone: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CompletedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CompletedAt == nil {
+				m.CompletedAt = &types.Timestamp{}
+			}
+			if err := m.CompletedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApiEndpointsFound", wireType)
+			}
+			m.ApiEndpointsFound = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ApiEndpointsFound |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ScanStatusFailed) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ScanStatusFailed: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ScanStatusFailed: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Error", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Error = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ScanStatusCancelled) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ScanStatusCancelled: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ScanStatusCancelled: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reason", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Reason = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ScanStatusTimedOut) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ScanStatusTimedOut: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ScanStatusTimedOut: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.StartedAt == nil {
+				m.StartedAt = &types.Timestamp{}
+			}
+			if err := m.StartedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CompletedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPrivateCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CompletedAt == nil {
+				m.CompletedAt = &types.Timestamp{}
+			}
+			if err := m.CompletedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPrivateCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPrivateCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UpdateScanStatusResp) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPrivateCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UpdateScanStatusResp: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UpdateScanStatusResp: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

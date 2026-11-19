@@ -14,18 +14,79 @@
 page_title: "f5xc_advertise_policy Resource - F5 XC Distributed Cloud"
 subcategory: "Networking & Connectivity"
 description: |-
-  advertise policy object advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers. Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE). A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port. So the problem of configuring VIP and Service port is made possible by advertise policy. There three things to be decided * Network * VIP * Protocol and Port Network is decided by a concrete network reference Network can be inferred automatically based on site and network type Network can be inferred automatically based on all site selected by virtual site and network type VIP can be automatically allocated by the system  or configured. Most of the time VIP is the interface IP of the Application gateway in the given network. Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system. A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
+  advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.<br>Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE).<br><br>A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port.<br>So the problem of configuring VIP and Service port is made possible by advertise policy.<br>There three things to be decided<br><br>* Network<br>* VIP<br>* Protocol and Port<br><br>Network is decided by a concrete network reference<br>Network can be inferred automatically based on site and network type<br>Network can be inferred automatically based on all site selected by virtual site and network type<br><br>VIP can be automatically allocated by the system  or configured.<br>Most of the time VIP is the interface IP of the Application gateway in the given network.<br><br>Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system.<br>A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
 ---
 
 # f5xc_advertise_policy (Resource)
 
-advertise policy object advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers. Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE). A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port. So the problem of configuring VIP and Service port is made possible by advertise policy. There three things to be decided * Network * VIP * Protocol and Port Network is decided by a concrete network reference Network can be inferred automatically based on site and network type Network can be inferred automatically based on all site selected by virtual site and network type VIP can be automatically allocated by the system  or configured. Most of the time VIP is the interface IP of the Application gateway in the given network. Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system. A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
+advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.<br>Basic concept is a service is made available to consumers in a given virtual_network/site/region(RE).<br><br>A Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port.<br>So the problem of configuring VIP and Service port is made possible by advertise policy.<br>There three things to be decided<br><br>* Network<br>* VIP<br>* Protocol and Port<br><br>Network is decided by a concrete network reference<br>Network can be inferred automatically based on site and network type<br>Network can be inferred automatically based on all site selected by virtual site and network type<br><br>VIP can be automatically allocated by the system  or configured.<br>Most of the time VIP is the interface IP of the Application gateway in the given network.<br><br>Each advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system.<br>A Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.
 
 To get more information about f5xc_advertise_policy, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/advertise-policy)
 
+## Example Usage
 
+```terraform
+# Example: Advertise Policy - Full
+
+resource "f5xc_virtual_network" "example" {
+  name      = "example-vn-4q6hl815"
+  namespace = "system"
+
+  network_choice = {
+    site_local_network = true
+  }
+}
+
+resource "f5xc_advertise_policy" "example" {
+  depends_on = [f5xc_virtual_network.example]
+
+  name            = "example-advertise-policy-4q6hl815"
+  namespace       = "default"
+  description     = "Acceptance test advertise policy"
+  protocol        = "UDP"
+  skip_xff_append = true
+
+  labels = {
+    env  = "example"
+    team = "platform"
+  }
+
+  annotations = {
+    owner = "networking"
+  }
+
+  where = {
+    ref_or_selector_choice = {
+      virtual_network = {
+        ref = [{
+          namespace = f5xc_virtual_network.example.namespace
+          name      = f5xc_virtual_network.example.name
+        }]
+      }
+    }
+  }
+
+  port_choice = {
+    port_ranges = "443,8443"
+  }
+
+  tls_parameters = {
+    client_certificate_verify_choice = {
+      no_client_certificate = true
+    }
+
+    xfcc_header_elements = ["XFCC_SUBJECT"]
+
+    common_params = {
+      minimum_protocol_version = ["TLSv1_2"]
+      maximum_protocol_version = ["TLSv1_3"]
+      cipher_suites            = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"]
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -34,16 +95,16 @@ To get more information about f5xc_advertise_policy, refer:
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `port_choice` (Attributes) Port Port to advertise. (see [below for nested schema](#nestedatt--port_choice))
+- `port_choice` (Attributes) Port Port to advertise.<br>Exactly one of `port` or `port_ranges` must be specified. (see [below for nested schema](#nestedatt--port_choice))
 
 ### Optional
 
-- `address` (String) address Optional. VIP to advertise. This VIP can be either V4/V6 address You can not specify this if where contains a site or virtual site of type REGIONAL_EDGE or public network If not specified and 'where' is specified with site or virtual site option, inside_vip or outside_vip specified in the site object will be used based on the network type. If inside_vip/outside_vip is not configured in the site object, system use interface ip in the respected networks.
-- `address_type_choice` (Attributes) address_type Indicates the VIP address family to use for this advertise policy. Select ipv4, ipv6 or dualstack. Defaults to ipv4. (see [below for nested schema](#nestedatt--address_type_choice))
+- `address` (String) address Optional. VIP to advertise. This VIP can be either V4/V6 address You can not specify this if where contains a site or virtual site of type REGIONAL_EDGE or public network If not specified and 'where' is specified with site or virtual site option, inside_vip or outside_vip specified in the site object will be used based on the network type. If inside_vip/outside_vip is not configured in the site object, system use interface ip in the respected networks.<br>**Default:** ``
+- `address_type_choice` (Attributes) address_type Indicates the VIP address family to use for this advertise policy. Select ipv4, ipv6 or dualstack. Defaults to ipv4.<br>Exactly one of `dualstack`, `ipv4`, or `ipv6` must be specified when `address_type_choice` is configured. (see [below for nested schema](#nestedatt--address_type_choice))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `protocol` (String) protocol Protocol to advertise.<br>**Default:** `TCP`
+- `protocol` (String) protocol Protocol to advertise.<br>**Default:** `TCP`<br>**Allowed Values (choose one):** `['TCP', 'UDP']`
 - `public_ip` (Attributes List) Public IP Optional. Public VIP to advertise This field is mutually exclusive with where and address fields. (see [below for nested schema](#nestedatt--public_ip))
 - `skip_xff_append` (Boolean) skip_xff_append<br>**Default:** `false`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -59,8 +120,8 @@ To get more information about f5xc_advertise_policy, refer:
 
 Optional:
 
-- `port` (Number) Port Port to advertise.
-- `port_ranges` (String) Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`
+- `port` (Number) Port Port to advertise.<br>Conflicts with `port_ranges`.
+- `port_ranges` (String) Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `port`.
 
 
 <a id="nestedatt--address_type_choice"></a>
@@ -68,9 +129,9 @@ Optional:
 
 Optional:
 
-- `dualstack` (Boolean) Dual Stack Advertise on both IPv4 and IPv6 simultaneously.
-- `ipv4` (Boolean) IPv4 Advertise on IPv4 only.
-- `ipv6` (Boolean) IPv6 Advertise on IPv6 only.
+- `dualstack` (Boolean) Dual Stack Advertise on both IPv4 and IPv6 simultaneously.<br>Conflicts with `ipv4` and `ipv6`.
+- `ipv4` (Boolean) IPv4 Advertise on IPv4 only.<br>Conflicts with `dualstack` and `ipv6`.
+- `ipv6` (Boolean) IPv6 Advertise on IPv6 only.<br>Conflicts with `dualstack` and `ipv4`.
 
 
 <a id="nestedatt--public_ip"></a>
@@ -81,7 +142,7 @@ Required:
 - `name` (String)
 - `namespace` (String)
 
-Read-Only:
+Optional:
 
 - `tenant` (String)
 
@@ -100,23 +161,19 @@ Optional:
 <a id="nestedatt--tls_parameters"></a>
 ### Nested Schema for `tls_parameters`
 
-Required:
-
-- `client_certificate_verify_choice` (Attributes) Client certificate verification Configuration to indicate whether client certificate verification is required (see [below for nested schema](#nestedatt--tls_parameters--client_certificate_verify_choice))
-
 Optional:
 
+- `client_certificate_verify_choice` (Attributes) Client certificate verification Configuration to indicate whether client certificate verification is required<br>Exactly one of `client_certificate_optional`, `client_certificate_required`, or `no_client_certificate` must be specified when `client_certificate_verify_choice` is configured. (see [below for nested schema](#nestedatt--tls_parameters--client_certificate_verify_choice))
 - `common_params` (Attributes) common_params Common TLS parameters used in both upstream and downstream connections (see [below for nested schema](#nestedatt--tls_parameters--common_params))
-- `xfcc_header_elements` (List of String) XFCC Header X-Forwarded-Client-Cert header elements to be set in an mTLS enabled connections. If none are defined, the header will not be added.<br>**Valid Options:** `['XFCC_CERT', 'XFCC_CHAIN', 'XFCC_DNS', 'XFCC_NONE', 'XFCC_SUBJECT', 'XFCC_URI']` (Multiple selection allowed)<br>**Default:** `XFCC_NONE`
 
 <a id="nestedatt--tls_parameters--client_certificate_verify_choice"></a>
 ### Nested Schema for `tls_parameters.client_certificate_verify_choice`
 
 Optional:
 
-- `client_certificate_optional` (Boolean) client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.
-- `client_certificate_required` (Boolean) client_certificate_required Client certificate is mandatory. F5XC will reject connections without a valid client certificate.
-- `no_client_certificate` (Boolean) no_client_certificate Client certificate is not required. If the client has provided a certificate, it will be ignored (not used for verification)
+- `client_certificate_optional` (Boolean) client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.<br>Conflicts with `client_certificate_required` and `no_client_certificate`.
+- `client_certificate_required` (Boolean) client_certificate_required Client certificate is mandatory. F5XC will reject connections without a valid client certificate.<br>Conflicts with `client_certificate_optional` and `no_client_certificate`.
+- `no_client_certificate` (Boolean) no_client_certificate Client certificate is not required. If the client has provided a certificate, it will be ignored (not used for verification)<br>Conflicts with `client_certificate_optional` and `client_certificate_required`.
 
 
 <a id="nestedatt--tls_parameters--common_params"></a>
@@ -124,7 +181,7 @@ Optional:
 
 Optional:
 
-- `cipher_suites` (List of String) cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.
+- `cipher_suites` (List of String) cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)
 - `maximum_protocol_version` (List of String) maximum_protocol_version Maximum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
 - `minimum_protocol_version` (List of String) minimum_protocol_version Minimum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
 - `tls_certificates` (Attributes List) tls_certificates Set of TLS certificates (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates))
@@ -141,29 +198,30 @@ Required:
 Optional:
 
 - `description` (String) description Description for the certificate
-- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--ocsp_stapling_choice))
+- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured. (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--ocsp_stapling_choice))
 
 <a id="nestedatt--tls_parameters--common_params--tls_certificates--private_key"></a>
 ### Nested Schema for `tls_parameters.common_params.tls_certificates.private_key`
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice))
 
 <a id="nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice"></a>
 ### Nested Schema for `tls_parameters.common_params.tls_certificates.private_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--tls_parameters--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `tls_parameters.common_params.tls_certificates.private_key.secret_info_choice.blindfold_secret_info`
 
 Required:
 
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
 
 Optional:
 
@@ -190,9 +248,9 @@ Optional:
 
 Optional:
 
-- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
-- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.
-- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.
+- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`. (see [below for nested schema](#nestedatt--tls_parameters--common_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
+- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.
+- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.
 
 <a id="nestedatt--tls_parameters--common_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms"></a>
 ### Nested Schema for `tls_parameters.common_params.tls_certificates.ocsp_stapling_choice.custom_hash_algorithms`
@@ -209,7 +267,7 @@ Required:
 
 Required:
 
-- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for downstream TLS connections (see [below for nested schema](#nestedatt--tls_parameters--common_params--validation_params--trusted_ca_choice))
+- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified. (see [below for nested schema](#nestedatt--tls_parameters--common_params--validation_params--trusted_ca_choice))
 
 Optional:
 
@@ -221,8 +279,8 @@ Optional:
 
 Optional:
 
-- `trusted_ca` (Attributes) trusted_ca Root CA Certificate (see [below for nested schema](#nestedatt--tls_parameters--common_params--validation_params--trusted_ca_choice--trusted_ca))
-- `trusted_ca_url` (String) trusted_ca_url Inline Root CA Certificate
+- `trusted_ca` (Attributes) trusted_ca Root CA Certificate<br>Conflicts with `trusted_ca_url`. (see [below for nested schema](#nestedatt--tls_parameters--common_params--validation_params--trusted_ca_choice--trusted_ca))
+- `trusted_ca_url` (String) trusted_ca_url Inline Root CA Certificate<br>Conflicts with `trusted_ca`.
 
 <a id="nestedatt--tls_parameters--common_params--validation_params--trusted_ca_choice--trusted_ca"></a>
 ### Nested Schema for `tls_parameters.common_params.validation_params.trusted_ca_choice.trusted_ca`
@@ -239,7 +297,7 @@ Required:
 - `name` (String)
 - `namespace` (String)
 
-Read-Only:
+Optional:
 
 - `tenant` (String)
 
@@ -254,37 +312,28 @@ Read-Only:
 
 Required:
 
-- `ref_or_selector_choice` (Attributes) ref_or_selector One of following (see [below for nested schema](#nestedatt--where--ref_or_selector_choice))
+- `ref_or_selector_choice` (Attributes) ref_or_selector One of following<br>Exactly one of `site`, `virtual_network`, or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice))
 
 <a id="nestedatt--where--ref_or_selector_choice"></a>
 ### Nested Schema for `where.ref_or_selector_choice`
 
 Optional:
 
-- `site` (Attributes) site Direct reference to site object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site))
-- `virtual_network` (Attributes) virtual_network Direct reference to virtual network object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_network))
-- `virtual_site` (Attributes) virtual_site Direct reference to virtual site object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site))
+- `site` (Attributes) site Direct reference to site object<br>Conflicts with `virtual_network` and `virtual_site`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site))
+- `virtual_network` (Attributes) virtual_network Direct reference to virtual network object<br>Conflicts with `site` and `virtual_site`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_network))
+- `virtual_site` (Attributes) virtual_site Direct reference to virtual site object<br>Conflicts with `site` and `virtual_network`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site))
 
 <a id="nestedatt--where--ref_or_selector_choice--site"></a>
 ### Nested Schema for `where.ref_or_selector_choice.site`
 
 Required:
 
-- `internet_vip_choice` (Attributes) Internet VIP Choice Internet VIP Choice (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site--internet_vip_choice))
 - `ref` (Attributes List) ref A site direct reference (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site--ref))
 
 Optional:
 
+- `internet_vip_choice` (Attributes) Internet VIP Choice Internet VIP Choice<br>Exactly one of `disable_internet_vip` or `enable_internet_vip` must be specified when `internet_vip_choice` is configured. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site--internet_vip_choice))
 - `network_type` (List of String) network_type The type of network on the referred site<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
-
-<a id="nestedatt--where--ref_or_selector_choice--site--internet_vip_choice"></a>
-### Nested Schema for `where.ref_or_selector_choice.site.internet_vip_choice`
-
-Optional:
-
-- `disable_internet_vip` (Boolean) Disable advertise on internet vip Do not enable advertise on external internet vip.
-- `enable_internet_vip` (Boolean) Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.
-
 
 <a id="nestedatt--where--ref_or_selector_choice--site--ref"></a>
 ### Nested Schema for `where.ref_or_selector_choice.site.ref`
@@ -294,9 +343,18 @@ Required:
 - `name` (String)
 - `namespace` (String)
 
-Read-Only:
+Optional:
 
 - `tenant` (String)
+
+
+<a id="nestedatt--where--ref_or_selector_choice--site--internet_vip_choice"></a>
+### Nested Schema for `where.ref_or_selector_choice.site.internet_vip_choice`
+
+Optional:
+
+- `disable_internet_vip` (Boolean) Disable advertise on internet vip Do not enable advertise on external internet vip.<br>Conflicts with `enable_internet_vip`.
+- `enable_internet_vip` (Boolean) Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.<br>Conflicts with `disable_internet_vip`.
 
 
 
@@ -315,7 +373,7 @@ Required:
 - `name` (String)
 - `namespace` (String)
 
-Read-Only:
+Optional:
 
 - `tenant` (String)
 
@@ -326,21 +384,12 @@ Read-Only:
 
 Required:
 
-- `internet_vip_choice` (Attributes) Internet VIP Choice Internet VIP Choice (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site--internet_vip_choice))
 - `ref` (Attributes List) ref A virtual_site direct reference (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site--ref))
 
 Optional:
 
+- `internet_vip_choice` (Attributes) Internet VIP Choice Internet VIP Choice<br>Exactly one of `disable_internet_vip` or `enable_internet_vip` must be specified when `internet_vip_choice` is configured. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site--internet_vip_choice))
 - `network_type` (List of String) network_type The type of network on the referred virtual_site<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
-
-<a id="nestedatt--where--ref_or_selector_choice--virtual_site--internet_vip_choice"></a>
-### Nested Schema for `where.ref_or_selector_choice.virtual_site.internet_vip_choice`
-
-Optional:
-
-- `disable_internet_vip` (Boolean) Disable advertise on internet vip Do not enable advertise on external internet vip.
-- `enable_internet_vip` (Boolean) Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.
-
 
 <a id="nestedatt--where--ref_or_selector_choice--virtual_site--ref"></a>
 ### Nested Schema for `where.ref_or_selector_choice.virtual_site.ref`
@@ -350,16 +399,25 @@ Required:
 - `name` (String)
 - `namespace` (String)
 
-Read-Only:
+Optional:
 
 - `tenant` (String)
+
+
+<a id="nestedatt--where--ref_or_selector_choice--virtual_site--internet_vip_choice"></a>
+### Nested Schema for `where.ref_or_selector_choice.virtual_site.internet_vip_choice`
+
+Optional:
+
+- `disable_internet_vip` (Boolean) Disable advertise on internet vip Do not enable advertise on external internet vip.<br>Conflicts with `enable_internet_vip`.
+- `enable_internet_vip` (Boolean) Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.<br>Conflicts with `disable_internet_vip`.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -367,13 +425,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_advertise_policy.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_advertise_policy.example"
+	to = f5xc_advertise_policy.example
 }
 ```

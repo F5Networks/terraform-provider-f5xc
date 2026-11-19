@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -36,6 +37,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -108,6 +110,7 @@ type LogReceiverSecretType struct {
 type LogReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
 type LogReceiverBlindfoldSecretInfo struct {
@@ -220,7 +223,7 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap = map
 	"server_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> CaChoice
+// Attribute map for OneOfField --> CaChoice
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap = map[string]attr.Type{
 
 	"trusted_ca_url": types.StringType,
@@ -264,6 +267,7 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKey
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -281,7 +285,7 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKey
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PortChoice
+// Attribute map for OneOfField --> PortChoice
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_https_port":      types.BoolType,
@@ -296,7 +300,7 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap = map
 	"server_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> WhereChoice
+// Attribute map for OneOfField --> WhereChoice
 var LogReceiverWhereChoiceModelAttributeMap = map[string]attr.Type{
 
 	"site_local": types.BoolType,
@@ -313,8 +317,8 @@ func (r *ResourceF5XCLogReceiver) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of log_receiver) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of log_receiver) etc. can be fetched",
+		MarkdownDescription: "Log Receiver is used to specify a receiver (syslog, splunk, datadog etc.,) to send the log. Log receiver need to be reachable on site local network.",
+		Description:         "Log Receiver is used to specify a receiver (syslog, splunk, datadog etc.,) to send the log. Log receiver need to be reachable on site local network.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -382,7 +386,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 			},
 			"log_receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Receiver Select type of log receiver",
-				MarkdownDescription: "Receiver Select type of log receiver",
+				MarkdownDescription: "Receiver Select type of log receiver<br>`syslog` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -401,7 +405,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 						Attributes: map[string]schema.Attribute{
 							"format_choice": schema.SingleNestedAttribute{
 								Description:         "Syslog Format Select syslog format",
-								MarkdownDescription: "Syslog Format Select syslog format",
+								MarkdownDescription: "Syslog Format Select syslog format<br>`syslog_rfc5424` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -428,7 +432,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 							},
 							"mode_choice": schema.SingleNestedAttribute{
 								Description:         "Syslog Transport Mode Select the syslog transport mode",
-								MarkdownDescription: "Syslog Transport Mode Select the syslog transport mode",
+								MarkdownDescription: "Syslog Transport Mode Select the syslog transport mode<br>Exactly one of `tcp_server`, `tls_server`, or `udp_server` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -442,7 +446,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 								Attributes: map[string]schema.Attribute{
 									"tcp_server": schema.SingleNestedAttribute{
 										Description:         "Mode TCP Syslog transport mode is TCP",
-										MarkdownDescription: "Mode TCP Syslog transport mode is TCP",
+										MarkdownDescription: "Mode TCP Syslog transport mode is TCP<br>Conflicts with `tls_server` and `udp_server`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -476,27 +480,30 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 									},
 									"tls_server": schema.SingleNestedAttribute{
 										Description:         "Mode TLS Syslog transport mode is TLS",
-										MarkdownDescription: "Mode TLS Syslog transport mode is TLS",
+										MarkdownDescription: "Mode TLS Syslog transport mode is TLS<br>Conflicts with `tcp_server` and `udp_server`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"ca_choice": schema.SingleNestedAttribute{
 												Description:         "Trusted CA Trusted CA for TLS server",
-												MarkdownDescription: "Trusted CA Trusted CA for TLS server",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Trusted CA Trusted CA for TLS server<br>Exactly one of `trusted_ca_url` or `volterra_ca` must be specified when `ca_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"trusted_ca_url",
 														"volterra_ca",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
-														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.<br>Conflicts with `volterra_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -510,7 +517,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 													},
 													"volterra_ca": schema.BoolAttribute{
 														Description:         "Default F5XC CA Use F5XC default CA",
-														MarkdownDescription: "Default F5XC CA Use F5XC default CA",
+														MarkdownDescription: "Default F5XC CA Use F5XC default CA<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -522,7 +529,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS config Select to enable mTLS configuration",
-												MarkdownDescription: "mTLS config Select to enable mTLS configuration",
+												MarkdownDescription: "mTLS config Select to enable mTLS configuration<br>Exactly one of `mtls_disabled` or `mtls_enable` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -535,7 +542,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 												Attributes: map[string]schema.Attribute{
 													"mtls_disabled": schema.BoolAttribute{
 														Description:         "mTLS is Disabled mTLS is disabled",
-														MarkdownDescription: "mTLS is Disabled mTLS is disabled",
+														MarkdownDescription: "mTLS is Disabled mTLS is disabled<br>Conflicts with `mtls_enable`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -545,7 +552,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 													},
 													"mtls_enable": schema.SingleNestedAttribute{
 														Description:         "Enable mTLS configuration Enable mTLS configuration",
-														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration",
+														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration<br>Conflicts with `mtls_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -573,7 +580,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -581,12 +588,13 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
+																				"none",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -604,6 +612,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						WriteOnly:           true,
 																						Validators: []validator.String{
 																							stringvalidator.RegexMatches(
 																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
@@ -625,7 +634,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																			},
 																			"clear_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -658,6 +667,16 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																					},
 																				},
 																			},
+																			"none": schema.BoolAttribute{
+																				Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																				MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Validators: []validator.Bool{
+																					boolvalidator.Equals(true),
+																				},
+																			},
 																		},
 																	},
 																},
@@ -668,21 +687,24 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 											},
 											"port_choice": schema.SingleNestedAttribute{
 												Description:         "Port Number Select port number for communication",
-												MarkdownDescription: "Port Number Select port number for communication",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Port Number Select port number for communication<br>Exactly one of `default_https_port`, `default_syslog_tls_port`, or `port` must be specified when `port_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"default_https_port",
 														"default_syslog_tls_port",
 														"port",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"default_https_port": schema.BoolAttribute{
 														Description:         "Default HTTPS Port Default port number for HTTPS is 443.",
-														MarkdownDescription: "Default HTTPS Port Default port number for HTTPS is 443.",
+														MarkdownDescription: "Default HTTPS Port Default port number for HTTPS is 443.<br>Conflicts with `default_syslog_tls_port` and `port`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -692,7 +714,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 													},
 													"default_syslog_tls_port": schema.BoolAttribute{
 														Description:         "Default Syslog Port Default port number for syslog TLS is 6514",
-														MarkdownDescription: "Default Syslog Port Default port number for syslog TLS is 6514",
+														MarkdownDescription: "Default Syslog Port Default port number for syslog TLS is 6514<br>Conflicts with `default_https_port` and `port`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -702,7 +724,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 													},
 													"port": schema.Int64Attribute{
 														Description:         "Custom Port Number Custom port number used for communication",
-														MarkdownDescription: "Custom Port Number Custom port number used for communication",
+														MarkdownDescription: "Custom Port Number Custom port number used for communication<br>Conflicts with `default_https_port` and `default_syslog_tls_port`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -730,7 +752,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 									},
 									"udp_server": schema.SingleNestedAttribute{
 										Description:         "Mode UDP Syslog transport mode is UDP",
-										MarkdownDescription: "Mode UDP Syslog transport mode is UDP",
+										MarkdownDescription: "Mode UDP Syslog transport mode is UDP<br>Conflicts with `tcp_server` and `tls_server`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -770,14 +792,17 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 			},
 			"where_choice": schema.SingleNestedAttribute{
 				Description:         "Where Select where the log receiver is accessible",
-				MarkdownDescription: "Where Select where the log receiver is accessible",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Where Select where the log receiver is accessible<br>`site_local` must be specified when `where_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"site_local",
 					),
+				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"site_local": schema.BoolAttribute{
@@ -854,9 +879,17 @@ func (r *ResourceF5XCLogReceiver) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCLogReceiverModel
 
 	// Read Terraform plan data into the model
@@ -864,6 +897,17 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the create request carries the user-supplied write-only values.
+	var configData ResourceF5XCLogReceiverModel
+	diags = request.Config.Get(ctx, &configData)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.LogReceiverChoice.IsNull() && !configData.LogReceiverChoice.IsUnknown() {
+		data.LogReceiverChoice = configData.LogReceiverChoice
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -1011,9 +1055,15 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 					}
 					tlsServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TlsServer{}
 					tlsServerOneOfSpec.TlsServer = &ves_io_schema_log_receiver.TLSConfigType{}
+					tlsServerOneOfSpec.TlsServer.CaChoice = &ves_io_schema_log_receiver.TLSConfigType_VolterraCa{
+						VolterraCa: &ves_io_schema.Empty{},
+					}
+					tlsServerOneOfSpec.TlsServer.PortChoice = &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{
+						DefaultSyslogTlsPort: &ves_io_schema.Empty{},
+					}
 					syslogOneOfSpec.Syslog.ModeChoice = tlsServerOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !logReceiverTlsServerModel.CaChoice.IsNull() && !logReceiverTlsServerModel.CaChoice.IsUnknown() {
 						tlsServerCaChoiceModel := LogReceiverCaChoice{}
 						response.Diagnostics.Append(logReceiverTlsServerModel.CaChoice.As(ctx, &tlsServerCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1138,6 +1188,13 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -1146,7 +1203,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					// resource modelToSpecNested OneOfField --> PortChoice
 					if !logReceiverTlsServerModel.PortChoice.IsNull() && !logReceiverTlsServerModel.PortChoice.IsUnknown() {
 						tlsServerPortChoiceModel := LogReceiverPortChoice{}
 						response.Diagnostics.Append(logReceiverTlsServerModel.PortChoice.As(ctx, &tlsServerPortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1211,7 +1268,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> WhereChoice
+	// resource modelToSpecRoot OneOfField --> WhereChoice
 	if !data.WhereChoice.IsNull() && !data.WhereChoice.IsUnknown() {
 		whereChoiceModel := LogReceiverWhereChoice{}
 		response.Diagnostics.Append(data.WhereChoice.As(ctx, &whereChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1226,11 +1283,16 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 			spec.WhereChoice = siteLocalSpecBool
 		}
 
+	} else {
+		spec.WhereChoice = &ves_io_schema_log_receiver.CreateSpecType_SiteLocal{
+			SiteLocal: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1253,7 +1315,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_log_receiver.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "log_receiver", err),
 		)
 		return
 	}
@@ -1487,8 +1549,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 						if isTlsServer && tlsServerOptionsWrapper != nil && tlsServerOptionsWrapper.TlsServer != nil {
 							tlsServerElement := tlsServerOptionsWrapper.TlsServer
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if tlsServerElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1675,6 +1736,15 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -1742,8 +1812,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> PortChoice
 							if tlsServerElement.GetPortChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1903,7 +1972,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		data.LogReceiverChoice = types.ObjectNull(LogReceiverLogReceiverChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WhereChoice
+	// resource SpecToModelRoot OneOfField --> WhereChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1942,8 +2011,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WhereChoice = types.ObjectNull(LogReceiverWhereChoiceModelAttributeMap)
 	}
 
@@ -1991,14 +2058,10 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 	defer cancel()
 	priorLogReceiverChoice := data.LogReceiverChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "log_receiver", err),
 		)
 		return
 	}
@@ -2176,7 +2239,9 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 					syslogAttributeMap["format_choice"] = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					syslogAttributeMap["format_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap)
+					syslogAttributeMap["format_choice"] = types.ObjectValueMust(LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap, map[string]attr.Value{
+						"syslog_rfc5424": types.Int64Value(10485760),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> ModeChoice
@@ -2232,8 +2297,7 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 						if isTlsServer && tlsServerOptionsWrapper != nil && tlsServerOptionsWrapper.TlsServer != nil {
 							tlsServerElement := tlsServerOptionsWrapper.TlsServer
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> CaChoice
 							if tlsServerElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2278,7 +2342,10 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 								tlsServerAttributeMap["ca_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["ca_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap)
+								tlsServerAttributeMap["ca_choice"] = types.ObjectValueMust(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap, map[string]attr.Value{
+									"trusted_ca_url": types.StringNull(),
+									"volterra_ca":    types.BoolValue(true),
+								})
 							}
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
@@ -2420,6 +2487,15 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -2496,11 +2572,13 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 								tlsServerAttributeMap["mtls_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
+								tlsServerAttributeMap["mtls_choice"] = types.ObjectValueMust(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap, map[string]attr.Value{
+									"mtls_disabled": types.BoolValue(true),
+									"mtls_enable":   types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap),
+								})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> PortChoice
 							if tlsServerElement.GetPortChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2554,7 +2632,11 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 								tlsServerAttributeMap["port_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["port_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap)
+								tlsServerAttributeMap["port_choice"] = types.ObjectValueMust(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap, map[string]attr.Value{
+									"default_https_port":      types.BoolNull(),
+									"default_syslog_tls_port": types.BoolValue(true),
+									"port":                    types.Int64Null(),
+								})
 							}
 
 							// resource specToModelNested RequiredStringField --> ServerName
@@ -2660,7 +2742,7 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 		data.LogReceiverChoice = types.ObjectNull(LogReceiverLogReceiverChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WhereChoice
+	// resource SpecToModelRoot OneOfField --> WhereChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -2699,9 +2781,12 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.WhereChoice = types.ObjectNull(LogReceiverWhereChoiceModelAttributeMap)
+
+		if data.WhereChoice.IsNull() || data.WhereChoice.IsUnknown() || (data.WhereChoice.Attributes()["site_local"].IsNull() || data.WhereChoice.Attributes()["site_local"].IsUnknown()) {
+			data.WhereChoice = types.ObjectValueMust(LogReceiverWhereChoiceModelAttributeMap, map[string]attr.Value{
+				"site_local": types.BoolValue(true),
+			})
+		}
 	}
 
 	// Restore prior state for LogReceiverChoice. The API redacts sensitive fields
@@ -2719,6 +2804,12 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCLogReceiverModel
@@ -2728,6 +2819,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	if response.Diagnostics.HasError() {
 		return
 	}
+	planLogReceiverChoice := data.LogReceiverChoice
 	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
 	// sets the plan value to the prior state to satisfy Terraform Core's constraint
 	// (plan must equal config or prior state). We save the plan values so we can restore
@@ -2747,7 +2839,11 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	if !configData.Labels.IsUnknown() {
 		data.Labels = configData.Labels
 	}
-	planLogReceiverChoice := data.LogReceiverChoice
+	// WriteOnly attributes are null in req.Plan; overlay their values from req.Config so
+	// the update request carries the user-supplied write-only values.
+	if !configData.LogReceiverChoice.IsNull() && !configData.LogReceiverChoice.IsUnknown() {
+		data.LogReceiverChoice = configData.LogReceiverChoice
+	}
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -2894,9 +2990,15 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 					}
 					tlsServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TlsServer{}
 					tlsServerOneOfSpec.TlsServer = &ves_io_schema_log_receiver.TLSConfigType{}
+					tlsServerOneOfSpec.TlsServer.CaChoice = &ves_io_schema_log_receiver.TLSConfigType_VolterraCa{
+						VolterraCa: &ves_io_schema.Empty{},
+					}
+					tlsServerOneOfSpec.TlsServer.PortChoice = &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{
+						DefaultSyslogTlsPort: &ves_io_schema.Empty{},
+					}
 					syslogOneOfSpec.Syslog.ModeChoice = tlsServerOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					// resource modelToSpecNested OneOfField --> CaChoice
 					if !logReceiverTlsServerModel.CaChoice.IsNull() && !logReceiverTlsServerModel.CaChoice.IsUnknown() {
 						tlsServerCaChoiceModel := LogReceiverCaChoice{}
 						response.Diagnostics.Append(logReceiverTlsServerModel.CaChoice.As(ctx, &tlsServerCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3021,6 +3123,13 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 									}
 
+									// resource modelToSpecNested BoolOfOneOfPointerField --> None
+									if !keyUrlSecretInfoChoiceModel.None.IsNull() && !keyUrlSecretInfoChoiceModel.None.IsUnknown() {
+										noneSpecBool := &ves_io_schema.SecretType_None{}
+										noneSpecBool.None = &ves_io_schema.Empty{}
+										keyUrlSpec.SecretInfoOneof = noneSpecBool
+									}
+
 								}
 
 							}
@@ -3029,7 +3138,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					// resource modelToSpecNested OneOfField --> PortChoice
 					if !logReceiverTlsServerModel.PortChoice.IsNull() && !logReceiverTlsServerModel.PortChoice.IsUnknown() {
 						tlsServerPortChoiceModel := LogReceiverPortChoice{}
 						response.Diagnostics.Append(logReceiverTlsServerModel.PortChoice.As(ctx, &tlsServerPortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3094,7 +3203,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> WhereChoice
+	// resource modelToSpecRoot OneOfField --> WhereChoice
 	if !data.WhereChoice.IsNull() && !data.WhereChoice.IsUnknown() {
 		whereChoiceModel := LogReceiverWhereChoice{}
 		response.Diagnostics.Append(data.WhereChoice.As(ctx, &whereChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3109,11 +3218,16 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 			spec.WhereChoice = siteLocalSpecBool
 		}
 
+	} else {
+		spec.WhereChoice = &ves_io_schema_log_receiver.ReplaceSpecType_SiteLocal{
+			SiteLocal: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3121,24 +3235,20 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_log_receiver.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_log_receiver.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "log_receiver", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "log_receiver", err),
 		)
 		return
 	}
@@ -3371,8 +3481,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 						if isTlsServer && tlsServerOptionsWrapper != nil && tlsServerOptionsWrapper.TlsServer != nil {
 							tlsServerElement := tlsServerOptionsWrapper.TlsServer
 
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> CaChoice
 							if tlsServerElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3559,6 +3668,15 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 													}
 												}
 
+												// resource specToModelNested BoolOfOneOfPointerField --> None
+												_, isNone := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+												if isNone {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+												} else {
+													keyUrlsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+												}
+
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -3626,8 +3744,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> PortChoice
 							if tlsServerElement.GetPortChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3787,7 +3904,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		data.LogReceiverChoice = types.ObjectNull(LogReceiverLogReceiverChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WhereChoice
+	// resource SpecToModelRoot OneOfField --> WhereChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -3826,8 +3943,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WhereChoice = types.ObjectNull(LogReceiverWhereChoiceModelAttributeMap)
 	}
 
@@ -3858,7 +3973,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	}
 	// Restore plan value for LogReceiverChoice. The API redacts sensitive fields
 	// in GET responses. Restoring the plan value ensures apply result == plan.
-	data.LogReceiverChoice = planLogReceiverChoice
+	data.LogReceiverChoice = utils.ResolveUnknowns(planLogReceiverChoice, data.LogReceiverChoice)
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -3906,7 +4021,7 @@ func (r *ResourceF5XCLogReceiver) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "log_receiver", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "log_receiver", err),
 		)
 		return
 	}

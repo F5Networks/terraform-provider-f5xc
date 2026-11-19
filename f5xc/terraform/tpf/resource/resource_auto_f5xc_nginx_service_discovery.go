@@ -32,6 +32,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -183,8 +184,8 @@ func (r *ResourceF5XCNginxServiceDiscovery) Metadata(ctx context.Context, reques
 func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a nginx_service_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nginx_service_discovery) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a nginx_service_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of nginx_service_discovery) etc. can be fetched",
+		MarkdownDescription: "NGINX Service discovery in F5XC",
+		Description:         "NGINX Service discovery in F5XC",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -259,7 +260,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 				Attributes: map[string]schema.Attribute{
 					"target_choice": schema.SingleNestedAttribute{
 						Description:         "Target choice",
-						MarkdownDescription: "Target choice",
+						MarkdownDescription: "Target choice<br>Exactly one of `config_sync_group` or `nginx_instance` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -272,7 +273,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 						Attributes: map[string]schema.Attribute{
 							"config_sync_group": schema.SingleNestedAttribute{
 								Description:         "Config Sync Group",
-								MarkdownDescription: "Config Sync Group",
+								MarkdownDescription: "Config Sync Group<br>Conflicts with `nginx_instance`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -309,7 +310,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -319,7 +320,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 							},
 							"nginx_instance": schema.SingleNestedAttribute{
 								Description:         "NGINX Instance",
-								MarkdownDescription: "NGINX Instance",
+								MarkdownDescription: "NGINX Instance<br>Conflicts with `config_sync_group`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -356,7 +357,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -372,15 +373,21 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 				Description:         "NGINX One Object ID",
 				MarkdownDescription: "NGINX One Object ID",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"nginx_one_object_name": schema.StringAttribute{
 				Description:         "NGINX One Object Name Hostname value set for Instance or Name for a Config Sync Group in NGINX One",
 				MarkdownDescription: "NGINX One Object Name Hostname value set for Instance or Name for a Config Sync Group in NGINX One",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"server_block_filters": schema.ListNestedAttribute{
 				Description:         "Server Block Filter Filters discovered server blocks based on server name, domain and ports. Atleast, one field should be populated for each filter. If no filters are specified, all server blocks will be discovered by default.",
@@ -480,9 +487,17 @@ func (r *ResourceF5XCNginxServiceDiscovery) ModifyPlan(ctx context.Context, req 
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCNginxServiceDiscovery) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCNginxServiceDiscoveryModel
 
 	// Read Terraform plan data into the model
@@ -739,7 +754,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Create(ctx context.Context, request 
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "nginx_service_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "nginx_service_discovery", err),
 		)
 		return
 	}
@@ -1108,14 +1123,12 @@ func (r *ResourceF5XCNginxServiceDiscovery) Create(ctx context.Context, request 
 			AttrTypes: NginxServiceDiscoveryServerBlockFiltersModelAttributeMap,
 		}
 		nullServerBlockFiltersList := basetypes.NewListNull(serverBlockFiltersObjectType)
-		var priorValServerBlockFilters types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("server_block_filters"), &priorValServerBlockFilters)
-		if !priorValServerBlockFilters.IsNull() && !priorValServerBlockFilters.IsUnknown() {
-			data.ServerBlockFilters = priorValServerBlockFilters
+		if !data.ServerBlockFilters.IsNull() && !data.ServerBlockFilters.IsUnknown() && len(data.ServerBlockFilters.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ServerBlockFilters = basetypes.NewListValueMust(serverBlockFiltersObjectType, nil)
 		} else {
 			data.ServerBlockFilters = nullServerBlockFiltersList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1161,14 +1174,10 @@ func (r *ResourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "nginx_service_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "nginx_service_discovery", err),
 		)
 		return
 	}
@@ -1537,14 +1546,12 @@ func (r *ResourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request re
 			AttrTypes: NginxServiceDiscoveryServerBlockFiltersModelAttributeMap,
 		}
 		nullServerBlockFiltersList := basetypes.NewListNull(serverBlockFiltersObjectType)
-		var priorValServerBlockFilters types.List
-		_ = request.State.GetAttribute(ctx, path.Root("server_block_filters"), &priorValServerBlockFilters)
-		if !priorValServerBlockFilters.IsNull() && !priorValServerBlockFilters.IsUnknown() {
-			data.ServerBlockFilters = priorValServerBlockFilters
+		if !data.ServerBlockFilters.IsNull() && !data.ServerBlockFilters.IsUnknown() && len(data.ServerBlockFilters.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ServerBlockFilters = basetypes.NewListValueMust(serverBlockFiltersObjectType, nil)
 		} else {
 			data.ServerBlockFilters = nullServerBlockFiltersList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1556,6 +1563,12 @@ func (r *ResourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request re
 }
 
 func (r *ResourceF5XCNginxServiceDiscovery) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCNginxServiceDiscoveryModel
@@ -1817,24 +1830,20 @@ func (r *ResourceF5XCNginxServiceDiscovery) Update(ctx context.Context, request 
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "nginx_service_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "nginx_service_discovery", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "nginx_service_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "nginx_service_discovery", err),
 		)
 		return
 	}
@@ -2202,14 +2211,12 @@ func (r *ResourceF5XCNginxServiceDiscovery) Update(ctx context.Context, request 
 			AttrTypes: NginxServiceDiscoveryServerBlockFiltersModelAttributeMap,
 		}
 		nullServerBlockFiltersList := basetypes.NewListNull(serverBlockFiltersObjectType)
-		var priorValServerBlockFilters types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("server_block_filters"), &priorValServerBlockFilters)
-		if !priorValServerBlockFilters.IsNull() && !priorValServerBlockFilters.IsUnknown() {
-			data.ServerBlockFilters = priorValServerBlockFilters
+		if !data.ServerBlockFilters.IsNull() && !data.ServerBlockFilters.IsUnknown() && len(data.ServerBlockFilters.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ServerBlockFilters = basetypes.NewListValueMust(serverBlockFiltersObjectType, nil)
 		} else {
 			data.ServerBlockFilters = nullServerBlockFiltersList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -2284,7 +2291,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Delete(ctx context.Context, request 
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "nginx_service_discovery", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "nginx_service_discovery", err),
 		)
 		return
 	}

@@ -1924,7 +1924,6 @@ var APISwaggerJSON string = `{
             "description": "Specifies the type of AWS service\n\nInvalid type of AWS service\nElastic cloud compute (EC2) instance\nAuto scaling group\nTarget group\nLambda function\nVirtual private cloud (VPC) endpoint\nNetwork load balancer (NLB)\nApplication load balancer (ALB)\nGateway load balancer (Gateway LB)",
             "title": "AwsServiceType",
             "enum": [
-                "INVALID_AWS_SERVICE",
                 "EC2",
                 "AUTO_SCALING_GROUP",
                 "TARGET_GROUP",

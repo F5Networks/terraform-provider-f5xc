@@ -29,7 +29,7 @@ type DataSourceF5XCDnsLbHealthCheck struct {
 	client *client.APIClient
 }
 
-type DnsLbHealthCheckGlobalSpecTypeHealthCheckChoice struct {
+type DnsLbHealthCheckHealthCheckChoice struct {
 	HttpHealthCheck   types.Object `tfsdk:"http_health_check"`
 	HttpsHealthCheck  types.Object `tfsdk:"https_health_check"`
 	IcmpHealthCheck   types.Bool   `tfsdk:"icmp_health_check"`
@@ -38,7 +38,7 @@ type DnsLbHealthCheckGlobalSpecTypeHealthCheckChoice struct {
 	UdpHealthCheck    types.Object `tfsdk:"udp_health_check"`
 }
 
-type DnsLbHealthCheckGlobalSpecTypeHttpHealthCheck struct {
+type DnsLbHealthCheckHttpHealthCheck struct {
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
 	Receive                  types.String `tfsdk:"receive"`
@@ -46,13 +46,13 @@ type DnsLbHealthCheckGlobalSpecTypeHttpHealthCheck struct {
 	VirtualHostChoice        types.Object `tfsdk:"virtual_host_choice"`
 }
 
-type DnsLbHealthCheckHttpHealthCheckVirtualHostChoice struct {
+type DnsLbHealthCheckVirtualHostChoice struct {
 	DisableVirtualHost      types.Bool   `tfsdk:"disable_virtual_host"`
 	InheritLoadBalancerFqdn types.Bool   `tfsdk:"inherit_load_balancer_fqdn"`
 	VirtualHost             types.String `tfsdk:"virtual_host"`
 }
 
-type DnsLbHealthCheckGlobalSpecTypeHttpsHealthCheck struct {
+type DnsLbHealthCheckHttpsHealthCheck struct {
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
 	Receive                  types.String `tfsdk:"receive"`
@@ -60,21 +60,21 @@ type DnsLbHealthCheckGlobalSpecTypeHttpsHealthCheck struct {
 	VirtualHostChoice        types.Object `tfsdk:"virtual_host_choice"`
 }
 
-type DnsLbHealthCheckGlobalSpecTypeTcpHealthCheck struct {
+type DnsLbHealthCheckTcpHealthCheck struct {
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
 	Receive                  types.String `tfsdk:"receive"`
 	Send                     types.String `tfsdk:"send"`
 }
 
-type DnsLbHealthCheckGlobalSpecTypeTcpHexHealthCheck struct {
+type DnsLbHealthCheckTcpHexHealthCheck struct {
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
 	Receive                  types.String `tfsdk:"receive"`
 	Send                     types.String `tfsdk:"send"`
 }
 
-type DnsLbHealthCheckGlobalSpecTypeUdpHealthCheck struct {
+type DnsLbHealthCheckUdpHealthCheck struct {
 	HealthCheckPort          types.Int64  `tfsdk:"health_check_port"`
 	HealthCheckSecondaryPort types.Int64  `tfsdk:"health_check_secondary_port"`
 	Receive                  types.String `tfsdk:"receive"`
@@ -205,8 +205,8 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_lb_health_check This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_health_check) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_lb_health_check This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_health_check) etc. can be fetched",
+		MarkdownDescription: "DNS Load Balancer Health Check object is used for configuring DNS Load Balancer Health Checks",
+		Description:         "DNS Load Balancer Health Check object is used for configuring DNS Load Balancer Health Checks",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -558,7 +558,7 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dns_lb_health_check", err))
 		return
 	}
 
@@ -685,7 +685,7 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 		healthCheckChoiceChoices := specData.GetHealthCheck()
 
 		// The model struct that will be populated by the nested template.
-		var healthCheckChoiceChoicesModel = &DnsLbHealthCheckGlobalSpecTypeHealthCheckChoice{}
+		var healthCheckChoiceChoicesModel = &DnsLbHealthCheckHealthCheckChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -919,20 +919,12 @@ func (d *DataSourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request datas
 				tcpHealthCheckAttributeMap["health_check_secondary_port"] = types.Int64Value(int64(tcpHealthCheckElement.GetHealthCheckSecondaryPort()))
 
 				// data specToModelNested StringField --> Receive
-				if tcpHealthCheckElement.GetReceive() != "" {
-					tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["receive"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				tcpHealthCheckAttributeMap["receive"] = types.StringValue(tcpHealthCheckElement.GetReceive())
 
 				// data specToModelNested StringField --> Send
-				if tcpHealthCheckElement.GetSend() != "" {
-					tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send"] = types.StringNull()
-				}
+				// The resource defaults this field to "", so API "" must stay "" to match it.
+				tcpHealthCheckAttributeMap["send"] = types.StringValue(tcpHealthCheckElement.GetSend())
 
 				tcpHealthCheckObj, tcpHealthCheckObjDiags := types.ObjectValue(DnsLbHealthCheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
 				response.Diagnostics.Append(tcpHealthCheckObjDiags...)

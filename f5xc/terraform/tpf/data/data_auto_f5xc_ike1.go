@@ -54,8 +54,8 @@ func (d *DataSourceF5XCIke1) Metadata(ctx context.Context, request datasource.Me
 func (r *DataSourceF5XCIke1) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a ike1 This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike1) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a ike1 This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike1) etc. can be fetched",
+		MarkdownDescription: "IKE Phase1 profile mainly includes the following<br>1. Encryption protocols to be used for IKE SA<br>2. Authentication Protocols to be used for IKE SA<br>3. DH group<br>4. PRF<br>5. Key lifetime etc",
+		Description:         "IKE Phase1 profile mainly includes the following 1. Encryption protocols to be used for IKE SA 2. Authentication Protocols to be used for IKE SA 3. DH group 4. PRF 5. Key lifetime etc",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -153,7 +153,7 @@ func (d *DataSourceF5XCIke1) Read(ctx context.Context, request datasource.ReadRe
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_ike1.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "ike1", err))
 		return
 	}
 

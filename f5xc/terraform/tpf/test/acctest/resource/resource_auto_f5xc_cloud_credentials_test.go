@@ -28,9 +28,9 @@ func TestAccResourceAutoF5XCCloudCredentials_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-cred-" + acctest.RandString(t, 8)
+	name := "example-cloud-cred-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudCredentialsDestroyProducer(t),
@@ -38,14 +38,18 @@ func TestAccResourceAutoF5XCCloudCredentials_basic(t *testing.T) {
 			{Config: testAccResourceAutoF5XCCloudCredentialsConfig_basic(name, namespace)},
 			{Config: testAccResourceAutoF5XCCloudCredentialsConfig_basicUpdated(name, namespace)},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCloudCredentialsConfig_basic("example-cloud-cred", "system"),
+		})
 }
 
 func TestAccResourceAutoF5XCCloudCredentials_withCloudChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-cred-" + acctest.RandString(t, 8)
+	name := "example-cloud-cred-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -62,7 +66,7 @@ func TestAccResourceAutoF5XCCloudCredentials_withAwsAssumeRoleDurationTransition
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-cred-" + acctest.RandString(t, 8)
+	name := "example-cloud-cred-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -79,7 +83,7 @@ func TestAccResourceAutoF5XCCloudCredentials_withAwsSecretInfoTransition(t *test
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-cred-" + acctest.RandString(t, 8)
+	name := "example-cloud-cred-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -95,7 +99,7 @@ func TestAccResourceAutoF5XCCloudCredentials_withAzureSecretInfoTransition(t *te
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-cred-" + acctest.RandString(t, 8)
+	name := "example-cloud-cred-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -111,9 +115,9 @@ func TestAccResourceAutoF5XCCloudCredentials_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-cred-" + acctest.RandString(t, 8)
+	name := "example-cloud-cred-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudCredentialsDestroyProducer(t),
@@ -121,7 +125,11 @@ func TestAccResourceAutoF5XCCloudCredentials_full(t *testing.T) {
 			{Config: testAccResourceAutoF5XCCloudCredentialsConfig_full(name, namespace)},
 			{Config: testAccResourceAutoF5XCCloudCredentialsConfig_fullUpdated(name, namespace)},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCloudCredentialsConfig_full("example-cloud-cred", "system"),
+		})
 }
 
 func testAccCheckCloudCredentialsDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -134,7 +142,7 @@ func testAccResourceAutoF5XCCloudCredentialsConfig_basic(name, namespace string)
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name        = %q
   namespace   = %q
   description = "updated cloud credentials"
@@ -161,7 +169,7 @@ func testAccResourceAutoF5XCCloudCredentialsConfig_withAwsSecretKey(name, namesp
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAwsSecretKeyClearSecret(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -183,7 +191,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAwsSecretKeyBlindfoldSecret(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -205,7 +213,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAwsSecretKeyClearSecretUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -227,7 +235,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAwsAssumeRole(name, namespace string, duration int) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -237,7 +245,7 @@ resource "f5xc_cloud_credentials" "test" {
       session_name     = "cloud-f5xc-deployment"
       duration_seconds = %d
       session_tags = {
-        env = "test"
+        env = "example"
       }
     }
   }
@@ -247,7 +255,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAzureClientSecret(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -271,7 +279,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAzureClientSecretBlindfold(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -295,7 +303,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAzureClientSecretUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -319,7 +327,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withAzurePfxCertificate(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -344,7 +352,7 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_withGcpCredFile(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name      = %q
   namespace = %q
 
@@ -365,13 +373,13 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name        = %q
   namespace   = %q
   description = "cloud credentials full"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -384,7 +392,7 @@ resource "f5xc_cloud_credentials" "test" {
       session_name     = "cloud-f5xc-deployment"
       duration_seconds = 3600
       session_tags = {
-        env  = "test"
+        env  = "example"
         team = "infra"
       }
     }
@@ -395,13 +403,13 @@ resource "f5xc_cloud_credentials" "test" {
 
 func testAccResourceAutoF5XCCloudCredentialsConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_credentials" "test" {
+resource "f5xc_cloud_credentials" "example" {
   name        = %q
   namespace   = %q
-  description = "cloud credentials full updated"
+  description = "cloud credentials updated full example"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {
@@ -414,7 +422,7 @@ resource "f5xc_cloud_credentials" "test" {
       session_name     = "cloud-f5xc-deployment-updated"
       duration_seconds = 7200
       session_tags = {
-        env  = "prod"
+        env  = "example"
         team = "secops"
       }
     }

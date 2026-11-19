@@ -2574,6 +2574,12 @@ var APISwaggerJSON string = `{
                     "description": " By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.",
                     "title": "Set Cookie",
                     "x-displayname": "Ignore-Response-Cookie"
+                },
+                "serve_stale": {
+                    "type": "boolean",
+                    "description": " Serve a stale cached object during origin unreachability while asynchronously revalidating it with the origin server, when the requested object is already in cache.",
+                    "title": "Serve Stale",
+                    "x-displayname": "Serve Stale"
                 }
             }
         },

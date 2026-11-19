@@ -50,7 +50,7 @@ func TestAccResourceAutoF5XCCloudLink_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-links-" + testAccRunSuffix(t)
+	name := "example-cloud-links-" + testAccRunSuffix(t)
 	profile := testAccCloudLinkAWSProfile(t)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -60,19 +60,19 @@ func TestAccResourceAutoF5XCCloudLink_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_basic(name, namespace, profile)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_basicUpdated(name, namespace, profile)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -84,7 +84,7 @@ func TestAccResourceAutoF5XCCloudLink_withDirectConnectGatewayAsnTransition(t *t
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-link-" + testAccRunSuffix(t)
+	name := "example-cloud-link-" + testAccRunSuffix(t)
 	profile := testAccCloudLinkAWSProfile(t)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -94,19 +94,19 @@ func TestAccResourceAutoF5XCCloudLink_withDirectConnectGatewayAsnTransition(t *t
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_withDirectConnectGatewayAsn(name, namespace, profile, profile.CustomASN)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_withDirectConnectGatewayAsn(name, namespace, profile, profile.CustomASN+1)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -118,7 +118,7 @@ func TestAccResourceAutoF5XCCloudLink_withVirtualInterfaceTypeTransition(t *test
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-link-" + testAccRunSuffix(t)
+	name := "example-cloud-link-" + testAccRunSuffix(t)
 	profile := testAccCloudLinkAWSProfile(t)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -128,19 +128,19 @@ func TestAccResourceAutoF5XCCloudLink_withVirtualInterfaceTypeTransition(t *test
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_withVirtualInterfaceType(name, namespace, profile, "PRIVATE")},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_withVirtualInterfaceType(name, namespace, profile, "TRANSIT")},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -153,7 +153,7 @@ func TestAccResourceAutoF5XCCloudLink_withEnableConnectionToReTransition(t *test
 	t.Skip("cloud_link enable_connection_to_re transition requires pre-provisioned private ADN network and is deferred for now")
 
 	namespace := "system"
-	name := "tf-acc-cloud-link-" + testAccRunSuffix(t)
+	name := "example-cloud-link-" + testAccRunSuffix(t)
 	profile := testAccCloudLinkAWSProfile(t)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -163,19 +163,19 @@ func TestAccResourceAutoF5XCCloudLink_withEnableConnectionToReTransition(t *test
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_withConnectionToReDisabled(name, namespace, profile)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_withConnectionToReEnabled(name, namespace, profile)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
@@ -187,34 +187,38 @@ func TestAccResourceAutoF5XCCloudLink_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-cloud-link-" + testAccRunSuffix(t)
+	name := "example-cloud-link-" + testAccRunSuffix(t)
 	profile := testAccCloudLinkAWSProfile(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudLinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_full(name, namespace, profile)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCCloudLinkConfig_fullUpdated(name, namespace, profile)},
 			{
-				ResourceName:                         "f5xc_cloud_link.test",
+				ResourceName:                         "f5xc_cloud_link.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_cloud_link.example"),
 				ImportStateVerifyIgnore:              testAccResourceAutoF5XCCloudLinkImportVerifyIgnore,
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCCloudLinkConfig_full("example-cloud-link", "system", profile),
+		})
 }
 
 func testAccCheckCloudLinkDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -223,7 +227,7 @@ func testAccCheckCloudLinkDestroyProducer(t *testing.T) func(*terraform.State) e
 
 func testAccResourceAutoF5XCCloudLinkConfig_basic(name, namespace string, profile cloudLinkAWSProfile) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name      = %q
   namespace = %q
 
@@ -276,7 +280,7 @@ resource "f5xc_cloud_link" "test" {
 
 func testAccResourceAutoF5XCCloudLinkConfig_basicUpdated(name, namespace string, profile cloudLinkAWSProfile) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name        = %q
   namespace   = %q
   description = "updated cloud link"
@@ -331,7 +335,7 @@ resource "f5xc_cloud_link" "test" {
 
 func testAccResourceAutoF5XCCloudLinkConfig_withDirectConnectGatewayAsn(name, namespace string, profile cloudLinkAWSProfile, asn int) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name      = %q
   namespace = %q
 
@@ -384,7 +388,7 @@ resource "f5xc_cloud_link" "test" {
 
 func testAccResourceAutoF5XCCloudLinkConfig_withVirtualInterfaceType(name, namespace string, profile cloudLinkAWSProfile, virtualInterfaceType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name      = %q
   namespace = %q
 
@@ -418,7 +422,7 @@ resource "f5xc_cloud_link" "test" {
             }
             region = %q
             tags = {
-              env = "test"
+              env = "example"
             }
             virtual_interface_type = [%q]
             vlan                   = %d
@@ -441,7 +445,7 @@ resource "f5xc_cloud_link" "test" {
 
 func testAccResourceAutoF5XCCloudLinkConfig_withConnectionToReDisabled(name, namespace string, profile cloudLinkAWSProfile) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name      = %q
   namespace = %q
 
@@ -494,7 +498,7 @@ resource "f5xc_cloud_link" "test" {
 
 func testAccResourceAutoF5XCCloudLinkConfig_withConnectionToReEnabled(name, namespace string, profile cloudLinkAWSProfile) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name      = %q
   namespace = %q
 
@@ -549,13 +553,13 @@ resource "f5xc_cloud_link" "test" {
 
 func testAccResourceAutoF5XCCloudLinkConfig_full(name, namespace string, profile cloudLinkAWSProfile) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name        = %q
   namespace   = %q
   description = "cloud link full configuration"
 
   labels = {
-    env  = "test"
+    env  = "example"
     team = "network"
   }
 
@@ -618,13 +622,13 @@ resource "f5xc_cloud_link" "test" {
 
 func testAccResourceAutoF5XCCloudLinkConfig_fullUpdated(name, namespace string, profile cloudLinkAWSProfile) string {
 	return fmt.Sprintf(`
-resource "f5xc_cloud_link" "test" {
+resource "f5xc_cloud_link" "example" {
   name        = %q
   namespace   = %q
   description = "cloud link full configuration updated"
 
   labels = {
-    env  = "prod"
+    env  = "example"
     team = "platform"
   }
 

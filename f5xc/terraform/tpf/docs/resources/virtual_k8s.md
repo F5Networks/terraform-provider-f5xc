@@ -14,18 +14,73 @@
 page_title: "f5xc_virtual_k8s Resource - F5 XC Distributed Cloud"
 subcategory: "Compute & Workloads"
 description: |-
-  Virtual K8s Object Virtual K8s object exposes a Kubernetes API endpoint in the namespace that operates on all the physical Kubernetes clusters in each of the sites that are selected by the virtual-site referred to in the object. Virtual K8s supports only a subset of Kubernetes APIs related to application management. Read and write operations are currently supported on the following Kubernetes API resources: 1. Deployment v1 apps 2. StatefulSet v1 apps 3. DaemonSet v1 apps 4. Job v1 batch 5. CronJob v1beta1 batch 6. Service v1 core with type ClusterIP 7. Secret v1 core 8. ConfigMap v1 core 9. ServiceAccount v1 core 10. PersistentVolumeClaim v1 core Only delete is supported on Pod v1 core. Read only operations are currently supported on the following Kubernetes API resources: 1. Pod v1 core 2. ReplicaSet v1 apps 3. Endpoints v1 core 4. Node v1 core 5. Namespace v1 core 6. PersistentVolume v1 core 7. Event v1 core The semantics of using Kubernetes APIs on a Virtual K8s object are different compared to those on a single Kubernetes cluster since the Kubernetes resource objects created using the Virtual K8s API will be instantiated in all the physical Kubernetes clusters in each of the sites selected by the virtual-site referred to in the object. In a single Kubernetes cluster, when a Deployment resource is created with Replicas set to 3, the expectation is that 3 Pods will be created on the Kubernetes cluster. On the Virtual K8S API, when a Deployment resource is created with Replicas set to 3, the total number of Pods created is equal to the number of Replicas times the number of physical clusters in each of the sites selected by the referred to virtual-site. For example, if the virtual-site associated with Virtual K8s object selects 3 sites each having 1 physical Kubernetes cluster, then the total number of Pods created will be 9. Kubernetes API resource objects can also be created with the annotation ves.io/virtual-sites=<virtual-site-namespace>/<virtual-site-name> and those objects will be instantiated in all physical Kubernetes clusters in each of the sites selected by the virtual-site specified in the annotation only and not using the virtual-site specified in the Virtual K8s object. This provides an override mechanism to select different virtual-sites for the Kubernetes API resource to be instantiated on. The virtual-site referred to in the Virtual K8s can hence be thought of as the default virtual-site for all the Kubernetes API resource objects created on the Virtual K8s API without the above annotation.
+  Virtual K8s object exposes a Kubernetes API endpoint in the namespace that operates on all the physical Kubernetes clusters in each of<br>the sites that are selected by the virtual-site referred to in the object.<br><br>Virtual K8s supports only a subset of Kubernetes APIs related to application management.<br><br>Read and write operations are currently supported on the following Kubernetes API resources:<br>1. Deployment v1 apps<br>2. StatefulSet v1 apps<br>3. DaemonSet v1 apps<br>4. Job v1 batch<br>5. CronJob v1beta1 batch<br>6. Service v1 core with type ClusterIP<br>7. Secret v1 core<br>8. ConfigMap v1 core<br>9. ServiceAccount v1 core<br>10. PersistentVolumeClaim v1 core<br><br>Only delete is supported on Pod v1 core.<br><br>Read only operations are currently supported on the following Kubernetes API resources:<br>1. Pod v1 core<br>2. ReplicaSet v1 apps<br>3. Endpoints v1 core<br>4. Node v1 core<br>5. Namespace v1 core<br>6. PersistentVolume v1 core<br>7. Event v1 core<br><br>The semantics of using Kubernetes APIs on a Virtual K8s object are different compared to those on a single Kubernetes cluster since the<br>Kubernetes resource objects created using the Virtual K8s API will be instantiated in all the physical Kubernetes clusters in each<br>of the sites selected by the virtual-site referred to in the object. In a single Kubernetes cluster, when a Deployment resource is created<br>with Replicas set to 3, the expectation is that 3 Pods will be created on the Kubernetes cluster. On the Virtual K8S API, when a Deployment<br>resource is created with Replicas set to 3, the total number of Pods created is equal to the number of Replicas times the number of physical<br>clusters in each of the sites selected by the referred to virtual-site. For example, if the virtual-site associated with Virtual K8s object<br>selects 3 sites each having 1 physical Kubernetes cluster, then the total number of Pods created will be 9.<br><br>Kubernetes API resource objects can also be created with the annotation ves.io/virtual-sites=<virtual-site-namespace>/<virtual-site-name><br>and those objects will be instantiated in all physical Kubernetes clusters in each of the sites selected by the virtual-site specified in the<br>annotation only and not using the virtual-site specified in the Virtual K8s object. This provides an override mechanism to select different<br>virtual-sites for the Kubernetes API resource to be instantiated on. The virtual-site referred to in the Virtual K8s can hence be thought<br>of as the default virtual-site for all the Kubernetes API resource objects created on the Virtual K8s API without the above annotation.
 ---
 
 # f5xc_virtual_k8s (Resource)
 
-Virtual K8s Object Virtual K8s object exposes a Kubernetes API endpoint in the namespace that operates on all the physical Kubernetes clusters in each of the sites that are selected by the virtual-site referred to in the object. Virtual K8s supports only a subset of Kubernetes APIs related to application management. Read and write operations are currently supported on the following Kubernetes API resources: 1. Deployment v1 apps 2. StatefulSet v1 apps 3. DaemonSet v1 apps 4. Job v1 batch 5. CronJob v1beta1 batch 6. Service v1 core with type ClusterIP 7. Secret v1 core 8. ConfigMap v1 core 9. ServiceAccount v1 core 10. PersistentVolumeClaim v1 core Only delete is supported on Pod v1 core. Read only operations are currently supported on the following Kubernetes API resources: 1. Pod v1 core 2. ReplicaSet v1 apps 3. Endpoints v1 core 4. Node v1 core 5. Namespace v1 core 6. PersistentVolume v1 core 7. Event v1 core The semantics of using Kubernetes APIs on a Virtual K8s object are different compared to those on a single Kubernetes cluster since the Kubernetes resource objects created using the Virtual K8s API will be instantiated in all the physical Kubernetes clusters in each of the sites selected by the virtual-site referred to in the object. In a single Kubernetes cluster, when a Deployment resource is created with Replicas set to 3, the expectation is that 3 Pods will be created on the Kubernetes cluster. On the Virtual K8S API, when a Deployment resource is created with Replicas set to 3, the total number of Pods created is equal to the number of Replicas times the number of physical clusters in each of the sites selected by the referred to virtual-site. For example, if the virtual-site associated with Virtual K8s object selects 3 sites each having 1 physical Kubernetes cluster, then the total number of Pods created will be 9. Kubernetes API resource objects can also be created with the annotation ves.io/virtual-sites=<virtual-site-namespace>/<virtual-site-name> and those objects will be instantiated in all physical Kubernetes clusters in each of the sites selected by the virtual-site specified in the annotation only and not using the virtual-site specified in the Virtual K8s object. This provides an override mechanism to select different virtual-sites for the Kubernetes API resource to be instantiated on. The virtual-site referred to in the Virtual K8s can hence be thought of as the default virtual-site for all the Kubernetes API resource objects created on the Virtual K8s API without the above annotation.
+Virtual K8s object exposes a Kubernetes API endpoint in the namespace that operates on all the physical Kubernetes clusters in each of<br>the sites that are selected by the virtual-site referred to in the object.<br><br>Virtual K8s supports only a subset of Kubernetes APIs related to application management.<br><br>Read and write operations are currently supported on the following Kubernetes API resources:<br>1. Deployment v1 apps<br>2. StatefulSet v1 apps<br>3. DaemonSet v1 apps<br>4. Job v1 batch<br>5. CronJob v1beta1 batch<br>6. Service v1 core with type ClusterIP<br>7. Secret v1 core<br>8. ConfigMap v1 core<br>9. ServiceAccount v1 core<br>10. PersistentVolumeClaim v1 core<br><br>Only delete is supported on Pod v1 core.<br><br>Read only operations are currently supported on the following Kubernetes API resources:<br>1. Pod v1 core<br>2. ReplicaSet v1 apps<br>3. Endpoints v1 core<br>4. Node v1 core<br>5. Namespace v1 core<br>6. PersistentVolume v1 core<br>7. Event v1 core<br><br>The semantics of using Kubernetes APIs on a Virtual K8s object are different compared to those on a single Kubernetes cluster since the<br>Kubernetes resource objects created using the Virtual K8s API will be instantiated in all the physical Kubernetes clusters in each<br>of the sites selected by the virtual-site referred to in the object. In a single Kubernetes cluster, when a Deployment resource is created<br>with Replicas set to 3, the expectation is that 3 Pods will be created on the Kubernetes cluster. On the Virtual K8S API, when a Deployment<br>resource is created with Replicas set to 3, the total number of Pods created is equal to the number of Replicas times the number of physical<br>clusters in each of the sites selected by the referred to virtual-site. For example, if the virtual-site associated with Virtual K8s object<br>selects 3 sites each having 1 physical Kubernetes cluster, then the total number of Pods created will be 9.<br><br>Kubernetes API resource objects can also be created with the annotation ves.io/virtual-sites=<virtual-site-namespace>/<virtual-site-name><br>and those objects will be instantiated in all physical Kubernetes clusters in each of the sites selected by the virtual-site specified in the<br>annotation only and not using the virtual-site specified in the Virtual K8s object. This provides an override mechanism to select different<br>virtual-sites for the Kubernetes API resource to be instantiated on. The virtual-site referred to in the Virtual K8s can hence be thought<br>of as the default virtual-site for all the Kubernetes API resource objects created on the Virtual K8s API without the above annotation.
 
 To get more information about f5xc_virtual_k8s, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/virtual-k8s)
 
+## Example Usage
 
+```terraform
+# Example: Virtual K8s - Full
+
+resource "f5xc_namespace" "test_namespace" {
+  name = "example-namespace"
+}
+
+resource "f5xc_virtual_k8s" "example" {
+  name        = "example-virtual-k8s"
+  namespace   = f5xc_namespace.test_namespace.name
+  description = "Virtual k8s full example"
+
+  labels = {
+    env = "example"
+  }
+
+  annotations = {
+    owner = "example-team"
+  }
+
+  service_isolation_choice = {
+    disabled = true
+  }
+}
+```
+
+```terraform
+# Example: Virtual K8s - Vsite Refs
+
+resource "f5xc_namespace" "test_namespace" {
+  name = "example-namespace"
+}
+
+resource "f5xc_virtual_site" "test_vsite_a" {
+  name      = "example-virtual-site-a"
+  namespace = f5xc_namespace.test_namespace.name
+
+  site_selector = {
+    expressions = ["environment in (example)"]
+  }
+
+  site_type = ["REGIONAL_EDGE"]
+}
+
+resource "f5xc_virtual_k8s" "example" {
+  name      = "example-virtual-k8s"
+  namespace = f5xc_namespace.test_namespace.name
+
+  vsite_refs = [{
+    name      = f5xc_virtual_site.test_vsite_a.name
+    namespace = f5xc_virtual_site.test_vsite_a.namespace
+  }]
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -41,7 +96,7 @@ To get more information about f5xc_virtual_k8s, refer:
 - `default_flavor_ref` (Attributes) Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s (see [below for nested schema](#nestedatt--default_flavor_ref))
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `service_isolation_choice` (Attributes) service_isolation_choice Service isolation choice (see [below for nested schema](#nestedatt--service_isolation_choice))
+- `service_isolation_choice` (Attributes) service_isolation_choice Service isolation choice<br>Exactly one of `disabled` or `isolated` must be specified when `service_isolation_choice` is configured. (see [below for nested schema](#nestedatt--service_isolation_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `vsite_refs` (Attributes List) vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object (see [below for nested schema](#nestedatt--vsite_refs))
 
@@ -67,8 +122,8 @@ Read-Only:
 
 Optional:
 
-- `disabled` (Boolean) Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true
-- `isolated` (Boolean) Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false
+- `disabled` (Boolean) Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true<br>Conflicts with `isolated`.
+- `isolated` (Boolean) Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false<br>Conflicts with `disabled`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -99,7 +154,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -107,13 +162,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_virtual_k8s.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_virtual_k8s.example"
+	to = f5xc_virtual_k8s.example
 }
 ```

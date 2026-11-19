@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
@@ -29,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -37,6 +37,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -48,6 +49,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_dns_load_balancer "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dns_load_balancer"
 	ves_io_schema_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
@@ -65,6 +67,7 @@ type DnsLoadBalancerRespCache struct {
 
 type DnsLoadBalancerRespCacheParametersChoice struct {
 	DefaultResponseCacheParameters types.Bool   `tfsdk:"default_response_cache_parameters"`
+	Disable                        types.Bool   `tfsdk:"disable"`
 	ResponseCacheParameters        types.Object `tfsdk:"response_cache_parameters"`
 }
 
@@ -110,14 +113,12 @@ type DnsLoadBalancerGeoLocationLabelSelector struct {
 }
 
 type DnsLoadBalancerIpPrefixList struct {
-	InvertMatch  types.Bool `tfsdk:"invert_match"`
 	IpPrefixes   types.List `tfsdk:"ip_prefixes"`
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
 type DnsLoadBalancerIpPrefixSet struct {
-	InvertMatcher types.Bool `tfsdk:"invert_matcher"`
-	PrefixSets    types.List `tfsdk:"prefix_sets"`
+	PrefixSets types.List `tfsdk:"prefix_sets"`
 }
 
 // ResourceF5XCDnsLoadBalancerModel describes the resource data model.
@@ -170,10 +171,11 @@ var DnsLoadBalancerResponseCacheModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ResponseCacheParametersChoice
+// Attribute map for OneOfField --> ResponseCacheParametersChoice
 var DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_response_cache_parameters": types.BoolType,
+	"disable":                           types.BoolType,
 	"response_cache_parameters": types.ObjectType{
 		AttrTypes: DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap,
 	},
@@ -307,7 +309,6 @@ var DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap = ma
 // Attribute map for PointerOfOneOfField --> IpPrefixList
 var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap = map[string]attr.Type{
 
-	"invert_match": types.BoolType,
 	"ip_prefixes": types.ListType{
 		ElemType: types.StringType,
 	},
@@ -319,7 +320,6 @@ var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap = map[
 // Attribute map for PointerOfOneOfField --> IpPrefixSet
 var DnsLoadBalancerRuleListRulesClientChoiceIpPrefixSetModelAttributeMap = map[string]attr.Type{
 
-	"invert_matcher": types.BoolType,
 	"prefix_sets": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -351,8 +351,8 @@ func (r *ResourceF5XCDnsLoadBalancer) Metadata(ctx context.Context, request reso
 func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_load_balancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_load_balancer) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_load_balancer This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_load_balancer) etc. can be fetched",
+		MarkdownDescription: "DNS Load Balancer Record is used for configuring DNS Load Balancer for a record.",
+		Description:         "DNS Load Balancer Record is used for configuring DNS Load Balancer for a record.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -408,7 +408,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -425,33 +425,30 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				Description:         "backref_objs a list of DNS Zones associated with this load balancer",
 				MarkdownDescription: "backref_objs a list of DNS Zones associated with this load balancer",
 				Required:            false,
-				Optional:            true,
-				Computed:            false,
+				Optional:            false,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
+							MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.OneOf([]string{"system"}...),
-							},
+							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
-							Required:            true,
+							Required:            false,
 							Optional:            false,
-							Computed:            false,
+							Computed:            true,
 						},
 					},
 				},
@@ -472,7 +469,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 					},
 					"namespace": schema.StringAttribute{
 						Description:         "",
-						MarkdownDescription: "",
+						MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -510,20 +507,34 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"response_cache_parameters_choice": schema.SingleNestedAttribute{
 						Description:         "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers",
-						MarkdownDescription: "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers<br>Exactly one of `default_response_cache_parameters`, `disable`, or `response_cache_parameters` must be specified when `response_cache_parameters_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_response_cache_parameters",
+								"disable",
 								"response_cache_parameters",
 							),
+						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 							"default_response_cache_parameters": schema.BoolAttribute{
 								Description:         "Default Response Cache Parameters Default Parameters for caching the DNS responses",
-								MarkdownDescription: "Default Response Cache Parameters Default Parameters for caching the DNS responses",
+								MarkdownDescription: "Default Response Cache Parameters Default Parameters for caching the DNS responses<br>Conflicts with `disable` and `response_cache_parameters`.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+							"disable": schema.BoolAttribute{
+								Description:         "Disable Response Cache When Response Cache is disabled, responses will be computed for each request",
+								MarkdownDescription: "Disable Response Cache When Response Cache is disabled, responses will be computed for each request<br>Conflicts with `default_response_cache_parameters` and `response_cache_parameters`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -533,7 +544,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 							},
 							"response_cache_parameters": schema.SingleNestedAttribute{
 								Description:         "Response Cache Parameters Customize the parameters for Response cache",
-								MarkdownDescription: "Response Cache Parameters Customize the parameters for Response cache",
+								MarkdownDescription: "Response Cache Parameters Customize the parameters for Response cache<br>Conflicts with `default_response_cache_parameters` and `disable`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -598,7 +609,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"action_choice": schema.SingleNestedAttribute{
 									Description:         "action choice Action for the DNS Load Balancing Rule",
-									MarkdownDescription: "action choice Action for the DNS Load Balancing Rule",
+									MarkdownDescription: "action choice Action for the DNS Load Balancing Rule<br>`pool` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -624,7 +635,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 												},
 												"namespace": schema.StringAttribute{
 													Description:         "",
-													MarkdownDescription: "",
+													MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -645,7 +656,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 								},
 								"client_choice": schema.SingleNestedAttribute{
 									Description:         "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.",
-									MarkdownDescription: "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.",
+									MarkdownDescription: "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.<br>Exactly one of `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, or `ip_prefix_set` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -662,7 +673,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"asn_list": schema.SingleNestedAttribute{
 											Description:         "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
-											MarkdownDescription: "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
+											MarkdownDescription: "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -683,7 +694,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"asn_matcher": schema.SingleNestedAttribute{
 											Description:         "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-											MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+											MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `asn_list`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -720,7 +731,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -730,7 +741,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"geo_location_label_selector": schema.SingleNestedAttribute{
 											Description:         "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
-											MarkdownDescription: "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											MarkdownDescription: "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -751,7 +762,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"geo_location_set": schema.SingleNestedAttribute{
 											Description:         "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
-											MarkdownDescription: "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											MarkdownDescription: "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -765,7 +776,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 												},
 												"namespace": schema.StringAttribute{
 													Description:         "",
-													MarkdownDescription: "",
+													MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -784,19 +795,11 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"ip_prefix_list": schema.SingleNestedAttribute{
 											Description:         "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
-											MarkdownDescription: "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
+											MarkdownDescription: "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
-												"invert_match": schema.BoolAttribute{
-													Description:         "invert_matcher Invert the match result.",
-													MarkdownDescription: "invert_matcher Invert the match result.<br>**Default:** `false`",
-													Required:            false,
-													Optional:            true,
-													Computed:            true,
-													Default:             booldefault.StaticBool(false),
-												},
 												"ip_prefixes": schema.ListAttribute{
 													Description:         "ip prefixes List of IPv4 prefix strings.",
 													MarkdownDescription: "ip prefixes List of IPv4 prefix strings.",
@@ -824,7 +827,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 													Validators: []validator.List{
 														listvalidator.SizeAtMost(128),
 														listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-															regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+															regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 															"must be a valid IPv6 prefix",
 														)),
 														listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
@@ -835,19 +838,11 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"ip_prefix_set": schema.SingleNestedAttribute{
 											Description:         "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.",
-											MarkdownDescription: "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.",
+											MarkdownDescription: "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, and `ip_prefix_list`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
-												"invert_matcher": schema.BoolAttribute{
-													Description:         "invert_matcher Invert the match result.",
-													MarkdownDescription: "invert_matcher Invert the match result.<br>**Default:** `false`",
-													Required:            false,
-													Optional:            true,
-													Computed:            true,
-													Default:             booldefault.StaticBool(false),
-												},
 												"prefix_sets": schema.ListNestedAttribute{
 													Description:         "prefix_sets A list of references to ip_prefix_set objects.",
 													MarkdownDescription: "prefix_sets A list of references to ip_prefix_set objects.",
@@ -880,7 +875,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 																Optional:            false,
 																Computed:            true,
 																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
+																	stringplanmodifier.UseNonNullStateForUnknown(),
 																},
 															},
 														},
@@ -968,9 +963,17 @@ func (r *ResourceF5XCDnsLoadBalancer) ModifyPlan(ctx context.Context, req resour
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDnsLoadBalancerModel
 
 	// Read Terraform plan data into the model
@@ -1112,6 +1115,9 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> ResponseCache
 		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
 			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
+			responseCacheSpec.ResponseCacheParametersChoice = &ves_io_schema_dns_load_balancer.ResponseCache_Disable{
+				Disable: &ves_io_schema.Empty{},
+			}
 			spec.ResponseCache = responseCacheSpec
 			var responseCacheModel DnsLoadBalancerRespCache
 
@@ -1122,7 +1128,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
+			// resource modelToSpecNested OneOfField --> ResponseCacheParametersChoice
 			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
 				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerRespCacheParametersChoice{}
 				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1135,6 +1141,13 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 					defaultResponseCacheParametersSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_DefaultResponseCacheParameters{}
 					defaultResponseCacheParametersSpecBool.DefaultResponseCacheParameters = &ves_io_schema.Empty{}
 					responseCacheSpec.ResponseCacheParametersChoice = defaultResponseCacheParametersSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !responseCacheResponseCacheParametersChoiceModel.Disable.IsNull() && !responseCacheResponseCacheParametersChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					responseCacheSpec.ResponseCacheParametersChoice = disableSpecBool
 				}
 
 				// resource modelToSpecNested PointerOfOneOfField --> ResponseCacheParameters
@@ -1388,13 +1401,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 							ipPrefixListOneOfSpec.IpPrefixList = &ves_io_schema_policy.PrefixMatchList{}
 							ruleListSpec.Rules[i].ClientChoice = ipPrefixListOneOfSpec
 
-							// resource modelToSpecNested BoolField --> InvertMatch
-							if !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsNull() && !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsUnknown() {
-								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(dnsLoadBalancerIpPrefixListModel.InvertMatch.ValueBool())
-							} else {
-								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(false)
-							}
-
 							// resource modelToSpecNested ArrayOfStringField --> IpPrefixes
 							if !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsNull() && !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsUnknown() {
 								{
@@ -1433,13 +1439,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 							ipPrefixSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet{}
 							ipPrefixSetOneOfSpec.IpPrefixSet = &ves_io_schema_policy.IpMatcherType{}
 							ruleListSpec.Rules[i].ClientChoice = ipPrefixSetOneOfSpec
-
-							// resource modelToSpecNested BoolField --> InvertMatcher
-							if !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsNull() && !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsUnknown() {
-								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(dnsLoadBalancerIpPrefixSetModel.InvertMatcher.ValueBool())
-							} else {
-								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(false)
-							}
 
 							// resource modelToSpecNested RequiredArrayOfPointerField --> PrefixSets
 							if !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsNull() && !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsUnknown() && len(dnsLoadBalancerIpPrefixSetModel.PrefixSets.Elements()) > 0 {
@@ -1494,7 +1493,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1517,7 +1516,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "dns_load_balancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "dns_load_balancer", err),
 		)
 		return
 	}
@@ -1687,14 +1686,12 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
 		}
 		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
-		var priorValDnsZones types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_zones"), &priorValDnsZones)
-		if !priorValDnsZones.IsNull() && !priorValDnsZones.IsUnknown() {
-			data.DnsZones = priorValDnsZones
+		if !data.DnsZones.IsNull() && !data.DnsZones.IsUnknown() && len(data.DnsZones.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsZones = basetypes.NewListValueMust(dnsZonesObjectType, nil)
 		} else {
 			data.DnsZones = nullDnsZonesList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> FallbackPool
@@ -1762,8 +1759,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
-		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> ResponseCacheParametersChoice
 		if responseCacheElement.GetResponseCacheParametersChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			responseCacheresponseCacheParametersChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1780,6 +1776,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolValue(true)
 			} else {
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_Disable)
+
+			if isDisable {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolNull()
 			}
 
 			// resource specToModelNested PointerOfOneOfField --> ResponseCacheParameters
@@ -1855,6 +1860,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
 			rulesElements := make([]DnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
+			i := 0
 			for _, rulesElement := range ruleListElement.GetRules() {
 				dnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerLoadBalancingRule{}
 
@@ -2141,9 +2147,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
 							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
 
-							// resource specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
-
 							// resource specToModelNested ArrayOfStringField --> IpPrefixes
 							{
 								if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
@@ -2152,9 +2155,31 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								} else {
-									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								}
 							}
 
@@ -2166,9 +2191,31 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								} else {
-									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								}
 							}
 
@@ -2192,9 +2239,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 						if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
 							ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
-
-							// resource specToModelNested BoolField --> InvertMatcher
-							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetElement.GetInvertMatcher()))
 
 							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
 							if len(ipPrefixSetElement.GetPrefixSets()) > 0 {
@@ -2280,6 +2324,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 				dnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
 
 				rulesElements = append(rulesElements, dnsLoadBalancerLoadBalancingRuleModel)
+				i++
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -2354,14 +2399,10 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "dns_load_balancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_load_balancer", err),
 		)
 		return
 	}
@@ -2531,14 +2572,12 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
 		}
 		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
-		var priorValDnsZones types.List
-		_ = request.State.GetAttribute(ctx, path.Root("dns_zones"), &priorValDnsZones)
-		if !priorValDnsZones.IsNull() && !priorValDnsZones.IsUnknown() {
-			data.DnsZones = priorValDnsZones
+		if !data.DnsZones.IsNull() && !data.DnsZones.IsUnknown() && len(data.DnsZones.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsZones = basetypes.NewListValueMust(dnsZonesObjectType, nil)
 		} else {
 			data.DnsZones = nullDnsZonesList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> FallbackPool
@@ -2606,8 +2645,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
-		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> ResponseCacheParametersChoice
 		if responseCacheElement.GetResponseCacheParametersChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			responseCacheresponseCacheParametersChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2624,6 +2662,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolValue(true)
 			} else {
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_Disable)
+
+			if isDisable {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolNull()
 			}
 
 			// resource specToModelNested PointerOfOneOfField --> ResponseCacheParameters
@@ -2672,7 +2719,11 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap)
+			dnsLoadBalancerRespCacheModel.ResponseCacheParametersChoice = types.ObjectValueMust(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap, map[string]attr.Value{
+				"default_response_cache_parameters": types.BoolNull(),
+				"disable":                           types.BoolValue(true),
+				"response_cache_parameters":         types.ObjectNull(DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParametersModelAttributeMap),
+			})
 		}
 
 		responseCacheObj, responseCacheDiags := utils.GoStructToObjectValue(
@@ -2699,6 +2750,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
 			rulesElements := make([]DnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
+			i := 0
 			for _, rulesElement := range ruleListElement.GetRules() {
 				dnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerLoadBalancingRule{}
 
@@ -2985,9 +3037,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
 							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
 
-							// resource specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
-
 							// resource specToModelNested ArrayOfStringField --> IpPrefixes
 							{
 								if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
@@ -2996,9 +3045,31 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								} else {
-									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForRead(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								}
 							}
 
@@ -3010,9 +3081,31 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForRead(ctx, priorValIpv6Prefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								} else {
-									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForRead(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								}
 							}
 
@@ -3036,9 +3129,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 
 						if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
 							ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
-
-							// resource specToModelNested BoolField --> InvertMatcher
-							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetElement.GetInvertMatcher()))
 
 							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
 							if len(ipPrefixSetElement.GetPrefixSets()) > 0 {
@@ -3124,6 +3214,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 				dnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
 
 				rulesElements = append(rulesElements, dnsLoadBalancerLoadBalancingRuleModel)
+				i++
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -3164,6 +3255,12 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 }
 
 func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDnsLoadBalancerModel
@@ -3325,6 +3422,9 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> ResponseCache
 		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
 			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
+			responseCacheSpec.ResponseCacheParametersChoice = &ves_io_schema_dns_load_balancer.ResponseCache_Disable{
+				Disable: &ves_io_schema.Empty{},
+			}
 			spec.ResponseCache = responseCacheSpec
 			var responseCacheModel DnsLoadBalancerRespCache
 
@@ -3335,7 +3435,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
+			// resource modelToSpecNested OneOfField --> ResponseCacheParametersChoice
 			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
 				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerRespCacheParametersChoice{}
 				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3348,6 +3448,13 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 					defaultResponseCacheParametersSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_DefaultResponseCacheParameters{}
 					defaultResponseCacheParametersSpecBool.DefaultResponseCacheParameters = &ves_io_schema.Empty{}
 					responseCacheSpec.ResponseCacheParametersChoice = defaultResponseCacheParametersSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Disable
+				if !responseCacheResponseCacheParametersChoiceModel.Disable.IsNull() && !responseCacheResponseCacheParametersChoiceModel.Disable.IsUnknown() {
+					disableSpecBool := &ves_io_schema_dns_load_balancer.ResponseCache_Disable{}
+					disableSpecBool.Disable = &ves_io_schema.Empty{}
+					responseCacheSpec.ResponseCacheParametersChoice = disableSpecBool
 				}
 
 				// resource modelToSpecNested PointerOfOneOfField --> ResponseCacheParameters
@@ -3601,13 +3708,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 							ipPrefixListOneOfSpec.IpPrefixList = &ves_io_schema_policy.PrefixMatchList{}
 							ruleListSpec.Rules[i].ClientChoice = ipPrefixListOneOfSpec
 
-							// resource modelToSpecNested BoolField --> InvertMatch
-							if !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsNull() && !dnsLoadBalancerIpPrefixListModel.InvertMatch.IsUnknown() {
-								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(dnsLoadBalancerIpPrefixListModel.InvertMatch.ValueBool())
-							} else {
-								ipPrefixListOneOfSpec.IpPrefixList.InvertMatch = bool(false)
-							}
-
 							// resource modelToSpecNested ArrayOfStringField --> IpPrefixes
 							if !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsNull() && !dnsLoadBalancerIpPrefixListModel.IpPrefixes.IsUnknown() {
 								{
@@ -3646,13 +3746,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 							ipPrefixSetOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_IpPrefixSet{}
 							ipPrefixSetOneOfSpec.IpPrefixSet = &ves_io_schema_policy.IpMatcherType{}
 							ruleListSpec.Rules[i].ClientChoice = ipPrefixSetOneOfSpec
-
-							// resource modelToSpecNested BoolField --> InvertMatcher
-							if !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsNull() && !dnsLoadBalancerIpPrefixSetModel.InvertMatcher.IsUnknown() {
-								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(dnsLoadBalancerIpPrefixSetModel.InvertMatcher.ValueBool())
-							} else {
-								ipPrefixSetOneOfSpec.IpPrefixSet.InvertMatcher = bool(false)
-							}
 
 							// resource modelToSpecNested RequiredArrayOfPointerField --> PrefixSets
 							if !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsNull() && !dnsLoadBalancerIpPrefixSetModel.PrefixSets.IsUnknown() && len(dnsLoadBalancerIpPrefixSetModel.PrefixSets.Elements()) > 0 {
@@ -3707,7 +3800,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3715,24 +3808,20 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "dns_load_balancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_load_balancer", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "dns_load_balancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_load_balancer", err),
 		)
 		return
 	}
@@ -3901,14 +3990,12 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			AttrTypes: DnsLoadBalancerDnsZonesObjectRefModelAttributeMap,
 		}
 		nullDnsZonesList := basetypes.NewListNull(dnsZonesObjectType)
-		var priorValDnsZones types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("dns_zones"), &priorValDnsZones)
-		if !priorValDnsZones.IsNull() && !priorValDnsZones.IsUnknown() {
-			data.DnsZones = priorValDnsZones
+		if !data.DnsZones.IsNull() && !data.DnsZones.IsUnknown() && len(data.DnsZones.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.DnsZones = basetypes.NewListValueMust(dnsZonesObjectType, nil)
 		} else {
 			data.DnsZones = nullDnsZonesList
 		}
-
 	}
 
 	// resource SpecToModelRoot PointerField --> FallbackPool
@@ -3976,8 +4063,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
-		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> ResponseCacheParametersChoice
 		if responseCacheElement.GetResponseCacheParametersChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			responseCacheresponseCacheParametersChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3994,6 +4080,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolValue(true)
 			} else {
 				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["default_response_cache_parameters"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Disable
+			_, isDisable := responseCacheresponseCacheParametersChoiceChoices.(*ves_io_schema_dns_load_balancer.ResponseCache_Disable)
+
+			if isDisable {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolValue(true)
+			} else {
+				responseCacheresponseCacheParametersChoiceChoicesAttributeMap["disable"] = types.BoolNull()
 			}
 
 			// resource specToModelNested PointerOfOneOfField --> ResponseCacheParameters
@@ -4069,6 +4164,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
 			rulesElements := make([]DnsLoadBalancerLoadBalancingRule, 0, len(ruleListElement.GetRules()))
+			i := 0
 			for _, rulesElement := range ruleListElement.GetRules() {
 				dnsLoadBalancerLoadBalancingRuleModel := DnsLoadBalancerLoadBalancingRule{}
 
@@ -4355,9 +4451,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 						if isIpPrefixList && ipPrefixListOptionsWrapper != nil && ipPrefixListOptionsWrapper.IpPrefixList != nil {
 							ipPrefixListElement := ipPrefixListOptionsWrapper.IpPrefixList
 
-							// resource specToModelNested BoolField --> InvertMatch
-							ipPrefixListAttributeMap["invert_match"] = types.BoolValue(bool(ipPrefixListElement.GetInvertMatch()))
-
 							// resource specToModelNested ArrayOfStringField --> IpPrefixes
 							{
 								if len(ipPrefixListElement.GetIpPrefixes()) > 0 {
@@ -4366,9 +4459,31 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ip_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								} else {
-									ipPrefixListAttributeMap["ip_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpPrefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ip_prefixes"), &priorValIpPrefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpPrefixes, reconcileDiagsIpPrefixes := utils.ReconcileListForApply(ctx, priorValIpPrefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpPrefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ip_prefixes"] = reconciledListIpPrefixes
 								}
 							}
 
@@ -4380,9 +4495,31 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 									if response.Diagnostics.HasError() {
 										return
 									}
-									ipPrefixListAttributeMap["ipv6_prefixes"] = listValue
+									// Semantic List Reconciliation: reconcile backend list order against client representation.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, listValue)
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								} else {
-									ipPrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
+									var priorValIpv6Prefixes types.List
+									response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_list").AtName("rules").AtListIndex(i).AtName("client_choice").AtName("ip_prefix_list").AtName("ipv6_prefixes"), &priorValIpv6Prefixes)...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									reconciledListIpv6Prefixes, reconcileDiagsIpv6Prefixes := utils.ReconcileListForApply(ctx, priorValIpv6Prefixes, types.ListNull(types.StringType))
+									response.Diagnostics.Append(reconcileDiagsIpv6Prefixes...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ipPrefixListAttributeMap["ipv6_prefixes"] = reconciledListIpv6Prefixes
 								}
 							}
 
@@ -4406,9 +4543,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 						if isIpPrefixSet && ipPrefixSetOptionsWrapper != nil && ipPrefixSetOptionsWrapper.IpPrefixSet != nil {
 							ipPrefixSetElement := ipPrefixSetOptionsWrapper.IpPrefixSet
-
-							// resource specToModelNested BoolField --> InvertMatcher
-							ipPrefixSetAttributeMap["invert_matcher"] = types.BoolValue(bool(ipPrefixSetElement.GetInvertMatcher()))
 
 							// resource specToModelNested RequiredArrayOfPointerField --> PrefixSets
 							if len(ipPrefixSetElement.GetPrefixSets()) > 0 {
@@ -4494,6 +4628,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 				dnsLoadBalancerLoadBalancingRuleModel.Score = types.Int64Value(int64(rulesElement.GetScore()))
 
 				rulesElements = append(rulesElements, dnsLoadBalancerLoadBalancingRuleModel)
+				i++
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -4597,7 +4732,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Delete(ctx context.Context, request resour
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "dns_load_balancer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "dns_load_balancer", err),
 		)
 		return
 	}

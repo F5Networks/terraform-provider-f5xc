@@ -22,6 +22,7 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -29,7 +30,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -40,6 +40,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/oneofbranchplanmodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
@@ -52,6 +53,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_network_interface "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_interface"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -418,14 +420,14 @@ var NetworkInterfaceInterfaceChoiceDedicatedInterfaceMonitoringChoiceModelAttrib
 	"monitor_disabled": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> NodeChoice
+// Attribute map for OneOfField --> NodeChoice
 var NetworkInterfaceInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster": types.BoolType,
 	"node":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PrimaryChoice
+// Attribute map for OneOfField --> PrimaryChoice
 var NetworkInterfaceInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap = map[string]attr.Type{
 
 	"is_primary":  types.BoolType,
@@ -442,7 +444,7 @@ var NetworkInterfaceInterfaceChoiceDedicatedManagementInterfaceModelAttributeMap
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NodeChoice
+// Attribute map for OneOfField --> NodeChoice
 var NetworkInterfaceInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster": types.BoolType,
@@ -478,7 +480,7 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceModelAttributeMap = map[stri
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AddressChoice
+// Attribute map for OneOfField --> AddressChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dhcp_client": types.BoolType,
@@ -555,14 +557,14 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpN
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DnsChoice
+// Attribute map for OneOfField --> DnsChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dns_address": types.StringType,
 	"same_as_dgw": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> GatewayChoice
+// Attribute map for OneOfField --> GatewayChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dgw_address":   types.StringType,
@@ -583,7 +585,7 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpN
 	"start_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
+// Attribute map for OneOfField --> InterfacesAddressingChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic_from_end":   types.BoolType,
@@ -664,7 +666,7 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoCon
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AutoconfigChoice
+// Attribute map for OneOfField --> AutoconfigChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"host": types.BoolType,
@@ -761,7 +763,7 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoCon
 	"start_ip": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
+// Attribute map for OneOfField --> InterfacesAddressingChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic_from_end":   types.BoolType,
@@ -814,7 +816,7 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoCon
 	},
 }
 
-// Attribute map for RequiredOneOfField --> LocalDnsChoice
+// Attribute map for OneOfField --> LocalDnsChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"configured_address": types.StringType,
@@ -872,7 +874,7 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceMonitoringChoiceModelAttribu
 	"monitor_disabled": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"segment_network": types.ObjectType{
@@ -891,21 +893,21 @@ var NetworkInterfaceInterfaceChoiceEthernetInterfaceNetworkChoiceSegmentNetworkM
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NodeChoice
+// Attribute map for OneOfField --> NodeChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cluster": types.BoolType,
 	"node":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PrimaryChoice
+// Attribute map for OneOfField --> PrimaryChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap = map[string]attr.Type{
 
 	"is_primary":  types.BoolType,
 	"not_primary": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> VlanChoice
+// Attribute map for OneOfField --> VlanChoice
 var NetworkInterfaceInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap = map[string]attr.Type{
 
 	"untagged": types.BoolType,
@@ -943,7 +945,7 @@ var NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceL2SriovIn
 	},
 }
 
-// Attribute map for RequiredOneOfField --> VlanChoice
+// Attribute map for OneOfField --> VlanChoice
 var NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceL2SriovInterfaceVlanChoiceModelAttributeMap = map[string]attr.Type{
 
 	"untagged": types.BoolType,
@@ -986,7 +988,7 @@ var NetworkInterfaceInterfaceChoiceTunnelInterfaceModelAttributeMap = map[string
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var NetworkInterfaceInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"site_local_inside_network": types.BoolType,
@@ -1061,8 +1063,8 @@ func (r *ResourceF5XCNetworkInterface) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a network_interface This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_interface) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a network_interface This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_interface) etc. can be fetched",
+		MarkdownDescription: "Network Interface object represents the configuration of a network device in a fleet of<br>F5XC Customer Edge sites. The following properties can be configured in this object:<br><br>IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface<br><br>Subnet to use for allocation<br><br>Default gateway<br><br>DNS server<br><br>Interfaces belonging to site local inside and site local outside networks have to be configured as part of<br>bootstrap configuration. This configuration can be done in two ways:<br><br>during site registration and is bundled as part of certified hardware image.<br><br>configured locally on the CE via Sia application<br><br>Interfaces corresponding to these local interfaces can be configured in the global configuration. Label<br>assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP<br>can be still be configured on site local inside network interface configuration, so that dynamic address is<br>obtained and used.<br><br>When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses<br>assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP<br>client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or<br>addresses internally allocated from the same subnet or may be disabled.<br><br>Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured<br>and DHCP server disabled, if an external DHCP server is used.<br><br>Currently, DHCP client should always be enabled, setting static address on a network interface is not supported.<br><br>If this Network interface is for primary network device (site local), then it has to be configured only as<br>DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network<br>of this interface has to be site local network. If there are multiple interfaces and multiple virtual<br>networks, then site local interface has to be in the outside network.<br><br>If network has Network interface with DHCP address assignment configured, then default gateway and DNS server<br>for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route<br>can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary<br>interface will be used.",
+		Description:         "Network Interface object represents the configuration of a network device in a fleet of F5XC Customer Edge sites. The following properties can be configured in this object: IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface Subnet to use for allocation Default gateway DNS server Interfaces belonging to site local inside and site local outside networks have to be configured as part of bootstrap configuration. This configuration can be done in two ways: during site registration and is bundled as part of certified hardware image. configured locally on the CE via Sia application Interfaces corresponding to these local interfaces can be configured in the global configuration. Label assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP can be still be configured on site local inside network interface configuration, so that dynamic address is obtained and used. When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or addresses internally allocated from the same subnet or may be disabled. Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured and DHCP server disabled, if an external DHCP server is used. Currently, DHCP client should always be enabled, setting static address on a network interface is not supported. If this Network interface is for primary network device (site local), then it has to be configured only as DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network of this interface has to be site local network. If there are multiple interfaces and multiple virtual networks, then site local interface has to be in the outside network. If network has Network interface with DHCP address assignment configured, then default gateway and DNS server for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary interface will be used.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -1118,7 +1120,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -1133,7 +1135,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 			},
 			"interface_choice": schema.SingleNestedAttribute{
 				Description:         "Interface Config Type Select the interface configuration type",
-				MarkdownDescription: "Interface Config Type Select the interface configuration type",
+				MarkdownDescription: "Interface Config Type Select the interface configuration type<br>Exactly one of `dedicated_interface`, `dedicated_management_interface`, `ethernet_interface`, `layer2_interface`, or `tunnel_interface` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -1149,7 +1151,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 				Attributes: map[string]schema.Attribute{
 					"dedicated_interface": schema.SingleNestedAttribute{
 						Description:         "Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet, WLAN, or LTE/4G.",
-						MarkdownDescription: "Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet, WLAN, or LTE/4G.",
+						MarkdownDescription: "Bootstrap Local Interface Configuration can be used to set labels, MTU and priority for dedicated interfaces. Networking configuration for dedicated interface is configured locally on site e.g. (outside/inside)Ethernet, WLAN, or LTE/4G.<br>Conflicts with `dedicated_management_interface`, `ethernet_interface`, `layer2_interface`, and `tunnel_interface`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1166,7 +1168,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"monitoring_choice": schema.SingleNestedAttribute{
 								Description:         "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
-								MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
+								MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1179,7 +1181,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"monitor": schema.BoolAttribute{
 										Description:         "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
-										MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
+										MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.<br>Conflicts with `monitor_disabled`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1189,7 +1191,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"monitor_disabled": schema.BoolAttribute{
 										Description:         "Monitoring disabled Link quality monitoring disabled on the interface.",
-										MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.",
+										MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.<br>Conflicts with `monitor`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1200,34 +1202,38 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 								},
 							},
 							"mtu": schema.Int64Attribute{
-								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Any(
-										int64validator.Between(512, 8000),
+										int64validator.Between(512, 9000),
 										int64validator.OneOf(0),
 									),
 								},
 							},
 							"node_choice": schema.SingleNestedAttribute{
 								Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"cluster",
 										"node",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"cluster": schema.BoolAttribute{
 										Description:         "Cluster Configuration will apply to given device on all nodes of the site.",
-										MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.",
+										MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1237,7 +1243,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"node": schema.StringAttribute{
 										Description:         "Node Configuration will apply to a device on the given node of the site.",
-										MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`",
+										MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1249,20 +1255,23 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"primary_choice": schema.SingleNestedAttribute{
 								Description:         "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-								MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet<br>Exactly one of `is_primary` or `not_primary` must be specified when `primary_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"is_primary",
 										"not_primary",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"is_primary": schema.BoolAttribute{
 										Description:         "Interface is Primary This interface is primary",
-										MarkdownDescription: "Interface is Primary This interface is primary",
+										MarkdownDescription: "Interface is Primary This interface is primary<br>Conflicts with `not_primary`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1272,7 +1281,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"not_primary": schema.BoolAttribute{
 										Description:         "Interface is Not Primary This interface is not primary",
-										MarkdownDescription: "Interface is Not Primary This interface is not primary",
+										MarkdownDescription: "Interface is Not Primary This interface is not primary<br>Conflicts with `is_primary`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1284,10 +1293,11 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"priority": schema.Int64Attribute{
 								Description:         "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority",
-								MarkdownDescription: "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority",
+								MarkdownDescription: "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 255),
 								},
@@ -1296,7 +1306,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 					},
 					"dedicated_management_interface": schema.SingleNestedAttribute{
 						Description:         "Dedicated Management Interface In dc cluster sites fallback management interfaces can be made into dedicated management interface",
-						MarkdownDescription: "Dedicated Management Interface In dc cluster sites fallback management interfaces can be made into dedicated management interface",
+						MarkdownDescription: "Dedicated Management Interface In dc cluster sites fallback management interfaces can be made into dedicated management interface<br>Conflicts with `dedicated_interface`, `ethernet_interface`, `layer2_interface`, and `tunnel_interface`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1312,34 +1322,38 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 								},
 							},
 							"mtu": schema.Int64Attribute{
-								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Any(
-										int64validator.Between(512, 8000),
+										int64validator.Between(512, 9000),
 										int64validator.OneOf(0),
 									),
 								},
 							},
 							"node_choice": schema.SingleNestedAttribute{
 								Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a specific node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"cluster",
 										"node",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"cluster": schema.BoolAttribute{
 										Description:         "Cluster Configuration will apply to given device on all nodes of the site.",
-										MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.",
+										MarkdownDescription: "Cluster Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1349,7 +1363,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"node": schema.StringAttribute{
 										Description:         "Node Configuration will apply to a device on the given node of the site.",
-										MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`",
+										MarkdownDescription: "Node Configuration will apply to a device on the given node of the site.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1363,28 +1377,31 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 					},
 					"ethernet_interface": schema.SingleNestedAttribute{
 						Description:         "Ethernet Interface Ethernet interface configuration.",
-						MarkdownDescription: "Ethernet Interface Ethernet interface configuration.",
+						MarkdownDescription: "Ethernet Interface Ethernet interface configuration.<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, `layer2_interface`, and `tunnel_interface`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"address_choice": schema.SingleNestedAttribute{
 								Description:         "Interface Addressing Select how ip address will be assigned to Interface",
-								MarkdownDescription: "Interface Addressing Select how ip address will be assigned to Interface",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Interface Addressing Select how ip address will be assigned to Interface<br>Exactly one of `dhcp_client`, `dhcp_server`, or `static_ip` must be specified when `address_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"dhcp_client",
 										"dhcp_server",
 										"static_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"dhcp_client": schema.BoolAttribute{
 										Description:         "DHCP Client Interface gets it's IP address from external DHCP server",
-										MarkdownDescription: "DHCP Client Interface gets it's IP address from external DHCP server",
+										MarkdownDescription: "DHCP Client Interface gets it's IP address from external DHCP server<br>Conflicts with `dhcp_server` and `static_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1394,7 +1411,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"dhcp_server": schema.SingleNestedAttribute{
 										Description:         "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.",
-										MarkdownDescription: "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.",
+										MarkdownDescription: "DHCP Server DHCP Server is configured for this interface. IP for this Interface will be derived from the DHCP Server configuration.<br>Conflicts with `dhcp_client` and `static_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1413,20 +1430,23 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 													Attributes: map[string]schema.Attribute{
 														"dns_choice": schema.SingleNestedAttribute{
 															Description:         "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.",
-															MarkdownDescription: "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dns_address` or `same_as_dgw` must be specified when `dns_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"dns_address",
 																	"same_as_dgw",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"dns_address": schema.StringAttribute{
 																	Description:         "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
-																	MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
+																	MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.<br>Conflicts with `same_as_dgw`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1439,7 +1459,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																},
 																"same_as_dgw": schema.BoolAttribute{
 																	Description:         "Default Gateway Address DNS server address is same as default gateway address",
-																	MarkdownDescription: "Default Gateway Address DNS server address is same as default gateway address",
+																	MarkdownDescription: "Default Gateway Address DNS server address is same as default gateway address<br>Conflicts with `dns_address`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1451,21 +1471,24 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 														},
 														"gateway_choice": schema.SingleNestedAttribute{
 															Description:         "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.",
-															MarkdownDescription: "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.<br>Exactly one of `dgw_address`, `first_address`, or `last_address` must be specified when `gateway_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"dgw_address",
 																	"first_address",
 																	"last_address",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"dgw_address": schema.StringAttribute{
 																	Description:         "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
-																	MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
+																	MarkdownDescription: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.<br>Conflicts with `first_address` and `last_address`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1478,7 +1501,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																},
 																"first_address": schema.BoolAttribute{
 																	Description:         "First Address First usable address from the network prefix is chosen as default gateway",
-																	MarkdownDescription: "First Address First usable address from the network prefix is chosen as default gateway",
+																	MarkdownDescription: "First Address First usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `last_address`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1488,7 +1511,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																},
 																"last_address": schema.BoolAttribute{
 																	Description:         "Last Address Last usable address from the network prefix is chosen as default gateway",
-																	MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as default gateway",
+																	MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as default gateway<br>Conflicts with `dgw_address` and `first_address`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1500,7 +1523,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 														},
 														"network_prefix_choice": schema.SingleNestedAttribute{
 															Description:         "Network Prefix choice Select DHCP network prefix for the site",
-															MarkdownDescription: "Network Prefix choice Select DHCP network prefix for the site",
+															MarkdownDescription: "Network Prefix choice Select DHCP network prefix for the site<br>`network_prefix` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -1606,21 +1629,24 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 											},
 											"interfaces_addressing_choice": schema.SingleNestedAttribute{
 												Description:         "Interface IP(s) Specify how interfaces on each node are assigned local address",
-												MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"automatic_from_end",
 														"automatic_from_start",
 														"interface_ip_map",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"automatic_from_end": schema.BoolAttribute{
 														Description:         "Automatic End Assign automatically from end of the first network in the DHCP Network list",
-														MarkdownDescription: "Automatic End Assign automatically from end of the first network in the DHCP Network list",
+														MarkdownDescription: "Automatic End Assign automatically from end of the first network in the DHCP Network list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1630,7 +1656,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 													},
 													"automatic_from_start": schema.BoolAttribute{
 														Description:         "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
-														MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
+														MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the DHCP Network list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1640,7 +1666,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 													},
 													"interface_ip_map": schema.SingleNestedAttribute{
 														Description:         "Static IPv4 Configuration Statically configure a IPv4 address for every node",
-														MarkdownDescription: "Static IPv4 Configuration Statically configure a IPv4 address for every node",
+														MarkdownDescription: "Static IPv4 Configuration Statically configure a IPv4 address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1670,14 +1696,14 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"static_ip": schema.SingleNestedAttribute{
 										Description:         "Static IP Interface IP is configured statically",
-										MarkdownDescription: "Static IP Interface IP is configured statically",
+										MarkdownDescription: "Static IP Interface IP is configured statically<br>Conflicts with `dhcp_client` and `dhcp_server`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"network_prefix_choice": schema.SingleNestedAttribute{
 												Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-												MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+												MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -1690,7 +1716,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 												Attributes: map[string]schema.Attribute{
 													"cluster_static_ip": schema.SingleNestedAttribute{
 														Description:         "Node Specific Static IP configuration for a specific node",
-														MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+														MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1730,7 +1756,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																			Computed:            false,
 																			Validators: []validator.String{
 																				stringvalidator.RegexMatches(
-																					regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																					regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																					"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																				),
 																			},
@@ -1742,7 +1768,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 													},
 													"node_static_ip": schema.SingleNestedAttribute{
 														Description:         "Node Static IP configuration for the Node",
-														MarkdownDescription: "Node Static IP configuration for the Node",
+														MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1768,7 +1794,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																Computed:            false,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
-																		regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																		regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																		"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																	),
 																},
@@ -1793,7 +1819,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"ipv6_address_choice": schema.SingleNestedAttribute{
 								Description:         "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface",
-								MarkdownDescription: "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface",
+								MarkdownDescription: "IPv6 Interface Addressing Select how IPv6 address will be assigned to Interface<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -1805,33 +1831,36 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									),
 								},
 								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.UseStateForUnknown(),
+									objectplanmodifier.UseNonNullStateForUnknown(),
 									oneofbranchplanmodifier.PreserveSelectedBranch(),
 								},
 								Attributes: map[string]schema.Attribute{
 									"ipv6_auto_config": schema.SingleNestedAttribute{
 										Description:         "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration",
-										MarkdownDescription: "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration",
+										MarkdownDescription: "IPV6 Auto configuration Configuration corresponding to IPV6 auto configuration<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"autoconfig_choice": schema.SingleNestedAttribute{
 												Description:         "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration",
-												MarkdownDescription: "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"host",
 														"router",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"host": schema.BoolAttribute{
 														Description:         "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.",
-														MarkdownDescription: "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.",
+														MarkdownDescription: "host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1841,14 +1870,14 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 													},
 													"router": schema.SingleNestedAttribute{
 														Description:         "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.",
-														MarkdownDescription: "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.",
+														MarkdownDescription: "router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
 															"address_choice": schema.SingleNestedAttribute{
 																Description:         "address choice Specify how the address need to be obtained for interfaces and clients",
-																MarkdownDescription: "address choice Specify how the address need to be obtained for interfaces and clients",
+																MarkdownDescription: "address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -1861,13 +1890,13 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																Attributes: map[string]schema.Attribute{
 																	"network_prefix": schema.StringAttribute{
 																		Description:         "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862",
-																		MarkdownDescription: "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862",
+																		MarkdownDescription: "Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																		Validators: []validator.String{
 																			stringvalidator.RegexMatches(
-																				regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																				regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																				"must be a valid IPv6 prefix (CIDR notation)",
 																			),
 																			stringvalidator.RegexMatches(
@@ -1878,7 +1907,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																	},
 																	"stateful": schema.SingleNestedAttribute{
 																		Description:         "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag",
-																		MarkdownDescription: "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag",
+																		MarkdownDescription: "Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1897,7 +1926,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																					Attributes: map[string]schema.Attribute{
 																						"network_prefix_choice": schema.SingleNestedAttribute{
 																							Description:         "Network Prefix choice Select DHCP network prefix for a site",
-																							MarkdownDescription: "Network Prefix choice Select DHCP network prefix for a site",
+																							MarkdownDescription: "Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified.",
 																							Required:            true,
 																							Optional:            false,
 																							Computed:            false,
@@ -1915,7 +1944,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																									Computed:            false,
 																									Validators: []validator.String{
 																										stringvalidator.RegexMatches(
-																											regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																											regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																											"must be a valid IPv6 prefix (CIDR notation)",
 																										),
 																									},
@@ -2000,21 +2029,24 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																			},
 																			"interfaces_addressing_choice": schema.SingleNestedAttribute{
 																				Description:         "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																				MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address",
-																				Required:            true,
-																				Optional:            false,
-																				Computed:            false,
+																				MarkdownDescription: "Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured.",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            true,
 																				Validators: []validator.Object{
-																					exactlyoneofvalidator.RequiredExactlyOneOf(
+																					exactlyoneofvalidator.ExactlyOneOf(
 																						"automatic_from_end",
 																						"automatic_from_start",
 																						"interface_ip_map",
 																					),
 																				},
+																				PlanModifiers: []planmodifier.Object{
+																					objectplanmodifier.UseNonNullStateForUnknown(),
+																				},
 																				Attributes: map[string]schema.Attribute{
 																					"automatic_from_end": schema.BoolAttribute{
 																						Description:         "Automatic End Assign automatically from End of the first network in the list",
-																						MarkdownDescription: "Automatic End Assign automatically from End of the first network in the list",
+																						MarkdownDescription: "Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -2024,7 +2056,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																					},
 																					"automatic_from_start": schema.BoolAttribute{
 																						Description:         "Automatic Start Assign automatically from start of the first network in the list",
-																						MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the list",
+																						MarkdownDescription: "Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -2034,7 +2066,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																					},
 																					"interface_ip_map": schema.SingleNestedAttribute{
 																						Description:         "Configured Address Configured address for every node",
-																						MarkdownDescription: "Configured Address Configured address for every node",
+																						MarkdownDescription: "Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -2073,7 +2105,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																Attributes: map[string]schema.Attribute{
 																	"dns_choice": schema.SingleNestedAttribute{
 																		Description:         "DNS server Address Select how DNS server address is determined",
-																		MarkdownDescription: "DNS server Address Select how DNS server address is determined",
+																		MarkdownDescription: "DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -2086,7 +2118,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																		Attributes: map[string]schema.Attribute{
 																			"configured_list": schema.SingleNestedAttribute{
 																				Description:         "Configured Address List Configured address outside network range - external dns server",
-																				MarkdownDescription: "Configured Address List Configured address outside network range - external dns server",
+																				MarkdownDescription: "Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -2111,28 +2143,31 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																			},
 																			"local_dns": schema.SingleNestedAttribute{
 																				Description:         "Local Dns Address Choose the address from the network prefix range as dns server",
-																				MarkdownDescription: "Local Dns Address Choose the address from the network prefix range as dns server",
+																				MarkdownDescription: "Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
 																				Attributes: map[string]schema.Attribute{
 																					"local_dns_choice": schema.SingleNestedAttribute{
 																						Description:         "Local Dns Address Select address from network prefix range as dns server",
-																						MarkdownDescription: "Local Dns Address Select address from network prefix range as dns server",
-																						Required:            true,
-																						Optional:            false,
-																						Computed:            false,
+																						MarkdownDescription: "Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured.",
+																						Required:            false,
+																						Optional:            true,
+																						Computed:            true,
 																						Validators: []validator.Object{
-																							exactlyoneofvalidator.RequiredExactlyOneOf(
+																							exactlyoneofvalidator.ExactlyOneOf(
 																								"configured_address",
 																								"first_address",
 																								"last_address",
 																							),
 																						},
+																						PlanModifiers: []planmodifier.Object{
+																							objectplanmodifier.UseNonNullStateForUnknown(),
+																						},
 																						Attributes: map[string]schema.Attribute{
 																							"configured_address": schema.StringAttribute{
 																								Description:         "Configured Address Configured address from the network prefix is chosen as dns server",
-																								MarkdownDescription: "Configured Address Configured address from the network prefix is chosen as dns server",
+																								MarkdownDescription: "Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -2145,7 +2180,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																							},
 																							"first_address": schema.BoolAttribute{
 																								Description:         "First Address First usable address from the network prefix is chosen as dns server",
-																								MarkdownDescription: "First Address First usable address from the network prefix is chosen as dns server",
+																								MarkdownDescription: "First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -2155,7 +2190,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																							},
 																							"last_address": schema.BoolAttribute{
 																								Description:         "Last Address Last usable address from the network prefix is chosen as dns server",
-																								MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as dns server",
+																								MarkdownDescription: "Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -2179,7 +2214,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"no_ipv6_address": schema.BoolAttribute{
 										Description:         "no_ipv6_address Interface does not have an IPv6 Address.",
-										MarkdownDescription: "no_ipv6_address Interface does not have an IPv6 Address.",
+										MarkdownDescription: "no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2189,14 +2224,14 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"static_ipv6_address": schema.SingleNestedAttribute{
 										Description:         "Static IP Interface IP is configured statically",
-										MarkdownDescription: "Static IP Interface IP is configured statically",
+										MarkdownDescription: "Static IP Interface IP is configured statically<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"network_prefix_choice": schema.SingleNestedAttribute{
 												Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-												MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+												MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -2209,7 +2244,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 												Attributes: map[string]schema.Attribute{
 													"cluster_static_ip": schema.SingleNestedAttribute{
 														Description:         "Node Specific Static IP configuration for a specific node",
-														MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+														MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2249,7 +2284,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																			Computed:            false,
 																			Validators: []validator.String{
 																				stringvalidator.RegexMatches(
-																					regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																					regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																					"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																				),
 																			},
@@ -2261,7 +2296,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 													},
 													"node_static_ip": schema.SingleNestedAttribute{
 														Description:         "Node Static IP configuration for the Node",
-														MarkdownDescription: "Node Static IP configuration for the Node",
+														MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2287,7 +2322,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																Computed:            false,
 																Validators: []validator.String{
 																	stringvalidator.RegexMatches(
-																		regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																		regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																		"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																	),
 																},
@@ -2302,7 +2337,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"monitoring_choice": schema.SingleNestedAttribute{
 								Description:         "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
-								MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.",
+								MarkdownDescription: "Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2315,7 +2350,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"monitor": schema.BoolAttribute{
 										Description:         "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
-										MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.",
+										MarkdownDescription: "Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.<br>Conflicts with `monitor_disabled`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2325,7 +2360,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"monitor_disabled": schema.BoolAttribute{
 										Description:         "Monitoring disabled Link quality monitoring disabled on the interface.",
-										MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.",
+										MarkdownDescription: "Monitoring disabled Link quality monitoring disabled on the interface.<br>Conflicts with `monitor`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2336,39 +2371,40 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 								},
 							},
 							"mtu": schema.Int64Attribute{
-								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Any(
-										int64validator.Between(512, 8000),
+										int64validator.Between(512, 9000),
 										int64validator.OneOf(0),
 									),
-								},
-								PlanModifiers: []planmodifier.Int64{
-									int64planmodifier.UseStateForUnknown(),
 								},
 							},
 							"network_choice": schema.SingleNestedAttribute{
 								Description:         "Network for this Interface Select virtual network of this interface",
-								MarkdownDescription: "Network for this Interface Select virtual network of this interface",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Network for this Interface Select virtual network of this interface<br>Exactly one of `segment_network`, `site_local_inside_network`, `site_local_network`, or `storage_network` must be specified when `network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"segment_network",
 										"site_local_inside_network",
 										"site_local_network",
 										"storage_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"segment_network": schema.SingleNestedAttribute{
 										Description:         "Segment",
-										MarkdownDescription: "Segment",
+										MarkdownDescription: "Segment<br>Conflicts with `site_local_inside_network`, `site_local_network`, and `storage_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2394,14 +2430,14 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 												Optional:            false,
 												Computed:            true,
 												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
+													stringplanmodifier.UseNonNullStateForUnknown(),
 												},
 											},
 										},
 									},
 									"site_local_inside_network": schema.BoolAttribute{
 										Description:         "Site Local Network Inside Interface belongs to site local network inside",
-										MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+										MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_network`, and `storage_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2411,7 +2447,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"site_local_network": schema.BoolAttribute{
 										Description:         "Site Local Network Interface belongs to site local network (outside)",
-										MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+										MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `segment_network`, `site_local_inside_network`, and `storage_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2421,7 +2457,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"storage_network": schema.BoolAttribute{
 										Description:         "Storage Network Interface belongs to site local network inside",
-										MarkdownDescription: "Storage Network Interface belongs to site local network inside",
+										MarkdownDescription: "Storage Network Interface belongs to site local network inside<br>Conflicts with `segment_network`, `site_local_inside_network`, and `site_local_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2433,20 +2469,23 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"node_choice": schema.SingleNestedAttribute{
 								Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.",
-								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the site. Node configuration will apply to a given device on a given node.<br>Exactly one of `cluster` or `node` must be specified when `node_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"cluster",
 										"node",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"cluster": schema.BoolAttribute{
 										Description:         "Node Independent Configuration will apply to given device on all nodes of the site.",
-										MarkdownDescription: "Node Independent Configuration will apply to given device on all nodes of the site.",
+										MarkdownDescription: "Node Independent Configuration will apply to given device on all nodes of the site.<br>Conflicts with `node`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2456,7 +2495,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"node": schema.StringAttribute{
 										Description:         "Node Configuration will apply to a device on the given node.",
-										MarkdownDescription: "Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`",
+										MarkdownDescription: "Node Configuration will apply to a device on the given node.<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2468,20 +2507,23 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"primary_choice": schema.SingleNestedAttribute{
 								Description:         "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-								MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Primary Interface Select if this interface is primary interface, only one interface can be primary in a given fleet<br>Exactly one of `is_primary` or `not_primary` must be specified when `primary_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"is_primary",
 										"not_primary",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"is_primary": schema.BoolAttribute{
 										Description:         "Interface is Primary This interface is primary",
-										MarkdownDescription: "Interface is Primary This interface is primary",
+										MarkdownDescription: "Interface is Primary This interface is primary<br>Conflicts with `not_primary`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2491,7 +2533,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"not_primary": schema.BoolAttribute{
 										Description:         "Interface is Not Primary This interface is not primary",
-										MarkdownDescription: "Interface is Not Primary This interface is not primary",
+										MarkdownDescription: "Interface is Not Primary This interface is not primary<br>Conflicts with `is_primary`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2503,33 +2545,34 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"priority": schema.Int64Attribute{
 								Description:         "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority",
-								MarkdownDescription: "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority",
+								MarkdownDescription: "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 255),
-								},
-								PlanModifiers: []planmodifier.Int64{
-									int64planmodifier.UseStateForUnknown(),
 								},
 							},
 							"vlan_choice": schema.SingleNestedAttribute{
 								Description:         "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-								MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged<br>Exactly one of `untagged` or `vlan_id` must be specified when `vlan_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"untagged",
 										"vlan_id",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"untagged": schema.BoolAttribute{
 										Description:         "Untagged Configure a untagged ethernet interface",
-										MarkdownDescription: "Untagged Configure a untagged ethernet interface",
+										MarkdownDescription: "Untagged Configure a untagged ethernet interface<br>Conflicts with `vlan_id`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2539,7 +2582,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"vlan_id": schema.Int64Attribute{
 										Description:         "VLAN Id Configure a VLAN tagged ethernet interface",
-										MarkdownDescription: "VLAN Id Configure a VLAN tagged ethernet interface",
+										MarkdownDescription: "VLAN Id Configure a VLAN tagged ethernet interface<br>Conflicts with `untagged`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2553,14 +2596,14 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 					},
 					"layer2_interface": schema.SingleNestedAttribute{
 						Description:         "Layer2 interface Layer2 interface configuration",
-						MarkdownDescription: "Layer2 interface Layer2 interface configuration",
+						MarkdownDescription: "Layer2 interface Layer2 interface configuration<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, `ethernet_interface`, and `tunnel_interface`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"layer2_interface_choice": schema.SingleNestedAttribute{
 								Description:         "Layer2 Interface choice Select the Layer2 interface type",
-								MarkdownDescription: "Layer2 Interface choice Select the Layer2 interface type",
+								MarkdownDescription: "Layer2 Interface choice Select the Layer2 interface type<br>Exactly one of `l2sriov_interface`, `l2vlan_interface`, or `l2vlan_slo_interface` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2574,7 +2617,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"l2sriov_interface": schema.SingleNestedAttribute{
 										Description:         "SR-IOV interface Layer2 SR-IOV interface",
-										MarkdownDescription: "SR-IOV interface Layer2 SR-IOV interface",
+										MarkdownDescription: "SR-IOV interface Layer2 SR-IOV interface<br>Conflicts with `l2vlan_interface` and `l2vlan_slo_interface`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2591,20 +2634,23 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 											},
 											"vlan_choice": schema.SingleNestedAttribute{
 												Description:         "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-												MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "Select Untagged or VLAN tagged Select if this interface is VLAN tagged or untagged<br>Exactly one of `untagged` or `vlan_id` must be specified when `vlan_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"untagged",
 														"vlan_id",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"untagged": schema.BoolAttribute{
 														Description:         "Untagged Configure a untagged interface",
-														MarkdownDescription: "Untagged Configure a untagged interface",
+														MarkdownDescription: "Untagged Configure a untagged interface<br>Conflicts with `vlan_id`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2614,7 +2660,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 													},
 													"vlan_id": schema.Int64Attribute{
 														Description:         "VLAN Id Configure a VLAN tagged interface",
-														MarkdownDescription: "VLAN Id Configure a VLAN tagged interface",
+														MarkdownDescription: "VLAN Id Configure a VLAN tagged interface<br>Conflicts with `untagged`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2628,7 +2674,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"l2vlan_interface": schema.SingleNestedAttribute{
 										Description:         "VLAN Interface Layer2 interface of type VLAN",
-										MarkdownDescription: "VLAN Interface Layer2 interface of type VLAN",
+										MarkdownDescription: "VLAN Interface Layer2 interface of type VLAN<br>Conflicts with `l2sriov_interface` and `l2vlan_slo_interface`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2657,7 +2703,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"l2vlan_slo_interface": schema.SingleNestedAttribute{
 										Description:         "SLO VLAN interface VLAN on site local outside interface",
-										MarkdownDescription: "SLO VLAN interface VLAN on site local outside interface",
+										MarkdownDescription: "SLO VLAN interface VLAN on site local outside interface<br>Conflicts with `l2sriov_interface` and `l2vlan_interface`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2680,40 +2726,44 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 					},
 					"tunnel_interface": schema.SingleNestedAttribute{
 						Description:         "Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices.",
-						MarkdownDescription: "Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices.",
+						MarkdownDescription: "Tunnel Interface Template Tunnel interface, Ipsec tunnels to other networking devices.<br>Conflicts with `dedicated_interface`, `dedicated_management_interface`, `ethernet_interface`, and `layer2_interface`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"mtu": schema.Int64Attribute{
-								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
-								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+								Description:         "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
+								MarkdownDescription: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Any(
-										int64validator.Between(512, 8000),
+										int64validator.Between(512, 9000),
 										int64validator.OneOf(0),
 									),
 								},
 							},
 							"network_choice": schema.SingleNestedAttribute{
 								Description:         "Network for this Interface Select virtual network of this interface",
-								MarkdownDescription: "Network for this Interface Select virtual network of this interface",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Network for this Interface Select virtual network of this interface<br>Exactly one of `site_local_inside_network` or `site_local_network` must be specified when `network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"site_local_inside_network",
 										"site_local_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"site_local_inside_network": schema.BoolAttribute{
 										Description:         "Site Local Network Inside Interface belongs to site local network inside",
-										MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+										MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `site_local_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2723,7 +2773,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 									},
 									"site_local_network": schema.BoolAttribute{
 										Description:         "Site Local Network Interface belongs to site local network (outside)",
-										MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+										MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `site_local_inside_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2735,7 +2785,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"node_choice": schema.SingleNestedAttribute{
 								Description:         "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node.",
-								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node.",
+								MarkdownDescription: "Select Node Independent or Node Specific Interface Cluster configuration will apply to a given device on all nodes of the Site. Node configuration will apply to a device on a specific node.<br>`node` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2759,10 +2809,11 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 							},
 							"priority": schema.Int64Attribute{
 								Description:         "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority",
-								MarkdownDescription: "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority",
+								MarkdownDescription: "Priority Priority of the network interface when multiple network interfaces are present in outside network Greater the value, higher the priority<br>**Default:** `0`",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             int64default.StaticInt64(0),
 								Validators: []validator.Int64{
 									int64validator.Between(0, 255),
 								},
@@ -2776,7 +2827,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"network_prefix_choice": schema.SingleNestedAttribute{
 										Description:         "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
-										MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet",
+										MarkdownDescription: "Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -2789,7 +2840,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 										Attributes: map[string]schema.Attribute{
 											"cluster_static_ip": schema.SingleNestedAttribute{
 												Description:         "Node Specific Static IP configuration for a specific node",
-												MarkdownDescription: "Node Specific Static IP configuration for a specific node",
+												MarkdownDescription: "Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2829,7 +2880,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 																	Computed:            false,
 																	Validators: []validator.String{
 																		stringvalidator.RegexMatches(
-																			regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																			regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																			"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 																		),
 																	},
@@ -2841,7 +2892,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 											},
 											"node_static_ip": schema.SingleNestedAttribute{
 												Description:         "Node Static IP configuration for the Node",
-												MarkdownDescription: "Node Static IP configuration for the Node",
+												MarkdownDescription: "Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2867,7 +2918,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 														Computed:            false,
 														Validators: []validator.String{
 															stringvalidator.RegexMatches(
-																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$)`),
+																regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)/(3[0-2]|[12]?\d)$)|(^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)`),
 																"must be a valid IP prefix (IPv4 or IPv6 CIDR)",
 															),
 														},
@@ -2906,7 +2957,7 @@ func (r *ResourceF5XCNetworkInterface) Schema(ctx context.Context, request resou
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -2977,9 +3028,17 @@ func (r *ResourceF5XCNetworkInterface) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCNetworkInterfaceModel
 
 	// Read Terraform plan data into the model
@@ -3077,6 +3136,12 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			}
 			dedicatedInterfaceOneOfSpec := &ves_io_schema_network_interface.CreateSpecType_DedicatedInterface{}
 			dedicatedInterfaceOneOfSpec.DedicatedInterface = &ves_io_schema_network_interface.DedicatedInterfaceType{}
+			dedicatedInterfaceOneOfSpec.DedicatedInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_Cluster{
+				Cluster: &ves_io_schema.Empty{},
+			}
+			dedicatedInterfaceOneOfSpec.DedicatedInterface.PrimaryChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_NotPrimary{
+				NotPrimary: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = dedicatedInterfaceOneOfSpec
 
 			// resource modelToSpecNested RequiredStringField --> Device
@@ -3111,9 +3176,11 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Mtu
 			if !netIfaceDedicatedIfaceModel.Mtu.IsNull() && !netIfaceDedicatedIfaceModel.Mtu.IsUnknown() {
 				dedicatedInterfaceOneOfSpec.DedicatedInterface.Mtu = uint32(uint32(netIfaceDedicatedIfaceModel.Mtu.ValueInt64()))
+			} else {
+				dedicatedInterfaceOneOfSpec.DedicatedInterface.Mtu = uint32(0)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+			// resource modelToSpecNested OneOfField --> NodeChoice
 			if !netIfaceDedicatedIfaceModel.NodeChoice.IsNull() && !netIfaceDedicatedIfaceModel.NodeChoice.IsUnknown() {
 				dedicatedInterfaceNodeChoiceModel := NetIfaceNodeChoice{}
 				response.Diagnostics.Append(netIfaceDedicatedIfaceModel.NodeChoice.As(ctx, &dedicatedInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3137,7 +3204,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+			// resource modelToSpecNested OneOfField --> PrimaryChoice
 			if !netIfaceDedicatedIfaceModel.PrimaryChoice.IsNull() && !netIfaceDedicatedIfaceModel.PrimaryChoice.IsUnknown() {
 				dedicatedInterfacePrimaryChoiceModel := NetIfacePrimaryChoice{}
 				response.Diagnostics.Append(netIfaceDedicatedIfaceModel.PrimaryChoice.As(ctx, &dedicatedInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3164,6 +3231,8 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Priority
 			if !netIfaceDedicatedIfaceModel.Priority.IsNull() && !netIfaceDedicatedIfaceModel.Priority.IsUnknown() {
 				dedicatedInterfaceOneOfSpec.DedicatedInterface.Priority = uint32(uint32(netIfaceDedicatedIfaceModel.Priority.ValueInt64()))
+			} else {
+				dedicatedInterfaceOneOfSpec.DedicatedInterface.Priority = uint32(0)
 			}
 
 		}
@@ -3177,6 +3246,9 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			}
 			dedicatedManagementInterfaceOneOfSpec := &ves_io_schema_network_interface.CreateSpecType_DedicatedManagementInterface{}
 			dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface = &ves_io_schema_network_interface.DedicatedManagementInterfaceType{}
+			dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedManagementInterfaceType_Cluster{
+				Cluster: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = dedicatedManagementInterfaceOneOfSpec
 
 			// resource modelToSpecNested RequiredStringField --> Device
@@ -3187,9 +3259,11 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Mtu
 			if !netIfaceDedicatedMgmtIfaceModel.Mtu.IsNull() && !netIfaceDedicatedMgmtIfaceModel.Mtu.IsUnknown() {
 				dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.Mtu = uint32(uint32(netIfaceDedicatedMgmtIfaceModel.Mtu.ValueInt64()))
+			} else {
+				dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.Mtu = uint32(0)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+			// resource modelToSpecNested OneOfField --> NodeChoice
 			if !netIfaceDedicatedMgmtIfaceModel.NodeChoice.IsNull() && !netIfaceDedicatedMgmtIfaceModel.NodeChoice.IsUnknown() {
 				dedicatedManagementInterfaceNodeChoiceModel := NetIfaceDedicatedMgmtIfaceTypeNodeChoice{}
 				response.Diagnostics.Append(netIfaceDedicatedMgmtIfaceModel.NodeChoice.As(ctx, &dedicatedManagementInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3224,9 +3298,24 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			}
 			ethernetInterfaceOneOfSpec := &ves_io_schema_network_interface.CreateSpecType_EthernetInterface{}
 			ethernetInterfaceOneOfSpec.EthernetInterface = &ves_io_schema_network_interface.EthernetInterfaceType{}
+			ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = &ves_io_schema_network_interface.EthernetInterfaceType_DhcpClient{
+				DhcpClient: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.NetworkChoice = &ves_io_schema_network_interface.EthernetInterfaceType_SiteLocalNetwork{
+				SiteLocalNetwork: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.NodeChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Cluster{
+				Cluster: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.PrimaryChoice = &ves_io_schema_network_interface.EthernetInterfaceType_NotPrimary{
+				NotPrimary: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.VlanChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Untagged{
+				Untagged: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = ethernetInterfaceOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> AddressChoice
+			// resource modelToSpecNested OneOfField --> AddressChoice
 			if !netIfaceEthernetIfaceModel.AddressChoice.IsNull() && !netIfaceEthernetIfaceModel.AddressChoice.IsUnknown() {
 				ethernetInterfaceAddressChoiceModel := NetIfaceAddrChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.AddressChoice.As(ctx, &ethernetInterfaceAddressChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3250,6 +3339,9 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					}
 					dhcpServerOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_DhcpServer{}
 					dhcpServerOneOfSpec.DhcpServer = &ves_io_schema_network_interface.DHCPServerParametersType{}
+					dhcpServerOneOfSpec.DhcpServer.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart{
+						AutomaticFromStart: &ves_io_schema.Empty{},
+					}
 					ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = dhcpServerOneOfSpec
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -3269,10 +3361,16 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 						for i, dhcpNetworksElement := range dhcpNetworksElements {
 							// Initialize the spec struct for the current element
 							dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[i] = &ves_io_schema_network_interface.DHCPNetworkType{}
+							dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[i].DnsChoice = &ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw{
+								SameAsDgw: &ves_io_schema.Empty{},
+							}
+							dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[i].GatewayChoice = &ves_io_schema_network_interface.DHCPNetworkType_FirstAddress{
+								FirstAddress: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+							// resource modelToSpecNested OneOfField --> DnsChoice
 							if !dhcpNetworksElement.DnsChoice.IsNull() && !dhcpNetworksElement.DnsChoice.IsUnknown() {
 								dhcpNetworksDnsChoiceModel := NetIfaceDnsChoice{}
 								response.Diagnostics.Append(dhcpNetworksElement.DnsChoice.As(ctx, &dhcpNetworksDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3296,7 +3394,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> GatewayChoice
+							// resource modelToSpecNested OneOfField --> GatewayChoice
 							if !dhcpNetworksElement.GatewayChoice.IsNull() && !dhcpNetworksElement.GatewayChoice.IsUnknown() {
 								dhcpNetworksGatewayChoiceModel := NetIfaceGatewayChoice{}
 								response.Diagnostics.Append(dhcpNetworksElement.GatewayChoice.As(ctx, &dhcpNetworksGatewayChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3418,7 +3516,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 						dhcpServerOneOfSpec.DhcpServer.FixedIpMap = nil
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+					// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 					if !netIfaceDhcpServerModel.InterfacesAddressingChoice.IsNull() && !netIfaceDhcpServerModel.InterfacesAddressingChoice.IsUnknown() {
 						dhcpServerInterfacesAddressingChoiceModel := NetIfaceInterfacesAddressingChoice{}
 						response.Diagnostics.Append(netIfaceDhcpServerModel.InterfacesAddressingChoice.As(ctx, &dhcpServerInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3594,9 +3692,12 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					}
 					ipv6AutoConfigOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_Ipv6AutoConfig{}
 					ipv6AutoConfigOneOfSpec.Ipv6AutoConfig = &ves_io_schema_network_interface.IPV6AutoConfigType{}
+					ipv6AutoConfigOneOfSpec.Ipv6AutoConfig.AutoconfigChoice = &ves_io_schema_network_interface.IPV6AutoConfigType_Host{
+						Host: &ves_io_schema.Empty{},
+					}
 					ethernetInterfaceOneOfSpec.EthernetInterface.Ipv6AddressChoice = ipv6AutoConfigOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> AutoconfigChoice
+					// resource modelToSpecNested OneOfField --> AutoconfigChoice
 					if !netIfaceIpv6AutoConfigModel.AutoconfigChoice.IsNull() && !netIfaceIpv6AutoConfigModel.AutoconfigChoice.IsUnknown() {
 						ipv6AutoConfigAutoconfigChoiceModel := NetIfaceAutoconfigChoice{}
 						response.Diagnostics.Append(netIfaceIpv6AutoConfigModel.AutoconfigChoice.As(ctx, &ipv6AutoConfigAutoconfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3646,6 +3747,9 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 									}
 									statefulOneOfSpec := &ves_io_schema_network_interface.IPV6AutoConfigRouterType_Stateful{}
 									statefulOneOfSpec.Stateful = &ves_io_schema_network_interface.DHCPIPV6StatefulServer{}
+									statefulOneOfSpec.Stateful.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPIPV6StatefulServer_AutomaticFromStart{
+										AutomaticFromStart: &ves_io_schema.Empty{},
+									}
 									routerOneOfSpec.Router.AddressChoice = statefulOneOfSpec
 
 									// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -3759,7 +3863,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 										statefulOneOfSpec.Stateful.FixedIpMap = nil
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+									// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 									if !netIfaceStatefulModel.InterfacesAddressingChoice.IsNull() && !netIfaceStatefulModel.InterfacesAddressingChoice.IsUnknown() {
 										statefulInterfacesAddressingChoiceModel := NetIfaceDHCPIPV6StatefulServerInterfacesAddressingChoice{}
 										response.Diagnostics.Append(netIfaceStatefulModel.InterfacesAddressingChoice.As(ctx, &statefulInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3866,9 +3970,12 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 										}
 										localDnsOneOfSpec := &ves_io_schema_network_interface.IPV6DnsConfig_LocalDns{}
 										localDnsOneOfSpec.LocalDns = &ves_io_schema_network_interface.IPV6LocalDnsAddress{}
+										localDnsOneOfSpec.LocalDns.LocalDnsChoice = &ves_io_schema_network_interface.IPV6LocalDnsAddress_FirstAddress{
+											FirstAddress: &ves_io_schema.Empty{},
+										}
 										dnsConfigSpec.DnsChoice = localDnsOneOfSpec
 
-										// resource modelToSpecNested RequiredOneOfField --> LocalDnsChoice
+										// resource modelToSpecNested OneOfField --> LocalDnsChoice
 										if !netIfaceLocalDnsModel.LocalDnsChoice.IsNull() && !netIfaceLocalDnsModel.LocalDnsChoice.IsUnknown() {
 											localDnsLocalDnsChoiceModel := NetIfaceLocalDnsChoice{}
 											response.Diagnostics.Append(netIfaceLocalDnsModel.LocalDnsChoice.As(ctx, &localDnsLocalDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4043,7 +4150,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+			// resource modelToSpecNested OneOfField --> NetworkChoice
 			if !netIfaceEthernetIfaceModel.NetworkChoice.IsNull() && !netIfaceEthernetIfaceModel.NetworkChoice.IsUnknown() {
 				ethernetInterfaceNetworkChoiceModel := NetIfaceNetChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.NetworkChoice.As(ctx, &ethernetInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4097,7 +4204,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+			// resource modelToSpecNested OneOfField --> NodeChoice
 			if !netIfaceEthernetIfaceModel.NodeChoice.IsNull() && !netIfaceEthernetIfaceModel.NodeChoice.IsUnknown() {
 				ethernetInterfaceNodeChoiceModel := NetIfaceEthernetIfaceTypeNodeChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.NodeChoice.As(ctx, &ethernetInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4121,7 +4228,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+			// resource modelToSpecNested OneOfField --> PrimaryChoice
 			if !netIfaceEthernetIfaceModel.PrimaryChoice.IsNull() && !netIfaceEthernetIfaceModel.PrimaryChoice.IsUnknown() {
 				ethernetInterfacePrimaryChoiceModel := NetIfaceEthernetIfaceTypePrimaryChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.PrimaryChoice.As(ctx, &ethernetInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4145,7 +4252,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+			// resource modelToSpecNested OneOfField --> VlanChoice
 			if !netIfaceEthernetIfaceModel.VlanChoice.IsNull() && !netIfaceEthernetIfaceModel.VlanChoice.IsUnknown() {
 				ethernetInterfaceVlanChoiceModel := NetIfaceVlanChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.VlanChoice.As(ctx, &ethernetInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4199,6 +4306,9 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					}
 					l2sriovInterfaceOneOfSpec := &ves_io_schema_network_interface.Layer2InterfaceType_L2SriovInterface{}
 					l2sriovInterfaceOneOfSpec.L2SriovInterface = &ves_io_schema_network_interface.Layer2SriovInterfaceType{}
+					l2sriovInterfaceOneOfSpec.L2SriovInterface.VlanChoice = &ves_io_schema_network_interface.Layer2SriovInterfaceType_Untagged{
+						Untagged: &ves_io_schema.Empty{},
+					}
 					layer2InterfaceOneOfSpec.Layer2Interface.Layer2InterfaceChoice = l2sriovInterfaceOneOfSpec
 
 					// resource modelToSpecNested RequiredStringField --> Device
@@ -4206,7 +4316,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 						l2sriovInterfaceOneOfSpec.L2SriovInterface.Device = string(netIfaceL2SriovIfaceModel.Device.ValueString())
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+					// resource modelToSpecNested OneOfField --> VlanChoice
 					if !netIfaceL2SriovIfaceModel.VlanChoice.IsNull() && !netIfaceL2SriovIfaceModel.VlanChoice.IsUnknown() {
 						l2sriovInterfaceVlanChoiceModel := NetIfaceLayer2SriovIfaceTypeVlanChoice{}
 						response.Diagnostics.Append(netIfaceL2SriovIfaceModel.VlanChoice.As(ctx, &l2sriovInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4282,14 +4392,19 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			}
 			tunnelInterfaceOneOfSpec := &ves_io_schema_network_interface.CreateSpecType_TunnelInterface{}
 			tunnelInterfaceOneOfSpec.TunnelInterface = &ves_io_schema_network_interface.TunnelInterfaceType{}
+			tunnelInterfaceOneOfSpec.TunnelInterface.NetworkChoice = &ves_io_schema_network_interface.TunnelInterfaceType_SiteLocalNetwork{
+				SiteLocalNetwork: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = tunnelInterfaceOneOfSpec
 
 			// resource modelToSpecNested UintField --> Mtu
 			if !netIfaceTunnelIfaceModel.Mtu.IsNull() && !netIfaceTunnelIfaceModel.Mtu.IsUnknown() {
 				tunnelInterfaceOneOfSpec.TunnelInterface.Mtu = uint32(uint32(netIfaceTunnelIfaceModel.Mtu.ValueInt64()))
+			} else {
+				tunnelInterfaceOneOfSpec.TunnelInterface.Mtu = uint32(0)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+			// resource modelToSpecNested OneOfField --> NetworkChoice
 			if !netIfaceTunnelIfaceModel.NetworkChoice.IsNull() && !netIfaceTunnelIfaceModel.NetworkChoice.IsUnknown() {
 				tunnelInterfaceNetworkChoiceModel := NetIfaceTunnelIfaceTypeNetChoice{}
 				response.Diagnostics.Append(netIfaceTunnelIfaceModel.NetworkChoice.As(ctx, &tunnelInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4333,6 +4448,8 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Priority
 			if !netIfaceTunnelIfaceModel.Priority.IsNull() && !netIfaceTunnelIfaceModel.Priority.IsUnknown() {
 				tunnelInterfaceOneOfSpec.TunnelInterface.Priority = uint32(uint32(netIfaceTunnelIfaceModel.Priority.ValueInt64()))
+			} else {
+				tunnelInterfaceOneOfSpec.TunnelInterface.Priority = uint32(0)
 			}
 
 			// resource modelToSpecNested RequiredPointerField --> StaticIp
@@ -4463,7 +4580,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4486,7 +4603,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_network_interface.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "network_interface", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "network_interface", err),
 		)
 		return
 	}
@@ -4823,14 +4940,14 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["monitoring_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedInterfaceAttributeMap["monitoring_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfaceMonitoringChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Mtu
 				dedicatedInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if dedicatedInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -4889,11 +5006,11 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PrimaryChoice
 				// CreateSpecType: GetPrimaryChoice() returns the oneof interface value.
 				if dedicatedInterfaceElement.GetPrimaryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -4964,6 +5081,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["primary_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap)
 				}
 
@@ -5002,8 +5120,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 				// resource specToModelNested UintField --> Mtu
 				dedicatedManagementInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedManagementInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if dedicatedManagementInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -5062,6 +5179,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedManagementInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap)
 				}
 
@@ -5086,8 +5204,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 			if isEthernetInterface && ethernetInterfaceOptionsWrapper != nil && ethernetInterfaceOptionsWrapper.EthernetInterface != nil {
 				ethernetInterfaceElement := ethernetInterfaceOptionsWrapper.EthernetInterface
 
-				// resource specToModelNested RequiredOneOfField --> AddressChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> AddressChoice
 				// CreateSpecType: GetAddressChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetAddressChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -5139,8 +5256,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 									netIfaceDHCPNetTypeModel := NetIfaceDHCPNetType{}
 
-									// resource specToModelNested RequiredOneOfField --> DnsChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DnsChoice
 									// CreateSpecType: GetDnsChoice() returns the oneof interface value.
 									if dhcpNetworksElement.GetDnsChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -5199,11 +5315,11 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.DnsChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										netIfaceDHCPNetTypeModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> GatewayChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> GatewayChoice
 									// CreateSpecType: GetGatewayChoice() returns the oneof interface value.
 									if dhcpNetworksElement.GetGatewayChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -5284,6 +5400,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.GatewayChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										netIfaceDHCPNetTypeModel.GatewayChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
 									}
 
@@ -5325,6 +5442,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 									}
 
@@ -5426,8 +5544,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 							// CreateSpecType: GetInterfacesAddressingChoice() returns the oneof interface value.
 							if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -5536,6 +5653,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								dhcpServerAttributeMap["interfaces_addressing_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap)
 							}
 
@@ -5689,6 +5807,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								staticIpAttributeMap["network_prefix_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								staticIpAttributeMap["network_prefix_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceStaticIpNetworkPrefixChoiceModelAttributeMap)
 							}
 
@@ -5718,6 +5837,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["address_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap)
 				}
 
@@ -5751,8 +5871,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 						if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 							ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-							// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> AutoconfigChoice
 							// CreateSpecType: GetAutoconfigChoice() returns the oneof interface value.
 							if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -5875,6 +5994,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
 																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = finalObj
 															} else {
+																// The OneOf field is nil in the source spec, so set the Terraform object to null.
 																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 															}
 
@@ -5971,8 +6091,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 														statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 													}
 
-													// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 													// CreateSpecType: GetInterfacesAddressingChoice() returns the oneof interface value.
 													if statefulElement.GetInterfacesAddressingChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -6081,6 +6200,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
 														statefulAttributeMap["interfaces_addressing_choice"] = finalObj
 													} else {
+														// The OneOf field is nil in the source spec, so set the Terraform object to null.
 														statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap)
 													}
 
@@ -6110,6 +6230,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											routerAttributeMap["address_choice"] = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											routerAttributeMap["address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceModelAttributeMap)
 										}
 
@@ -6179,8 +6300,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 													if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 														localDnsElement := localDnsOptionsWrapper.LocalDns
 
-														// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-														// CreateSpecType
+														// resource specToModelNested OneOfField --> LocalDnsChoice
 														// CreateSpecType: GetLocalDnsChoice() returns the oneof interface value.
 														if localDnsElement.GetLocalDnsChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
@@ -6261,6 +6381,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
 															localDnsAttributeMap["local_dns_choice"] = finalObj
 														} else {
+															// The OneOf field is nil in the source spec, so set the Terraform object to null.
 															localDnsAttributeMap["local_dns_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap)
 														}
 
@@ -6290,6 +6411,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												netIfaceIPV6DnsConfigModel.DnsChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												netIfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
 											}
 
@@ -6337,6 +6459,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								ipv6AutoConfigAttributeMap["autoconfig_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap)
 							}
 
@@ -6512,6 +6635,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								staticIpv6AddressAttributeMap["network_prefix_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								staticIpv6AddressAttributeMap["network_prefix_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceStaticIpv6AddressNetworkPrefixChoiceModelAttributeMap)
 							}
 
@@ -6580,6 +6704,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["ipv6_address_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["ipv6_address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceModelAttributeMap)
 				}
 
@@ -6654,14 +6779,14 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["monitoring_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["monitoring_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceMonitoringChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Mtu
 				ethernetInterfaceAttributeMap["mtu"] = types.Int64Value(int64(ethernetInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -6799,11 +6924,11 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["network_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["network_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -6862,11 +6987,11 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PrimaryChoice
 				// CreateSpecType: GetPrimaryChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetPrimaryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -6937,14 +7062,14 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["primary_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Priority
 				ethernetInterfaceAttributeMap["priority"] = types.Int64Value(int64(ethernetInterfaceElement.GetPriority()))
 
-				// resource specToModelNested RequiredOneOfField --> VlanChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VlanChoice
 				// CreateSpecType: GetVlanChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetVlanChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -7003,6 +7128,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["vlan_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap)
 				}
 
@@ -7058,8 +7184,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								l2sriovInterfaceAttributeMap["device"] = types.StringNull()
 							}
 
-							// resource specToModelNested RequiredOneOfField --> VlanChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> VlanChoice
 							// CreateSpecType: GetVlanChoice() returns the oneof interface value.
 							if l2sriovInterfaceElement.GetVlanChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -7118,6 +7243,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								l2sriovInterfaceAttributeMap["vlan_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								l2sriovInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceL2SriovInterfaceVlanChoiceModelAttributeMap)
 							}
 
@@ -7203,6 +7329,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					layer2InterfaceAttributeMap["layer2_interface_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					layer2InterfaceAttributeMap["layer2_interface_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceModelAttributeMap)
 				}
 
@@ -7230,8 +7357,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 				// resource specToModelNested UintField --> Mtu
 				tunnelInterfaceAttributeMap["mtu"] = types.Int64Value(int64(tunnelInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if tunnelInterfaceElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -7302,6 +7428,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					tunnelInterfaceAttributeMap["network_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					tunnelInterfaceAttributeMap["network_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap)
 				}
 
@@ -7343,6 +7470,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					tunnelInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					tunnelInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceNodeChoiceModelAttributeMap)
 				}
 
@@ -7486,6 +7614,7 @@ func (r *ResourceF5XCNetworkInterface) Create(ctx context.Context, request resou
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
 						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = finalObj
 					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
 						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceStaticIpNetworkPrefixChoiceModelAttributeMap)
 					}
 
@@ -7631,20 +7760,19 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_network_interface.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_interface.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "network_interface", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "network_interface", err),
 		)
 		return
 	}
@@ -7975,14 +8103,14 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["monitoring_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedInterfaceAttributeMap["monitoring_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfaceMonitoringChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Mtu
 				dedicatedInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if dedicatedInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -8041,11 +8169,14 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
-					dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+						"cluster": types.BoolValue(true),
+						"node":    types.StringNull(),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PrimaryChoice
 				// CreateSpecType: GetPrimaryChoice() returns the oneof interface value.
 				if dedicatedInterfaceElement.GetPrimaryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -8116,7 +8247,11 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["primary_choice"] = finalObj
 				} else {
-					dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+						"is_primary":  types.BoolNull(),
+						"not_primary": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested UintField --> Priority
@@ -8154,8 +8289,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 				// resource specToModelNested UintField --> Mtu
 				dedicatedManagementInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedManagementInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if dedicatedManagementInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -8214,7 +8348,11 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedManagementInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
-					dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+						"cluster": types.BoolValue(true),
+						"node":    types.StringNull(),
+					})
 				}
 
 				dedicatedManagementInterfaceObj, dedicatedManagementInterfaceObjDiags := types.ObjectValue(NetworkInterfaceInterfaceChoiceDedicatedManagementInterfaceModelAttributeMap, dedicatedManagementInterfaceAttributeMap)
@@ -8238,8 +8376,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 			if isEthernetInterface && ethernetInterfaceOptionsWrapper != nil && ethernetInterfaceOptionsWrapper.EthernetInterface != nil {
 				ethernetInterfaceElement := ethernetInterfaceOptionsWrapper.EthernetInterface
 
-				// resource specToModelNested RequiredOneOfField --> AddressChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> AddressChoice
 				// CreateSpecType: GetAddressChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetAddressChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -8291,8 +8428,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 									netIfaceDHCPNetTypeModel := NetIfaceDHCPNetType{}
 
-									// resource specToModelNested RequiredOneOfField --> DnsChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DnsChoice
 									// CreateSpecType: GetDnsChoice() returns the oneof interface value.
 									if dhcpNetworksElement.GetDnsChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -8351,11 +8487,14 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.DnsChoice = finalObj
 									} else {
-										netIfaceDHCPNetTypeModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										netIfaceDHCPNetTypeModel.DnsChoice = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap, map[string]attr.Value{
+											"dns_address": types.StringNull(),
+											"same_as_dgw": types.BoolValue(true),
+										})
 									}
 
-									// resource specToModelNested RequiredOneOfField --> GatewayChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> GatewayChoice
 									// CreateSpecType: GetGatewayChoice() returns the oneof interface value.
 									if dhcpNetworksElement.GetGatewayChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -8436,7 +8575,12 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.GatewayChoice = finalObj
 									} else {
-										netIfaceDHCPNetTypeModel.GatewayChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										netIfaceDHCPNetTypeModel.GatewayChoice = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap, map[string]attr.Value{
+											"dgw_address":   types.StringNull(),
+											"first_address": types.BoolValue(true),
+											"last_address":  types.BoolNull(),
+										})
 									}
 
 									// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -8477,6 +8621,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 									}
 
@@ -8578,8 +8723,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 							// CreateSpecType: GetInterfacesAddressingChoice() returns the oneof interface value.
 							if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -8688,7 +8832,12 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								dhcpServerAttributeMap["interfaces_addressing_choice"] = finalObj
 							} else {
-								dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap)
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+									"automatic_from_end":   types.BoolNull(),
+									"automatic_from_start": types.BoolValue(true),
+									"interface_ip_map":     types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+								})
 							}
 
 							dhcpServerObj, dhcpServerObjDiags := types.ObjectValue(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerModelAttributeMap, dhcpServerAttributeMap)
@@ -8841,6 +8990,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								staticIpAttributeMap["network_prefix_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								staticIpAttributeMap["network_prefix_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceStaticIpNetworkPrefixChoiceModelAttributeMap)
 							}
 
@@ -8870,7 +9020,12 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["address_choice"] = finalObj
 				} else {
-					ethernetInterfaceAttributeMap["address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					ethernetInterfaceAttributeMap["address_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap, map[string]attr.Value{
+						"dhcp_client": types.BoolValue(true),
+						"dhcp_server": types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerModelAttributeMap),
+						"static_ip":   types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceStaticIpModelAttributeMap),
+					})
 				}
 
 				// resource specToModelNested RequiredStringField --> Device
@@ -8903,8 +9058,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 						if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 							ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-							// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> AutoconfigChoice
 							// CreateSpecType: GetAutoconfigChoice() returns the oneof interface value.
 							if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -9027,6 +9181,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
 																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = finalObj
 															} else {
+																// The OneOf field is nil in the source spec, so set the Terraform object to null.
 																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 															}
 
@@ -9123,8 +9278,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 														statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 													}
 
-													// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 													// CreateSpecType: GetInterfacesAddressingChoice() returns the oneof interface value.
 													if statefulElement.GetInterfacesAddressingChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -9233,7 +9387,12 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
 														statefulAttributeMap["interfaces_addressing_choice"] = finalObj
 													} else {
-														statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap)
+														// The OneOf field is nil in the source spec, so set the Terraform object to null.
+														statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap, map[string]attr.Value{
+															"automatic_from_end":   types.BoolNull(),
+															"automatic_from_start": types.BoolValue(true),
+															"interface_ip_map":     types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap),
+														})
 													}
 
 													statefulObj, statefulObjDiags := types.ObjectValue(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulModelAttributeMap, statefulAttributeMap)
@@ -9262,6 +9421,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											routerAttributeMap["address_choice"] = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											routerAttributeMap["address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceModelAttributeMap)
 										}
 
@@ -9331,8 +9491,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 													if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 														localDnsElement := localDnsOptionsWrapper.LocalDns
 
-														// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-														// CreateSpecType
+														// resource specToModelNested OneOfField --> LocalDnsChoice
 														// CreateSpecType: GetLocalDnsChoice() returns the oneof interface value.
 														if localDnsElement.GetLocalDnsChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
@@ -9413,7 +9572,12 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
 															localDnsAttributeMap["local_dns_choice"] = finalObj
 														} else {
-															localDnsAttributeMap["local_dns_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap)
+															// The OneOf field is nil in the source spec, so set the Terraform object to null.
+															localDnsAttributeMap["local_dns_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+																"configured_address": types.StringNull(),
+																"first_address":      types.BoolValue(true),
+																"last_address":       types.BoolNull(),
+															})
 														}
 
 														localDnsObj, localDnsObjDiags := types.ObjectValue(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, localDnsAttributeMap)
@@ -9442,7 +9606,17 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												netIfaceIPV6DnsConfigModel.DnsChoice = finalObj
 											} else {
-												netIfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
+												netIfaceIPV6DnsConfigModel.DnsChoice = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap, map[string]attr.Value{
+													"configured_list": types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceConfiguredListModelAttributeMap),
+													"local_dns": types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsModelAttributeMap, map[string]attr.Value{
+														"local_dns_choice": types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap, map[string]attr.Value{
+															"configured_address": types.StringNull(),
+															"first_address":      types.BoolValue(true),
+															"last_address":       types.BoolNull(),
+														}),
+													}),
+												})
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
@@ -9489,7 +9663,11 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								ipv6AutoConfigAttributeMap["autoconfig_choice"] = finalObj
 							} else {
-								ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap)
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap, map[string]attr.Value{
+									"host":   types.BoolValue(true),
+									"router": types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterModelAttributeMap),
+								})
 							}
 
 							ipv6AutoConfigObj, ipv6AutoConfigObjDiags := types.ObjectValue(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigModelAttributeMap, ipv6AutoConfigAttributeMap)
@@ -9664,6 +9842,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								staticIpv6AddressAttributeMap["network_prefix_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								staticIpv6AddressAttributeMap["network_prefix_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceStaticIpv6AddressNetworkPrefixChoiceModelAttributeMap)
 							}
 
@@ -9732,6 +9911,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["ipv6_address_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["ipv6_address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceModelAttributeMap)
 				}
 
@@ -9806,14 +9986,14 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["monitoring_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["monitoring_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceMonitoringChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Mtu
 				ethernetInterfaceAttributeMap["mtu"] = types.Int64Value(int64(ethernetInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -9951,11 +10131,16 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["network_choice"] = finalObj
 				} else {
-					ethernetInterfaceAttributeMap["network_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					ethernetInterfaceAttributeMap["network_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"segment_network":           types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceNetworkChoiceSegmentNetworkModelAttributeMap),
+						"site_local_inside_network": types.BoolNull(),
+						"site_local_network":        types.BoolValue(true),
+						"storage_network":           types.BoolNull(),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -10014,11 +10199,14 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
-					ethernetInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					ethernetInterfaceAttributeMap["node_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap, map[string]attr.Value{
+						"cluster": types.BoolValue(true),
+						"node":    types.StringNull(),
+					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PrimaryChoice
 				// CreateSpecType: GetPrimaryChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetPrimaryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -10089,14 +10277,17 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["primary_choice"] = finalObj
 				} else {
-					ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap, map[string]attr.Value{
+						"is_primary":  types.BoolNull(),
+						"not_primary": types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested UintField --> Priority
 				ethernetInterfaceAttributeMap["priority"] = types.Int64Value(int64(ethernetInterfaceElement.GetPriority()))
 
-				// resource specToModelNested RequiredOneOfField --> VlanChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VlanChoice
 				// CreateSpecType: GetVlanChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetVlanChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -10155,7 +10346,11 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["vlan_choice"] = finalObj
 				} else {
-					ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap, map[string]attr.Value{
+						"untagged": types.BoolValue(true),
+						"vlan_id":  types.Int64Null(),
+					})
 				}
 
 				ethernetInterfaceObj, ethernetInterfaceObjDiags := types.ObjectValue(NetworkInterfaceInterfaceChoiceEthernetInterfaceModelAttributeMap, ethernetInterfaceAttributeMap)
@@ -10210,8 +10405,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								l2sriovInterfaceAttributeMap["device"] = types.StringNull()
 							}
 
-							// resource specToModelNested RequiredOneOfField --> VlanChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> VlanChoice
 							// CreateSpecType: GetVlanChoice() returns the oneof interface value.
 							if l2sriovInterfaceElement.GetVlanChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -10270,7 +10464,11 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								l2sriovInterfaceAttributeMap["vlan_choice"] = finalObj
 							} else {
-								l2sriovInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceL2SriovInterfaceVlanChoiceModelAttributeMap)
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								l2sriovInterfaceAttributeMap["vlan_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceL2SriovInterfaceVlanChoiceModelAttributeMap, map[string]attr.Value{
+									"untagged": types.BoolValue(true),
+									"vlan_id":  types.Int64Null(),
+								})
 							}
 
 							l2sriovInterfaceObj, l2sriovInterfaceObjDiags := types.ObjectValue(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceL2SriovInterfaceModelAttributeMap, l2sriovInterfaceAttributeMap)
@@ -10355,6 +10553,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					layer2InterfaceAttributeMap["layer2_interface_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					layer2InterfaceAttributeMap["layer2_interface_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceModelAttributeMap)
 				}
 
@@ -10382,8 +10581,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 				// resource specToModelNested UintField --> Mtu
 				tunnelInterfaceAttributeMap["mtu"] = types.Int64Value(int64(tunnelInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if tunnelInterfaceElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -10454,7 +10652,11 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					tunnelInterfaceAttributeMap["network_choice"] = finalObj
 				} else {
-					tunnelInterfaceAttributeMap["network_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap)
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					tunnelInterfaceAttributeMap["network_choice"] = types.ObjectValueMust(NetworkInterfaceInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap, map[string]attr.Value{
+						"site_local_inside_network": types.BoolNull(),
+						"site_local_network":        types.BoolValue(true),
+					})
 				}
 
 				// resource specToModelNested RequiredOneOfField --> NodeChoice
@@ -10495,6 +10697,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					tunnelInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					tunnelInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceNodeChoiceModelAttributeMap)
 				}
 
@@ -10638,6 +10841,7 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
 						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = finalObj
 					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
 						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceStaticIpNetworkPrefixChoiceModelAttributeMap)
 					}
 
@@ -10749,6 +10953,12 @@ func (r *ResourceF5XCNetworkInterface) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCNetworkInterfaceModel
@@ -10866,6 +11076,12 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			}
 			dedicatedInterfaceOneOfSpec := &ves_io_schema_network_interface.ReplaceSpecType_DedicatedInterface{}
 			dedicatedInterfaceOneOfSpec.DedicatedInterface = &ves_io_schema_network_interface.DedicatedInterfaceType{}
+			dedicatedInterfaceOneOfSpec.DedicatedInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_Cluster{
+				Cluster: &ves_io_schema.Empty{},
+			}
+			dedicatedInterfaceOneOfSpec.DedicatedInterface.PrimaryChoice = &ves_io_schema_network_interface.DedicatedInterfaceType_NotPrimary{
+				NotPrimary: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = dedicatedInterfaceOneOfSpec
 
 			// resource modelToSpecNested RequiredStringField --> Device
@@ -10900,9 +11116,11 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Mtu
 			if !netIfaceDedicatedIfaceModel.Mtu.IsNull() && !netIfaceDedicatedIfaceModel.Mtu.IsUnknown() {
 				dedicatedInterfaceOneOfSpec.DedicatedInterface.Mtu = uint32(uint32(netIfaceDedicatedIfaceModel.Mtu.ValueInt64()))
+			} else {
+				dedicatedInterfaceOneOfSpec.DedicatedInterface.Mtu = uint32(0)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+			// resource modelToSpecNested OneOfField --> NodeChoice
 			if !netIfaceDedicatedIfaceModel.NodeChoice.IsNull() && !netIfaceDedicatedIfaceModel.NodeChoice.IsUnknown() {
 				dedicatedInterfaceNodeChoiceModel := NetIfaceNodeChoice{}
 				response.Diagnostics.Append(netIfaceDedicatedIfaceModel.NodeChoice.As(ctx, &dedicatedInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10926,7 +11144,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+			// resource modelToSpecNested OneOfField --> PrimaryChoice
 			if !netIfaceDedicatedIfaceModel.PrimaryChoice.IsNull() && !netIfaceDedicatedIfaceModel.PrimaryChoice.IsUnknown() {
 				dedicatedInterfacePrimaryChoiceModel := NetIfacePrimaryChoice{}
 				response.Diagnostics.Append(netIfaceDedicatedIfaceModel.PrimaryChoice.As(ctx, &dedicatedInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10953,6 +11171,8 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Priority
 			if !netIfaceDedicatedIfaceModel.Priority.IsNull() && !netIfaceDedicatedIfaceModel.Priority.IsUnknown() {
 				dedicatedInterfaceOneOfSpec.DedicatedInterface.Priority = uint32(uint32(netIfaceDedicatedIfaceModel.Priority.ValueInt64()))
+			} else {
+				dedicatedInterfaceOneOfSpec.DedicatedInterface.Priority = uint32(0)
 			}
 
 		}
@@ -10966,6 +11186,9 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			}
 			dedicatedManagementInterfaceOneOfSpec := &ves_io_schema_network_interface.ReplaceSpecType_DedicatedManagementInterface{}
 			dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface = &ves_io_schema_network_interface.DedicatedManagementInterfaceType{}
+			dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.NodeChoice = &ves_io_schema_network_interface.DedicatedManagementInterfaceType_Cluster{
+				Cluster: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = dedicatedManagementInterfaceOneOfSpec
 
 			// resource modelToSpecNested RequiredStringField --> Device
@@ -10976,9 +11199,11 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Mtu
 			if !netIfaceDedicatedMgmtIfaceModel.Mtu.IsNull() && !netIfaceDedicatedMgmtIfaceModel.Mtu.IsUnknown() {
 				dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.Mtu = uint32(uint32(netIfaceDedicatedMgmtIfaceModel.Mtu.ValueInt64()))
+			} else {
+				dedicatedManagementInterfaceOneOfSpec.DedicatedManagementInterface.Mtu = uint32(0)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+			// resource modelToSpecNested OneOfField --> NodeChoice
 			if !netIfaceDedicatedMgmtIfaceModel.NodeChoice.IsNull() && !netIfaceDedicatedMgmtIfaceModel.NodeChoice.IsUnknown() {
 				dedicatedManagementInterfaceNodeChoiceModel := NetIfaceDedicatedMgmtIfaceTypeNodeChoice{}
 				response.Diagnostics.Append(netIfaceDedicatedMgmtIfaceModel.NodeChoice.As(ctx, &dedicatedManagementInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11013,9 +11238,24 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			}
 			ethernetInterfaceOneOfSpec := &ves_io_schema_network_interface.ReplaceSpecType_EthernetInterface{}
 			ethernetInterfaceOneOfSpec.EthernetInterface = &ves_io_schema_network_interface.EthernetInterfaceType{}
+			ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = &ves_io_schema_network_interface.EthernetInterfaceType_DhcpClient{
+				DhcpClient: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.NetworkChoice = &ves_io_schema_network_interface.EthernetInterfaceType_SiteLocalNetwork{
+				SiteLocalNetwork: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.NodeChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Cluster{
+				Cluster: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.PrimaryChoice = &ves_io_schema_network_interface.EthernetInterfaceType_NotPrimary{
+				NotPrimary: &ves_io_schema.Empty{},
+			}
+			ethernetInterfaceOneOfSpec.EthernetInterface.VlanChoice = &ves_io_schema_network_interface.EthernetInterfaceType_Untagged{
+				Untagged: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = ethernetInterfaceOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> AddressChoice
+			// resource modelToSpecNested OneOfField --> AddressChoice
 			if !netIfaceEthernetIfaceModel.AddressChoice.IsNull() && !netIfaceEthernetIfaceModel.AddressChoice.IsUnknown() {
 				ethernetInterfaceAddressChoiceModel := NetIfaceAddrChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.AddressChoice.As(ctx, &ethernetInterfaceAddressChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11039,6 +11279,9 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					}
 					dhcpServerOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_DhcpServer{}
 					dhcpServerOneOfSpec.DhcpServer = &ves_io_schema_network_interface.DHCPServerParametersType{}
+					dhcpServerOneOfSpec.DhcpServer.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart{
+						AutomaticFromStart: &ves_io_schema.Empty{},
+					}
 					ethernetInterfaceOneOfSpec.EthernetInterface.AddressChoice = dhcpServerOneOfSpec
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -11058,10 +11301,16 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 						for i, dhcpNetworksElement := range dhcpNetworksElements {
 							// Initialize the spec struct for the current element
 							dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[i] = &ves_io_schema_network_interface.DHCPNetworkType{}
+							dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[i].DnsChoice = &ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw{
+								SameAsDgw: &ves_io_schema.Empty{},
+							}
+							dhcpServerOneOfSpec.DhcpServer.DhcpNetworks[i].GatewayChoice = &ves_io_schema_network_interface.DHCPNetworkType_FirstAddress{
+								FirstAddress: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+							// resource modelToSpecNested OneOfField --> DnsChoice
 							if !dhcpNetworksElement.DnsChoice.IsNull() && !dhcpNetworksElement.DnsChoice.IsUnknown() {
 								dhcpNetworksDnsChoiceModel := NetIfaceDnsChoice{}
 								response.Diagnostics.Append(dhcpNetworksElement.DnsChoice.As(ctx, &dhcpNetworksDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11085,7 +11334,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> GatewayChoice
+							// resource modelToSpecNested OneOfField --> GatewayChoice
 							if !dhcpNetworksElement.GatewayChoice.IsNull() && !dhcpNetworksElement.GatewayChoice.IsUnknown() {
 								dhcpNetworksGatewayChoiceModel := NetIfaceGatewayChoice{}
 								response.Diagnostics.Append(dhcpNetworksElement.GatewayChoice.As(ctx, &dhcpNetworksGatewayChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11207,7 +11456,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 						dhcpServerOneOfSpec.DhcpServer.FixedIpMap = nil
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+					// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 					if !netIfaceDhcpServerModel.InterfacesAddressingChoice.IsNull() && !netIfaceDhcpServerModel.InterfacesAddressingChoice.IsUnknown() {
 						dhcpServerInterfacesAddressingChoiceModel := NetIfaceInterfacesAddressingChoice{}
 						response.Diagnostics.Append(netIfaceDhcpServerModel.InterfacesAddressingChoice.As(ctx, &dhcpServerInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11383,9 +11632,12 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					}
 					ipv6AutoConfigOneOfSpec := &ves_io_schema_network_interface.EthernetInterfaceType_Ipv6AutoConfig{}
 					ipv6AutoConfigOneOfSpec.Ipv6AutoConfig = &ves_io_schema_network_interface.IPV6AutoConfigType{}
+					ipv6AutoConfigOneOfSpec.Ipv6AutoConfig.AutoconfigChoice = &ves_io_schema_network_interface.IPV6AutoConfigType_Host{
+						Host: &ves_io_schema.Empty{},
+					}
 					ethernetInterfaceOneOfSpec.EthernetInterface.Ipv6AddressChoice = ipv6AutoConfigOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> AutoconfigChoice
+					// resource modelToSpecNested OneOfField --> AutoconfigChoice
 					if !netIfaceIpv6AutoConfigModel.AutoconfigChoice.IsNull() && !netIfaceIpv6AutoConfigModel.AutoconfigChoice.IsUnknown() {
 						ipv6AutoConfigAutoconfigChoiceModel := NetIfaceAutoconfigChoice{}
 						response.Diagnostics.Append(netIfaceIpv6AutoConfigModel.AutoconfigChoice.As(ctx, &ipv6AutoConfigAutoconfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11435,6 +11687,9 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 									}
 									statefulOneOfSpec := &ves_io_schema_network_interface.IPV6AutoConfigRouterType_Stateful{}
 									statefulOneOfSpec.Stateful = &ves_io_schema_network_interface.DHCPIPV6StatefulServer{}
+									statefulOneOfSpec.Stateful.InterfacesAddressingChoice = &ves_io_schema_network_interface.DHCPIPV6StatefulServer_AutomaticFromStart{
+										AutomaticFromStart: &ves_io_schema.Empty{},
+									}
 									routerOneOfSpec.Router.AddressChoice = statefulOneOfSpec
 
 									// resource modelToSpecNested RequiredArrayOfPointerField --> DhcpNetworks
@@ -11548,7 +11803,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 										statefulOneOfSpec.Stateful.FixedIpMap = nil
 									}
 
-									// resource modelToSpecNested RequiredOneOfField --> InterfacesAddressingChoice
+									// resource modelToSpecNested OneOfField --> InterfacesAddressingChoice
 									if !netIfaceStatefulModel.InterfacesAddressingChoice.IsNull() && !netIfaceStatefulModel.InterfacesAddressingChoice.IsUnknown() {
 										statefulInterfacesAddressingChoiceModel := NetIfaceDHCPIPV6StatefulServerInterfacesAddressingChoice{}
 										response.Diagnostics.Append(netIfaceStatefulModel.InterfacesAddressingChoice.As(ctx, &statefulInterfacesAddressingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11655,9 +11910,12 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 										}
 										localDnsOneOfSpec := &ves_io_schema_network_interface.IPV6DnsConfig_LocalDns{}
 										localDnsOneOfSpec.LocalDns = &ves_io_schema_network_interface.IPV6LocalDnsAddress{}
+										localDnsOneOfSpec.LocalDns.LocalDnsChoice = &ves_io_schema_network_interface.IPV6LocalDnsAddress_FirstAddress{
+											FirstAddress: &ves_io_schema.Empty{},
+										}
 										dnsConfigSpec.DnsChoice = localDnsOneOfSpec
 
-										// resource modelToSpecNested RequiredOneOfField --> LocalDnsChoice
+										// resource modelToSpecNested OneOfField --> LocalDnsChoice
 										if !netIfaceLocalDnsModel.LocalDnsChoice.IsNull() && !netIfaceLocalDnsModel.LocalDnsChoice.IsUnknown() {
 											localDnsLocalDnsChoiceModel := NetIfaceLocalDnsChoice{}
 											response.Diagnostics.Append(netIfaceLocalDnsModel.LocalDnsChoice.As(ctx, &localDnsLocalDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11832,7 +12090,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+			// resource modelToSpecNested OneOfField --> NetworkChoice
 			if !netIfaceEthernetIfaceModel.NetworkChoice.IsNull() && !netIfaceEthernetIfaceModel.NetworkChoice.IsUnknown() {
 				ethernetInterfaceNetworkChoiceModel := NetIfaceNetChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.NetworkChoice.As(ctx, &ethernetInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11886,7 +12144,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NodeChoice
+			// resource modelToSpecNested OneOfField --> NodeChoice
 			if !netIfaceEthernetIfaceModel.NodeChoice.IsNull() && !netIfaceEthernetIfaceModel.NodeChoice.IsUnknown() {
 				ethernetInterfaceNodeChoiceModel := NetIfaceEthernetIfaceTypeNodeChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.NodeChoice.As(ctx, &ethernetInterfaceNodeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11910,7 +12168,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PrimaryChoice
+			// resource modelToSpecNested OneOfField --> PrimaryChoice
 			if !netIfaceEthernetIfaceModel.PrimaryChoice.IsNull() && !netIfaceEthernetIfaceModel.PrimaryChoice.IsUnknown() {
 				ethernetInterfacePrimaryChoiceModel := NetIfaceEthernetIfaceTypePrimaryChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.PrimaryChoice.As(ctx, &ethernetInterfacePrimaryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11934,7 +12192,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+			// resource modelToSpecNested OneOfField --> VlanChoice
 			if !netIfaceEthernetIfaceModel.VlanChoice.IsNull() && !netIfaceEthernetIfaceModel.VlanChoice.IsUnknown() {
 				ethernetInterfaceVlanChoiceModel := NetIfaceVlanChoice{}
 				response.Diagnostics.Append(netIfaceEthernetIfaceModel.VlanChoice.As(ctx, &ethernetInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11988,6 +12246,9 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					}
 					l2sriovInterfaceOneOfSpec := &ves_io_schema_network_interface.Layer2InterfaceType_L2SriovInterface{}
 					l2sriovInterfaceOneOfSpec.L2SriovInterface = &ves_io_schema_network_interface.Layer2SriovInterfaceType{}
+					l2sriovInterfaceOneOfSpec.L2SriovInterface.VlanChoice = &ves_io_schema_network_interface.Layer2SriovInterfaceType_Untagged{
+						Untagged: &ves_io_schema.Empty{},
+					}
 					layer2InterfaceOneOfSpec.Layer2Interface.Layer2InterfaceChoice = l2sriovInterfaceOneOfSpec
 
 					// resource modelToSpecNested RequiredStringField --> Device
@@ -11995,7 +12256,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 						l2sriovInterfaceOneOfSpec.L2SriovInterface.Device = string(netIfaceL2SriovIfaceModel.Device.ValueString())
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> VlanChoice
+					// resource modelToSpecNested OneOfField --> VlanChoice
 					if !netIfaceL2SriovIfaceModel.VlanChoice.IsNull() && !netIfaceL2SriovIfaceModel.VlanChoice.IsUnknown() {
 						l2sriovInterfaceVlanChoiceModel := NetIfaceLayer2SriovIfaceTypeVlanChoice{}
 						response.Diagnostics.Append(netIfaceL2SriovIfaceModel.VlanChoice.As(ctx, &l2sriovInterfaceVlanChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -12071,14 +12332,19 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			}
 			tunnelInterfaceOneOfSpec := &ves_io_schema_network_interface.ReplaceSpecType_TunnelInterface{}
 			tunnelInterfaceOneOfSpec.TunnelInterface = &ves_io_schema_network_interface.TunnelInterfaceType{}
+			tunnelInterfaceOneOfSpec.TunnelInterface.NetworkChoice = &ves_io_schema_network_interface.TunnelInterfaceType_SiteLocalNetwork{
+				SiteLocalNetwork: &ves_io_schema.Empty{},
+			}
 			spec.InterfaceChoice = tunnelInterfaceOneOfSpec
 
 			// resource modelToSpecNested UintField --> Mtu
 			if !netIfaceTunnelIfaceModel.Mtu.IsNull() && !netIfaceTunnelIfaceModel.Mtu.IsUnknown() {
 				tunnelInterfaceOneOfSpec.TunnelInterface.Mtu = uint32(uint32(netIfaceTunnelIfaceModel.Mtu.ValueInt64()))
+			} else {
+				tunnelInterfaceOneOfSpec.TunnelInterface.Mtu = uint32(0)
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+			// resource modelToSpecNested OneOfField --> NetworkChoice
 			if !netIfaceTunnelIfaceModel.NetworkChoice.IsNull() && !netIfaceTunnelIfaceModel.NetworkChoice.IsUnknown() {
 				tunnelInterfaceNetworkChoiceModel := NetIfaceTunnelIfaceTypeNetChoice{}
 				response.Diagnostics.Append(netIfaceTunnelIfaceModel.NetworkChoice.As(ctx, &tunnelInterfaceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -12122,6 +12388,8 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Priority
 			if !netIfaceTunnelIfaceModel.Priority.IsNull() && !netIfaceTunnelIfaceModel.Priority.IsUnknown() {
 				tunnelInterfaceOneOfSpec.TunnelInterface.Priority = uint32(uint32(netIfaceTunnelIfaceModel.Priority.ValueInt64()))
+			} else {
+				tunnelInterfaceOneOfSpec.TunnelInterface.Priority = uint32(0)
 			}
 
 			// resource modelToSpecNested RequiredPointerField --> StaticIp
@@ -12252,7 +12520,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -12260,15 +12528,11 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_network_interface.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_network_interface.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "network_interface", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "network_interface", err),
 		)
 		return
 	}
@@ -12277,13 +12541,15 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_interface.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "network_interface", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "network_interface", err),
 		)
 		return
 	}
@@ -12389,34 +12655,27 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -12445,17 +12704,23 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -12614,14 +12879,14 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["monitoring_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedInterfaceAttributeMap["monitoring_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfaceMonitoringChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Mtu
 				dedicatedInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if dedicatedInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -12680,11 +12945,11 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfaceNodeChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PrimaryChoice
 				// CreateSpecType: GetPrimaryChoice() returns the oneof interface value.
 				if dedicatedInterfaceElement.GetPrimaryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -12755,6 +13020,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedInterfaceAttributeMap["primary_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedInterfaceAttributeMap["primary_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedInterfacePrimaryChoiceModelAttributeMap)
 				}
 
@@ -12793,8 +13059,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 				// resource specToModelNested UintField --> Mtu
 				dedicatedManagementInterfaceAttributeMap["mtu"] = types.Int64Value(int64(dedicatedManagementInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if dedicatedManagementInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -12853,6 +13118,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					dedicatedManagementInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					dedicatedManagementInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceDedicatedManagementInterfaceNodeChoiceModelAttributeMap)
 				}
 
@@ -12877,8 +13143,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 			if isEthernetInterface && ethernetInterfaceOptionsWrapper != nil && ethernetInterfaceOptionsWrapper.EthernetInterface != nil {
 				ethernetInterfaceElement := ethernetInterfaceOptionsWrapper.EthernetInterface
 
-				// resource specToModelNested RequiredOneOfField --> AddressChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> AddressChoice
 				// CreateSpecType: GetAddressChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetAddressChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -12930,8 +13195,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
 									netIfaceDHCPNetTypeModel := NetIfaceDHCPNetType{}
 
-									// resource specToModelNested RequiredOneOfField --> DnsChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DnsChoice
 									// CreateSpecType: GetDnsChoice() returns the oneof interface value.
 									if dhcpNetworksElement.GetDnsChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -12990,11 +13254,11 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.DnsChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										netIfaceDHCPNetTypeModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> GatewayChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> GatewayChoice
 									// CreateSpecType: GetGatewayChoice() returns the oneof interface value.
 									if dhcpNetworksElement.GetGatewayChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -13075,6 +13339,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.GatewayChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										netIfaceDHCPNetTypeModel.GatewayChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
 									}
 
@@ -13116,6 +13381,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
 										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = finalObj
 									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										netIfaceDHCPNetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 									}
 
@@ -13217,8 +13483,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								dhcpServerAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 							// CreateSpecType: GetInterfacesAddressingChoice() returns the oneof interface value.
 							if dhcpServerElement.GetInterfacesAddressingChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -13327,6 +13592,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								dhcpServerAttributeMap["interfaces_addressing_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								dhcpServerAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerInterfacesAddressingChoiceModelAttributeMap)
 							}
 
@@ -13480,6 +13746,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								staticIpAttributeMap["network_prefix_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								staticIpAttributeMap["network_prefix_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceStaticIpNetworkPrefixChoiceModelAttributeMap)
 							}
 
@@ -13509,6 +13776,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["address_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceAddressChoiceModelAttributeMap)
 				}
 
@@ -13542,8 +13810,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 						if isIpv6AutoConfig && ipv6AutoConfigOptionsWrapper != nil && ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig != nil {
 							ipv6AutoConfigElement := ipv6AutoConfigOptionsWrapper.Ipv6AutoConfig
 
-							// resource specToModelNested RequiredOneOfField --> AutoconfigChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> AutoconfigChoice
 							// CreateSpecType: GetAutoconfigChoice() returns the oneof interface value.
 							if ipv6AutoConfigElement.GetAutoconfigChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -13666,6 +13933,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 																// Assign the final object to the correct place (either the root model or a parent's attribute map)
 																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = finalObj
 															} else {
+																// The OneOf field is nil in the source spec, so set the Terraform object to null.
 																netIfaceDHCPIPV6NetTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 															}
 
@@ -13762,8 +14030,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 														statefulAttributeMap["fixed_ip_map"] = types.MapNull(types.StringType)
 													}
 
-													// resource specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> InterfacesAddressingChoice
 													// CreateSpecType: GetInterfacesAddressingChoice() returns the oneof interface value.
 													if statefulElement.GetInterfacesAddressingChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -13872,6 +14139,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 														// Assign the final object to the correct place (either the root model or a parent's attribute map)
 														statefulAttributeMap["interfaces_addressing_choice"] = finalObj
 													} else {
+														// The OneOf field is nil in the source spec, so set the Terraform object to null.
 														statefulAttributeMap["interfaces_addressing_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulInterfacesAddressingChoiceModelAttributeMap)
 													}
 
@@ -13901,6 +14169,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 											// Assign the final object to the correct place (either the root model or a parent's attribute map)
 											routerAttributeMap["address_choice"] = finalObj
 										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
 											routerAttributeMap["address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceModelAttributeMap)
 										}
 
@@ -13970,8 +14239,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 													if isLocalDns && localDnsOptionsWrapper != nil && localDnsOptionsWrapper.LocalDns != nil {
 														localDnsElement := localDnsOptionsWrapper.LocalDns
 
-														// resource specToModelNested RequiredOneOfField --> LocalDnsChoice
-														// CreateSpecType
+														// resource specToModelNested OneOfField --> LocalDnsChoice
 														// CreateSpecType: GetLocalDnsChoice() returns the oneof interface value.
 														if localDnsElement.GetLocalDnsChoice() != nil {
 															// Create a temporary attribute map for the choices within this OneOf
@@ -14052,6 +14320,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 															// Assign the final object to the correct place (either the root model or a parent's attribute map)
 															localDnsAttributeMap["local_dns_choice"] = finalObj
 														} else {
+															// The OneOf field is nil in the source spec, so set the Terraform object to null.
 															localDnsAttributeMap["local_dns_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceLocalDnsLocalDnsChoiceModelAttributeMap)
 														}
 
@@ -14081,6 +14350,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 												// Assign the final object to the correct place (either the root model or a parent's attribute map)
 												netIfaceIPV6DnsConfigModel.DnsChoice = finalObj
 											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
 												netIfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
 											}
 
@@ -14128,6 +14398,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								ipv6AutoConfigAttributeMap["autoconfig_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								ipv6AutoConfigAttributeMap["autoconfig_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceModelAttributeMap)
 							}
 
@@ -14303,6 +14574,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								staticIpv6AddressAttributeMap["network_prefix_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								staticIpv6AddressAttributeMap["network_prefix_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceStaticIpv6AddressNetworkPrefixChoiceModelAttributeMap)
 							}
 
@@ -14333,7 +14605,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// prior plan/state, keep the prior branch object to avoid false oneof drift.
 					{
 						var priorOneOfObj types.Object
-						priorOneOfDiags := request.State.GetAttribute(ctx, path.Root("interface_choice").AtName("ethernet_interface").AtName("ipv6_address_choice"), &priorOneOfObj)
+						priorOneOfDiags := request.Plan.GetAttribute(ctx, path.Root("interface_choice").AtName("ethernet_interface").AtName("ipv6_address_choice"), &priorOneOfObj)
 						if !priorOneOfDiags.HasError() && !priorOneOfObj.IsNull() && !priorOneOfObj.IsUnknown() && !finalObj.IsNull() && !finalObj.IsUnknown() {
 							selectedBranchName := func(obj types.Object) string {
 								for branchName, branchValue := range obj.Attributes() {
@@ -14371,6 +14643,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["ipv6_address_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["ipv6_address_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceIpv6AddressChoiceModelAttributeMap)
 				}
 
@@ -14445,14 +14718,14 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["monitoring_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["monitoring_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceMonitoringChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Mtu
 				ethernetInterfaceAttributeMap["mtu"] = types.Int64Value(int64(ethernetInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -14590,11 +14863,11 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["network_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["network_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NodeChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NodeChoice
 				// CreateSpecType: GetNodeChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetNodeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -14653,11 +14926,11 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceNodeChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PrimaryChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PrimaryChoice
 				// CreateSpecType: GetPrimaryChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetPrimaryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -14728,14 +15001,14 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["primary_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["primary_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfacePrimaryChoiceModelAttributeMap)
 				}
 
 				// resource specToModelNested UintField --> Priority
 				ethernetInterfaceAttributeMap["priority"] = types.Int64Value(int64(ethernetInterfaceElement.GetPriority()))
 
-				// resource specToModelNested RequiredOneOfField --> VlanChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VlanChoice
 				// CreateSpecType: GetVlanChoice() returns the oneof interface value.
 				if ethernetInterfaceElement.GetVlanChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -14794,6 +15067,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					ethernetInterfaceAttributeMap["vlan_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					ethernetInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceEthernetInterfaceVlanChoiceModelAttributeMap)
 				}
 
@@ -14849,8 +15123,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								l2sriovInterfaceAttributeMap["device"] = types.StringNull()
 							}
 
-							// resource specToModelNested RequiredOneOfField --> VlanChoice
-							// CreateSpecType
+							// resource specToModelNested OneOfField --> VlanChoice
 							// CreateSpecType: GetVlanChoice() returns the oneof interface value.
 							if l2sriovInterfaceElement.GetVlanChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
@@ -14909,6 +15182,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
 								l2sriovInterfaceAttributeMap["vlan_choice"] = finalObj
 							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
 								l2sriovInterfaceAttributeMap["vlan_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceL2SriovInterfaceVlanChoiceModelAttributeMap)
 							}
 
@@ -14994,6 +15268,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					layer2InterfaceAttributeMap["layer2_interface_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					layer2InterfaceAttributeMap["layer2_interface_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceLayer2InterfaceLayer2InterfaceChoiceModelAttributeMap)
 				}
 
@@ -15021,8 +15296,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 				// resource specToModelNested UintField --> Mtu
 				tunnelInterfaceAttributeMap["mtu"] = types.Int64Value(int64(tunnelInterfaceElement.GetMtu()))
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if tunnelInterfaceElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -15093,6 +15367,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					tunnelInterfaceAttributeMap["network_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					tunnelInterfaceAttributeMap["network_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceNetworkChoiceModelAttributeMap)
 				}
 
@@ -15134,6 +15409,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
 					tunnelInterfaceAttributeMap["node_choice"] = finalObj
 				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					tunnelInterfaceAttributeMap["node_choice"] = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceNodeChoiceModelAttributeMap)
 				}
 
@@ -15277,6 +15553,7 @@ func (r *ResourceF5XCNetworkInterface) Update(ctx context.Context, request resou
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
 						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = finalObj
 					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
 						netIfaceStaticIPParametersTypeModel.NetworkPrefixChoice = types.ObjectNull(NetworkInterfaceInterfaceChoiceTunnelInterfaceStaticIpNetworkPrefixChoiceModelAttributeMap)
 					}
 
@@ -15451,7 +15728,7 @@ func (r *ResourceF5XCNetworkInterface) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "network_interface", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "network_interface", err),
 		)
 		return
 	}

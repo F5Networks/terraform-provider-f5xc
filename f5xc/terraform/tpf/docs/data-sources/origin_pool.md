@@ -14,12 +14,12 @@
 page_title: "f5xc_origin_pool Data Source - F5 XC Distributed Cloud"
 subcategory: "App Security & Load Balancing"
 description: |-
-  Origin Pool Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer It will create following child objects * cluster * endpoints * healthcheck
+  Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer<br><br>It will create following child objects<br><br>* cluster<br>* endpoints<br>* healthcheck
 ---
 
 # f5xc_origin_pool (Data Source)
 
-Origin Pool Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer It will create following child objects * cluster * endpoints * healthcheck
+Origin pool is a view to create cluster and endpoints that can be used in HTTP loadbalancer or TCP loadbalancer<br><br>It will create following child objects<br><br>* cluster<br>* endpoints<br>* healthcheck
 
 ## Example Usage
 
@@ -703,7 +703,6 @@ Read-Only:
 Read-Only:
 
 - `ip` (String) IP Public IPV4 address
-- `ipv6` (String) IPV6 Public IPV6 address
 
 
 
@@ -862,6 +861,7 @@ Read-Only:
 
 - `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
 - `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice.use_mtls.tls_certificates.private_key.secret_info_choice.blindfold_secret_info`
@@ -879,7 +879,7 @@ Read-Only:
 Read-Only:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 
 

@@ -28,38 +28,44 @@ func TestAccResourceAutoF5XCEndpoint_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-endpoint-" + acctest.RandString(t, 8)
+	name := "example-endpoint-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEndpointConfig_basic(name, namespace)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port", "port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEndpointConfig_basicUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCEndpointConfig_basic("example-endpoint", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCEndpoint_withProtocolTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-endpoint-" + acctest.RandString(t, 8)
+	name := "example-endpoint-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,18 +74,20 @@ func TestAccResourceAutoF5XCEndpoint_withProtocolTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEndpointConfig_withProtocol(name, namespace, "TCP")},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEndpointConfig_withProtocol(name, namespace, "UDP")},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -90,7 +98,7 @@ func TestAccResourceAutoF5XCEndpoint_withAddressChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-endpoint-" + acctest.RandString(t, 8)
+	name := "example-endpoint-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -99,26 +107,29 @@ func TestAccResourceAutoF5XCEndpoint_withAddressChoiceTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEndpointConfig_withIPAddress(name, namespace, "10.10.10.10")},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEndpointConfig_withDNSName(name, namespace, "api.example.com")},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEndpointConfig_withDNSNameAdvanced(name, namespace, "edge.example.com", 300)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -129,7 +140,7 @@ func TestAccResourceAutoF5XCEndpoint_withDNSRefreshIntervalTransition(t *testing
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-endpoint-" + acctest.RandString(t, 8)
+	name := "example-endpoint-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -138,18 +149,20 @@ func TestAccResourceAutoF5XCEndpoint_withDNSRefreshIntervalTransition(t *testing
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEndpointConfig_withDNSNameAdvanced(name, namespace, "refresh.example.com", 120)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEndpointConfig_withDNSNameAdvanced(name, namespace, "refresh.example.com", 600)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -160,7 +173,7 @@ func TestAccResourceAutoF5XCEndpoint_withNoSNATPool(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-endpoint-" + acctest.RandString(t, 8)
+	name := "example-endpoint-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -169,10 +182,11 @@ func TestAccResourceAutoF5XCEndpoint_withNoSNATPool(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEndpointConfig_withNoSNATPool(name, namespace)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port", "port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -183,7 +197,7 @@ func TestAccResourceAutoF5XCEndpoint_withSNATPrefixes(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-endpoint-" + acctest.RandString(t, 8)
+	name := "example-endpoint-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -192,10 +206,11 @@ func TestAccResourceAutoF5XCEndpoint_withSNATPrefixes(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEndpointConfig_withSNATPrefixes(name, namespace, "10.20.0.0/16")},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateVerifyIgnore:              []string{"health_check_port", "port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -206,31 +221,35 @@ func TestAccResourceAutoF5XCEndpoint_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-endpoint-" + acctest.RandString(t, 8)
+	name := "example-endpoint-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckEndpointDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCEndpointConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCEndpointConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_endpoint.test",
+				ResourceName:                         "f5xc_endpoint.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCEndpointConfig_full("example-endpoint", "default"),
+		})
 }
 
 func testAccCheckEndpointDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -239,7 +258,7 @@ func testAccCheckEndpointDestroyProducer(t *testing.T) func(*terraform.State) er
 
 func testAccResourceAutoF5XCEndpointConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name      = %q
   namespace = %q
 
@@ -252,10 +271,10 @@ resource "f5xc_endpoint" "test" {
 
 func testAccResourceAutoF5XCEndpointConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name        = %q
   namespace   = %q
-  description = "endpoint updated"
+  description = "Updated endpoint example"
   port        = 8080
 
   endpoint_address_choice = {
@@ -267,7 +286,7 @@ resource "f5xc_endpoint" "test" {
 
 func testAccResourceAutoF5XCEndpointConfig_withProtocol(name, namespace, protocol string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name      = %q
   namespace = %q
   protocol  = %q
@@ -282,7 +301,7 @@ resource "f5xc_endpoint" "test" {
 
 func testAccResourceAutoF5XCEndpointConfig_withIPAddress(name, namespace, ip string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name      = %q
   namespace = %q
   port      = 8080
@@ -296,7 +315,7 @@ resource "f5xc_endpoint" "test" {
 
 func testAccResourceAutoF5XCEndpointConfig_withDNSName(name, namespace, dnsName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name      = %q
   namespace = %q
   port      = 8080
@@ -310,7 +329,7 @@ resource "f5xc_endpoint" "test" {
 
 func testAccResourceAutoF5XCEndpointConfig_withDNSNameAdvanced(name, namespace, dnsName string, refreshInterval int) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name      = %q
   namespace = %q
   port      = 8080
@@ -330,7 +349,7 @@ resource "f5xc_endpoint" "test" {
 
 func testAccResourceAutoF5XCEndpointConfig_withNoSNATPool(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name      = %q
   namespace = %q
 
@@ -344,7 +363,7 @@ resource "f5xc_endpoint" "test" {
 		ref = [{
 		  name      = "ves-io-all-res"
 		  namespace = "shared"
-          tenant    = "customer1"
+          tenant    = %q
 		}]
 		network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
 		internet_vip_choice = {
@@ -360,12 +379,34 @@ resource "f5xc_endpoint" "test" {
     }
   }
 }
-`, name, namespace)
+`, name, namespace, acctest.DefaultTenant())
 }
 
 func testAccResourceAutoF5XCEndpointConfig_withSNATPrefixes(name, namespace, prefix string) string {
+	siteName := name + "-site"
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_securemesh_site_v2" "site" {
+  name      = %q
+  namespace = "system"
+
+  logs_receiver_choice = {
+    logs_streaming_disabled = true
+  }
+
+  blocked_services_choice = {
+    block_all_services = true
+  }
+
+  provider_choice = {
+    kvm = {
+      orchestration_choice = {
+        not_managed = {}
+      }
+    }
+  }
+}
+
+resource "f5xc_endpoint" "example" {
   name      = %q
   namespace = %q
 
@@ -377,9 +418,9 @@ resource "f5xc_endpoint" "test" {
 	ref_or_selector_choice = {
 	  site = {
 		ref = [{
-		  name      = "arushi-testing-site"
-		  namespace = "system"
-          tenant    = "customer1"
+		  name      = f5xc_securemesh_site_v2.site.name
+		  namespace = f5xc_securemesh_site_v2.site.namespace
+          tenant    = %q
 		}]
 		network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
 		internet_vip_choice = {
@@ -397,21 +438,21 @@ resource "f5xc_endpoint" "test" {
     }
   }
 }
-`, name, namespace, prefix)
+`, siteName, name, namespace, acctest.DefaultTenant(), prefix)
 }
 
 func testAccResourceAutoF5XCEndpointConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name              = %q
   namespace         = %q
-  description       = "endpoint full"
+  description       = "Full endpoint example"
   protocol          = "TCP"
   port              = 8443
   health_check_port = 9443
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -434,7 +475,7 @@ resource "f5xc_endpoint" "test" {
         ref = [{
           name      = "ves-io-all-res"
           namespace = "shared"
-          tenant    = "customer1"
+          tenant    = %q
         }]
         network_type = ["VIRTUAL_NETWORK_SITE_LOCAL"]
         internet_vip_choice = {
@@ -450,21 +491,21 @@ resource "f5xc_endpoint" "test" {
     }
   }
 }
-`, name, namespace)
+`, name, namespace, acctest.DefaultTenant())
 }
 
 func testAccResourceAutoF5XCEndpointConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_endpoint" "test" {
+resource "f5xc_endpoint" "example" {
   name              = %q
   namespace         = %q
-  description       = "endpoint full updated"
+  description       = "Updated full endpoint example"
   protocol          = "UDP"
   port              = 5353
   health_check_port = 5354
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {

@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -35,6 +36,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -45,6 +47,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_enhanced_firewall_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/enhanced_firewall_policy"
 	ves_io_schema_network_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_policy"
@@ -245,7 +248,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> RuleChoice
+// Attribute map for OneOfField --> RuleChoice
 var EnhancedFirewallPolicyRuleChoiceModelAttributeMap = map[string]attr.Type{
 
 	"allow_all": types.BoolType,
@@ -380,7 +383,7 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionChoice
+// Attribute map for OneOfField --> ActionChoice
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"allow": types.BoolType,
@@ -416,7 +419,7 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DestinationChoice
+// Attribute map for OneOfField --> DestinationChoice
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"all_destinations": types.BoolType,
@@ -503,7 +506,7 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap = map
 	"name":        types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SourceChoice
+// Attribute map for OneOfField --> SourceChoice
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"all_sources":     types.BoolType,
@@ -565,7 +568,7 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListMod
 	},
 }
 
-// Attribute map for RequiredOneOfField --> TrafficChoice
+// Attribute map for OneOfField --> TrafficChoice
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap = map[string]attr.Type{
 
 	"all_tcp_traffic": types.BoolType,
@@ -675,8 +678,8 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Metadata(ctx context.Context, reque
 func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Enhanced Firewall Policy Hits ID EnhancedFirewallPolicyHitsId uniquely identifies an entry in the response to Enhanced Firewall Policy hits request. Enhanced Firewall Policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the fields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
-		Description:         "Enhanced Firewall Policy Hits ID EnhancedFirewallPolicyHitsId uniquely identifies an entry in the response to Enhanced Firewall Policy hits request. Enhanced Firewall Policy hits counter is aggregated based on the labels specified in the group_by field in the request. Therefore, only the fields that corresponds to the MetricLabel in the group_by field will have non-empty value in the response.",
+		MarkdownDescription: "Enhanced Firewall Policy defined firewall rules applied in the site<br>Enhanced Firewall Policy defines rules in the form or 5 tuple,<br><source, source-port, destination, destination-port, protocol><br><br>Where,<br>source : source can be specified in the form of<br>- ip-address or ip-subnet to be matched with source-ip in packet<br>- labels associated with the source of packet<br>- tags associated with the source vpc, from where the packet originates<br>- vpc-id for the source address<br>source attributes are matched before any NAT processing of the packet<br><br>source-port: matches the source-port in the packet<br><br>destination: destination can be specified in the form of<br>- ip-address or ip-subnet to be matched with destination-ip in packet<br>- labels associated with the destination of packet<br>- tags associated with the destination vpc, to where the packet is sent<br>- vpc for the source address<br><br>destination-port: matches the destination-port in the packet<br><br>protocol: protocol of the IP packet<br><br>The Enhanced Firewall Policies are applied as part of route processing<br>The policies are always applied before any NAT processing so that source<br>matching always happens on the original packet",
+		Description:         "Enhanced Firewall Policy defined firewall rules applied in the site Enhanced Firewall Policy defines rules in the form or 5 tuple, <source, source-port, destination, destination-port, protocol> Where, source : source can be specified in the form of - ip-address or ip-subnet to be matched with source-ip in packet - labels associated with the source of packet - tags associated with the source vpc, from where the packet originates - vpc-id for the source address source attributes are matched before any NAT processing of the packet source-port: matches the source-port in the packet destination: destination can be specified in the form of - ip-address or ip-subnet to be matched with destination-ip in packet - labels associated with the destination of packet - tags associated with the destination vpc, to where the packet is sent - vpc for the source address destination-port: matches the destination-port in the packet protocol: protocol of the IP packet The Enhanced Firewall Policies are applied as part of route processing The policies are always applied before any NAT processing so that source matching always happens on the original packet",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -744,12 +747,12 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 			},
 			"rule_choice": schema.SingleNestedAttribute{
 				Description:         "Select Enhanced Firewall Policy Rule Type Select specific/custom rules for Enhanced Firewall Policy",
-				MarkdownDescription: "Select Enhanced Firewall Policy Rule Type Select specific/custom rules for Enhanced Firewall Policy",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select Enhanced Firewall Policy Rule Type Select specific/custom rules for Enhanced Firewall Policy<br>Exactly one of `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, `deny_all`, or `rule_list` must be specified when `rule_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"allow_all",
 						"allowed_destinations",
 						"allowed_sources",
@@ -759,10 +762,13 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 						"rule_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"allow_all": schema.BoolAttribute{
 						Description:         "Allow all connections Allow all connections from any source to any destination",
-						MarkdownDescription: "Allow all connections Allow all connections from any source to any destination",
+						MarkdownDescription: "Allow all connections Allow all connections from any source to any destination<br>Conflicts with `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, `deny_all`, and `rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -772,7 +778,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 					},
 					"allowed_destinations": schema.SingleNestedAttribute{
 						Description:         "List of allowed destination prefixes Allow all connections to list of destinations from any source",
-						MarkdownDescription: "List of allowed destination prefixes Allow all connections to list of destinations from any source",
+						MarkdownDescription: "List of allowed destination prefixes Allow all connections to list of destinations from any source<br>Conflicts with `allow_all`, `allowed_sources`, `denied_destinations`, `denied_sources`, `deny_all`, and `rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -787,7 +793,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -811,7 +817,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 					},
 					"allowed_sources": schema.SingleNestedAttribute{
 						Description:         "List of allowed source prefixes Allow all connections from list of sources to any destination",
-						MarkdownDescription: "List of allowed source prefixes Allow all connections from list of sources to any destination",
+						MarkdownDescription: "List of allowed source prefixes Allow all connections from list of sources to any destination<br>Conflicts with `allow_all`, `allowed_destinations`, `denied_destinations`, `denied_sources`, `deny_all`, and `rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -826,7 +832,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -850,7 +856,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 					},
 					"denied_destinations": schema.SingleNestedAttribute{
 						Description:         "List of denied destination prefixes Deny all connections to list of destinations from any source",
-						MarkdownDescription: "List of denied destination prefixes Deny all connections to list of destinations from any source",
+						MarkdownDescription: "List of denied destination prefixes Deny all connections to list of destinations from any source<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_sources`, `deny_all`, and `rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -865,7 +871,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -889,7 +895,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 					},
 					"denied_sources": schema.SingleNestedAttribute{
 						Description:         "List of denied source prefixes Deny all connections from list of sources to any destination",
-						MarkdownDescription: "List of denied source prefixes Deny all connections from list of sources to any destination",
+						MarkdownDescription: "List of denied source prefixes Deny all connections from list of sources to any destination<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `deny_all`, and `rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -904,7 +910,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -928,7 +934,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 					},
 					"deny_all": schema.BoolAttribute{
 						Description:         "Deny all connections Deny all connections from any source to any destination",
-						MarkdownDescription: "Deny all connections Deny all connections from any source to any destination",
+						MarkdownDescription: "Deny all connections Deny all connections from any source to any destination<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, and `rule_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -938,7 +944,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 					},
 					"rule_list": schema.SingleNestedAttribute{
 						Description:         "Custom Enhanced Firewall Policy Rule Selection Custom Enhanced Firewall Policy Rule Selection",
-						MarkdownDescription: "Custom Enhanced Firewall Policy Rule Selection Custom Enhanced Firewall Policy Rule Selection",
+						MarkdownDescription: "Custom Enhanced Firewall Policy Rule Selection Custom Enhanced Firewall Policy Rule Selection<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, and `deny_all`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -956,21 +962,24 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 									Attributes: map[string]schema.Attribute{
 										"action_choice": schema.SingleNestedAttribute{
 											Description:         "Action Action for any connection matching the rule",
-											MarkdownDescription: "Action Action for any connection matching the rule",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Action Action for any connection matching the rule<br>Exactly one of `allow`, `deny`, or `insert_service` must be specified when `action_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"allow",
 													"deny",
 													"insert_service",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"allow": schema.BoolAttribute{
 													Description:         "Allow Allow any connection matching the rule",
-													MarkdownDescription: "Allow Allow any connection matching the rule",
+													MarkdownDescription: "Allow Allow any connection matching the rule<br>Conflicts with `deny` and `insert_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -980,7 +989,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"deny": schema.BoolAttribute{
 													Description:         "Deny Deny any connection matching the rule",
-													MarkdownDescription: "Deny Deny any connection matching the rule",
+													MarkdownDescription: "Deny Deny any connection matching the rule<br>Conflicts with `allow` and `insert_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -990,7 +999,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"insert_service": schema.SingleNestedAttribute{
 													Description:         "Service Send selected traffic to NFV Service of type Palo Alto Networks VM-Series Firewall for inspection",
-													MarkdownDescription: "Service Send selected traffic to NFV Service of type Palo Alto Networks VM-Series Firewall for inspection",
+													MarkdownDescription: "Service Send selected traffic to NFV Service of type Palo Alto Networks VM-Series Firewall for inspection<br>Conflicts with `allow` and `deny`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1023,7 +1032,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 																	Optional:            false,
 																	Computed:            true,
 																	PlanModifiers: []planmodifier.String{
-																		stringplanmodifier.UseStateForUnknown(),
+																		stringplanmodifier.UseNonNullStateForUnknown(),
 																	},
 																},
 															},
@@ -1056,12 +1065,12 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 										},
 										"destination_choice": schema.SingleNestedAttribute{
 											Description:         "Destination Traffic Filter Destination Traffic Filter for the policy",
-											MarkdownDescription: "Destination Traffic Filter Destination Traffic Filter for the policy",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Destination Traffic Filter Destination Traffic Filter for the policy<br>Exactly one of `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, or `outside_destinations` must be specified when `destination_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"all_destinations",
 													"all_sli_vips",
 													"all_slo_vips",
@@ -1073,10 +1082,13 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													"outside_destinations",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"all_destinations": schema.BoolAttribute{
 													Description:         "All Destinations Any address that matches 0/0 ip prefix",
-													MarkdownDescription: "All Destinations Any address that matches 0/0 ip prefix",
+													MarkdownDescription: "All Destinations Any address that matches 0/0 ip prefix<br>Conflicts with `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1086,7 +1098,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"all_sli_vips": schema.BoolAttribute{
 													Description:         "All VIP address on Site Local Inside Network Destination is virtual-ip of all loadbalancer on site-local-inside network",
-													MarkdownDescription: "All VIP address on Site Local Inside Network Destination is virtual-ip of all loadbalancer on site-local-inside network",
+													MarkdownDescription: "All VIP address on Site Local Inside Network Destination is virtual-ip of all loadbalancer on site-local-inside network<br>Conflicts with `all_destinations`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1096,7 +1108,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"all_slo_vips": schema.BoolAttribute{
 													Description:         "All VIP address on Site Local Outside Network Destination is virtual-ip of all loadbalancer on site-local-outside network",
-													MarkdownDescription: "All VIP address on Site Local Outside Network Destination is virtual-ip of all loadbalancer on site-local-outside network",
+													MarkdownDescription: "All VIP address on Site Local Outside Network Destination is virtual-ip of all loadbalancer on site-local-outside network<br>Conflicts with `all_destinations`, `all_sli_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1106,7 +1118,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"destination_aws_vpc_ids": schema.SingleNestedAttribute{
 													Description:         "AWS VPC Identifier Destination is any address in list of AWS VPCs",
-													MarkdownDescription: "AWS VPC Identifier Destination is any address in list of AWS VPCs",
+													MarkdownDescription: "AWS VPC Identifier Destination is any address in list of AWS VPCs<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1132,7 +1144,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"destination_ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "IP Prefix Set",
-													MarkdownDescription: "IP Prefix Set",
+													MarkdownDescription: "IP Prefix Set<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1169,7 +1181,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1179,7 +1191,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"destination_label_selector": schema.SingleNestedAttribute{
 													Description:         "Destination Label selector Destination is a set of addresses determined by label selector expression These labels can be cloud tags defined on the vpc resource, labels on the global network or others.",
-													MarkdownDescription: "Destination Label selector Destination is a set of addresses determined by label selector expression These labels can be cloud tags defined on the vpc resource, labels on the global network or others.",
+													MarkdownDescription: "Destination Label selector Destination is a set of addresses determined by label selector expression These labels can be cloud tags defined on the vpc resource, labels on the global network or others.<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1200,7 +1212,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"destination_prefix_list": schema.SingleNestedAttribute{
 													Description:         "IP Prefix List Addresses that match one of the prefix in the list",
-													MarkdownDescription: "IP Prefix List Addresses that match one of the prefix in the list",
+													MarkdownDescription: "IP Prefix List Addresses that match one of the prefix in the list<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `inside_destinations`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1215,7 +1227,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1241,7 +1253,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"inside_destinations": schema.BoolAttribute{
 													Description:         "All Destination Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
-													MarkdownDescription: "All Destination Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
+													MarkdownDescription: "All Destination Reachable via all inside interfaces All addresses reachable in site-local inside interfaces<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, and `outside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1251,7 +1263,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"outside_destinations": schema.BoolAttribute{
 													Description:         "All Destination Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
-													MarkdownDescription: "All Destination Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
+													MarkdownDescription: "All Destination Reachable via all outside interfaces All addresses reachable in site-local outside interfaces<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, and `inside_destinations`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1318,12 +1330,12 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 										},
 										"source_choice": schema.SingleNestedAttribute{
 											Description:         "Source Traffic Filter Source Traffic Filter for the policy",
-											MarkdownDescription: "Source Traffic Filter Source Traffic Filter for the policy",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Source Traffic Filter Source Traffic Filter for the policy<br>Exactly one of `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, or `source_prefix_list` must be specified when `source_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"all_sources",
 													"inside_sources",
 													"outside_sources",
@@ -1333,10 +1345,13 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													"source_prefix_list",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"all_sources": schema.BoolAttribute{
 													Description:         "All Sources Any address that matches 0/0 ip prefix",
-													MarkdownDescription: "All Sources Any address that matches 0/0 ip prefix",
+													MarkdownDescription: "All Sources Any address that matches 0/0 ip prefix<br>Conflicts with `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1346,7 +1361,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"inside_sources": schema.BoolAttribute{
 													Description:         "All Source Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
-													MarkdownDescription: "All Source Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
+													MarkdownDescription: "All Source Reachable via all inside interfaces All addresses reachable in site-local inside interfaces<br>Conflicts with `all_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1356,7 +1371,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"outside_sources": schema.BoolAttribute{
 													Description:         "All Source Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
-													MarkdownDescription: "All Source Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
+													MarkdownDescription: "All Source Reachable via all outside interfaces All addresses reachable in site-local outside interfaces<br>Conflicts with `all_sources`, `inside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1366,7 +1381,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"source_aws_vpc_ids": schema.SingleNestedAttribute{
 													Description:         "AWS VPC Identifier Source is any address in list of AWS VPCs",
-													MarkdownDescription: "AWS VPC Identifier Source is any address in list of AWS VPCs",
+													MarkdownDescription: "AWS VPC Identifier Source is any address in list of AWS VPCs<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1392,7 +1407,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"source_ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "IP Prefix Set",
-													MarkdownDescription: "IP Prefix Set",
+													MarkdownDescription: "IP Prefix Set<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_label_selector`, and `source_prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1429,7 +1444,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 																		Optional:            false,
 																		Computed:            true,
 																		PlanModifiers: []planmodifier.String{
-																			stringplanmodifier.UseStateForUnknown(),
+																			stringplanmodifier.UseNonNullStateForUnknown(),
 																		},
 																	},
 																},
@@ -1439,7 +1454,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"source_label_selector": schema.SingleNestedAttribute{
 													Description:         "Source Label selector Source is a set of addresses determined by label selector expression. These labels can be cloud tags defined on the vpc resource, labels on the global network or others.",
-													MarkdownDescription: "Source Label selector Source is a set of addresses determined by label selector expression. These labels can be cloud tags defined on the vpc resource, labels on the global network or others.",
+													MarkdownDescription: "Source Label selector Source is a set of addresses determined by label selector expression. These labels can be cloud tags defined on the vpc resource, labels on the global network or others.<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, and `source_prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1460,7 +1475,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"source_prefix_list": schema.SingleNestedAttribute{
 													Description:         "ip prefix list Addresses that match one of the prefix in the list list contains sublist of both v4 and v6 prfix list",
-													MarkdownDescription: "ip prefix list Addresses that match one of the prefix in the list list contains sublist of both v4 and v6 prfix list",
+													MarkdownDescription: "ip prefix list Addresses that match one of the prefix in the list list contains sublist of both v4 and v6 prfix list<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, and `source_label_selector`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1475,7 +1490,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 															Validators: []validator.List{
 																listvalidator.SizeAtMost(128),
 																listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+																	regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 																	"must be a valid IPv6 prefix",
 																)),
 																listvalidator.UniqueValues(),
@@ -1503,12 +1518,12 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 										},
 										"traffic_choice": schema.SingleNestedAttribute{
 											Description:         "Traffic Type Select type of traffic to match",
-											MarkdownDescription: "Traffic Type Select type of traffic to match",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"all_tcp_traffic",
 													"all_traffic",
 													"all_udp_traffic",
@@ -1516,10 +1531,13 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													"protocol_port_range",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"all_tcp_traffic": schema.BoolAttribute{
 													Description:         "All TCP Traffic Select all TCP traffic to match",
-													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match",
+													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1529,7 +1547,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"all_traffic": schema.BoolAttribute{
 													Description:         "All Traffic Select all traffic to match",
-													MarkdownDescription: "All Traffic Select all traffic to match",
+													MarkdownDescription: "All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1539,7 +1557,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"all_udp_traffic": schema.BoolAttribute{
 													Description:         "All UDP Traffic Select all UDP traffic to match",
-													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match",
+													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1549,19 +1567,18 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"applications": schema.SingleNestedAttribute{
 													Description:         "Specific Applications Select Application traffic to match",
-													MarkdownDescription: "Specific Applications Select Application traffic to match",
+													MarkdownDescription: "Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"applications": schema.ListAttribute{
 															Description:         "Applications Application protocols like HTTP, SNMP",
-															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`",
+															MarkdownDescription: "Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("APPLICATION_HTTP")),
+															Computed:            false,
 															Validators: []validator.List{
 																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPLICATION_DNS", "APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP"}...)),
 															},
@@ -1570,7 +1587,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 												},
 												"protocol_port_range": schema.SingleNestedAttribute{
 													Description:         "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1592,7 +1609,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 														},
 														"protocol": schema.StringAttribute{
 															Description:         "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`",
+															MarkdownDescription: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`",
 															Required:            false,
 															Optional:            true,
 															Computed:            true,
@@ -1621,7 +1638,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 				Attributes: map[string]schema.Attribute{
 					"dst_segment_choice": schema.SingleNestedAttribute{
 						Description:         "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-						MarkdownDescription: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
+						MarkdownDescription: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `dst_any`, `dst_segments`, or `intra_segment` must be specified when `dst_segment_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1635,7 +1652,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 						Attributes: map[string]schema.Attribute{
 							"dst_any": schema.BoolAttribute{
 								Description:         "Any segment Traffic is not matched against any segment",
-								MarkdownDescription: "Any segment Traffic is not matched against any segment",
+								MarkdownDescription: "Any segment Traffic is not matched against any segment<br>Conflicts with `dst_segments` and `intra_segment`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1645,7 +1662,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 							},
 							"dst_segments": schema.SingleNestedAttribute{
 								Description:         "List of segments Traffic is matched against destination segment in selected segments",
-								MarkdownDescription: "List of segments Traffic is matched against destination segment in selected segments",
+								MarkdownDescription: "List of segments Traffic is matched against destination segment in selected segments<br>Conflicts with `dst_any` and `intra_segment`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1679,7 +1696,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -1689,7 +1706,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 							},
 							"intra_segment": schema.BoolAttribute{
 								Description:         "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-								MarkdownDescription: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
+								MarkdownDescription: "Intra Segment Policy Traffic is matched for source and destination on the same segment<br>Conflicts with `dst_any` and `dst_segments`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1701,7 +1718,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 					},
 					"src_segment_choice": schema.SingleNestedAttribute{
 						Description:         "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
-						MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
+						MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `src_any` or `src_segments` must be specified when `src_segment_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1714,7 +1731,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 						Attributes: map[string]schema.Attribute{
 							"src_any": schema.BoolAttribute{
 								Description:         "Any segment Traffic is not matched against any segment",
-								MarkdownDescription: "Any segment Traffic is not matched against any segment",
+								MarkdownDescription: "Any segment Traffic is not matched against any segment<br>Conflicts with `src_segments`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1724,7 +1741,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 							},
 							"src_segments": schema.SingleNestedAttribute{
 								Description:         "List of segments Source traffic is matched against selected segments",
-								MarkdownDescription: "List of segments Source traffic is matched against selected segments",
+								MarkdownDescription: "List of segments Source traffic is matched against selected segments<br>Conflicts with `src_any`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1758,7 +1775,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, request
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -1832,9 +1849,17 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) ModifyPlan(ctx context.Context, req
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCEnhancedFirewallPolicyModel
 
 	// Read Terraform plan data into the model
@@ -1915,7 +1940,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> RuleChoice
+	// resource modelToSpecRoot OneOfField --> RuleChoice
 	if !data.RuleChoice.IsNull() && !data.RuleChoice.IsUnknown() {
 		ruleChoiceModel := EnhancedFirewallPolicyRuleChoice{}
 		response.Diagnostics.Append(data.RuleChoice.As(ctx, &ruleChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2121,10 +2146,22 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 				for i, rulesElement := range rulesElements {
 					// Initialize the spec struct for the current element
 					ruleListOneOfSpec.RuleList.Rules[i] = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType{}
+					ruleListOneOfSpec.RuleList.Rules[i].ActionChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_Deny{
+						Deny: &ves_io_schema.Empty{},
+					}
+					ruleListOneOfSpec.RuleList.Rules[i].DestinationChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllDestinations{
+						AllDestinations: &ves_io_schema.Empty{},
+					}
+					ruleListOneOfSpec.RuleList.Rules[i].SourceChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllSources{
+						AllSources: &ves_io_schema.Empty{},
+					}
+					ruleListOneOfSpec.RuleList.Rules[i].TrafficChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllTraffic{
+						AllTraffic: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					// resource modelToSpecNested OneOfField --> ActionChoice
 					if !rulesElement.ActionChoice.IsNull() && !rulesElement.ActionChoice.IsUnknown() {
 						rulesActionChoiceModel := EnhancedFirewallPolicyActionChoice{}
 						response.Diagnostics.Append(rulesElement.ActionChoice.As(ctx, &rulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2221,7 +2258,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> DestinationChoice
+					// resource modelToSpecNested OneOfField --> DestinationChoice
 					if !rulesElement.DestinationChoice.IsNull() && !rulesElement.DestinationChoice.IsUnknown() {
 						rulesDestinationChoiceModel := EnhancedFirewallPolicyDestChoice{}
 						response.Diagnostics.Append(rulesElement.DestinationChoice.As(ctx, &rulesDestinationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2448,7 +2485,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> SourceChoice
+					// resource modelToSpecNested OneOfField --> SourceChoice
 					if !rulesElement.SourceChoice.IsNull() && !rulesElement.SourceChoice.IsUnknown() {
 						rulesSourceChoiceModel := EnhancedFirewallPolicySrcChoice{}
 						response.Diagnostics.Append(rulesElement.SourceChoice.As(ctx, &rulesSourceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2612,7 +2649,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> TrafficChoice
+					// resource modelToSpecNested OneOfField --> TrafficChoice
 					if !rulesElement.TrafficChoice.IsNull() && !rulesElement.TrafficChoice.IsUnknown() {
 						rulesTrafficChoiceModel := EnhancedFirewallPolicyTrafficChoice{}
 						response.Diagnostics.Append(rulesElement.TrafficChoice.As(ctx, &rulesTrafficChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2719,6 +2756,10 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 
 		}
 
+	} else {
+		spec.RuleChoice = &ves_io_schema_enhanced_firewall_policy.CreateSpecType_AllowAll{
+			AllowAll: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -2874,7 +2915,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2897,7 +2938,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "enhanced_firewall_policy", err),
 		)
 		return
 	}
@@ -3015,7 +3056,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> RuleChoice
+	// resource SpecToModelRoot OneOfField --> RuleChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -3055,29 +3096,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3124,29 +3167,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3193,29 +3238,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3262,29 +3309,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3340,8 +3389,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 					for _, rulesElement := range ruleListElement.GetRules() {
 						enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel := EnhancedFirewallPolicyEnhancedFirewallPolicyRuleType{}
 
-						// resource specToModelNested RequiredOneOfField --> ActionChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> ActionChoice
 						if rulesElement.GetActionChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3501,8 +3549,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DestinationChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DestinationChoice
 						if rulesElement.GetDestinationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulesdestinationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3848,8 +3895,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.Metadata = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> SourceChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> SourceChoice
 						if rulesElement.GetSourceChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4095,8 +4141,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> TrafficChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> TrafficChoice
 						if rulesElement.GetTrafficChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulestrafficChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4282,8 +4327,6 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Create(ctx context.Context, request
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.RuleChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceModelAttributeMap)
 	}
 
@@ -4576,14 +4619,10 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "enhanced_firewall_policy", err),
 		)
 		return
 	}
@@ -4701,7 +4740,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> RuleChoice
+	// resource SpecToModelRoot OneOfField --> RuleChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -4741,29 +4780,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -4810,29 +4851,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -4879,29 +4922,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -4948,29 +4993,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -5026,8 +5073,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 					for _, rulesElement := range ruleListElement.GetRules() {
 						enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel := EnhancedFirewallPolicyEnhancedFirewallPolicyRuleType{}
 
-						// resource specToModelNested RequiredOneOfField --> ActionChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> ActionChoice
 						if rulesElement.GetActionChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5142,7 +5188,11 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.ActionChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap, map[string]attr.Value{
+								"allow":          types.BoolNull(),
+								"deny":           types.BoolValue(true),
+								"insert_service": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceInsertServiceModelAttributeMap),
+							})
 						}
 
 						// resource specToModelNested PointerField --> AdvancedAction
@@ -5187,8 +5237,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DestinationChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> DestinationChoice
 						if rulesElement.GetDestinationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulesdestinationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5449,7 +5498,17 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.DestinationChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap, map[string]attr.Value{
+								"all_destinations":           types.BoolValue(true),
+								"all_sli_vips":               types.BoolNull(),
+								"all_slo_vips":               types.BoolNull(),
+								"destination_aws_vpc_ids":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap),
+								"destination_ip_prefix_set":  types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationIpPrefixSetModelAttributeMap),
+								"destination_label_selector": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationLabelSelectorModelAttributeMap),
+								"destination_prefix_list":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationPrefixListModelAttributeMap),
+								"inside_destinations":        types.BoolNull(),
+								"outside_destinations":       types.BoolNull(),
+							})
 						}
 
 						// resource specToModelNested PointerField --> LabelMatcher
@@ -5534,8 +5593,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.Metadata = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> SourceChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> SourceChoice
 						if rulesElement.GetSourceChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5778,11 +5836,18 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap, map[string]attr.Value{
+								"all_sources":           types.BoolValue(true),
+								"inside_sources":        types.BoolNull(),
+								"outside_sources":       types.BoolNull(),
+								"source_aws_vpc_ids":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap),
+								"source_ip_prefix_set":  types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap),
+								"source_label_selector": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap),
+								"source_prefix_list":    types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap),
+							})
 						}
 
-						// resource specToModelNested RequiredOneOfField --> TrafficChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> TrafficChoice
 						if rulesElement.GetTrafficChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulestrafficChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5919,7 +5984,13 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap)
+							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.TrafficChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap, map[string]attr.Value{
+								"all_tcp_traffic":     types.BoolNull(),
+								"all_traffic":         types.BoolValue(true),
+								"all_udp_traffic":     types.BoolNull(),
+								"applications":        types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceApplicationsModelAttributeMap),
+								"protocol_port_range": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap),
+							})
 						}
 
 						rulesElements = append(rulesElements, enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel)
@@ -5968,9 +6039,18 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.RuleChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceModelAttributeMap)
+
+		if data.RuleChoice.IsNull() || data.RuleChoice.IsUnknown() || ((data.RuleChoice.Attributes()["allow_all"].IsNull() || data.RuleChoice.Attributes()["allow_all"].IsUnknown()) && (data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).IsNull() || data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_destinations"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["allowed_sources"].(types.Object).IsNull() || data.RuleChoice.Attributes()["allowed_sources"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["allowed_sources"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["denied_destinations"].(types.Object).IsNull() || data.RuleChoice.Attributes()["denied_destinations"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["denied_destinations"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["denied_sources"].(types.Object).IsNull() || data.RuleChoice.Attributes()["denied_sources"].(types.Object).IsUnknown() || ((data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["ipv6_prefix"].IsNull() || data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["ipv6_prefix"].IsUnknown()) && (data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["prefix"].IsNull() || data.RuleChoice.Attributes()["denied_sources"].(types.Object).Attributes()["prefix"].IsUnknown()))) && (data.RuleChoice.Attributes()["deny_all"].IsNull() || data.RuleChoice.Attributes()["deny_all"].IsUnknown()) && (data.RuleChoice.Attributes()["rule_list"].(types.Object).IsNull() || data.RuleChoice.Attributes()["rule_list"].(types.Object).IsUnknown() || (data.RuleChoice.Attributes()["rule_list"].(types.Object).Attributes()["rules"].IsNull() || data.RuleChoice.Attributes()["rule_list"].(types.Object).Attributes()["rules"].IsUnknown()))) {
+			data.RuleChoice = types.ObjectValueMust(EnhancedFirewallPolicyRuleChoiceModelAttributeMap, map[string]attr.Value{
+				"allow_all":            types.BoolValue(true),
+				"allowed_destinations": types.ObjectNull(EnhancedFirewallPolicyRuleChoiceAllowedDestinationsModelAttributeMap),
+				"allowed_sources":      types.ObjectNull(EnhancedFirewallPolicyRuleChoiceAllowedSourcesModelAttributeMap),
+				"denied_destinations":  types.ObjectNull(EnhancedFirewallPolicyRuleChoiceDeniedDestinationsModelAttributeMap),
+				"denied_sources":       types.ObjectNull(EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap),
+				"deny_all":             types.BoolNull(),
+				"rule_list":            types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot PointerField --> SegmentPolicy
@@ -6228,6 +6308,12 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request r
 }
 
 func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCEnhancedFirewallPolicyModel
@@ -6328,7 +6414,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> RuleChoice
+	// resource modelToSpecRoot OneOfField --> RuleChoice
 	if !data.RuleChoice.IsNull() && !data.RuleChoice.IsUnknown() {
 		ruleChoiceModel := EnhancedFirewallPolicyRuleChoice{}
 		response.Diagnostics.Append(data.RuleChoice.As(ctx, &ruleChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6534,10 +6620,22 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 				for i, rulesElement := range rulesElements {
 					// Initialize the spec struct for the current element
 					ruleListOneOfSpec.RuleList.Rules[i] = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType{}
+					ruleListOneOfSpec.RuleList.Rules[i].ActionChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_Deny{
+						Deny: &ves_io_schema.Empty{},
+					}
+					ruleListOneOfSpec.RuleList.Rules[i].DestinationChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllDestinations{
+						AllDestinations: &ves_io_schema.Empty{},
+					}
+					ruleListOneOfSpec.RuleList.Rules[i].SourceChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllSources{
+						AllSources: &ves_io_schema.Empty{},
+					}
+					ruleListOneOfSpec.RuleList.Rules[i].TrafficChoice = &ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllTraffic{
+						AllTraffic: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					// resource modelToSpecNested OneOfField --> ActionChoice
 					if !rulesElement.ActionChoice.IsNull() && !rulesElement.ActionChoice.IsUnknown() {
 						rulesActionChoiceModel := EnhancedFirewallPolicyActionChoice{}
 						response.Diagnostics.Append(rulesElement.ActionChoice.As(ctx, &rulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6634,7 +6732,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> DestinationChoice
+					// resource modelToSpecNested OneOfField --> DestinationChoice
 					if !rulesElement.DestinationChoice.IsNull() && !rulesElement.DestinationChoice.IsUnknown() {
 						rulesDestinationChoiceModel := EnhancedFirewallPolicyDestChoice{}
 						response.Diagnostics.Append(rulesElement.DestinationChoice.As(ctx, &rulesDestinationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6861,7 +6959,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> SourceChoice
+					// resource modelToSpecNested OneOfField --> SourceChoice
 					if !rulesElement.SourceChoice.IsNull() && !rulesElement.SourceChoice.IsUnknown() {
 						rulesSourceChoiceModel := EnhancedFirewallPolicySrcChoice{}
 						response.Diagnostics.Append(rulesElement.SourceChoice.As(ctx, &rulesSourceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7025,7 +7123,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> TrafficChoice
+					// resource modelToSpecNested OneOfField --> TrafficChoice
 					if !rulesElement.TrafficChoice.IsNull() && !rulesElement.TrafficChoice.IsUnknown() {
 						rulesTrafficChoiceModel := EnhancedFirewallPolicyTrafficChoice{}
 						response.Diagnostics.Append(rulesElement.TrafficChoice.As(ctx, &rulesTrafficChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7132,6 +7230,10 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 
 		}
 
+	} else {
+		spec.RuleChoice = &ves_io_schema_enhanced_firewall_policy.ReplaceSpecType_AllowAll{
+			AllowAll: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -7287,7 +7389,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -7295,24 +7397,20 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "enhanced_firewall_policy", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "enhanced_firewall_policy", err),
 		)
 		return
 	}
@@ -7429,7 +7527,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> RuleChoice
+	// resource SpecToModelRoot OneOfField --> RuleChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -7469,29 +7567,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -7538,29 +7638,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("allowed_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							allowedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							allowedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						allowedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -7607,29 +7709,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_destinations").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedDestinationsAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -7676,29 +7780,31 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("rule_choice").AtName("denied_sources").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							deniedSourcesAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						deniedSourcesAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -7754,8 +7860,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 					for _, rulesElement := range ruleListElement.GetRules() {
 						enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel := EnhancedFirewallPolicyEnhancedFirewallPolicyRuleType{}
 
-						// resource specToModelNested RequiredOneOfField --> ActionChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> ActionChoice
 						if rulesElement.GetActionChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7915,8 +8020,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DestinationChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DestinationChoice
 						if rulesElement.GetDestinationChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulesdestinationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8262,8 +8366,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.Metadata = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesMetadataModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> SourceChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> SourceChoice
 						if rulesElement.GetSourceChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8509,8 +8612,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 							enhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> TrafficChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> TrafficChoice
 						if rulesElement.GetTrafficChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							rulestrafficChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8696,8 +8798,6 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Update(ctx context.Context, request
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.RuleChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceModelAttributeMap)
 	}
 
@@ -9009,8 +9109,26 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Delete(ctx context.Context, request
 	// Standard Delete Logic
 	opts := []vesapi.CallOpt{}
 	opts = append(opts, vesapi.WithFailIfReferred())
+	deleteFn := func() error {
+		return r.client.DeleteObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	}
 
-	err = r.client.DeleteObject(ctx, ves_io_schema_enhanced_firewall_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	err = deleteFn()
+	if err != nil && strings.Contains(err.Error(), "is still being referred by") {
+		// The object is still referenced by a parent object (e.g. the user is deleting it
+		// and re-pointing the parent to another object in the same apply). Reactively
+		// detach it from any referring parents Terraform manages, then retry.
+		tflog.Info(ctx, fmt.Sprintf("[hook] enhanced_firewall_policy delete hit 409, attempting reactive unbind: %s", err))
+		if unbindErr := hook.EnhancedFirewallPolicyUnbindReferencingObjects(ctx, r.client, data.Namespace.ValueString(), data.Name.ValueString(), err.Error()); unbindErr != nil {
+			tflog.Warn(ctx, fmt.Sprintf("[hook] enhanced_firewall_policy reactive unbind failed: %s", unbindErr))
+		}
+		// Retry immediately: the unbind above (when it applies) removes the reference
+		// that caused the conflict, so there is nothing to gain from sleeping first.
+		err = deleteFn()
+	}
+	if err != nil {
+		err = utils.DeleteWithTransientRetry(ctx, "enhanced_firewall_policy", deleteFn)
+	}
 
 	if err != nil {
 		if strings.Contains(err.Error(), "status code 404") || strings.Contains(err.Error(), "NotFound") {
@@ -9019,7 +9137,7 @@ func (r *ResourceF5XCEnhancedFirewallPolicy) Delete(ctx context.Context, request
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "enhanced_firewall_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "enhanced_firewall_policy", err),
 		)
 		return
 	}

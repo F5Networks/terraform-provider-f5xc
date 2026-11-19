@@ -114,7 +114,8 @@ func (s *apiCredentialCustomAPIServer) Create(_ context.Context, _ *ves_io_schem
 func (s *apiCredentialCustomAPIServer) Get(_ context.Context, _ *ves_io_schema_api_credential.GetRequest) (*ves_io_schema_api_credential.GetResponse, error) {
 	timestamp := &types.Timestamp{
 		Seconds: time.Now().Unix(),
-		Nanos:   int32(time.Now().Nanosecond()),
+		// #nosec G115 -- nanoseconds [0, 999999999] safely fits in int32
+		Nanos: int32(time.Now().Nanosecond()),
 	}
 	return &ves_io_schema_api_credential.GetResponse{
 		Object: &ves_io_schema_api_credential.Object{
@@ -485,6 +486,11 @@ func (n *namespaceCustomAPIServer) OIDCOAuthDiscovery(context.Context,
 	return &ves_io_schema_ns.OIDCOAuthDiscoveryResp{}, nil
 }
 
+func (n *namespaceCustomAPIServer) GetDynamicDefaultValues(context.Context,
+	*ves_io_schema_ns.GetDynamicDefaultValuesReq) (*ves_io_schema_ns.DynamicDefaultValuesResp, error) {
+	return &ves_io_schema_ns.DynamicDefaultValuesResp{}, nil
+}
+
 var _ ves_io_schema_ns.NamespaceCustomAPIServer = &namespaceCustomAPIServer{}
 
 // ves.io.schema.views.gcp_vpc_site.CustomAPI handling - start
@@ -506,7 +512,7 @@ var _ ves_io_schema_gcp_vpc_site.CustomAPIServer = &gcpVpcCustomAPIServer{}
 
 // ves.io.schema.namespace.NamespaceCustomAPI handling - end
 
-func getTestClientOpts(url, tenant string) ([]vesapi.ConfigOpt, error) {
+func getTestClientOpts(url, tenant, userAgent string) ([]vesapi.ConfigOpt, error) {
 
 	clKey := fmt.Sprintf("file:///%s/tls/client.examplesvc.ves.io.key", tdRoot)
 	clCert := fmt.Sprintf("file:///%s/tls/client.examplesvc.ves.io.crt", tdRoot)
@@ -516,7 +522,7 @@ func getTestClientOpts(url, tenant string) ([]vesapi.ConfigOpt, error) {
 	if err != nil {
 		return nil, err
 	}
-	remapperFn := uriRemapperFn(tenant, policy, newResourceThrottleRegistry())
+	remapperFn := uriRemapperFn(tenant, userAgent, policy, newResourceThrottleRegistry())
 
 	clOpts := []vesapi.ConfigOpt{
 		vesapi.WithCfgKey(clKey),

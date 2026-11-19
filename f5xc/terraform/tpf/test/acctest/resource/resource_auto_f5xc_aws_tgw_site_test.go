@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCAwsTgwSite_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-aws-tgw-site-" + testAccRunSuffix(t)
+	name := "example-aws-tgw-site-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,22 +39,22 @@ func TestAccResourceAutoF5XCAwsTgwSite_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_withDescription(name, namespace, "aws tgw site basic update"),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCAwsTgwSite_basic(t *testing.T) {
 func TestAccResourceAutoF5XCAwsTgwSite_withInternetVipChoiceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-aws-tgw-site-" + testAccRunSuffix(t)
+	name := "example-aws-tgw-site-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,22 +76,22 @@ func TestAccResourceAutoF5XCAwsTgwSite_withInternetVipChoiceTransition(t *testin
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_withInternetVIP(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_withInternetVIP(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -101,7 +101,7 @@ func TestAccResourceAutoF5XCAwsTgwSite_withInternetVipChoiceTransition(t *testin
 func TestAccResourceAutoF5XCAwsTgwSite_withBlockedServicesChoiceTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-aws-tgw-site-" + testAccRunSuffix(t)
+	name := "example-aws-tgw-site-" + testAccRunSuffix(t)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -113,22 +113,22 @@ func TestAccResourceAutoF5XCAwsTgwSite_withBlockedServicesChoiceTransition(t *te
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_withBlockedServicesChoice(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_withBlockedServicesChoice(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -138,10 +138,10 @@ func TestAccResourceAutoF5XCAwsTgwSite_withBlockedServicesChoiceTransition(t *te
 func TestAccResourceAutoF5XCAwsTgwSite_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-aws-tgw-site-" + testAccRunSuffix(t)
+	name := "example-aws-tgw-site-" + testAccRunSuffix(t)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAwsTgwSiteDestroyProducer(t),
@@ -150,26 +150,30 @@ func TestAccResourceAutoF5XCAwsTgwSite_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_full(name, namespace, "dev", "platform"),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAwsTgwSiteConfig_full(name, namespace, "dev", "security"),
 			},
 			{
-				ResourceName:                         "f5xc_aws_tgw_site.test",
+				ResourceName:                         "f5xc_aws_tgw_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
 				ImportStateVerifyIgnore:              []string{"validation_state"},
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_aws_tgw_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAwsTgwSiteConfig_full(name, namespace, "dev", "platform"),
+		})
 }
 
 func testAccCheckAwsTgwSiteDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -178,7 +182,7 @@ func testAccCheckAwsTgwSiteDestroyProducer(t *testing.T) func(*terraform.State) 
 
 func testAccResourceAutoF5XCAwsTgwSiteConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_aws_tgw_site" "test" {
+resource "f5xc_aws_tgw_site" "example" {
   name      = %q
   namespace = %q
 
@@ -251,7 +255,7 @@ resource "f5xc_aws_tgw_site" "test" {
 
 func testAccResourceAutoF5XCAwsTgwSiteConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_aws_tgw_site" "test" {
+resource "f5xc_aws_tgw_site" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -330,7 +334,7 @@ func testAccResourceAutoF5XCAwsTgwSiteConfig_withInternetVIP(name, namespace str
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_aws_tgw_site" "test" {
+resource "f5xc_aws_tgw_site" "example" {
   name      = %q
   namespace = %q
 
@@ -408,7 +412,7 @@ func testAccResourceAutoF5XCAwsTgwSiteConfig_withBlockedServicesChoice(name, nam
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_aws_tgw_site" "test" {
+resource "f5xc_aws_tgw_site" "example" {
   name      = %q
   namespace = %q
 
@@ -481,7 +485,7 @@ resource "f5xc_aws_tgw_site" "test" {
 
 func testAccResourceAutoF5XCAwsTgwSiteConfig_full(name, namespace, envLabel, ownerLabel string) string {
 	return fmt.Sprintf(`
-resource "f5xc_aws_tgw_site" "test" {
+resource "f5xc_aws_tgw_site" "example" {
   name      = %q
   namespace = %q
 

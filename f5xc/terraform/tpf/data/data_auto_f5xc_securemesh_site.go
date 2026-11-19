@@ -34,12 +34,12 @@ type DataSourceF5XCSecuremeshSite struct {
 	client *client.APIClient
 }
 
-type SecuremeshSiteGlobalSpecTypeBlockedServicesChoice struct {
+type SecuremeshSiteBlockedServicesChoice struct {
 	BlockedServices        types.Object `tfsdk:"blocked_services"`
 	DefaultBlockedServices types.Bool   `tfsdk:"default_blocked_services"`
 }
 
-type SecuremeshSiteGlobalSpecTypeBlockedServices struct {
+type SecuremeshSiteBlockedServices struct {
 	BlockedSevice types.List `tfsdk:"blocked_sevice"`
 }
 
@@ -48,22 +48,22 @@ type SecuremeshSiteFleetBlockedServices struct {
 	NetworkType                    types.List   `tfsdk:"network_type"`
 }
 
-type SecuremeshSiteBlockedServicesBlockedServicesValueTypeChoice struct {
+type SecuremeshSiteBlockedServicesValueTypeChoice struct {
 	Dns              types.Bool `tfsdk:"dns"`
 	Ssh              types.Bool `tfsdk:"ssh"`
 	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
 }
 
-type SecuremeshSiteGlobalSpecTypeBondChoice struct {
+type SecuremeshSiteBondChoice struct {
 	BondDeviceList types.Object `tfsdk:"bond_device_list"`
 	NoBondDevices  types.Bool   `tfsdk:"no_bond_devices"`
 }
 
-type SecuremeshSiteGlobalSpecTypeBondDeviceList struct {
+type SecuremeshSiteBondDeviceList struct {
 	BondDevices types.List `tfsdk:"bond_devices"`
 }
 
-type SecuremeshSiteFleetFleetBondDeviceType struct {
+type SecuremeshSiteFleetBondDeviceType struct {
 	Devices             types.List   `tfsdk:"devices"`
 	LacpChoice          types.Object `tfsdk:"lacp_choice"`
 	LinkPollingInterval types.Int64  `tfsdk:"link_polling_interval"`
@@ -71,54 +71,54 @@ type SecuremeshSiteFleetFleetBondDeviceType struct {
 	Name                types.String `tfsdk:"name"`
 }
 
-type SecuremeshSiteFleetBondDeviceTypeLacpChoice struct {
+type SecuremeshSiteLacpChoice struct {
 	ActiveBackup types.Bool   `tfsdk:"active_backup"`
 	Lacp         types.Object `tfsdk:"lacp"`
 }
 
-type SecuremeshSiteFleetBondDeviceTypeLacp struct {
+type SecuremeshSiteLacp struct {
 	Rate types.Int64 `tfsdk:"rate"`
 }
 
-type SecuremeshSiteSiteCoordinates struct {
+type SecuremeshSiteCoordinates struct {
 	Latitude  types.Float32 `tfsdk:"latitude"`
 	Longitude types.Float32 `tfsdk:"longitude"`
 }
 
-type SecuremeshSiteViewsKubernetesUpgradeDrain struct {
+type SecuremeshSiteK8sUpgradeDrain struct {
 	KubernetesUpgradeDrainEnableChoice types.Object `tfsdk:"kubernetes_upgrade_drain_enable_choice"`
 }
 
-type SecuremeshSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoice struct {
+type SecuremeshSiteK8sUpgradeDrainEnableChoice struct {
 	DisableUpgradeDrain types.Bool   `tfsdk:"disable_upgrade_drain"`
 	EnableUpgradeDrain  types.Object `tfsdk:"enable_upgrade_drain"`
 }
 
-type SecuremeshSiteKubernetesUpgradeDrainEnableUpgradeDrain struct {
+type SecuremeshSiteEnableUpgradeDrain struct {
 	DrainMaxUnavailableChoice types.Object `tfsdk:"drain_max_unavailable_choice"`
 	DrainNodeTimeout          types.Int64  `tfsdk:"drain_node_timeout"`
 }
 
-type SecuremeshSiteKubernetesUpgradeDrainConfigDrainMaxUnavailableChoice struct {
+type SecuremeshSiteDrainMaxUnavailableChoice struct {
 	DrainMaxUnavailableNodeCount types.Int64 `tfsdk:"drain_max_unavailable_node_count"`
 }
 
-type SecuremeshSiteGlobalSpecTypeLogsReceiverChoice struct {
+type SecuremeshSiteLogsReceiverChoice struct {
 	LogReceiver           types.Object `tfsdk:"log_receiver"`
 	LogsStreamingDisabled types.Bool   `tfsdk:"logs_streaming_disabled"`
 }
 
-type SecuremeshSiteViewsMasterNode struct {
+type SecuremeshSiteMasterNode struct {
 	Name     types.String `tfsdk:"name"`
 	PublicIp types.String `tfsdk:"public_ip"`
 }
 
-type SecuremeshSiteGlobalSpecTypeNetworkCfgChoice struct {
+type SecuremeshSiteNetCfgChoice struct {
 	CustomNetworkConfig  types.Object `tfsdk:"custom_network_config"`
 	DefaultNetworkConfig types.Bool   `tfsdk:"default_network_config"`
 }
 
-type SecuremeshSiteGlobalSpecTypeCustomNetworkConfig struct {
+type SecuremeshSiteCustomNetConfig struct {
 	ForwardProxyChoice  types.Object `tfsdk:"forward_proxy_choice"`
 	GlobalNetworkChoice types.Object `tfsdk:"global_network_choice"`
 	InterfaceChoice     types.Object `tfsdk:"interface_choice"`
@@ -130,70 +130,70 @@ type SecuremeshSiteGlobalSpecTypeCustomNetworkConfig struct {
 	VipVrrpMode         types.List   `tfsdk:"vip_vrrp_mode"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationForwardProxyChoice struct {
+type SecuremeshSiteForwardProxyChoice struct {
 	ActiveForwardProxyPolicies types.Object `tfsdk:"active_forward_proxy_policies"`
 	ForwardProxyAllowAll       types.Bool   `tfsdk:"forward_proxy_allow_all"`
 	NoForwardProxy             types.Bool   `tfsdk:"no_forward_proxy"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationActiveForwardProxyPolicies struct {
+type SecuremeshSiteActiveForwardProxyPolicies struct {
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationGlobalNetworkChoice struct {
+type SecuremeshSiteGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationGlobalNetworkList struct {
+type SecuremeshSiteGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
-type SecuremeshSiteViewsGlobalNetworkConnectionType struct {
+type SecuremeshSiteGlobalNetConnType struct {
 	ConnectionChoice types.Object `tfsdk:"connection_choice"`
 }
 
-type SecuremeshSiteGlobalNetworkConnectionTypeConnectionChoice struct {
+type SecuremeshSiteConnChoice struct {
 	SliToGlobalDr types.Object `tfsdk:"sli_to_global_dr"`
 	SloToGlobalDr types.Object `tfsdk:"slo_to_global_dr"`
 }
 
-type SecuremeshSiteGlobalNetworkConnectionTypeSliToGlobalDr struct {
+type SecuremeshSiteSliToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type SecuremeshSiteGlobalNetworkConnectionTypeSloToGlobalDr struct {
+type SecuremeshSiteSloToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationInterfaceChoice struct {
+type SecuremeshSiteIfaceChoice struct {
 	DefaultInterfaceConfig types.Bool   `tfsdk:"default_interface_config"`
 	InterfaceList          types.Object `tfsdk:"interface_list"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationInterfaceList struct {
+type SecuremeshSiteIfaceList struct {
 	Interfaces types.List `tfsdk:"interfaces"`
 }
 
-type SecuremeshSiteSecuremeshSiteInterface struct {
+type SecuremeshSiteIface struct {
 	DcClusterGroupConnectivityInterfaceChoice types.Object `tfsdk:"dc_cluster_group_connectivity_interface_choice"`
 	Description                               types.String `tfsdk:"description"`
 	InterfaceChoice                           types.Object `tfsdk:"interface_choice"`
 	Labels                                    types.Map    `tfsdk:"labels"`
 }
 
-type SecuremeshSiteInterfaceDcClusterGroupConnectivityInterfaceChoice struct {
+type SecuremeshSiteDcClusterGroupConnectivityIfaceChoice struct {
 	DcClusterGroupConnectivityInterfaceDisabled types.Bool `tfsdk:"dc_cluster_group_connectivity_interface_disabled"`
 	DcClusterGroupConnectivityInterfaceEnabled  types.Bool `tfsdk:"dc_cluster_group_connectivity_interface_enabled"`
 }
 
-type SecuremeshSiteInterfaceInterfaceChoice struct {
+type SecuremeshSiteIfaceIfaceChoice struct {
 	DedicatedInterface           types.Object `tfsdk:"dedicated_interface"`
 	DedicatedManagementInterface types.Object `tfsdk:"dedicated_management_interface"`
 	EthernetInterface            types.Object `tfsdk:"ethernet_interface"`
 }
 
-type SecuremeshSiteInterfaceDedicatedInterface struct {
+type SecuremeshSiteDedicatedIface struct {
 	Device           types.String `tfsdk:"device"`
 	MonitoringChoice types.Object `tfsdk:"monitoring_choice"`
 	Mtu              types.Int64  `tfsdk:"mtu"`
@@ -202,33 +202,33 @@ type SecuremeshSiteInterfaceDedicatedInterface struct {
 	Priority         types.Int64  `tfsdk:"priority"`
 }
 
-type SecuremeshSiteDedicatedInterfaceTypeMonitoringChoice struct {
+type SecuremeshSiteMonitoringChoice struct {
 	Monitor         types.Bool `tfsdk:"monitor"`
 	MonitorDisabled types.Bool `tfsdk:"monitor_disabled"`
 }
 
-type SecuremeshSiteDedicatedInterfaceTypeNodeChoice struct {
+type SecuremeshSiteNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type SecuremeshSiteDedicatedInterfaceTypePrimaryChoice struct {
+type SecuremeshSitePrimaryChoice struct {
 	IsPrimary  types.Bool `tfsdk:"is_primary"`
 	NotPrimary types.Bool `tfsdk:"not_primary"`
 }
 
-type SecuremeshSiteInterfaceDedicatedManagementInterface struct {
+type SecuremeshSiteDedicatedMgmtIface struct {
 	Device     types.String `tfsdk:"device"`
 	Mtu        types.Int64  `tfsdk:"mtu"`
 	NodeChoice types.Object `tfsdk:"node_choice"`
 }
 
-type SecuremeshSiteDedicatedManagementInterfaceTypeNodeChoice struct {
+type SecuremeshSiteDedicatedMgmtIfaceTypeNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type SecuremeshSiteInterfaceEthernetInterface struct {
+type SecuremeshSiteEthernetIface struct {
 	AddressChoice     types.Object `tfsdk:"address_choice"`
 	Device            types.String `tfsdk:"device"`
 	Ipv6AddressChoice types.Object `tfsdk:"ipv6_address_choice"`
@@ -241,19 +241,19 @@ type SecuremeshSiteInterfaceEthernetInterface struct {
 	VlanChoice        types.Object `tfsdk:"vlan_choice"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeAddressChoice struct {
+type SecuremeshSiteAddrChoice struct {
 	DhcpClient types.Bool   `tfsdk:"dhcp_client"`
 	DhcpServer types.Object `tfsdk:"dhcp_server"`
 	StaticIp   types.Object `tfsdk:"static_ip"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeDhcpServer struct {
+type SecuremeshSiteDhcpServer struct {
 	DhcpNetworks               types.List   `tfsdk:"dhcp_networks"`
 	FixedIpMap                 types.Map    `tfsdk:"fixed_ip_map"`
 	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
 }
 
-type SecuremeshSiteNetworkInterfaceDHCPNetworkType struct {
+type SecuremeshSiteDHCPNetType struct {
 	DnsChoice           types.Object `tfsdk:"dns_choice"`
 	GatewayChoice       types.Object `tfsdk:"gateway_choice"`
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
@@ -261,101 +261,101 @@ type SecuremeshSiteNetworkInterfaceDHCPNetworkType struct {
 	Pools               types.List   `tfsdk:"pools"`
 }
 
-type SecuremeshSiteDHCPNetworkTypeDnsChoice struct {
+type SecuremeshSiteDnsChoice struct {
 	DnsAddress types.String `tfsdk:"dns_address"`
 	SameAsDgw  types.Bool   `tfsdk:"same_as_dgw"`
 }
 
-type SecuremeshSiteDHCPNetworkTypeGatewayChoice struct {
+type SecuremeshSiteGatewayChoice struct {
 	DgwAddress   types.String `tfsdk:"dgw_address"`
 	FirstAddress types.Bool   `tfsdk:"first_address"`
 	LastAddress  types.Bool   `tfsdk:"last_address"`
 }
 
-type SecuremeshSiteDHCPNetworkTypeNetworkPrefixChoice struct {
+type SecuremeshSiteNetPrefixChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 }
 
-type SecuremeshSiteNetworkInterfaceDHCPPoolType struct {
+type SecuremeshSiteDHCPPoolType struct {
 	EndIp   types.String `tfsdk:"end_ip"`
 	StartIp types.String `tfsdk:"start_ip"`
 }
 
-type SecuremeshSiteDHCPServerParametersTypeInterfacesAddressingChoice struct {
+type SecuremeshSiteInterfacesAddressingChoice struct {
 	AutomaticFromEnd   types.Bool   `tfsdk:"automatic_from_end"`
 	AutomaticFromStart types.Bool   `tfsdk:"automatic_from_start"`
 	InterfaceIpMap     types.Object `tfsdk:"interface_ip_map"`
 }
 
-type SecuremeshSiteDHCPServerParametersTypeInterfaceIpMap struct {
+type SecuremeshSiteIfaceIpMap struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeStaticIp struct {
+type SecuremeshSiteStaticIp struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
-type SecuremeshSiteStaticIPParametersTypeNetworkPrefixChoice struct {
+type SecuremeshSiteStaticIPParametersTypeNetPrefixChoice struct {
 	ClusterStaticIp types.Object `tfsdk:"cluster_static_ip"`
 	NodeStaticIp    types.Object `tfsdk:"node_static_ip"`
 }
 
-type SecuremeshSiteStaticIPParametersTypeClusterStaticIp struct {
+type SecuremeshSiteClusterStaticIp struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type SecuremeshSiteNetworkInterfaceStaticIpParametersNodeType struct {
+type SecuremeshSiteStaticIpParametersNodeType struct {
 	DefaultGw types.String `tfsdk:"default_gw"`
 	IpAddress types.String `tfsdk:"ip_address"`
 }
 
-type SecuremeshSiteStaticIPParametersTypeNodeStaticIp struct {
+type SecuremeshSiteNodeStaticIp struct {
 	DefaultGw types.String `tfsdk:"default_gw"`
 	IpAddress types.String `tfsdk:"ip_address"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeIpv6AddressChoice struct {
+type SecuremeshSiteIpv6AddrChoice struct {
 	Ipv6AutoConfig    types.Object `tfsdk:"ipv6_auto_config"`
 	NoIpv6Address     types.Bool   `tfsdk:"no_ipv6_address"`
 	StaticIpv6Address types.Object `tfsdk:"static_ipv6_address"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeIpv6AutoConfig struct {
+type SecuremeshSiteIpv6AutoConfig struct {
 	AutoconfigChoice types.Object `tfsdk:"autoconfig_choice"`
 }
 
-type SecuremeshSiteIPV6AutoConfigTypeAutoconfigChoice struct {
+type SecuremeshSiteAutoconfigChoice struct {
 	Host   types.Bool   `tfsdk:"host"`
 	Router types.Object `tfsdk:"router"`
 }
 
-type SecuremeshSiteIPV6AutoConfigTypeRouter struct {
+type SecuremeshSiteRouter struct {
 	AddressChoice types.Object `tfsdk:"address_choice"`
 	DnsConfig     types.Object `tfsdk:"dns_config"`
 }
 
-type SecuremeshSiteIPV6AutoConfigRouterTypeAddressChoice struct {
+type SecuremeshSiteIPV6AutoConfigRouterTypeAddrChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 	Stateful      types.Object `tfsdk:"stateful"`
 }
 
-type SecuremeshSiteIPV6AutoConfigRouterTypeStateful struct {
+type SecuremeshSiteStateful struct {
 	DhcpNetworks               types.List   `tfsdk:"dhcp_networks"`
 	FixedIpMap                 types.Map    `tfsdk:"fixed_ip_map"`
 	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
 }
 
-type SecuremeshSiteNetworkInterfaceDHCPIPV6NetworkType struct {
+type SecuremeshSiteDHCPIPV6NetType struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 	PoolSettings        types.List   `tfsdk:"pool_settings"`
 	Pools               types.List   `tfsdk:"pools"`
 }
 
-type SecuremeshSiteDHCPIPV6NetworkTypeNetworkPrefixChoice struct {
+type SecuremeshSiteDHCPIPV6NetTypeNetPrefixChoice struct {
 	NetworkPrefix types.String `tfsdk:"network_prefix"`
 }
 
-type SecuremeshSiteNetworkInterfaceDHCPIPV6PoolType struct {
+type SecuremeshSiteDHCPIPV6PoolType struct {
 	EndIp   types.String `tfsdk:"end_ip"`
 	StartIp types.String `tfsdk:"start_ip"`
 }
@@ -366,11 +366,11 @@ type SecuremeshSiteDHCPIPV6StatefulServerInterfacesAddressingChoice struct {
 	InterfaceIpMap     types.Object `tfsdk:"interface_ip_map"`
 }
 
-type SecuremeshSiteDHCPIPV6StatefulServerInterfaceIpMap struct {
+type SecuremeshSiteDHCPIPV6StatefulServerIfaceIpMap struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type SecuremeshSiteNetworkInterfaceIPV6DnsConfig struct {
+type SecuremeshSiteIPV6DnsConfig struct {
 	DnsChoice types.Object `tfsdk:"dns_choice"`
 }
 
@@ -379,76 +379,75 @@ type SecuremeshSiteIPV6DnsConfigDnsChoice struct {
 	LocalDns       types.Object `tfsdk:"local_dns"`
 }
 
-type SecuremeshSiteIPV6DnsConfigConfiguredList struct {
+type SecuremeshSiteConfiguredList struct {
 	DnsList types.List `tfsdk:"dns_list"`
 }
 
-type SecuremeshSiteIPV6DnsConfigLocalDns struct {
+type SecuremeshSiteLocalDns struct {
 	LocalDnsChoice types.Object `tfsdk:"local_dns_choice"`
 }
 
-type SecuremeshSiteIPV6LocalDnsAddressLocalDnsChoice struct {
+type SecuremeshSiteLocalDnsChoice struct {
 	ConfiguredAddress types.String `tfsdk:"configured_address"`
 	FirstAddress      types.Bool   `tfsdk:"first_address"`
 	LastAddress       types.Bool   `tfsdk:"last_address"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeStaticIpv6Address struct {
+type SecuremeshSiteStaticIpv6Addr struct {
 	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeMonitoringChoice struct {
+type SecuremeshSiteEthernetIfaceTypeMonitoringChoice struct {
 	Monitor         types.Bool `tfsdk:"monitor"`
 	MonitorDisabled types.Bool `tfsdk:"monitor_disabled"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeNetworkChoice struct {
+type SecuremeshSiteNetChoice struct {
 	SegmentNetwork         types.Object `tfsdk:"segment_network"`
 	SiteLocalInsideNetwork types.Bool   `tfsdk:"site_local_inside_network"`
 	SiteLocalNetwork       types.Bool   `tfsdk:"site_local_network"`
-	StorageNetwork         types.Bool   `tfsdk:"storage_network"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeNodeChoice struct {
+type SecuremeshSiteEthernetIfaceTypeNodeChoice struct {
 	Cluster types.Bool   `tfsdk:"cluster"`
 	Node    types.String `tfsdk:"node"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypePrimaryChoice struct {
+type SecuremeshSiteEthernetIfaceTypePrimaryChoice struct {
 	IsPrimary  types.Bool `tfsdk:"is_primary"`
 	NotPrimary types.Bool `tfsdk:"not_primary"`
 }
 
-type SecuremeshSiteEthernetInterfaceTypeVlanChoice struct {
+type SecuremeshSiteVlanChoice struct {
 	Untagged types.Bool  `tfsdk:"untagged"`
 	VlanId   types.Int64 `tfsdk:"vlan_id"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationNetworkPolicyChoice struct {
+type SecuremeshSiteNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationActiveEnhancedFirewallPolicies struct {
+type SecuremeshSiteActiveEnhancedFirewallPolicies struct {
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationActiveNetworkPolicies struct {
+type SecuremeshSiteActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationSiteMeshGroupChoice struct {
+type SecuremeshSiteSiteMeshGroupChoice struct {
 	SmConnectionPublicIp types.Bool `tfsdk:"sm_connection_public_ip"`
 	SmConnectionPvtIp    types.Bool `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationSliChoice struct {
+type SecuremeshSiteSliChoice struct {
 	DefaultSliConfig types.Bool   `tfsdk:"default_sli_config"`
 	SliConfig        types.Object `tfsdk:"sli_config"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationSliConfig struct {
+type SecuremeshSiteSliConfig struct {
 	DcClusterGroupChoice types.Object `tfsdk:"dc_cluster_group_choice"`
 	Labels               types.Map    `tfsdk:"labels"`
 	Nameserver           types.String `tfsdk:"nameserver"`
@@ -459,51 +458,51 @@ type SecuremeshSiteSmsNetworkConfigurationSliConfig struct {
 	VipV6                types.String `tfsdk:"vip_v6"`
 }
 
-type SecuremeshSiteVnConfigurationDcClusterGroupChoice struct {
+type SecuremeshSiteDcClusterGroupChoice struct {
 	DcClusterGroup   types.Object `tfsdk:"dc_cluster_group"`
 	NoDcClusterGroup types.Bool   `tfsdk:"no_dc_cluster_group"`
 }
 
-type SecuremeshSiteVnConfigurationStaticRouteChoice struct {
+type SecuremeshSiteStaticRouteChoice struct {
 	NoStaticRoutes types.Bool   `tfsdk:"no_static_routes"`
 	StaticRoutes   types.Object `tfsdk:"static_routes"`
 }
 
-type SecuremeshSiteVnConfigurationStaticRoutes struct {
+type SecuremeshSiteStaticRoutes struct {
 	StaticRoutes types.List `tfsdk:"static_routes"`
 }
 
-type SecuremeshSiteVirtualNetworkStaticRouteViewType struct {
+type SecuremeshSiteStaticRouteViewType struct {
 	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
 }
 
-type SecuremeshSiteStaticRouteViewTypeNextHopChoice struct {
+type SecuremeshSiteNextHopChoice struct {
 	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 	IpAddress      types.String `tfsdk:"ip_address"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
-type SecuremeshSiteStaticRouteViewTypeNodeInterface struct {
+type SecuremeshSiteNodeIface struct {
 	List types.List `tfsdk:"list"`
 }
 
-type SecuremeshSiteNodeInterfaceInfo struct {
+type SecuremeshSiteNodeIfaceInfo struct {
 	Interface types.List   `tfsdk:"interface"`
 	Node      types.String `tfsdk:"node"`
 }
 
-type SecuremeshSiteVnConfigurationStaticV6RouteChoice struct {
+type SecuremeshSiteStaticV6RouteChoice struct {
 	NoV6StaticRoutes types.Bool   `tfsdk:"no_v6_static_routes"`
 	StaticV6Routes   types.Object `tfsdk:"static_v6_routes"`
 }
 
-type SecuremeshSiteVnConfigurationStaticV6Routes struct {
+type SecuremeshSiteStaticV6Routes struct {
 	StaticRoutes types.List `tfsdk:"static_routes"`
 }
 
-type SecuremeshSiteVirtualNetworkStaticV6RouteViewType struct {
+type SecuremeshSiteStaticV6RouteViewType struct {
 	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
@@ -515,16 +514,16 @@ type SecuremeshSiteStaticV6RouteViewTypeNextHopChoice struct {
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
-type SecuremeshSiteStaticV6RouteViewTypeNodeInterface struct {
+type SecuremeshSiteStaticV6RouteViewTypeNodeIface struct {
 	List types.List `tfsdk:"list"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationSloChoice struct {
+type SecuremeshSiteSloChoice struct {
 	DefaultConfig types.Bool   `tfsdk:"default_config"`
 	SloConfig     types.Object `tfsdk:"slo_config"`
 }
 
-type SecuremeshSiteSmsNetworkConfigurationSloConfig struct {
+type SecuremeshSiteSloConfig struct {
 	DcClusterGroupChoice types.Object `tfsdk:"dc_cluster_group_choice"`
 	Labels               types.Map    `tfsdk:"labels"`
 	Nameserver           types.String `tfsdk:"nameserver"`
@@ -535,34 +534,34 @@ type SecuremeshSiteSmsNetworkConfigurationSloConfig struct {
 	VipV6                types.String `tfsdk:"vip_v6"`
 }
 
-type SecuremeshSiteViewsOfflineSurvivabilityModeType struct {
+type SecuremeshSiteOfflineSurvivabilityModeType struct {
 	OfflineSurvivabilityModeChoice types.Object `tfsdk:"offline_survivability_mode_choice"`
 }
 
-type SecuremeshSiteOfflineSurvivabilityModeTypeOfflineSurvivabilityModeChoice struct {
+type SecuremeshSiteOfflineSurvivabilityModeChoice struct {
 	EnableOfflineSurvivabilityMode types.Bool `tfsdk:"enable_offline_survivability_mode"`
 	NoOfflineSurvivabilityMode     types.Bool `tfsdk:"no_offline_survivability_mode"`
 }
 
-type SecuremeshSiteViewsOperatingSystemType struct {
+type SecuremeshSiteOperatingSystemType struct {
 	OperatingSystemVersionChoice types.Object `tfsdk:"operating_system_version_choice"`
 }
 
-type SecuremeshSiteOperatingSystemTypeOperatingSystemVersionChoice struct {
+type SecuremeshSiteOperatingSystemVersionChoice struct {
 	DefaultOsVersion       types.Bool   `tfsdk:"default_os_version"`
 	OperatingSystemVersion types.String `tfsdk:"operating_system_version"`
 }
 
-type SecuremeshSiteViewsPerformanceEnhancementModeType struct {
+type SecuremeshSitePerformanceEnhancementModeType struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
-type SecuremeshSitePerformanceEnhancementModeTypePerfModeChoice struct {
+type SecuremeshSitePerfModeChoice struct {
 	PerfModeL3Enhanced types.Object `tfsdk:"perf_mode_l3_enhanced"`
-	PerfModeL7Enhanced types.Object `tfsdk:"perf_mode_l7_enhanced"`
+	PerfModeL7Enhanced types.Bool   `tfsdk:"perf_mode_l7_enhanced"`
 }
 
-type SecuremeshSitePerformanceEnhancementModeTypePerfModeL3Enhanced struct {
+type SecuremeshSitePerfModeL3Enhanced struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
@@ -571,29 +570,20 @@ type SecuremeshSiteL3PerformanceEnhancementTypePerfModeChoice struct {
 	NoJumbo types.Bool `tfsdk:"no_jumbo"`
 }
 
-type SecuremeshSitePerformanceEnhancementModeTypePerfModeL7Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type SecuremeshSiteL7PerformanceEnhancementTypePerfModeChoice struct {
-	JumboDisabled types.Bool `tfsdk:"jumbo_disabled"`
-	JumboEnabled  types.Bool `tfsdk:"jumbo_enabled"`
-}
-
-type SecuremeshSiteViewsVolterraSoftwareType struct {
+type SecuremeshSiteVolterraSoftwareType struct {
 	VolterraSwVersionChoice types.Object `tfsdk:"volterra_sw_version_choice"`
 }
 
-type SecuremeshSiteVolterraSoftwareTypeVolterraSwVersionChoice struct {
+type SecuremeshSiteVolterraSwVersionChoice struct {
 	DefaultSwVersion        types.Bool   `tfsdk:"default_sw_version"`
 	VolterraSoftwareVersion types.String `tfsdk:"volterra_software_version"`
 }
 
-type SecuremeshSiteCommonWafLiveSignaturesUpdate struct {
+type SecuremeshSiteLiveSignaturesUpdate struct {
 	SignaturesUpdateModeChoice types.Object `tfsdk:"signatures_update_mode_choice"`
 }
 
-type SecuremeshSiteLiveSignaturesUpdateSignaturesUpdateModeChoice struct {
+type SecuremeshSiteSignaturesUpdateModeChoice struct {
 	Automatic types.Bool `tfsdk:"automatic"`
 	Manual    types.Bool `tfsdk:"manual"`
 }
@@ -1499,7 +1489,6 @@ var SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceLis
 	},
 	"site_local_inside_network": types.BoolType,
 	"site_local_network":        types.BoolType,
-	"storage_network":           types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> SegmentNetwork
@@ -2114,9 +2103,7 @@ var SecuremeshSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap = ma
 	"perf_mode_l3_enhanced": types.ObjectType{
 		AttrTypes: SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
 	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
@@ -2132,21 +2119,6 @@ var SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerf
 
 	"jumbo":    types.BoolType,
 	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
 }
 
 // Attribute map for PointerField --> Sw
@@ -2172,7 +2144,7 @@ var SecuremeshSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var SecuremeshSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -2193,8 +2165,8 @@ func (d *DataSourceF5XCSecuremeshSite) Metadata(ctx context.Context, request dat
 func (r *DataSourceF5XCSecuremeshSite) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a securemesh_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of securemesh_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a securemesh_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of securemesh_site) etc. can be fetched",
+		MarkdownDescription: "Secure Mesh site defines a required parameters that can be used in CRUD, to create and manage an Secure Mesh site.",
+		Description:         "Secure Mesh site defines a required parameters that can be used in CRUD, to create and manage an Secure Mesh site.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2789,7 +2761,7 @@ func (r *DataSourceF5XCSecuremeshSite) Schema(ctx context.Context, request datas
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -2855,7 +2827,7 @@ func (r *DataSourceF5XCSecuremeshSite) Schema(ctx context.Context, request datas
 																			Computed:    true,
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -3436,7 +3408,7 @@ func (r *DataSourceF5XCSecuremeshSite) Schema(ctx context.Context, request datas
 																			},
 																		},
 																		"mtu": schema.Int64Attribute{
-																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000",
+																			Description: "Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 9000",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -3481,12 +3453,6 @@ func (r *DataSourceF5XCSecuremeshSite) Schema(ctx context.Context, request datas
 																				},
 																				"site_local_network": schema.BoolAttribute{
 																					Description: "Site Local Network Interface belongs to site local network (outside)",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																				"storage_network": schema.BoolAttribute{
-																					Description: "Storage Network Interface belongs to site local network inside",
 																					Required:    false,
 																					Optional:    false,
 																					Computed:    true,
@@ -4466,33 +4432,11 @@ func (r *DataSourceF5XCSecuremeshSite) Schema(ctx context.Context, request datas
 									},
 								},
 							},
-							"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+							"perf_mode_l7_enhanced": schema.BoolAttribute{
 								Description: "Default Performance Mode Site optimized for L7 traffic processing",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"perf_mode_choice": schema.SingleNestedAttribute{
-										Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"jumbo_disabled": schema.BoolAttribute{
-												Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"jumbo_enabled": schema.BoolAttribute{
-												Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-								},
 							},
 						},
 					},
@@ -4630,7 +4574,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_securemesh_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "securemesh_site", err))
 		return
 	}
 
@@ -4692,12 +4636,8 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot StringField --> Address
-	if specData.GetAddress() != "" {
-		data.Address = types.StringValue(specData.GetAddress())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Address = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.Address = types.StringValue(specData.GetAddress())
 
 	// data SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
 	// false
@@ -4709,7 +4649,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 		blockedServicesChoiceChoices := specData.GetBlockedServicesChoice()
 
 		// The model struct that will be populated by the nested template.
-		var blockedServicesChoiceChoicesModel = &SecuremeshSiteGlobalSpecTypeBlockedServicesChoice{}
+		var blockedServicesChoiceChoicesModel = &SecuremeshSiteBlockedServicesChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4870,7 +4810,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 		bondChoiceChoices := specData.GetBondChoice()
 
 		// The model struct that will be populated by the nested template.
-		var bondChoiceChoicesModel = &SecuremeshSiteGlobalSpecTypeBondChoice{}
+		var bondChoiceChoicesModel = &SecuremeshSiteBondChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4888,9 +4828,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 				if len(bondDeviceListElement.GetBondDevices()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					bondDevicesElements := make([]SecuremeshSiteFleetFleetBondDeviceType, 0, len(bondDeviceListElement.GetBondDevices()))
+					bondDevicesElements := make([]SecuremeshSiteFleetBondDeviceType, 0, len(bondDeviceListElement.GetBondDevices()))
 					for _, bondDevicesElement := range bondDeviceListElement.GetBondDevices() {
-						securemeshSiteFleetFleetBondDeviceTypeModel := SecuremeshSiteFleetFleetBondDeviceType{}
+						securemeshSiteFleetBondDeviceTypeModel := SecuremeshSiteFleetBondDeviceType{}
 
 						// data specToModelNested RequiredArrayOfStringField --> Devices
 						if len(bondDevicesElement.GetDevices()) > 0 {
@@ -4899,9 +4839,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 							if response.Diagnostics.HasError() {
 								return
 							}
-							securemeshSiteFleetFleetBondDeviceTypeModel.Devices = listValue
+							securemeshSiteFleetBondDeviceTypeModel.Devices = listValue
 						} else {
-							securemeshSiteFleetFleetBondDeviceTypeModel.Devices = types.ListNull(types.StringType)
+							securemeshSiteFleetBondDeviceTypeModel.Devices = types.ListNull(types.StringType)
 						}
 
 						// data specToModelNested RequiredOneOfField --> LacpChoice
@@ -4962,27 +4902,27 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 							}
 
 							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							securemeshSiteFleetFleetBondDeviceTypeModel.LacpChoice = finalObj
+							securemeshSiteFleetBondDeviceTypeModel.LacpChoice = finalObj
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							securemeshSiteFleetFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(SecuremeshSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
+							securemeshSiteFleetBondDeviceTypeModel.LacpChoice = types.ObjectNull(SecuremeshSiteBondChoiceBondDeviceListBondDevicesLacpChoiceModelAttributeMap)
 						}
 
 						// data specToModelNested RequiredUintField --> LinkPollingInterval
-						securemeshSiteFleetFleetBondDeviceTypeModel.LinkPollingInterval = types.Int64Value(int64(bondDevicesElement.GetLinkPollingInterval()))
+						securemeshSiteFleetBondDeviceTypeModel.LinkPollingInterval = types.Int64Value(int64(bondDevicesElement.GetLinkPollingInterval()))
 
 						// data specToModelNested RequiredUintField --> LinkUpDelay
-						securemeshSiteFleetFleetBondDeviceTypeModel.LinkUpDelay = types.Int64Value(int64(bondDevicesElement.GetLinkUpDelay()))
+						securemeshSiteFleetBondDeviceTypeModel.LinkUpDelay = types.Int64Value(int64(bondDevicesElement.GetLinkUpDelay()))
 
 						// data specToModelNested RequiredStringField --> Name
 						if bondDevicesElement.GetName() != "" {
-							securemeshSiteFleetFleetBondDeviceTypeModel.Name = types.StringValue(bondDevicesElement.GetName())
+							securemeshSiteFleetBondDeviceTypeModel.Name = types.StringValue(bondDevicesElement.GetName())
 						} else {
 							// Empty string, set to null
-							securemeshSiteFleetFleetBondDeviceTypeModel.Name = types.StringNull()
+							securemeshSiteFleetBondDeviceTypeModel.Name = types.StringNull()
 						}
 
-						bondDevicesElements = append(bondDevicesElements, securemeshSiteFleetFleetBondDeviceTypeModel)
+						bondDevicesElements = append(bondDevicesElements, securemeshSiteFleetBondDeviceTypeModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5042,19 +4982,19 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot PointerField --> Coordinates
 	if specData.GetCoordinates() != nil {
-		var securemeshSiteSiteCoordinatesModel = &SecuremeshSiteSiteCoordinates{}
+		var securemeshSiteCoordinatesModel = &SecuremeshSiteCoordinates{}
 		coordinatesElement := specData.GetCoordinates()
 
 		// data specToModelNested FloatField --> Latitude
-		securemeshSiteSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
+		securemeshSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
 
 		// data specToModelNested FloatField --> Longitude
-		securemeshSiteSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
+		securemeshSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
 
 		coordinatesObj, coordinatesDiags := utils.GoStructToObjectValue(
 			ctx,
 			SecuremeshSiteCoordinatesModelAttributeMap,
-			securemeshSiteSiteCoordinatesModel,
+			securemeshSiteCoordinatesModel,
 		)
 		response.Diagnostics.Append(coordinatesDiags...)
 		data.Coordinates = coordinatesObj
@@ -5064,7 +5004,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
-		var securemeshSiteViewsKubernetesUpgradeDrainModel = &SecuremeshSiteViewsKubernetesUpgradeDrain{}
+		var securemeshSiteK8sUpgradeDrainModel = &SecuremeshSiteK8sUpgradeDrain{}
 		kubernetesUpgradeDrainElement := specData.GetKubernetesUpgradeDrain()
 
 		// data specToModelNested RequiredOneOfField --> KubernetesUpgradeDrainEnableChoice
@@ -5166,16 +5106,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			securemeshSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
+			securemeshSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			securemeshSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(SecuremeshSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
+			securemeshSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(SecuremeshSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
 		}
 
 		kubernetesUpgradeDrainObj, kubernetesUpgradeDrainDiags := utils.GoStructToObjectValue(
 			ctx,
 			SecuremeshSiteKubernetesUpgradeDrainModelAttributeMap,
-			securemeshSiteViewsKubernetesUpgradeDrainModel,
+			securemeshSiteK8sUpgradeDrainModel,
 		)
 		response.Diagnostics.Append(kubernetesUpgradeDrainDiags...)
 		data.KubernetesUpgradeDrain = kubernetesUpgradeDrainObj
@@ -5193,7 +5133,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 		logsReceiverChoiceChoices := specData.GetLogsReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logsReceiverChoiceChoicesModel = &SecuremeshSiteGlobalSpecTypeLogsReceiverChoice{}
+		var logsReceiverChoiceChoicesModel = &SecuremeshSiteLogsReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5272,28 +5212,28 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> MasterNodeConfiguration
-	masterNodeConfigurationElementsSpectToModel := make([]SecuremeshSiteViewsMasterNode, 0, len(specData.GetMasterNodeConfiguration()))
+	masterNodeConfigurationElementsSpectToModel := make([]SecuremeshSiteMasterNode, 0, len(specData.GetMasterNodeConfiguration()))
 
 	for _, masterNodeConfigurationElement := range specData.GetMasterNodeConfiguration() {
-		securemeshSiteViewsMasterNodeModel := SecuremeshSiteViewsMasterNode{}
+		securemeshSiteMasterNodeModel := SecuremeshSiteMasterNode{}
 
 		// data specToModelNested RequiredStringField --> Name
 		if masterNodeConfigurationElement.GetName() != "" {
-			securemeshSiteViewsMasterNodeModel.Name = types.StringValue(masterNodeConfigurationElement.GetName())
+			securemeshSiteMasterNodeModel.Name = types.StringValue(masterNodeConfigurationElement.GetName())
 		} else {
 			// Empty string, set to null
-			securemeshSiteViewsMasterNodeModel.Name = types.StringNull()
+			securemeshSiteMasterNodeModel.Name = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> PublicIp
 		if masterNodeConfigurationElement.GetPublicIp() != "" {
-			securemeshSiteViewsMasterNodeModel.PublicIp = types.StringValue(masterNodeConfigurationElement.GetPublicIp())
+			securemeshSiteMasterNodeModel.PublicIp = types.StringValue(masterNodeConfigurationElement.GetPublicIp())
 		} else {
 			// Empty string, set to null
-			securemeshSiteViewsMasterNodeModel.PublicIp = types.StringNull()
+			securemeshSiteMasterNodeModel.PublicIp = types.StringNull()
 		}
 
-		masterNodeConfigurationElementsSpectToModel = append(masterNodeConfigurationElementsSpectToModel, securemeshSiteViewsMasterNodeModel)
+		masterNodeConfigurationElementsSpectToModel = append(masterNodeConfigurationElementsSpectToModel, securemeshSiteMasterNodeModel)
 	}
 
 	{
@@ -5321,7 +5261,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 		networkCfgChoiceChoices := specData.GetNetworkCfgChoice()
 
 		// The model struct that will be populated by the nested template.
-		var networkCfgChoiceChoicesModel = &SecuremeshSiteGlobalSpecTypeNetworkCfgChoice{}
+		var networkCfgChoiceChoicesModel = &SecuremeshSiteNetCfgChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -5481,9 +5421,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 							if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								globalNetworkConnectionsElements := make([]SecuremeshSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+								globalNetworkConnectionsElements := make([]SecuremeshSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 								for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-									securemeshSiteViewsGlobalNetworkConnectionTypeModel := SecuremeshSiteViewsGlobalNetworkConnectionType{}
+									securemeshSiteGlobalNetConnTypeModel := SecuremeshSiteGlobalNetConnType{}
 
 									// data specToModelNested RequiredOneOfField --> ConnectionChoice
 									// <no value>
@@ -5652,13 +5592,13 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										securemeshSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+										securemeshSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										securemeshSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+										securemeshSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 									}
 
-									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, securemeshSiteViewsGlobalNetworkConnectionTypeModel)
+									globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, securemeshSiteGlobalNetConnTypeModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5750,9 +5690,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 							if len(interfaceListElement.GetInterfaces()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								interfacesElements := make([]SecuremeshSiteSecuremeshSiteInterface, 0, len(interfaceListElement.GetInterfaces()))
+								interfacesElements := make([]SecuremeshSiteIface, 0, len(interfaceListElement.GetInterfaces()))
 								for _, interfacesElement := range interfaceListElement.GetInterfaces() {
-									securemeshSiteSecuremeshSiteInterfaceModel := SecuremeshSiteSecuremeshSiteInterface{}
+									securemeshSiteIfaceModel := SecuremeshSiteIface{}
 
 									// data specToModelNested RequiredOneOfField --> DcClusterGroupConnectivityInterfaceChoice
 									// <no value>
@@ -5797,18 +5737,18 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										securemeshSiteSecuremeshSiteInterfaceModel.DcClusterGroupConnectivityInterfaceChoice = finalObj
+										securemeshSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										securemeshSiteSecuremeshSiteInterfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap)
+										securemeshSiteIfaceModel.DcClusterGroupConnectivityInterfaceChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesDcClusterGroupConnectivityInterfaceChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested StringField --> Description
 									if interfacesElement.GetDescription() != "" {
-										securemeshSiteSecuremeshSiteInterfaceModel.Description = types.StringValue(interfacesElement.GetDescription())
+										securemeshSiteIfaceModel.Description = types.StringValue(interfacesElement.GetDescription())
 									} else {
 										// Empty string, set to null
-										securemeshSiteSecuremeshSiteInterfaceModel.Description = types.StringNull()
+										securemeshSiteIfaceModel.Description = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> InterfaceChoice
@@ -6132,9 +6072,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 															if len(dhcpServerElement.GetDhcpNetworks()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																dhcpNetworksElements := make([]SecuremeshSiteNetworkInterfaceDHCPNetworkType, 0, len(dhcpServerElement.GetDhcpNetworks()))
+																dhcpNetworksElements := make([]SecuremeshSiteDHCPNetType, 0, len(dhcpServerElement.GetDhcpNetworks()))
 																for _, dhcpNetworksElement := range dhcpServerElement.GetDhcpNetworks() {
-																	securemeshSiteNetworkInterfaceDHCPNetworkTypeModel := SecuremeshSiteNetworkInterfaceDHCPNetworkType{}
+																	securemeshSiteDHCPNetTypeModel := SecuremeshSiteDHCPNetType{}
 
 																	// data specToModelNested RequiredOneOfField --> DnsChoice
 																	// <no value>
@@ -6180,10 +6120,10 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = finalObj
+																		securemeshSiteDHCPNetTypeModel.DnsChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.DnsChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
+																		securemeshSiteDHCPNetTypeModel.DnsChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksDnsChoiceModelAttributeMap)
 																	}
 
 																	// data specToModelNested RequiredOneOfField --> GatewayChoice
@@ -6239,10 +6179,10 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = finalObj
+																		securemeshSiteDHCPNetTypeModel.GatewayChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.GatewayChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
+																		securemeshSiteDHCPNetTypeModel.GatewayChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksGatewayChoiceModelAttributeMap)
 																	}
 
 																	// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
@@ -6280,10 +6220,10 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		}
 
 																		// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
+																		securemeshSiteDHCPNetTypeModel.NetworkPrefixChoice = finalObj
 																	} else {
 																		// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+																		securemeshSiteDHCPNetTypeModel.NetworkPrefixChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 																	}
 
 																	// data specToModelNested RequiredEnumField --> PoolSettings
@@ -6295,36 +6235,36 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = listValue
+																		securemeshSiteDHCPNetTypeModel.PoolSettings = listValue
 																	} else {
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+																		securemeshSiteDHCPNetTypeModel.PoolSettings = types.ListNull(types.StringType)
 																	}
 
 																	// data specToModelNested ArrayOfPointerField --> Pools
 																	if len(dhcpNetworksElement.GetPools()) > 0 {
 																		// Step 1: Always create a slice of model structs from the spec data.
 																		// This slice serves as an intermediate representation.
-																		poolsElements := make([]SecuremeshSiteNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
+																		poolsElements := make([]SecuremeshSiteDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
 																		for _, poolsElement := range dhcpNetworksElement.GetPools() {
-																			securemeshSiteNetworkInterfaceDHCPPoolTypeModel := SecuremeshSiteNetworkInterfaceDHCPPoolType{}
+																			securemeshSiteDHCPPoolTypeModel := SecuremeshSiteDHCPPoolType{}
 
 																			// data specToModelNested StringField --> EndIp
 																			if poolsElement.GetEndIp() != "" {
-																				securemeshSiteNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+																				securemeshSiteDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 																			} else {
 																				// Empty string, set to null
-																				securemeshSiteNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
+																				securemeshSiteDHCPPoolTypeModel.EndIp = types.StringNull()
 																			}
 
 																			// data specToModelNested StringField --> StartIp
 																			if poolsElement.GetStartIp() != "" {
-																				securemeshSiteNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+																				securemeshSiteDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 																			} else {
 																				// Empty string, set to null
-																				securemeshSiteNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+																				securemeshSiteDHCPPoolTypeModel.StartIp = types.StringNull()
 																			}
 
-																			poolsElements = append(poolsElements, securemeshSiteNetworkInterfaceDHCPPoolTypeModel)
+																			poolsElements = append(poolsElements, securemeshSiteDHCPPoolTypeModel)
 																		}
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6333,16 +6273,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
+																		securemeshSiteDHCPNetTypeModel.Pools = poolsListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		securemeshSiteNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
+																		securemeshSiteDHCPNetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceAddressChoiceDhcpServerDhcpNetworksPoolsModelAttributeMap})
 																	}
 
-																	dhcpNetworksElements = append(dhcpNetworksElements, securemeshSiteNetworkInterfaceDHCPNetworkTypeModel)
+																	dhcpNetworksElements = append(dhcpNetworksElements, securemeshSiteDHCPNetTypeModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6511,10 +6451,10 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 																		// data specToModelNested MapOfPointerField --> InterfaceIpMap
 																		if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-																			interfaceIpMapGoMap := make(map[string]SecuremeshSiteNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+																			interfaceIpMapGoMap := make(map[string]SecuremeshSiteStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 																			for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-																				interfaceIpMapItem := SecuremeshSiteNetworkInterfaceStaticIpParametersNodeType{}
+																				interfaceIpMapItem := SecuremeshSiteStaticIpParametersNodeType{}
 
 																				// data specToModelNested StringField --> DefaultGw
 																				if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -6744,9 +6684,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																					if len(statefulElement.GetDhcpNetworks()) > 0 {
 																						// Step 1: Always create a slice of model structs from the spec data.
 																						// This slice serves as an intermediate representation.
-																						dhcpNetworksElements := make([]SecuremeshSiteNetworkInterfaceDHCPIPV6NetworkType, 0, len(statefulElement.GetDhcpNetworks()))
+																						dhcpNetworksElements := make([]SecuremeshSiteDHCPIPV6NetType, 0, len(statefulElement.GetDhcpNetworks()))
 																						for _, dhcpNetworksElement := range statefulElement.GetDhcpNetworks() {
-																							securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel := SecuremeshSiteNetworkInterfaceDHCPIPV6NetworkType{}
+																							securemeshSiteDHCPIPV6NetTypeModel := SecuremeshSiteDHCPIPV6NetType{}
 
 																							// data specToModelNested RequiredOneOfField --> NetworkPrefixChoice
 																							// <no value>
@@ -6783,10 +6723,10 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																								}
 
 																								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																								securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = finalObj
+																								securemeshSiteDHCPIPV6NetTypeModel.NetworkPrefixChoice = finalObj
 																							} else {
 																								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																								securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+																								securemeshSiteDHCPIPV6NetTypeModel.NetworkPrefixChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
 																							}
 
 																							// data specToModelNested RequiredEnumField --> PoolSettings
@@ -6798,36 +6738,36 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																								if response.Diagnostics.HasError() {
 																									return
 																								}
-																								securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = listValue
+																								securemeshSiteDHCPIPV6NetTypeModel.PoolSettings = listValue
 																							} else {
-																								securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
+																								securemeshSiteDHCPIPV6NetTypeModel.PoolSettings = types.ListNull(types.StringType)
 																							}
 
 																							// data specToModelNested ArrayOfPointerField --> Pools
 																							if len(dhcpNetworksElement.GetPools()) > 0 {
 																								// Step 1: Always create a slice of model structs from the spec data.
 																								// This slice serves as an intermediate representation.
-																								poolsElements := make([]SecuremeshSiteNetworkInterfaceDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
+																								poolsElements := make([]SecuremeshSiteDHCPIPV6PoolType, 0, len(dhcpNetworksElement.GetPools()))
 																								for _, poolsElement := range dhcpNetworksElement.GetPools() {
-																									securemeshSiteNetworkInterfaceDHCPIPV6PoolTypeModel := SecuremeshSiteNetworkInterfaceDHCPIPV6PoolType{}
+																									securemeshSiteDHCPIPV6PoolTypeModel := SecuremeshSiteDHCPIPV6PoolType{}
 
 																									// data specToModelNested StringField --> EndIp
 																									if poolsElement.GetEndIp() != "" {
-																										securemeshSiteNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+																										securemeshSiteDHCPIPV6PoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
 																									} else {
 																										// Empty string, set to null
-																										securemeshSiteNetworkInterfaceDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
+																										securemeshSiteDHCPIPV6PoolTypeModel.EndIp = types.StringNull()
 																									}
 
 																									// data specToModelNested StringField --> StartIp
 																									if poolsElement.GetStartIp() != "" {
-																										securemeshSiteNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+																										securemeshSiteDHCPIPV6PoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 																									} else {
 																										// Empty string, set to null
-																										securemeshSiteNetworkInterfaceDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
+																										securemeshSiteDHCPIPV6PoolTypeModel.StartIp = types.StringNull()
 																									}
 
-																									poolsElements = append(poolsElements, securemeshSiteNetworkInterfaceDHCPIPV6PoolTypeModel)
+																									poolsElements = append(poolsElements, securemeshSiteDHCPIPV6PoolTypeModel)
 																								}
 																								// CASE 1: The target field is a `types.List` or an attribute map.
 																								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6836,16 +6776,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																								if response.Diagnostics.HasError() {
 																									return
 																								}
-																								securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = poolsListValue
+																								securemeshSiteDHCPIPV6NetTypeModel.Pools = poolsListValue
 
 																							} else {
 																								// The source list is empty or nil.
 																								// CASE 1: The target field is a `types.List` or an attribute map.
 																								// Assign a null `types.ListValue`.
-																								securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
+																								securemeshSiteDHCPIPV6NetTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterAddressChoiceStatefulDhcpNetworksPoolsModelAttributeMap})
 																							}
 
-																							dhcpNetworksElements = append(dhcpNetworksElements, securemeshSiteNetworkInterfaceDHCPIPV6NetworkTypeModel)
+																							dhcpNetworksElements = append(dhcpNetworksElements, securemeshSiteDHCPIPV6NetTypeModel)
 																						}
 																						// CASE 1: The target field is a `types.List` or an attribute map.
 																						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7002,7 +6942,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		// data specToModelNested PointerField --> DnsConfig
 																		if routerElement.GetDnsConfig() != nil {
 																			// Create the nested Go struct
-																			securemeshSiteNetworkInterfaceIPV6DnsConfigModel := &SecuremeshSiteNetworkInterfaceIPV6DnsConfig{}
+																			securemeshSiteIPV6DnsConfigModel := &SecuremeshSiteIPV6DnsConfig{}
 																			dnsConfigElement := routerElement.GetDnsConfig()
 
 																			// Recursively populate the nested struct
@@ -7145,19 +7085,19 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																				}
 
 																				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-																				securemeshSiteNetworkInterfaceIPV6DnsConfigModel.DnsChoice = finalObj
+																				securemeshSiteIPV6DnsConfigModel.DnsChoice = finalObj
 																			} else {
 																				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-																				securemeshSiteNetworkInterfaceIPV6DnsConfigModel.DnsChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
+																				securemeshSiteIPV6DnsConfigModel.DnsChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigDnsChoiceModelAttributeMap)
 																			}
 
 																			// This field needs to be converted to a types.ObjectValue before assignment.
-																			securemeshSiteNetworkInterfaceIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, securemeshSiteNetworkInterfaceIPV6DnsConfigModel)
+																			securemeshSiteIPV6DnsConfigModelObj, objDiags := types.ObjectValueFrom(ctx, SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceEthernetInterfaceIpv6AddressChoiceIpv6AutoConfigAutoconfigChoiceRouterDnsConfigModelAttributeMap, securemeshSiteIPV6DnsConfigModel)
 																			response.Diagnostics.Append(objDiags...)
 																			if response.Diagnostics.HasError() {
 																				return
 																			}
-																			routerAttributeMap["dns_config"] = securemeshSiteNetworkInterfaceIPV6DnsConfigModelObj
+																			routerAttributeMap["dns_config"] = securemeshSiteIPV6DnsConfigModelObj
 
 																		} else {
 																			// The source field is nil (e.g. redacted by the API).
@@ -7253,10 +7193,10 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 																		// data specToModelNested MapOfPointerField --> InterfaceIpMap
 																		if len(clusterStaticIpElement.GetInterfaceIpMap()) > 0 {
-																			interfaceIpMapGoMap := make(map[string]SecuremeshSiteNetworkInterfaceStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
+																			interfaceIpMapGoMap := make(map[string]SecuremeshSiteStaticIpParametersNodeType, len(clusterStaticIpElement.GetInterfaceIpMap()))
 
 																			for key, interfaceIpMapElement := range clusterStaticIpElement.GetInterfaceIpMap() {
-																				interfaceIpMapItem := SecuremeshSiteNetworkInterfaceStaticIpParametersNodeType{}
+																				interfaceIpMapItem := SecuremeshSiteStaticIpParametersNodeType{}
 
 																				// data specToModelNested StringField --> DefaultGw
 																				if interfaceIpMapElement.GetDefaultGw() != "" {
@@ -7516,15 +7456,6 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 														ethernetInterfacenetworkChoiceChoicesAttributeMap["site_local_network"] = types.BoolNull()
 													}
 
-													// data specToModelNested BoolOfOneOfPointerField --> StorageNetwork
-													_, isStorageNetwork := ethernetInterfacenetworkChoiceChoices.(*ves_io_schema_network_interface.EthernetInterfaceType_StorageNetwork)
-
-													if isStorageNetwork {
-														ethernetInterfacenetworkChoiceChoicesAttributeMap["storage_network"] = types.BoolValue(true)
-													} else {
-														ethernetInterfacenetworkChoiceChoicesAttributeMap["storage_network"] = types.BoolNull()
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -7720,10 +7651,10 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										securemeshSiteSecuremeshSiteInterfaceModel.InterfaceChoice = finalObj
+										securemeshSiteIfaceModel.InterfaceChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										securemeshSiteSecuremeshSiteInterfaceModel.InterfaceChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceModelAttributeMap)
+										securemeshSiteIfaceModel.InterfaceChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigInterfaceChoiceInterfaceListInterfacesInterfaceChoiceModelAttributeMap)
 									}
 
 									// data specToModelNested MapOfStringField --> Labels
@@ -7735,16 +7666,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 											return
 										}
 										// Assign the typed map to the model
-										securemeshSiteSecuremeshSiteInterfaceModel.Labels = labelsMap
+										securemeshSiteIfaceModel.Labels = labelsMap
 									} else {
 										// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 										// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 										// API returned nil (Protobuf omits empty maps). Set to null.
 										// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-										securemeshSiteSecuremeshSiteInterfaceModel.Labels = types.MapNull(types.StringType)
+										securemeshSiteIfaceModel.Labels = types.MapNull(types.StringType)
 									}
 
-									interfacesElements = append(interfacesElements, securemeshSiteSecuremeshSiteInterfaceModel)
+									interfacesElements = append(interfacesElements, securemeshSiteIfaceModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8207,9 +8138,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 										if len(staticRoutesElement.GetStaticRoutes()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											staticRoutesElements := make([]SecuremeshSiteVirtualNetworkStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
+											staticRoutesElements := make([]SecuremeshSiteStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
 											for _, staticRoutesElement := range staticRoutesElement.GetStaticRoutes() {
-												securemeshSiteVirtualNetworkStaticRouteViewTypeModel := SecuremeshSiteVirtualNetworkStaticRouteViewType{}
+												securemeshSiteStaticRouteViewTypeModel := SecuremeshSiteStaticRouteViewType{}
 
 												// data SpecToModelNested ArrayOfEnumField --> Attrs
 												if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -8224,9 +8155,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = listValue
+													securemeshSiteStaticRouteViewTypeModel.Attrs = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+													securemeshSiteStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -8236,9 +8167,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = listValue
+													securemeshSiteStaticRouteViewTypeModel.IpPrefixes = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+													securemeshSiteStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -8286,9 +8217,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 															if len(nodeInterfaceElement.GetList()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																listElements := make([]SecuremeshSiteNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+																listElements := make([]SecuremeshSiteNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 																for _, listElement := range nodeInterfaceElement.GetList() {
-																	securemeshSiteNodeInterfaceInfoModel := SecuremeshSiteNodeInterfaceInfo{}
+																	securemeshSiteNodeIfaceInfoModel := SecuremeshSiteNodeIfaceInfo{}
 
 																	// data specToModelNested ArrayOfPointerField --> Interface
 																	if len(listElement.GetInterface()) > 0 {
@@ -8331,24 +8262,24 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		securemeshSiteNodeInterfaceInfoModel.Interface = interfaceListValue
+																		securemeshSiteNodeIfaceInfoModel.Interface = interfaceListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		securemeshSiteNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
+																		securemeshSiteNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
 																	}
 
 																	// data specToModelNested StringField --> Node
 																	if listElement.GetNode() != "" {
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 																	} else {
 																		// Empty string, set to null
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringNull()
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringNull()
 																	}
 
-																	listElements = append(listElements, securemeshSiteNodeInterfaceInfoModel)
+																	listElements = append(listElements, securemeshSiteNodeIfaceInfoModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8390,13 +8321,13 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = finalObj
+													securemeshSiteStaticRouteViewTypeModel.NextHopChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSliChoiceSliConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
+													securemeshSiteStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSliChoiceSliConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
 												}
 
-												staticRoutesElements = append(staticRoutesElements, securemeshSiteVirtualNetworkStaticRouteViewTypeModel)
+												staticRoutesElements = append(staticRoutesElements, securemeshSiteStaticRouteViewTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8479,9 +8410,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 										if len(staticV6RoutesElement.GetStaticRoutes()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											staticRoutesElements := make([]SecuremeshSiteVirtualNetworkStaticV6RouteViewType, 0, len(staticV6RoutesElement.GetStaticRoutes()))
+											staticRoutesElements := make([]SecuremeshSiteStaticV6RouteViewType, 0, len(staticV6RoutesElement.GetStaticRoutes()))
 											for _, staticRoutesElement := range staticV6RoutesElement.GetStaticRoutes() {
-												securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel := SecuremeshSiteVirtualNetworkStaticV6RouteViewType{}
+												securemeshSiteStaticV6RouteViewTypeModel := SecuremeshSiteStaticV6RouteViewType{}
 
 												// data SpecToModelNested ArrayOfEnumField --> Attrs
 												if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -8496,9 +8427,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.Attrs = listValue
+													securemeshSiteStaticV6RouteViewTypeModel.Attrs = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+													securemeshSiteStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -8508,9 +8439,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = listValue
+													securemeshSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+													securemeshSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -8558,9 +8489,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 															if len(nodeInterfaceElement.GetList()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																listElements := make([]SecuremeshSiteNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+																listElements := make([]SecuremeshSiteNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 																for _, listElement := range nodeInterfaceElement.GetList() {
-																	securemeshSiteNodeInterfaceInfoModel := SecuremeshSiteNodeInterfaceInfo{}
+																	securemeshSiteNodeIfaceInfoModel := SecuremeshSiteNodeIfaceInfo{}
 
 																	// data specToModelNested ArrayOfPointerField --> Interface
 																	if len(listElement.GetInterface()) > 0 {
@@ -8603,24 +8534,24 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		securemeshSiteNodeInterfaceInfoModel.Interface = interfaceListValue
+																		securemeshSiteNodeIfaceInfoModel.Interface = interfaceListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		securemeshSiteNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
+																		securemeshSiteNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
 																	}
 
 																	// data specToModelNested StringField --> Node
 																	if listElement.GetNode() != "" {
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 																	} else {
 																		// Empty string, set to null
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringNull()
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringNull()
 																	}
 
-																	listElements = append(listElements, securemeshSiteNodeInterfaceInfoModel)
+																	listElements = append(listElements, securemeshSiteNodeIfaceInfoModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8662,13 +8593,13 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = finalObj
+													securemeshSiteStaticV6RouteViewTypeModel.NextHopChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSliChoiceSliConfigStaticV6RouteChoiceStaticV6RoutesStaticRoutesNextHopChoiceModelAttributeMap)
+													securemeshSiteStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSliChoiceSliConfigStaticV6RouteChoiceStaticV6RoutesStaticRoutesNextHopChoiceModelAttributeMap)
 												}
 
-												staticRoutesElements = append(staticRoutesElements, securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel)
+												staticRoutesElements = append(staticRoutesElements, securemeshSiteStaticV6RouteViewTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8947,9 +8878,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 										if len(staticRoutesElement.GetStaticRoutes()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											staticRoutesElements := make([]SecuremeshSiteVirtualNetworkStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
+											staticRoutesElements := make([]SecuremeshSiteStaticRouteViewType, 0, len(staticRoutesElement.GetStaticRoutes()))
 											for _, staticRoutesElement := range staticRoutesElement.GetStaticRoutes() {
-												securemeshSiteVirtualNetworkStaticRouteViewTypeModel := SecuremeshSiteVirtualNetworkStaticRouteViewType{}
+												securemeshSiteStaticRouteViewTypeModel := SecuremeshSiteStaticRouteViewType{}
 
 												// data SpecToModelNested ArrayOfEnumField --> Attrs
 												if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -8964,9 +8895,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = listValue
+													securemeshSiteStaticRouteViewTypeModel.Attrs = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+													securemeshSiteStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -8976,9 +8907,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = listValue
+													securemeshSiteStaticRouteViewTypeModel.IpPrefixes = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+													securemeshSiteStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -9026,9 +8957,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 															if len(nodeInterfaceElement.GetList()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																listElements := make([]SecuremeshSiteNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+																listElements := make([]SecuremeshSiteNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 																for _, listElement := range nodeInterfaceElement.GetList() {
-																	securemeshSiteNodeInterfaceInfoModel := SecuremeshSiteNodeInterfaceInfo{}
+																	securemeshSiteNodeIfaceInfoModel := SecuremeshSiteNodeIfaceInfo{}
 
 																	// data specToModelNested ArrayOfPointerField --> Interface
 																	if len(listElement.GetInterface()) > 0 {
@@ -9071,24 +9002,24 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		securemeshSiteNodeInterfaceInfoModel.Interface = interfaceListValue
+																		securemeshSiteNodeIfaceInfoModel.Interface = interfaceListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		securemeshSiteNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
+																		securemeshSiteNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
 																	}
 
 																	// data specToModelNested StringField --> Node
 																	if listElement.GetNode() != "" {
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 																	} else {
 																		// Empty string, set to null
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringNull()
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringNull()
 																	}
 
-																	listElements = append(listElements, securemeshSiteNodeInterfaceInfoModel)
+																	listElements = append(listElements, securemeshSiteNodeIfaceInfoModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -9130,13 +9061,13 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = finalObj
+													securemeshSiteStaticRouteViewTypeModel.NextHopChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													securemeshSiteVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
+													securemeshSiteStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticRouteChoiceStaticRoutesStaticRoutesNextHopChoiceModelAttributeMap)
 												}
 
-												staticRoutesElements = append(staticRoutesElements, securemeshSiteVirtualNetworkStaticRouteViewTypeModel)
+												staticRoutesElements = append(staticRoutesElements, securemeshSiteStaticRouteViewTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -9219,9 +9150,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 										if len(staticV6RoutesElement.GetStaticRoutes()) > 0 {
 											// Step 1: Always create a slice of model structs from the spec data.
 											// This slice serves as an intermediate representation.
-											staticRoutesElements := make([]SecuremeshSiteVirtualNetworkStaticV6RouteViewType, 0, len(staticV6RoutesElement.GetStaticRoutes()))
+											staticRoutesElements := make([]SecuremeshSiteStaticV6RouteViewType, 0, len(staticV6RoutesElement.GetStaticRoutes()))
 											for _, staticRoutesElement := range staticV6RoutesElement.GetStaticRoutes() {
-												securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel := SecuremeshSiteVirtualNetworkStaticV6RouteViewType{}
+												securemeshSiteStaticV6RouteViewTypeModel := SecuremeshSiteStaticV6RouteViewType{}
 
 												// data SpecToModelNested ArrayOfEnumField --> Attrs
 												if len(staticRoutesElement.GetAttrs()) > 0 {
@@ -9236,9 +9167,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.Attrs = listValue
+													securemeshSiteStaticV6RouteViewTypeModel.Attrs = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+													securemeshSiteStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
@@ -9248,9 +9179,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													if response.Diagnostics.HasError() {
 														return
 													}
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = listValue
+													securemeshSiteStaticV6RouteViewTypeModel.IpPrefixes = listValue
 												} else {
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+													securemeshSiteStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
 												}
 
 												// data specToModelNested RequiredOneOfField --> NextHopChoice
@@ -9298,9 +9229,9 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 															if len(nodeInterfaceElement.GetList()) > 0 {
 																// Step 1: Always create a slice of model structs from the spec data.
 																// This slice serves as an intermediate representation.
-																listElements := make([]SecuremeshSiteNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+																listElements := make([]SecuremeshSiteNodeIfaceInfo, 0, len(nodeInterfaceElement.GetList()))
 																for _, listElement := range nodeInterfaceElement.GetList() {
-																	securemeshSiteNodeInterfaceInfoModel := SecuremeshSiteNodeInterfaceInfo{}
+																	securemeshSiteNodeIfaceInfoModel := SecuremeshSiteNodeIfaceInfo{}
 
 																	// data specToModelNested ArrayOfPointerField --> Interface
 																	if len(listElement.GetInterface()) > 0 {
@@ -9343,24 +9274,24 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 																		if response.Diagnostics.HasError() {
 																			return
 																		}
-																		securemeshSiteNodeInterfaceInfoModel.Interface = interfaceListValue
+																		securemeshSiteNodeIfaceInfoModel.Interface = interfaceListValue
 
 																	} else {
 																		// The source list is empty or nil.
 																		// CASE 1: The target field is a `types.List` or an attribute map.
 																		// Assign a null `types.ListValue`.
-																		securemeshSiteNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
+																		securemeshSiteNodeIfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: SecuremeshSiteInterfaceObjectRefModelAttributeMap})
 																	}
 
 																	// data specToModelNested StringField --> Node
 																	if listElement.GetNode() != "" {
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringValue(listElement.GetNode())
 																	} else {
 																		// Empty string, set to null
-																		securemeshSiteNodeInterfaceInfoModel.Node = types.StringNull()
+																		securemeshSiteNodeIfaceInfoModel.Node = types.StringNull()
 																	}
 
-																	listElements = append(listElements, securemeshSiteNodeInterfaceInfoModel)
+																	listElements = append(listElements, securemeshSiteNodeIfaceInfoModel)
 																}
 																// CASE 1: The target field is a `types.List` or an attribute map.
 																// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -9402,13 +9333,13 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = finalObj
+													securemeshSiteStaticV6RouteViewTypeModel.NextHopChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceStaticV6RoutesStaticRoutesNextHopChoiceModelAttributeMap)
+													securemeshSiteStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(SecuremeshSiteNetworkCfgChoiceCustomNetworkConfigSloChoiceSloConfigStaticV6RouteChoiceStaticV6RoutesStaticRoutesNextHopChoiceModelAttributeMap)
 												}
 
-												staticRoutesElements = append(staticRoutesElements, securemeshSiteVirtualNetworkStaticV6RouteViewTypeModel)
+												staticRoutesElements = append(staticRoutesElements, securemeshSiteStaticV6RouteViewTypeModel)
 											}
 											// CASE 1: The target field is a `types.List` or an attribute map.
 											// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -9561,7 +9492,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot PointerField --> OfflineSurvivabilityMode
 	if specData.GetOfflineSurvivabilityMode() != nil {
-		var securemeshSiteViewsOfflineSurvivabilityModeTypeModel = &SecuremeshSiteViewsOfflineSurvivabilityModeType{}
+		var securemeshSiteOfflineSurvivabilityModeTypeModel = &SecuremeshSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
 		// data specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
@@ -9607,16 +9538,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			securemeshSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
+			securemeshSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			securemeshSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(SecuremeshSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			securemeshSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(SecuremeshSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			SecuremeshSiteOfflineSurvivabilityModeModelAttributeMap,
-			securemeshSiteViewsOfflineSurvivabilityModeTypeModel,
+			securemeshSiteOfflineSurvivabilityModeTypeModel,
 		)
 		response.Diagnostics.Append(offlineSurvivabilityModeDiags...)
 		data.OfflineSurvivabilityMode = offlineSurvivabilityModeObj
@@ -9625,16 +9556,12 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 	}
 
 	// data SpecToModelRoot StringField --> OperatingSystemVersion
-	if specData.GetOperatingSystemVersion() != "" {
-		data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.OperatingSystemVersion = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.OperatingSystemVersion = types.StringValue(specData.GetOperatingSystemVersion())
 
 	// data SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
-		var securemeshSiteViewsOperatingSystemTypeModel = &SecuremeshSiteViewsOperatingSystemType{}
+		var securemeshSiteOperatingSystemTypeModel = &SecuremeshSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
 		// data specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
@@ -9681,16 +9608,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			securemeshSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
+			securemeshSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			securemeshSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(SecuremeshSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			securemeshSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(SecuremeshSiteOsOperatingSystemVersionChoiceModelAttributeMap)
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
 			ctx,
 			SecuremeshSiteOsModelAttributeMap,
-			securemeshSiteViewsOperatingSystemTypeModel,
+			securemeshSiteOperatingSystemTypeModel,
 		)
 		response.Diagnostics.Append(osDiags...)
 		data.Os = osObj
@@ -9700,7 +9627,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot PointerField --> PerformanceEnhancementMode
 	if specData.GetPerformanceEnhancementMode() != nil {
-		var securemeshSiteViewsPerformanceEnhancementModeTypeModel = &SecuremeshSiteViewsPerformanceEnhancementModeType{}
+		var securemeshSitePerformanceEnhancementModeTypeModel = &SecuremeshSitePerformanceEnhancementModeType{}
 		performanceEnhancementModeElement := specData.GetPerformanceEnhancementMode()
 
 		// data specToModelNested RequiredOneOfField --> PerfModeChoice
@@ -9785,74 +9712,13 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 				}
 			}
 
-			// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-			// <no value>
-			// false
-			{
-				perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-				perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+			// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+			_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-					// data specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
-					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-						_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-						if isJumboDisabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-						_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-						if isJumboEnabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(SecuremeshSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-				}
+			if isPerfModeL7Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -9868,16 +9734,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			securemeshSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+			securemeshSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			securemeshSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(SecuremeshSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+			securemeshSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(SecuremeshSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 		}
 
 		performanceEnhancementModeObj, performanceEnhancementModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			SecuremeshSitePerformanceEnhancementModeModelAttributeMap,
-			securemeshSiteViewsPerformanceEnhancementModeTypeModel,
+			securemeshSitePerformanceEnhancementModeTypeModel,
 		)
 		response.Diagnostics.Append(performanceEnhancementModeDiags...)
 		data.PerformanceEnhancementMode = performanceEnhancementModeObj
@@ -9887,7 +9753,7 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
-		var securemeshSiteViewsVolterraSoftwareTypeModel = &SecuremeshSiteViewsVolterraSoftwareType{}
+		var securemeshSiteVolterraSoftwareTypeModel = &SecuremeshSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
 		// data specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
@@ -9934,16 +9800,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			securemeshSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
+			securemeshSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			securemeshSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(SecuremeshSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			securemeshSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(SecuremeshSiteSwVolterraSwVersionChoiceModelAttributeMap)
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
 			ctx,
 			SecuremeshSiteSwModelAttributeMap,
-			securemeshSiteViewsVolterraSoftwareTypeModel,
+			securemeshSiteVolterraSoftwareTypeModel,
 		)
 		response.Diagnostics.Append(swDiags...)
 		data.Sw = swObj
@@ -9969,10 +9835,11 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 
 	// data SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
-		var securemeshSiteCommonWafLiveSignaturesUpdateModel = &SecuremeshSiteCommonWafLiveSignaturesUpdate{}
+		var securemeshSiteLiveSignaturesUpdateModel = &SecuremeshSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// data specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// data specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10014,16 +9881,16 @@ func (d *DataSourceF5XCSecuremeshSite) Read(ctx context.Context, request datasou
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			securemeshSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
+			securemeshSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			securemeshSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(SecuremeshSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			securemeshSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(SecuremeshSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
 			ctx,
 			SecuremeshSiteWafSignaturesModelAttributeMap,
-			securemeshSiteCommonWafLiveSignaturesUpdateModel,
+			securemeshSiteLiveSignaturesUpdateModel,
 		)
 		response.Diagnostics.Append(wafSignaturesDiags...)
 		data.WafSignatures = wafSignaturesObj

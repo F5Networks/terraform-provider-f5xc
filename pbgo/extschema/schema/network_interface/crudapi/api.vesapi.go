@@ -3253,7 +3253,7 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 8000",
+                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 9000",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64"
                 },
@@ -3292,7 +3292,7 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 8000",
+                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 9000",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64"
                 },
@@ -3360,7 +3360,7 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 8000",
+                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 9000",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64"
                 },
@@ -3543,13 +3543,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum Transfer Unit (Max packet length) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"0\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
+                    "description": " Maximum Transfer Unit (Max packet length) of the interface\n When configured, mtu must be between 512 and 9000\n\nExample: - \"0\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-9000\n",
                     "title": "Mtu",
                     "format": "int64",
                     "x-displayname": "MTU",
                     "x-ves-example": "0",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-9000"
                     }
                 },
                 "network_config": {
@@ -3776,9 +3776,7 @@ var APISwaggerJSON string = `{
                 "NETWORK_INTERFACE_SITE_LOCAL",
                 "NETWORK_INTERFACE_SITE_LOCAL_INSIDE",
                 "NETWORK_INTERFACE_STORAGE",
-                "NETWORK_INTERFACE_MANAGEMENT",
-                "NETWORK_INTERFACE_IPFABRIC",
-                "NETWORK_INTERFACE_SEGMENT"
+                "NETWORK_INTERFACE_MANAGEMENT"
             ],
             "default": "NETWORK_INTERFACE_NETWORK_REF",
             "x-displayname": "Interface Network Type",
@@ -3899,7 +3897,7 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 8000",
+                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 9000",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64"
                 },
@@ -4085,7 +4083,6 @@ var APISwaggerJSON string = `{
                 "NETWORK_INTERFACE_VLAN_INTERFACE",
                 "NETWORK_INTERFACE_LACP_INTERFACE",
                 "NETWORK_INTERFACE_TUNNEL_INTERFACE",
-                "NETWORK_INTERFACE_LOOPBACK_INTERFACE",
                 "NETWORK_INTERFACE_LAYER2_INTERFACE"
             ],
             "default": "NETWORK_INTERFACE_ETHERNET",
@@ -4273,7 +4270,7 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 8000",
+                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 9000",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64"
                 },
@@ -4440,12 +4437,12 @@ var APISwaggerJSON string = `{
                 },
                 "status": {
                     "type": "string",
-                    "description": " Status of the condition\n \"Success\" Validtion has succeded. Requested operation was successful.\n \"Failed\"  Validation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s\n \"Down\" Configuration is operationally down. e.g. down interface\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]\n",
+                    "description": " Status of the condition\n \"Success\" Validation has succeeded. Requested operation was successful.\n \"Failed\"  Validation or operation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s.\n \"Down\" Configuration is operationally down. e.g. down interface.\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs.\n \"InProgress\" Operation is in progress.\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]\n",
                     "title": "status",
                     "x-displayname": "Status",
                     "x-ves-example": "Failed",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]"
+                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]"
                     }
                 },
                 "type": {

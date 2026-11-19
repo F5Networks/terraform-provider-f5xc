@@ -35,7 +35,7 @@ type DataSourceF5XCBgpAsnSetModel struct {
 	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
-	AsNumbers   types.List     `tfsdk:"as_numbers"`
+	AsNumbers   types.Set      `tfsdk:"as_numbers"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -55,8 +55,8 @@ func (d *DataSourceF5XCBgpAsnSet) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCBgpAsnSet) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a bgp_asn_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bgp_asn_set) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a bgp_asn_set This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of bgp_asn_set) etc. can be fetched",
+		MarkdownDescription: "An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create whitelists or blacklists for use in network policy or service policy. The<br>source or destination public IP address from the input packet/message is used as the key to lookup a GeoIP database in order to determine the origin ASN for<br>the IP address.",
+		Description:         "An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create whitelists or blacklists for use in network policy or service policy. The source or destination public IP address from the input packet/message is used as the key to lookup a GeoIP database in order to determine the origin ASN for the IP address.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -97,7 +97,7 @@ func (r *DataSourceF5XCBgpAsnSet) Schema(ctx context.Context, request datasource
 				Optional:    false,
 				Computed:    true,
 			},
-			"as_numbers": schema.ListAttribute{
+			"as_numbers": schema.SetAttribute{
 				Description: "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create whitelists or blacklists for use in network policy or service policy.",
 				Required:    false,
 				Optional:    false,
@@ -161,7 +161,7 @@ func (d *DataSourceF5XCBgpAsnSet) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "bgp_asn_set", err))
 		return
 	}
 
@@ -226,14 +226,14 @@ func (d *DataSourceF5XCBgpAsnSet) Read(ctx context.Context, request datasource.R
 	{
 		asNumbersValue := specData.GetAsNumbers()
 		if len(asNumbersValue) > 0 {
-			listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, asNumbersValue)
-			response.Diagnostics.Append(listDiags...)
+			setValue, setDiags := types.SetValueFrom(ctx, types.Int64Type, asNumbersValue)
+			response.Diagnostics.Append(setDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			data.AsNumbers = listValue
+			data.AsNumbers = setValue
 		} else {
-			data.AsNumbers = types.ListNull(types.Int64Type)
+			data.AsNumbers = types.SetNull(types.Int64Type)
 		}
 	}
 

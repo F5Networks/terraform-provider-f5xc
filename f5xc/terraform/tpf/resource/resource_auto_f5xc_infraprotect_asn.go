@@ -34,6 +34,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -44,6 +45,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_infraprotect_asn "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/infraprotect_asn"
 )
@@ -88,7 +90,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> BgpSession
+// Attribute map for OneOfField --> BgpSession
 var InfraprotectAsnBgpSessionModelAttributeMap = map[string]attr.Type{
 
 	"bgp_session_disabled": types.BoolType,
@@ -114,8 +116,8 @@ func (r *ResourceF5XCInfraprotectAsn) Metadata(ctx context.Context, request reso
 func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_asn This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a infraprotect_asn This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn) etc. can be fetched",
+		MarkdownDescription: "DDoS transit ASN information",
+		Description:         "DDoS transit ASN information",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -171,7 +173,7 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -196,20 +198,23 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 			},
 			"bgp_session_choice": schema.SingleNestedAttribute{
 				Description:         "Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled.",
-				MarkdownDescription: "Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled.<br>Exactly one of `bgp_session_disabled` or `bgp_session_enabled` must be specified when `bgp_session_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"bgp_session_disabled",
 						"bgp_session_enabled",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"bgp_session_disabled": schema.BoolAttribute{
 						Description:         "BGP Sessions Not Enabled BGP Sessions Not Enabled",
-						MarkdownDescription: "BGP Sessions Not Enabled BGP Sessions Not Enabled",
+						MarkdownDescription: "BGP Sessions Not Enabled BGP Sessions Not Enabled<br>Conflicts with `bgp_session_enabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -219,7 +224,7 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 					},
 					"bgp_session_enabled": schema.BoolAttribute{
 						Description:         "BGP Sessions Enabled BGP Sessions Enabled",
-						MarkdownDescription: "BGP Sessions Enabled BGP Sessions Enabled",
+						MarkdownDescription: "BGP Sessions Enabled BGP Sessions Enabled<br>Conflicts with `bgp_session_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -324,9 +329,17 @@ func (r *ResourceF5XCInfraprotectAsn) ModifyPlan(ctx context.Context, req resour
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCInfraprotectAsnModel
 
 	// Read Terraform plan data into the model
@@ -410,7 +423,7 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 	// resource modelToSpecRoot RequiredUintField --> Asn
 	spec.Asn = uint32(data.Asn.ValueInt64())
 
-	// resource modelToSpecRoot RequiredOneOfField --> BgpSession
+	// resource modelToSpecRoot OneOfField --> BgpSession
 	if !data.BgpSessionChoice.IsNull() && !data.BgpSessionChoice.IsUnknown() {
 		bgpSessionChoiceModel := InfraprotectAsnBgpSessionChoice{}
 		response.Diagnostics.Append(data.BgpSessionChoice.As(ctx, &bgpSessionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -432,12 +445,16 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 			spec.BgpSession = bgpSessionEnabledSpecBool
 		}
 
+	} else {
+		spec.BgpSession = &ves_io_schema_infraprotect_asn.CreateSpecType_BgpSessionEnabled{
+			BgpSessionEnabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -460,7 +477,7 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "infraprotect_asn", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "infraprotect_asn", err),
 		)
 		return
 	}
@@ -584,7 +601,7 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 		data.Asn = types.Int64Value(int64(asnValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BgpSession
+	// resource SpecToModelRoot OneOfField --> BgpSession
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -632,8 +649,6 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BgpSessionChoice = types.ObjectNull(InfraprotectAsnBgpSessionModelAttributeMap)
 	}
 
@@ -742,14 +757,10 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "infraprotect_asn", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_asn", err),
 		)
 		return
 	}
@@ -873,7 +884,7 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 		data.Asn = types.Int64Value(int64(asnValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BgpSession
+	// resource SpecToModelRoot OneOfField --> BgpSession
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -921,9 +932,13 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.BgpSessionChoice = types.ObjectNull(InfraprotectAsnBgpSessionModelAttributeMap)
+
+		if data.BgpSessionChoice.IsNull() || data.BgpSessionChoice.IsUnknown() || ((data.BgpSessionChoice.Attributes()["bgp_session_disabled"].IsNull() || data.BgpSessionChoice.Attributes()["bgp_session_disabled"].IsUnknown()) && (data.BgpSessionChoice.Attributes()["bgp_session_enabled"].IsNull() || data.BgpSessionChoice.Attributes()["bgp_session_enabled"].IsUnknown())) {
+			data.BgpSessionChoice = types.ObjectValueMust(InfraprotectAsnBgpSessionModelAttributeMap, map[string]attr.Value{
+				"bgp_session_disabled": types.BoolNull(),
+				"bgp_session_enabled":  types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> ReviewType
@@ -997,6 +1012,12 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 }
 
 func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCInfraprotectAsnModel
@@ -1100,7 +1121,7 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1108,24 +1129,20 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "infraprotect_asn", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "infraprotect_asn", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "infraprotect_asn", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "infraprotect_asn", err),
 		)
 		return
 	}
@@ -1248,7 +1265,7 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 		data.Asn = types.Int64Value(int64(asnValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BgpSession
+	// resource SpecToModelRoot OneOfField --> BgpSession
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1296,8 +1313,6 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BgpSessionChoice = types.ObjectNull(InfraprotectAsnBgpSessionModelAttributeMap)
 	}
 
@@ -1435,7 +1450,7 @@ func (r *ResourceF5XCInfraprotectAsn) Delete(ctx context.Context, request resour
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "infraprotect_asn", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "infraprotect_asn", err),
 		)
 		return
 	}

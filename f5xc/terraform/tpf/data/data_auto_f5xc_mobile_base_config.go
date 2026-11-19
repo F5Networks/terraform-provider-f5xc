@@ -57,8 +57,8 @@ func (d *DataSourceF5XCMobileBaseConfig) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCMobileBaseConfig) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a mobile_base_config This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of mobile_base_config) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a mobile_base_config This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of mobile_base_config) etc. can be fetched",
+		MarkdownDescription: "Configures Mobile SDK Base Configuration",
+		Description:         "Configures Mobile SDK Base Configuration",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -175,7 +175,7 @@ func (d *DataSourceF5XCMobileBaseConfig) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_shape_bot_defense_mobile_base_config.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "mobile_base_config", err))
 		return
 	}
 

@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 
@@ -44,6 +45,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_infraprotect_asn_prefix "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/infraprotect_asn_prefix"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
@@ -147,8 +149,8 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Metadata(ctx context.Context, reques
 func (r *ResourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_asn_prefix This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn_prefix) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a infraprotect_asn_prefix This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn_prefix) etc. can be fetched",
+		MarkdownDescription: "DDoS transit Prefix Information",
+		Description:         "DDoS transit Prefix Information",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -204,7 +206,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, request 
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -245,7 +247,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, request 
 						Optional:            false,
 						Computed:            true,
 						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+							stringplanmodifier.UseNonNullStateForUnknown(),
 						},
 					},
 				},
@@ -459,9 +461,17 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) ModifyPlan(ctx context.Context, req 
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCInfraprotectAsnPrefixModel
 
 	// Read Terraform plan data into the model
@@ -575,7 +585,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -598,7 +608,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Create(ctx context.Context, request 
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "infraprotect_asn_prefix", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "infraprotect_asn_prefix", err),
 		)
 		return
 	}
@@ -1025,14 +1035,10 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "infraprotect_asn_prefix", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_asn_prefix", err),
 		)
 		return
 	}
@@ -1425,6 +1431,12 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 }
 
 func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCInfraprotectAsnPrefixModel
@@ -1528,7 +1540,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1536,24 +1548,20 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "infraprotect_asn_prefix", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "infraprotect_asn_prefix", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "infraprotect_asn_prefix", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "infraprotect_asn_prefix", err),
 		)
 		return
 	}
@@ -2008,7 +2016,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Delete(ctx context.Context, request 
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "infraprotect_asn_prefix", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "infraprotect_asn_prefix", err),
 		)
 		return
 	}

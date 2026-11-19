@@ -34,7 +34,7 @@ type DataSourceF5XCAwsTgwSite struct {
 	client *client.APIClient
 }
 
-type AwsTgwSiteAwsTgwSiteServicesVPCType struct {
+type AwsTgwSiteServicesVPCType struct {
 	AdminPassword       types.Object `tfsdk:"admin_password"`
 	AwsRegion           types.String `tfsdk:"aws_region"`
 	AzNodes             types.List   `tfsdk:"az_nodes"`
@@ -55,35 +55,36 @@ type AwsTgwSiteSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type AwsTgwSiteSecretTypeSecretInfoChoice struct {
+type AwsTgwSiteSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+	None                types.Bool   `tfsdk:"none"`
 }
 
-type AwsTgwSiteSecretTypeBlindfoldSecretInfo struct {
+type AwsTgwSiteBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
 	Location           types.String `tfsdk:"location"`
 	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
-type AwsTgwSiteSecretTypeClearSecretInfo struct {
+type AwsTgwSiteClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type AwsTgwSiteViewsAWSVPCTwoInterfaceNodeType struct {
+type AwsTgwSiteAWSVPCTwoIfaceNodeType struct {
 	AwsAzName      types.String `tfsdk:"aws_az_name"`
 	Choice         types.Object `tfsdk:"choice"`
 	OutsideSubnet  types.Object `tfsdk:"outside_subnet"`
 	WorkloadSubnet types.Object `tfsdk:"workload_subnet"`
 }
 
-type AwsTgwSiteAWSVPCTwoInterfaceNodeTypeChoice struct {
+type AwsTgwSiteChoice struct {
 	InsideSubnet         types.Object `tfsdk:"inside_subnet"`
 	ReservedInsideSubnet types.Bool   `tfsdk:"reserved_inside_subnet"`
 }
 
-type AwsTgwSiteAWSVPCTwoInterfaceNodeTypeInsideSubnet struct {
+type AwsTgwSiteInsideSubnet struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
@@ -92,106 +93,104 @@ type AwsTgwSiteCloudSubnetTypeChoice struct {
 	SubnetParam      types.Object `tfsdk:"subnet_param"`
 }
 
-type AwsTgwSiteCloudSubnetTypeSubnetParam struct {
+type AwsTgwSiteSubnetParam struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
-type AwsTgwSiteViewsCloudSubnetType struct {
+type AwsTgwSiteCloudSubnetType struct {
 	Choice types.Object `tfsdk:"choice"`
 }
 
-type AwsTgwSiteServicesVPCTypeDeploymentChoice struct {
+type AwsTgwSiteDepChoice struct {
 	AwsCred types.Object `tfsdk:"aws_cred"`
 }
 
-type AwsTgwSiteServicesVPCTypeEncryptionChoice struct {
+type AwsTgwSiteEncryptionChoice struct {
 	DisableEncryption types.Bool   `tfsdk:"disable_encryption"`
 	EnableEncryption  types.Object `tfsdk:"enable_encryption"`
 }
 
-type AwsTgwSiteServicesVPCTypeEnableEncryption struct {
+type AwsTgwSiteEnableEncryption struct {
 	KmsKeyId types.String `tfsdk:"kms_key_id"`
 }
 
-type AwsTgwSiteServicesVPCTypeInternetVipChoice struct {
+type AwsTgwSiteInternetVipChoice struct {
 	DisableInternetVip types.Bool `tfsdk:"disable_internet_vip"`
 	EnableInternetVip  types.Bool `tfsdk:"enable_internet_vip"`
 }
 
-type AwsTgwSiteServicesVPCTypeSecurityGroupChoice struct {
+type AwsTgwSiteSecGroupChoice struct {
 	CustomSecurityGroup types.Object `tfsdk:"custom_security_group"`
 	F5XcSecurityGroup   types.Bool   `tfsdk:"f5xc_security_group"`
 }
 
-type AwsTgwSiteServicesVPCTypeCustomSecurityGroup struct {
+type AwsTgwSiteCustomSecGroup struct {
 	InsideSecurityGroupId  types.String `tfsdk:"inside_security_group_id"`
 	OutsideSecurityGroupId types.String `tfsdk:"outside_security_group_id"`
 }
 
-type AwsTgwSiteServicesVPCTypeServiceVpcChoice struct {
+type AwsTgwSiteSvcVpcChoice struct {
 	NewVpc types.Object `tfsdk:"new_vpc"`
 	VpcId  types.String `tfsdk:"vpc_id"`
 }
 
-type AwsTgwSiteServicesVPCTypeNewVpc struct {
+type AwsTgwSiteNewVpc struct {
 	NameChoice  types.Object `tfsdk:"name_choice"`
 	PrimaryIpv4 types.String `tfsdk:"primary_ipv4"`
 }
 
-type AwsTgwSiteAWSVPCParamsTypeNameChoice struct {
+type AwsTgwSiteNameChoice struct {
 	Autogenerate types.Bool   `tfsdk:"autogenerate"`
 	NameTag      types.String `tfsdk:"name_tag"`
 }
 
-type AwsTgwSiteServicesVPCTypeTgwChoice struct {
+type AwsTgwSiteTgwChoice struct {
 	ExistingTgw types.Object `tfsdk:"existing_tgw"`
 	NewTgw      types.Object `tfsdk:"new_tgw"`
 }
 
-type AwsTgwSiteServicesVPCTypeExistingTgw struct {
+type AwsTgwSiteExistingTgw struct {
 	TgwAsn          types.Int64  `tfsdk:"tgw_asn"`
 	TgwId           types.String `tfsdk:"tgw_id"`
 	VolterraSiteAsn types.Int64  `tfsdk:"volterra_site_asn"`
 }
 
-type AwsTgwSiteServicesVPCTypeNewTgw struct {
+type AwsTgwSiteNewTgw struct {
 	AsnChoice types.Object `tfsdk:"asn_choice"`
 }
 
-type AwsTgwSiteTGWParamsTypeAsnChoice struct {
+type AwsTgwSiteAsnChoice struct {
 	SystemGenerated types.Bool   `tfsdk:"system_generated"`
 	UserAssigned    types.Object `tfsdk:"user_assigned"`
 }
 
-type AwsTgwSiteTGWParamsTypeUserAssigned struct {
+type AwsTgwSiteUserAssigned struct {
 	TgwAsn          types.Int64 `tfsdk:"tgw_asn"`
 	VolterraSiteAsn types.Int64 `tfsdk:"volterra_site_asn"`
 }
 
-type AwsTgwSiteServicesVPCTypeTgwCidrChoice struct {
+type AwsTgwSiteTgwCidrChoice struct {
 	ReservedTgwCidr types.Bool   `tfsdk:"reserved_tgw_cidr"`
 	TgwCidr         types.Object `tfsdk:"tgw_cidr"`
 }
 
-type AwsTgwSiteServicesVPCTypeTgwCidr struct {
+type AwsTgwSiteTgwCidr struct {
 	Ipv4 types.String `tfsdk:"ipv4"`
-	Ipv6 types.String `tfsdk:"ipv6"`
 }
 
-type AwsTgwSiteServicesVPCTypeWorkerNodesChoice struct {
+type AwsTgwSiteWorkerNodesChoice struct {
 	NoWorkerNodes types.Bool  `tfsdk:"no_worker_nodes"`
 	NodesPerAz    types.Int64 `tfsdk:"nodes_per_az"`
 	TotalNodes    types.Int64 `tfsdk:"total_nodes"`
 }
 
-type AwsTgwSiteGlobalSpecTypeBlockedServicesChoice struct {
+type AwsTgwSiteBlockedServicesChoice struct {
 	BlockAllServices       types.Bool   `tfsdk:"block_all_services"`
 	BlockedServices        types.Object `tfsdk:"blocked_services"`
 	DefaultBlockedServices types.Bool   `tfsdk:"default_blocked_services"`
 }
 
-type AwsTgwSiteGlobalSpecTypeBlockedServices struct {
+type AwsTgwSiteBlockedServices struct {
 	BlockedSevice types.List `tfsdk:"blocked_sevice"`
 }
 
@@ -200,35 +199,32 @@ type AwsTgwSiteFleetBlockedServices struct {
 	NetworkType                    types.List   `tfsdk:"network_type"`
 }
 
-type AwsTgwSiteBlockedServicesBlockedServicesValueTypeChoice struct {
-	Dns              types.Bool `tfsdk:"dns"`
-	Ssh              types.Bool `tfsdk:"ssh"`
-	WebUserInterface types.Bool `tfsdk:"web_user_interface"`
+type AwsTgwSiteBlockedServicesValueTypeChoice struct {
+	Dns types.Bool `tfsdk:"dns"`
+	Ssh types.Bool `tfsdk:"ssh"`
 }
 
-type AwsTgwSiteSiteCoordinates struct {
+type AwsTgwSiteCoordinates struct {
 	Latitude  types.Float32 `tfsdk:"latitude"`
 	Longitude types.Float32 `tfsdk:"longitude"`
 }
 
-type AwsTgwSiteViewsCustomDNS struct {
+type AwsTgwSiteCustomDNS struct {
 	InsideNameserver    types.String `tfsdk:"inside_nameserver"`
 	InsideNameserverV6  types.String `tfsdk:"inside_nameserver_v6"`
 	OutsideNameserver   types.String `tfsdk:"outside_nameserver"`
 	OutsideNameserverV6 types.String `tfsdk:"outside_nameserver_v6"`
 }
 
-type AwsTgwSiteGlobalSpecTypeDirectConnectChoice struct {
+type AwsTgwSiteDirectConnectChoice struct {
 	DirectConnectDisabled types.Bool   `tfsdk:"direct_connect_disabled"`
 	DirectConnectEnabled  types.Object `tfsdk:"direct_connect_enabled"`
 	PrivateConnectivity   types.Object `tfsdk:"private_connectivity"`
 }
 
-type AwsTgwSiteGlobalSpecTypeDirectConnectEnabled struct {
-	AsnChoice                 types.Object `tfsdk:"asn_choice"`
-	CloudAggregatedPrefix     types.List   `tfsdk:"cloud_aggregated_prefix"`
-	DcConnectAggregatedPrefix types.List   `tfsdk:"dc_connect_aggregated_prefix"`
-	VifChoice                 types.Object `tfsdk:"vif_choice"`
+type AwsTgwSiteDirectConnectEnabled struct {
+	AsnChoice types.Object `tfsdk:"asn_choice"`
+	VifChoice types.Object `tfsdk:"vif_choice"`
 }
 
 type AwsTgwSiteDirectConnectConfigTypeAsnChoice struct {
@@ -236,128 +232,110 @@ type AwsTgwSiteDirectConnectConfigTypeAsnChoice struct {
 	CustomAsn types.Int64 `tfsdk:"custom_asn"`
 }
 
-type AwsTgwSiteDirectConnectConfigTypeVifChoice struct {
+type AwsTgwSiteVifChoice struct {
 	HostedVifs   types.Object `tfsdk:"hosted_vifs"`
 	StandardVifs types.Bool   `tfsdk:"standard_vifs"`
 }
 
-type AwsTgwSiteDirectConnectConfigTypeHostedVifs struct {
+type AwsTgwSiteHostedVifs struct {
 	ConnectivityOptionsChoice types.Object `tfsdk:"connectivity_options_choice"`
 	VifList                   types.List   `tfsdk:"vif_list"`
 }
 
-type AwsTgwSiteHostedVIFConfigTypeConnectivityOptionsChoice struct {
+type AwsTgwSiteConnectivityOptionsChoice struct {
 	SiteRegistrationOverDirectConnect types.Object `tfsdk:"site_registration_over_direct_connect"`
 	SiteRegistrationOverInternet      types.Bool   `tfsdk:"site_registration_over_internet"`
 }
 
-type AwsTgwSiteHostedVIFConfigTypeSiteRegistrationOverDirectConnect struct {
+type AwsTgwSiteSiteRegistrationOverDirectConnect struct {
 	CloudlinkNetworkName types.String `tfsdk:"cloudlink_network_name"`
 }
 
-type AwsTgwSiteViewsVifRegionConfig struct {
+type AwsTgwSiteVifRegionConfig struct {
 	VifId           types.String `tfsdk:"vif_id"`
 	VifRegionChoice types.Object `tfsdk:"vif_region_choice"`
 }
 
-type AwsTgwSiteVifRegionConfigVifRegionChoice struct {
+type AwsTgwSiteVifRegionChoice struct {
 	OtherRegion      types.String `tfsdk:"other_region"`
 	SameAsSiteRegion types.Bool   `tfsdk:"same_as_site_region"`
 }
 
-type AwsTgwSiteGlobalSpecTypePrivateConnectivity struct {
+type AwsTgwSitePrivateConnectivity struct {
 	CloudLink            types.Object `tfsdk:"cloud_link"`
 	NetworkOptionsChoice types.Object `tfsdk:"network_options_choice"`
 }
 
-type AwsTgwSitePrivateConnectConfigTypeNetworkOptionsChoice struct {
+type AwsTgwSiteNetOptionsChoice struct {
 	Inside  types.Bool `tfsdk:"inside"`
 	Outside types.Bool `tfsdk:"outside"`
 }
 
-type AwsTgwSiteViewsDirectConnectInfo struct {
+type AwsTgwSiteDirectConnectInfo struct {
 	Asn                    types.Int64  `tfsdk:"asn"`
 	DirectConnectGatewayId types.String `tfsdk:"direct_connect_gateway_id"`
 	VgwId                  types.String `tfsdk:"vgw_id"`
 }
 
-type AwsTgwSiteViewsKubernetesUpgradeDrain struct {
+type AwsTgwSiteK8sUpgradeDrain struct {
 	KubernetesUpgradeDrainEnableChoice types.Object `tfsdk:"kubernetes_upgrade_drain_enable_choice"`
 }
 
-type AwsTgwSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoice struct {
+type AwsTgwSiteK8sUpgradeDrainEnableChoice struct {
 	DisableUpgradeDrain types.Bool   `tfsdk:"disable_upgrade_drain"`
 	EnableUpgradeDrain  types.Object `tfsdk:"enable_upgrade_drain"`
 }
 
-type AwsTgwSiteKubernetesUpgradeDrainEnableUpgradeDrain struct {
+type AwsTgwSiteEnableUpgradeDrain struct {
 	DrainMaxUnavailableChoice types.Object `tfsdk:"drain_max_unavailable_choice"`
 	DrainNodeTimeout          types.Int64  `tfsdk:"drain_node_timeout"`
 }
 
-type AwsTgwSiteKubernetesUpgradeDrainConfigDrainMaxUnavailableChoice struct {
+type AwsTgwSiteDrainMaxUnavailableChoice struct {
 	DrainMaxUnavailableNodeCount types.Int64 `tfsdk:"drain_max_unavailable_node_count"`
 }
 
-type AwsTgwSiteGlobalSpecTypeLogsReceiverChoice struct {
+type AwsTgwSiteLogsReceiverChoice struct {
 	LogsStreamingDisabled types.Bool `tfsdk:"logs_streaming_disabled"`
 }
 
-type AwsTgwSiteViewsOfflineSurvivabilityModeType struct {
+type AwsTgwSiteOfflineSurvivabilityModeType struct {
 	OfflineSurvivabilityModeChoice types.Object `tfsdk:"offline_survivability_mode_choice"`
 }
 
-type AwsTgwSiteOfflineSurvivabilityModeTypeOfflineSurvivabilityModeChoice struct {
+type AwsTgwSiteOfflineSurvivabilityModeChoice struct {
 	EnableOfflineSurvivabilityMode types.Bool `tfsdk:"enable_offline_survivability_mode"`
 	NoOfflineSurvivabilityMode     types.Bool `tfsdk:"no_offline_survivability_mode"`
 }
 
-type AwsTgwSiteViewsOperatingSystemType struct {
+type AwsTgwSiteOperatingSystemType struct {
 	OperatingSystemVersionChoice types.Object `tfsdk:"operating_system_version_choice"`
 }
 
-type AwsTgwSiteOperatingSystemTypeOperatingSystemVersionChoice struct {
+type AwsTgwSiteOperatingSystemVersionChoice struct {
 	DefaultOsVersion       types.Bool   `tfsdk:"default_os_version"`
 	OperatingSystemVersion types.String `tfsdk:"operating_system_version"`
 }
 
-type AwsTgwSiteViewsPerformanceEnhancementModeType struct {
+type AwsTgwSitePerformanceEnhancementModeType struct {
 	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
 }
 
-type AwsTgwSitePerformanceEnhancementModeTypePerfModeChoice struct {
-	PerfModeL3Enhanced types.Object `tfsdk:"perf_mode_l3_enhanced"`
-	PerfModeL7Enhanced types.Object `tfsdk:"perf_mode_l7_enhanced"`
+type AwsTgwSitePerfModeChoice struct {
+	PerfModeL3Enhanced types.Bool `tfsdk:"perf_mode_l3_enhanced"`
+	PerfModeL7Enhanced types.Bool `tfsdk:"perf_mode_l7_enhanced"`
 }
 
-type AwsTgwSitePerformanceEnhancementModeTypePerfModeL3Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AwsTgwSiteL3PerformanceEnhancementTypePerfModeChoice struct {
-	Jumbo   types.Bool `tfsdk:"jumbo"`
-	NoJumbo types.Bool `tfsdk:"no_jumbo"`
-}
-
-type AwsTgwSitePerformanceEnhancementModeTypePerfModeL7Enhanced struct {
-	PerfModeChoice types.Object `tfsdk:"perf_mode_choice"`
-}
-
-type AwsTgwSiteL7PerformanceEnhancementTypePerfModeChoice struct {
-	JumboDisabled types.Bool `tfsdk:"jumbo_disabled"`
-	JumboEnabled  types.Bool `tfsdk:"jumbo_enabled"`
-}
-
-type AwsTgwSiteViewsVolterraSoftwareType struct {
+type AwsTgwSiteVolterraSoftwareType struct {
 	VolterraSwVersionChoice types.Object `tfsdk:"volterra_sw_version_choice"`
 }
 
-type AwsTgwSiteVolterraSoftwareTypeVolterraSwVersionChoice struct {
+type AwsTgwSiteVolterraSwVersionChoice struct {
 	DefaultSwVersion        types.Bool   `tfsdk:"default_sw_version"`
 	VolterraSoftwareVersion types.String `tfsdk:"volterra_software_version"`
 }
 
-type AwsTgwSiteAwsTgwSiteAWSTGWInfoConfigType struct {
+type AwsTgwSiteAWSTGWInfoConfigType struct {
 	PrivateIps types.List   `tfsdk:"private_ips"`
 	PublicIps  types.List   `tfsdk:"public_ips"`
 	SubnetIds  types.List   `tfsdk:"subnet_ids"`
@@ -366,7 +344,7 @@ type AwsTgwSiteAwsTgwSiteAWSTGWInfoConfigType struct {
 	VpcName    types.String `tfsdk:"vpc_name"`
 }
 
-type AwsTgwSiteViewsAWSSubnetIdsType struct {
+type AwsTgwSiteAWSSubnetIdsType struct {
 	AzName           types.String `tfsdk:"az_name"`
 	InsideSubnet     types.Object `tfsdk:"inside_subnet"`
 	InsideSubnetId   types.String `tfsdk:"inside_subnet_id"`
@@ -376,53 +354,53 @@ type AwsTgwSiteViewsAWSSubnetIdsType struct {
 	WorkloadSubnetId types.String `tfsdk:"workload_subnet_id"`
 }
 
-type AwsTgwSiteViewsAWSSubnetInfoType struct {
+type AwsTgwSiteAWSSubnetInfoType struct {
 	AzName     types.String `tfsdk:"az_name"`
 	Id         types.String `tfsdk:"id"`
 	Ipv4Prefix types.String `tfsdk:"ipv4_prefix"`
 }
 
-type AwsTgwSiteAwsTgwSiteSecurityConfigType struct {
+type AwsTgwSiteSecConfigType struct {
 	EastWestServicePolicyChoice types.Object `tfsdk:"east_west_service_policy_choice"`
 	ForwardProxyChoice          types.Object `tfsdk:"forward_proxy_choice"`
 	NetworkPolicyChoice         types.Object `tfsdk:"network_policy_choice"`
 }
 
-type AwsTgwSiteSecurityConfigTypeEastWestServicePolicyChoice struct {
+type AwsTgwSiteEastWestSvcPolicyChoice struct {
 	ActiveEastWestServicePolicies types.Object `tfsdk:"active_east_west_service_policies"`
 	EastWestServicePolicyAllowAll types.Bool   `tfsdk:"east_west_service_policy_allow_all"`
 	NoEastWestPolicy              types.Bool   `tfsdk:"no_east_west_policy"`
 }
 
-type AwsTgwSiteSecurityConfigTypeActiveEastWestServicePolicies struct {
+type AwsTgwSiteActiveEastWestSvcPolicies struct {
 	ServicePolicies types.List `tfsdk:"service_policies"`
 }
 
-type AwsTgwSiteSecurityConfigTypeForwardProxyChoice struct {
+type AwsTgwSiteForwardProxyChoice struct {
 	ActiveForwardProxyPolicies types.Object `tfsdk:"active_forward_proxy_policies"`
 	ForwardProxyAllowAll       types.Bool   `tfsdk:"forward_proxy_allow_all"`
 	NoForwardProxy             types.Bool   `tfsdk:"no_forward_proxy"`
 }
 
-type AwsTgwSiteSecurityConfigTypeActiveForwardProxyPolicies struct {
+type AwsTgwSiteActiveForwardProxyPolicies struct {
 	ForwardProxyPolicies types.List `tfsdk:"forward_proxy_policies"`
 }
 
-type AwsTgwSiteSecurityConfigTypeNetworkPolicyChoice struct {
+type AwsTgwSiteNetPolicyChoice struct {
 	ActiveEnhancedFirewallPolicies types.Object `tfsdk:"active_enhanced_firewall_policies"`
 	ActiveNetworkPolicies          types.Object `tfsdk:"active_network_policies"`
 	NoNetworkPolicy                types.Bool   `tfsdk:"no_network_policy"`
 }
 
-type AwsTgwSiteSecurityConfigTypeActiveEnhancedFirewallPolicies struct {
+type AwsTgwSiteActiveEnhancedFirewallPolicies struct {
 	EnhancedFirewallPolicies types.List `tfsdk:"enhanced_firewall_policies"`
 }
 
-type AwsTgwSiteSecurityConfigTypeActiveNetworkPolicies struct {
+type AwsTgwSiteActiveNetPolicies struct {
 	NetworkPolicies types.List `tfsdk:"network_policies"`
 }
 
-type AwsTgwSiteSitePublishVIPParamsPerAz struct {
+type AwsTgwSitePublishVIPParamsPerAz struct {
 	AzName          types.String `tfsdk:"az_name"`
 	InsideVip       types.List   `tfsdk:"inside_vip"`
 	InsideVipCname  types.String `tfsdk:"inside_vip_cname"`
@@ -432,7 +410,7 @@ type AwsTgwSiteSitePublishVIPParamsPerAz struct {
 	OutsideVipV6    types.List   `tfsdk:"outside_vip_v6"`
 }
 
-type AwsTgwSiteAwsTgwSiteVnConfiguration struct {
+type AwsTgwSiteVnCfg struct {
 	AllowedVipPort           types.Object `tfsdk:"allowed_vip_port"`
 	AllowedVipPortSli        types.Object `tfsdk:"allowed_vip_port_sli"`
 	DcClusterGroupChoice     types.Object `tfsdk:"dc_cluster_group_choice"`
@@ -442,11 +420,11 @@ type AwsTgwSiteAwsTgwSiteVnConfiguration struct {
 	SiteMeshGroupChoice      types.Object `tfsdk:"site_mesh_group_choice"`
 }
 
-type AwsTgwSiteViewsAllowedVIPPorts struct {
+type AwsTgwSiteAllowedVIPPorts struct {
 	PortChoice types.Object `tfsdk:"port_choice"`
 }
 
-type AwsTgwSiteAllowedVIPPortsPortChoice struct {
+type AwsTgwSitePortChoice struct {
 	CustomPorts           types.Object `tfsdk:"custom_ports"`
 	DisableAllowedVipPort types.Bool   `tfsdk:"disable_allowed_vip_port"`
 	UseHttpHttpsPort      types.Bool   `tfsdk:"use_http_https_port"`
@@ -454,61 +432,61 @@ type AwsTgwSiteAllowedVIPPortsPortChoice struct {
 	UseHttpsPort          types.Bool   `tfsdk:"use_https_port"`
 }
 
-type AwsTgwSiteAllowedVIPPortsCustomPorts struct {
+type AwsTgwSiteCustomPorts struct {
 	PortRanges types.String `tfsdk:"port_ranges"`
 }
 
-type AwsTgwSiteVnConfigurationDcClusterGroupChoice struct {
+type AwsTgwSiteDcClusterGroupChoice struct {
 	DcClusterGroupInsideVn  types.Object `tfsdk:"dc_cluster_group_inside_vn"`
 	DcClusterGroupOutsideVn types.Object `tfsdk:"dc_cluster_group_outside_vn"`
 	NoDcClusterGroup        types.Bool   `tfsdk:"no_dc_cluster_group"`
 }
 
-type AwsTgwSiteVnConfigurationGlobalNetworkChoice struct {
+type AwsTgwSiteGlobalNetChoice struct {
 	GlobalNetworkList types.Object `tfsdk:"global_network_list"`
 	NoGlobalNetwork   types.Bool   `tfsdk:"no_global_network"`
 }
 
-type AwsTgwSiteVnConfigurationGlobalNetworkList struct {
+type AwsTgwSiteGlobalNetList struct {
 	GlobalNetworkConnections types.List `tfsdk:"global_network_connections"`
 }
 
-type AwsTgwSiteViewsGlobalNetworkConnectionType struct {
+type AwsTgwSiteGlobalNetConnType struct {
 	ConnectionChoice types.Object `tfsdk:"connection_choice"`
 }
 
-type AwsTgwSiteGlobalNetworkConnectionTypeConnectionChoice struct {
+type AwsTgwSiteConnChoice struct {
 	SliToGlobalDr types.Object `tfsdk:"sli_to_global_dr"`
 	SloToGlobalDr types.Object `tfsdk:"slo_to_global_dr"`
 }
 
-type AwsTgwSiteGlobalNetworkConnectionTypeSliToGlobalDr struct {
+type AwsTgwSiteSliToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type AwsTgwSiteGlobalNetworkConnectionTypeSloToGlobalDr struct {
+type AwsTgwSiteSloToGlobalDr struct {
 	GlobalVn types.Object `tfsdk:"global_vn"`
 }
 
-type AwsTgwSiteVnConfigurationInsideStaticRouteChoice struct {
+type AwsTgwSiteInsideStaticRouteChoice struct {
 	InsideStaticRoutes   types.Object `tfsdk:"inside_static_routes"`
 	NoInsideStaticRoutes types.Bool   `tfsdk:"no_inside_static_routes"`
 }
 
-type AwsTgwSiteVnConfigurationInsideStaticRoutes struct {
+type AwsTgwSiteInsideStaticRoutes struct {
 	StaticRouteList types.List `tfsdk:"static_route_list"`
 }
 
-type AwsTgwSiteViewsSiteStaticRoutesType struct {
+type AwsTgwSiteSiteStaticRoutesType struct {
 	ConfigModeChoice types.Object `tfsdk:"config_mode_choice"`
 }
 
-type AwsTgwSiteSiteStaticRoutesTypeConfigModeChoice struct {
+type AwsTgwSiteConfigModeChoice struct {
 	CustomStaticRoute types.Object `tfsdk:"custom_static_route"`
 	SimpleStaticRoute types.String `tfsdk:"simple_static_route"`
 }
 
-type AwsTgwSiteSiteStaticRoutesTypeCustomStaticRoute struct {
+type AwsTgwSiteCustomStaticRoute struct {
 	Attrs   types.List   `tfsdk:"attrs"`
 	Labels  types.Map    `tfsdk:"labels"`
 	Nexthop types.Object `tfsdk:"nexthop"`
@@ -521,34 +499,29 @@ type AwsTgwSiteNextHopType struct {
 	Type           types.List   `tfsdk:"type"`
 }
 
-type AwsTgwSiteIpAddressType struct {
+type AwsTgwSiteIpAddrType struct {
 	VerChoice types.Object `tfsdk:"ver_choice"`
 }
 
-type AwsTgwSiteIpAddressTypeVerChoice struct {
+type AwsTgwSiteVerChoice struct {
 	DualStack types.Object `tfsdk:"dual_stack"`
 	Ipv4      types.Object `tfsdk:"ipv4"`
-	Ipv6      types.Object `tfsdk:"ipv6"`
 }
 
-type AwsTgwSiteIpAddressTypeDualStack struct {
+type AwsTgwSiteDualStack struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
 	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
-type AwsTgwSiteIpv4AddressType struct {
+type AwsTgwSiteIpv4AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type AwsTgwSiteIpv6AddressType struct {
+type AwsTgwSiteIpv6AddrType struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
-type AwsTgwSiteIpAddressTypeIpv4 struct {
-	Addr types.String `tfsdk:"addr"`
-}
-
-type AwsTgwSiteIpAddressTypeIpv6 struct {
+type AwsTgwSiteIpv4 struct {
 	Addr types.String `tfsdk:"addr"`
 }
 
@@ -558,7 +531,6 @@ type AwsTgwSiteIpSubnetType struct {
 
 type AwsTgwSiteIpSubnetTypeVerChoice struct {
 	Ipv4 types.Object `tfsdk:"ipv4"`
-	Ipv6 types.Object `tfsdk:"ipv6"`
 }
 
 type AwsTgwSiteIpSubnetTypeIpv4 struct {
@@ -566,39 +538,34 @@ type AwsTgwSiteIpSubnetTypeIpv4 struct {
 	Prefix types.String `tfsdk:"prefix"`
 }
 
-type AwsTgwSiteIpSubnetTypeIpv6 struct {
-	Plen   types.Int64  `tfsdk:"plen"`
-	Prefix types.String `tfsdk:"prefix"`
-}
-
-type AwsTgwSiteVnConfigurationOutsideStaticRouteChoice struct {
+type AwsTgwSiteOutsideStaticRouteChoice struct {
 	NoOutsideStaticRoutes types.Bool   `tfsdk:"no_outside_static_routes"`
 	OutsideStaticRoutes   types.Object `tfsdk:"outside_static_routes"`
 }
 
-type AwsTgwSiteVnConfigurationOutsideStaticRoutes struct {
+type AwsTgwSiteOutsideStaticRoutes struct {
 	StaticRouteList types.List `tfsdk:"static_route_list"`
 }
 
-type AwsTgwSiteVnConfigurationSiteMeshGroupChoice struct {
+type AwsTgwSiteSiteMeshGroupChoice struct {
 	SmConnectionPublicIp types.Bool `tfsdk:"sm_connection_public_ip"`
 	SmConnectionPvtIp    types.Bool `tfsdk:"sm_connection_pvt_ip"`
 }
 
-type AwsTgwSiteAwsTgwSiteVPCAttachmentListType struct {
+type AwsTgwSiteVPCAttachmentListType struct {
 	VpcList types.List `tfsdk:"vpc_list"`
 }
 
-type AwsTgwSiteAwsTgwSiteVPCAttachmentType struct {
+type AwsTgwSiteVPCAttachmentType struct {
 	Labels types.Map    `tfsdk:"labels"`
 	VpcId  types.String `tfsdk:"vpc_id"`
 }
 
-type AwsTgwSiteCommonWafLiveSignaturesUpdate struct {
+type AwsTgwSiteLiveSignaturesUpdate struct {
 	SignaturesUpdateModeChoice types.Object `tfsdk:"signatures_update_mode_choice"`
 }
 
-type AwsTgwSiteLiveSignaturesUpdateSignaturesUpdateModeChoice struct {
+type AwsTgwSiteSignaturesUpdateModeChoice struct {
 	Automatic types.Bool `tfsdk:"automatic"`
 	Manual    types.Bool `tfsdk:"manual"`
 }
@@ -714,6 +681,7 @@ var AwsTgwSiteAwsParametersAdminPasswordSecretInfoOneofModelAttributeMap = map[s
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: AwsTgwSiteAwsParametersAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"none": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -780,7 +748,6 @@ var AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceModelAttributeMap = ma
 var AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredPointerField --> OutsideSubnet
@@ -804,7 +771,6 @@ var AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceModelAttributeMap = map[str
 var AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for PointerField --> WorkloadSubnet
@@ -828,7 +794,6 @@ var AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceModelAttributeMap = map[st
 var AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceSubnetParamModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> Deployment
@@ -966,7 +931,6 @@ var AwsTgwSiteAwsParametersTgwCidrChoiceModelAttributeMap = map[string]attr.Type
 var AwsTgwSiteAwsParametersTgwCidrChoiceTgwCidrModelAttributeMap = map[string]attr.Type{
 
 	"ipv4": types.StringType,
-	"ipv6": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> WorkerNodes
@@ -1019,9 +983,8 @@ var AwsTgwSiteBlockedServicesChoiceBlockedServicesBlockedSeviceModelAttributeMap
 // Attribute map for OneOfField --> BlockedServicesValueTypeChoice
 var AwsTgwSiteBlockedServicesChoiceBlockedServicesBlockedSeviceBlockedServicesValueTypeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dns":                types.BoolType,
-	"ssh":                types.BoolType,
-	"web_user_interface": types.BoolType,
+	"dns": types.BoolType,
+	"ssh": types.BoolType,
 }
 
 // Attribute map for PointerField --> Coordinates
@@ -1057,12 +1020,6 @@ var AwsTgwSiteDirectConnectChoiceDirectConnectEnabledModelAttributeMap = map[str
 
 	"asn_choice": types.ObjectType{
 		AttrTypes: AwsTgwSiteDirectConnectChoiceDirectConnectEnabledAsnChoiceModelAttributeMap,
-	},
-	"cloud_aggregated_prefix": types.ListType{
-		ElemType: types.StringType,
-	},
-	"dc_connect_aggregated_prefix": types.ListType{
-		ElemType: types.StringType,
 	},
 	"vif_choice": types.ObjectType{
 		AttrTypes: AwsTgwSiteDirectConnectChoiceDirectConnectEnabledVifChoiceModelAttributeMap,
@@ -1250,42 +1207,8 @@ var AwsTgwSitePerformanceEnhancementModeModelAttributeMap = map[string]attr.Type
 // Attribute map for RequiredOneOfField --> PerfModeChoice
 var AwsTgwSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"perf_mode_l3_enhanced": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap,
-	},
-	"perf_mode_l7_enhanced": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL3Enhanced
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo":    types.BoolType,
-	"no_jumbo": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> PerfModeL7Enhanced
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap = map[string]attr.Type{
-
-	"perf_mode_choice": types.ObjectType{
-		AttrTypes: AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PerfModeChoice
-var AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"jumbo_disabled": types.BoolType,
-	"jumbo_enabled":  types.BoolType,
+	"perf_mode_l3_enhanced": types.BoolType,
+	"perf_mode_l7_enhanced": types.BoolType,
 }
 
 // Attribute map for PointerField --> Sw
@@ -1868,9 +1791,6 @@ var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListCo
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -1902,12 +1822,6 @@ var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListCo
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -1922,20 +1836,10 @@ var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListCo
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2063,9 +1967,6 @@ var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteList
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> DualStack
@@ -2097,12 +1998,6 @@ var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteList
 	"addr": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Subnets
 var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsModelAttributeMap = map[string]attr.Type{
 
@@ -2117,20 +2012,10 @@ var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteList
 	"ipv4": types.ObjectType{
 		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap,
 	},
-	"ipv6": types.ObjectType{
-		AttrTypes: AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap,
-	},
 }
 
 // Attribute map for PointerOfOneOfField --> Ipv4
 var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"plen":   types.Int64Type,
-	"prefix": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap = map[string]attr.Type{
 
 	"plen":   types.Int64Type,
 	"prefix": types.StringType,
@@ -2176,7 +2061,7 @@ var AwsTgwSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for OneOfField --> SignaturesUpdateModeChoice
+// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
 var AwsTgwSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -2197,8 +2082,8 @@ func (d *DataSourceF5XCAwsTgwSite) Metadata(ctx context.Context, request datasou
 func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a aws_tgw_site This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of aws_tgw_site) etc. can be fetched",
+		MarkdownDescription: "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC.<br>It can be used to automatically site creation in the AWS TGW.<br><br>View will create following child objects.<br><br>* Site",
+		Description:         "AWS TGW site view defines a required parameters that can be used in CRUD, to create and manage a volterra site in AWS VPC. It can be used to automatically site creation in the AWS TGW. View will create following child objects. Site",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -2300,8 +2185,15 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
+												Sensitive:   true,
 											},
 										},
+									},
+									"none": schema.BoolAttribute{
+										Description: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
 									},
 								},
 							},
@@ -2362,12 +2254,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"ipv6": schema.StringAttribute{
-																	Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
 															},
 														},
 													},
@@ -2412,12 +2298,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 															Optional:    false,
 															Computed:    true,
 														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
 													},
 												},
 											},
@@ -2450,12 +2330,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 													Attributes: map[string]schema.Attribute{
 														"ipv4": schema.StringAttribute{
 															Description: "IPv4 Subnet IPv4 subnet prefix for this subnet",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6": schema.StringAttribute{
-															Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
@@ -2751,12 +2625,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 										Optional:    false,
 										Computed:    true,
 									},
-									"ipv6": schema.StringAttribute{
-										Description: "IPv6 Subnet IPv6 subnet prefix for this subnet",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
 								},
 							},
 						},
@@ -2828,12 +2696,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 												},
 												"ssh": schema.BoolAttribute{
 													Description: "SSH",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"web_user_interface": schema.BoolAttribute{
-													Description: "Web UI",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -2950,20 +2812,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 										Computed:    true,
 									},
 								},
-							},
-							"cloud_aggregated_prefix": schema.ListAttribute{
-								Description: "Cloud Aggregated Prefix Aggregated prefix from cloud to be advertised for DC side",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"dc_connect_aggregated_prefix": schema.ListAttribute{
-								Description: "Direct Connect Aggregate Prefixes Aggregated prefix from direct connect to be advertised for Cloud side",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
 							},
 							"vif_choice": schema.SingleNestedAttribute{
 								Description: "AWS Direct Connect VIF Configuration AWS Direct Connect VIF Configuration",
@@ -3273,61 +3121,17 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
+							"perf_mode_l3_enhanced": schema.BoolAttribute{
 								Description: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"perf_mode_choice": schema.SingleNestedAttribute{
-										Description: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"jumbo": schema.BoolAttribute{
-												Description: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"no_jumbo": schema.BoolAttribute{
-												Description: "L3 Mode Enhanced Performance with no jumbo frame support",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-								},
 							},
-							"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
+							"perf_mode_l7_enhanced": schema.BoolAttribute{
 								Description: "Default Performance Mode Site optimized for L7 traffic processing",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"perf_mode_choice": schema.SingleNestedAttribute{
-										Description: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"jumbo_disabled": schema.BoolAttribute{
-												Description: "L7 Mode Enhanced Performance with no jumbo frame support",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"jumbo_enabled": schema.BoolAttribute{
-												Description: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-								},
 							},
 						},
 					},
@@ -4235,20 +4039,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 																								},
 																							},
 																						},
-																						"ipv6": schema.SingleNestedAttribute{
-																							Description: "IPv6 ADDRESS IPv6 Address",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																							Attributes: map[string]schema.Attribute{
-																								"addr": schema.StringAttribute{
-																									Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																								},
-																							},
-																						},
 																					},
 																				},
 																			},
@@ -4289,26 +4079,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 																							},
 																							"prefix": schema.StringAttribute{
 																								Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
-																						},
-																					},
-																					"ipv6": schema.SingleNestedAttribute{
-																						Description: "IPv6 Subnet IPv6 Subnet Address",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																						Attributes: map[string]schema.Attribute{
-																							"plen": schema.Int64Attribute{
-																								Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
-																							"prefix": schema.StringAttribute{
-																								Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																								Required:    false,
 																								Optional:    false,
 																								Computed:    true,
@@ -4490,20 +4260,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 																								},
 																							},
 																						},
-																						"ipv6": schema.SingleNestedAttribute{
-																							Description: "IPv6 ADDRESS IPv6 Address",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																							Attributes: map[string]schema.Attribute{
-																								"addr": schema.StringAttribute{
-																									Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																									Required:    false,
-																									Optional:    false,
-																									Computed:    true,
-																								},
-																							},
-																						},
 																					},
 																				},
 																			},
@@ -4544,26 +4300,6 @@ func (r *DataSourceF5XCAwsTgwSite) Schema(ctx context.Context, request datasourc
 																							},
 																							"prefix": schema.StringAttribute{
 																								Description: "Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
-																						},
-																					},
-																					"ipv6": schema.SingleNestedAttribute{
-																						Description: "IPv6 Subnet IPv6 Subnet Address",
-																						Required:    false,
-																						Optional:    false,
-																						Computed:    true,
-																						Attributes: map[string]schema.Attribute{
-																							"plen": schema.Int64Attribute{
-																								Description: "Prefix length Prefix length of the IPv6 subnet. Must be <= 128",
-																								Required:    false,
-																								Optional:    false,
-																								Computed:    true,
-																							},
-																							"prefix": schema.StringAttribute{
-																								Description: "Prefix Prefix part of the IPv6 subnet given in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' e.g. '2001:db8:0:0:0:2:0:0' The address can be compacted by suppressing zeros e.g. '2001:db8::2::'",
 																								Required:    false,
 																								Optional:    false,
 																								Computed:    true,
@@ -4730,7 +4466,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_aws_tgw_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "aws_tgw_site", err))
 		return
 	}
 
@@ -4793,7 +4529,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot RequiredPointerField --> AwsParameters
 	if specData.GetAwsParameters() != nil {
-		var awsTgwSiteAwsTgwSiteServicesVPCTypeModel = &AwsTgwSiteAwsTgwSiteServicesVPCType{}
+		var awsTgwSiteServicesVPCTypeModel = &AwsTgwSiteServicesVPCType{}
 		awsParametersElement := specData.GetAwsParameters()
 
 		// data specToModelNested PointerField --> AdminPassword
@@ -4898,6 +4634,15 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					}
 				}
 
+				// data specToModelNested BoolOfOneOfPointerField --> None
+				_, isNone := adminPasswordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_None)
+
+				if isNone {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolValue(true)
+				} else {
+					adminPasswordsecretInfoChoiceChoicesAttributeMap["none"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -4935,7 +4680,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.AdminPassword = awsTgwSiteSecretTypeModelObj
+			awsTgwSiteServicesVPCTypeModel.AdminPassword = awsTgwSiteSecretTypeModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -4944,31 +4689,31 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.AdminPassword = types.ObjectNull(AwsTgwSiteAwsParametersAdminPasswordModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.AdminPassword = types.ObjectNull(AwsTgwSiteAwsParametersAdminPasswordModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredStringField --> AwsRegion
 		if awsParametersElement.GetAwsRegion() != "" {
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.AwsRegion = types.StringValue(awsParametersElement.GetAwsRegion())
+			awsTgwSiteServicesVPCTypeModel.AwsRegion = types.StringValue(awsParametersElement.GetAwsRegion())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.AwsRegion = types.StringNull()
+			awsTgwSiteServicesVPCTypeModel.AwsRegion = types.StringNull()
 		}
 
 		// data specToModelNested RequiredArrayOfPointerField --> AzNodes
 		if len(awsParametersElement.GetAzNodes()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			azNodesElements := make([]AwsTgwSiteViewsAWSVPCTwoInterfaceNodeType, 0, len(awsParametersElement.GetAzNodes()))
+			azNodesElements := make([]AwsTgwSiteAWSVPCTwoIfaceNodeType, 0, len(awsParametersElement.GetAzNodes()))
 			for _, azNodesElement := range awsParametersElement.GetAzNodes() {
-				awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel := AwsTgwSiteViewsAWSVPCTwoInterfaceNodeType{}
+				awsTgwSiteAWSVPCTwoIfaceNodeTypeModel := AwsTgwSiteAWSVPCTwoIfaceNodeType{}
 
 				// data specToModelNested RequiredStringField --> AwsAzName
 				if azNodesElement.GetAwsAzName() != "" {
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.AwsAzName = types.StringValue(azNodesElement.GetAwsAzName())
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.AwsAzName = types.StringValue(azNodesElement.GetAwsAzName())
 				} else {
 					// Empty string, set to null
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.AwsAzName = types.StringNull()
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.AwsAzName = types.StringNull()
 				}
 
 				// data specToModelNested RequiredOneOfField --> Choice
@@ -5031,14 +4776,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 										} else {
 											// Empty string, set to null
 											subnetParamAttributeMap["ipv4"] = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Ipv6
-										if subnetParamElement.GetIpv6() != "" {
-											subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-										} else {
-											// Empty string, set to null
-											subnetParamAttributeMap["ipv6"] = types.StringNull()
 										}
 
 										subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesChoiceInsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
@@ -5104,16 +4841,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					}
 
 					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.Choice = finalObj
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.Choice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.Choice = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesChoiceModelAttributeMap)
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.Choice = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested RequiredPointerField --> OutsideSubnet
 				if azNodesElement.GetOutsideSubnet() != nil {
 					// Create the nested Go struct
-					awsTgwSiteViewsCloudSubnetTypeModel := &AwsTgwSiteViewsCloudSubnetType{}
+					awsTgwSiteCloudSubnetTypeModel := &AwsTgwSiteCloudSubnetType{}
 					outsideSubnetElement := azNodesElement.GetOutsideSubnet()
 
 					// Recursively populate the nested struct
@@ -5158,14 +4895,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
 								}
 
-								// data specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
-								}
-
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 								response.Diagnostics.Append(subnetParamObjDiags...)
 								if response.Diagnostics.HasError() {
@@ -5190,19 +4919,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						awsTgwSiteViewsCloudSubnetTypeModel.Choice = finalObj
+						awsTgwSiteCloudSubnetTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						awsTgwSiteViewsCloudSubnetTypeModel.Choice = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceModelAttributeMap)
+						awsTgwSiteCloudSubnetTypeModel.Choice = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesOutsideSubnetChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					awsTgwSiteViewsCloudSubnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteAwsParametersAzNodesOutsideSubnetModelAttributeMap, awsTgwSiteViewsCloudSubnetTypeModel)
+					awsTgwSiteCloudSubnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteAwsParametersAzNodesOutsideSubnetModelAttributeMap, awsTgwSiteCloudSubnetTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.OutsideSubnet = awsTgwSiteViewsCloudSubnetTypeModelObj
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.OutsideSubnet = awsTgwSiteCloudSubnetTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -5211,13 +4940,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.OutsideSubnet = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesOutsideSubnetModelAttributeMap)
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.OutsideSubnet = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesOutsideSubnetModelAttributeMap)
 				}
 
 				// data specToModelNested PointerField --> WorkloadSubnet
 				if azNodesElement.GetWorkloadSubnet() != nil {
 					// Create the nested Go struct
-					awsTgwSiteViewsCloudSubnetTypeModel := &AwsTgwSiteViewsCloudSubnetType{}
+					awsTgwSiteCloudSubnetTypeModel := &AwsTgwSiteCloudSubnetType{}
 					workloadSubnetElement := azNodesElement.GetWorkloadSubnet()
 
 					// Recursively populate the nested struct
@@ -5262,14 +4991,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 									subnetParamAttributeMap["ipv4"] = types.StringNull()
 								}
 
-								// data specToModelNested StringField --> Ipv6
-								if subnetParamElement.GetIpv6() != "" {
-									subnetParamAttributeMap["ipv6"] = types.StringValue(subnetParamElement.GetIpv6())
-								} else {
-									// Empty string, set to null
-									subnetParamAttributeMap["ipv6"] = types.StringNull()
-								}
-
 								subnetParamObj, subnetParamObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceSubnetParamModelAttributeMap, subnetParamAttributeMap)
 								response.Diagnostics.Append(subnetParamObjDiags...)
 								if response.Diagnostics.HasError() {
@@ -5294,19 +5015,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						awsTgwSiteViewsCloudSubnetTypeModel.Choice = finalObj
+						awsTgwSiteCloudSubnetTypeModel.Choice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						awsTgwSiteViewsCloudSubnetTypeModel.Choice = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceModelAttributeMap)
+						awsTgwSiteCloudSubnetTypeModel.Choice = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					awsTgwSiteViewsCloudSubnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteAwsParametersAzNodesWorkloadSubnetModelAttributeMap, awsTgwSiteViewsCloudSubnetTypeModel)
+					awsTgwSiteCloudSubnetTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteAwsParametersAzNodesWorkloadSubnetModelAttributeMap, awsTgwSiteCloudSubnetTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.WorkloadSubnet = awsTgwSiteViewsCloudSubnetTypeModelObj
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.WorkloadSubnet = awsTgwSiteCloudSubnetTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -5315,10 +5036,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel.WorkloadSubnet = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetModelAttributeMap)
+					awsTgwSiteAWSVPCTwoIfaceNodeTypeModel.WorkloadSubnet = types.ObjectNull(AwsTgwSiteAwsParametersAzNodesWorkloadSubnetModelAttributeMap)
 				}
 
-				azNodesElements = append(azNodesElements, awsTgwSiteViewsAWSVPCTwoInterfaceNodeTypeModel)
+				azNodesElements = append(azNodesElements, awsTgwSiteAWSVPCTwoIfaceNodeTypeModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -5327,13 +5048,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.AzNodes = azNodesListValue
+			awsTgwSiteServicesVPCTypeModel.AzNodes = azNodesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.AzNodes = types.ListNull(types.ObjectType{AttrTypes: AwsTgwSiteAwsParametersAzNodesModelAttributeMap})
+			awsTgwSiteServicesVPCTypeModel.AzNodes = types.ListNull(types.ObjectType{AttrTypes: AwsTgwSiteAwsParametersAzNodesModelAttributeMap})
 		}
 
 		// data specToModelNested RequiredOneOfField --> Deployment
@@ -5406,14 +5127,14 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.DeploymentChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.DeploymentChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.DeploymentChoice = types.ObjectNull(AwsTgwSiteAwsParametersDeploymentModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.DeploymentChoice = types.ObjectNull(AwsTgwSiteAwsParametersDeploymentModelAttributeMap)
 		}
 
 		// data specToModelNested UintField --> DiskSize
-		awsTgwSiteAwsTgwSiteServicesVPCTypeModel.DiskSize = types.Int64Value(int64(awsParametersElement.GetDiskSize()))
+		awsTgwSiteServicesVPCTypeModel.DiskSize = types.Int64Value(int64(awsParametersElement.GetDiskSize()))
 
 		// data specToModelNested OneOfField --> EncryptionChoice
 		if awsParametersElement.GetEncryptionChoice() != nil {
@@ -5477,18 +5198,18 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.EncryptionChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.EncryptionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.EncryptionChoice = types.ObjectNull(AwsTgwSiteAwsParametersEncryptionChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.EncryptionChoice = types.ObjectNull(AwsTgwSiteAwsParametersEncryptionChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredStringField --> InstanceType
 		if awsParametersElement.GetInstanceType() != "" {
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.InstanceType = types.StringValue(awsParametersElement.GetInstanceType())
+			awsTgwSiteServicesVPCTypeModel.InstanceType = types.StringValue(awsParametersElement.GetInstanceType())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.InstanceType = types.StringNull()
+			awsTgwSiteServicesVPCTypeModel.InstanceType = types.StringNull()
 		}
 
 		// data specToModelNested RequiredOneOfField --> InternetVipChoice
@@ -5534,10 +5255,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.InternetVipChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.InternetVipChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.InternetVipChoice = types.ObjectNull(AwsTgwSiteAwsParametersInternetVipChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.InternetVipChoice = types.ObjectNull(AwsTgwSiteAwsParametersInternetVipChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> SecurityGroupChoice
@@ -5611,10 +5332,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.SecurityGroupChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.SecurityGroupChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.SecurityGroupChoice = types.ObjectNull(AwsTgwSiteAwsParametersSecurityGroupChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.SecurityGroupChoice = types.ObjectNull(AwsTgwSiteAwsParametersSecurityGroupChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> ServiceVpcChoice
@@ -5731,18 +5452,18 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.ServiceVpcChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.ServiceVpcChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.ServiceVpcChoice = types.ObjectNull(AwsTgwSiteAwsParametersServiceVpcChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.ServiceVpcChoice = types.ObjectNull(AwsTgwSiteAwsParametersServiceVpcChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredStringField --> SshKey
 		if awsParametersElement.GetSshKey() != "" {
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.SshKey = types.StringValue(awsParametersElement.GetSshKey())
+			awsTgwSiteServicesVPCTypeModel.SshKey = types.StringValue(awsParametersElement.GetSshKey())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.SshKey = types.StringNull()
+			awsTgwSiteServicesVPCTypeModel.SshKey = types.StringNull()
 		}
 
 		// data specToModelNested RequiredOneOfField --> TgwChoice
@@ -5893,10 +5614,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.TgwChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.TgwChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.TgwChoice = types.ObjectNull(AwsTgwSiteAwsParametersTgwChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.TgwChoice = types.ObjectNull(AwsTgwSiteAwsParametersTgwChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> TgwCidrChoice
@@ -5938,14 +5659,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 						tgwCidrAttributeMap["ipv4"] = types.StringNull()
 					}
 
-					// data specToModelNested StringField --> Ipv6
-					if tgwCidrElement.GetIpv6() != "" {
-						tgwCidrAttributeMap["ipv6"] = types.StringValue(tgwCidrElement.GetIpv6())
-					} else {
-						// Empty string, set to null
-						tgwCidrAttributeMap["ipv6"] = types.StringNull()
-					}
-
 					tgwCidrObj, tgwCidrObjDiags := types.ObjectValue(AwsTgwSiteAwsParametersTgwCidrChoiceTgwCidrModelAttributeMap, tgwCidrAttributeMap)
 					response.Diagnostics.Append(tgwCidrObjDiags...)
 					if response.Diagnostics.HasError() {
@@ -5970,10 +5683,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.TgwCidrChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.TgwCidrChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.TgwCidrChoice = types.ObjectNull(AwsTgwSiteAwsParametersTgwCidrChoiceModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.TgwCidrChoice = types.ObjectNull(AwsTgwSiteAwsParametersTgwCidrChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> WorkerNodes
@@ -6030,16 +5743,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.WorkerNodesChoice = finalObj
+			awsTgwSiteServicesVPCTypeModel.WorkerNodesChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel.WorkerNodesChoice = types.ObjectNull(AwsTgwSiteAwsParametersWorkerNodesModelAttributeMap)
+			awsTgwSiteServicesVPCTypeModel.WorkerNodesChoice = types.ObjectNull(AwsTgwSiteAwsParametersWorkerNodesModelAttributeMap)
 		}
 
 		awsParametersObj, awsParametersDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteAwsParametersModelAttributeMap,
-			awsTgwSiteAwsTgwSiteServicesVPCTypeModel,
+			awsTgwSiteServicesVPCTypeModel,
 		)
 		response.Diagnostics.Append(awsParametersDiags...)
 		if response.Diagnostics.HasError() {
@@ -6060,7 +5773,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 		blockedServicesChoiceChoices := specData.GetBlockedServicesChoice()
 
 		// The model struct that will be populated by the nested template.
-		var blockedServicesChoiceChoicesModel = &AwsTgwSiteGlobalSpecTypeBlockedServicesChoice{}
+		var blockedServicesChoiceChoicesModel = &AwsTgwSiteBlockedServicesChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6118,15 +5831,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolValue(true)
 							} else {
 								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["ssh"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> WebUserInterface
-							_, isWebUserInterface := blockedSeviceblockedServicesValueTypeChoiceChoices.(*ves_io_schema_fleet.BlockedServices_WebUserInterface)
-
-							if isWebUserInterface {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolValue(true)
-							} else {
-								blockedSeviceblockedServicesValueTypeChoiceChoicesAttributeMap["web_user_interface"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -6222,19 +5926,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> Coordinates
 	if specData.GetCoordinates() != nil {
-		var awsTgwSiteSiteCoordinatesModel = &AwsTgwSiteSiteCoordinates{}
+		var awsTgwSiteCoordinatesModel = &AwsTgwSiteCoordinates{}
 		coordinatesElement := specData.GetCoordinates()
 
 		// data specToModelNested FloatField --> Latitude
-		awsTgwSiteSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
+		awsTgwSiteCoordinatesModel.Latitude = types.Float32Value(float32(coordinatesElement.GetLatitude()))
 
 		// data specToModelNested FloatField --> Longitude
-		awsTgwSiteSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
+		awsTgwSiteCoordinatesModel.Longitude = types.Float32Value(float32(coordinatesElement.GetLongitude()))
 
 		coordinatesObj, coordinatesDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteCoordinatesModelAttributeMap,
-			awsTgwSiteSiteCoordinatesModel,
+			awsTgwSiteCoordinatesModel,
 		)
 		response.Diagnostics.Append(coordinatesDiags...)
 		data.Coordinates = coordinatesObj
@@ -6244,45 +5948,45 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> CustomDns
 	if specData.GetCustomDns() != nil {
-		var awsTgwSiteViewsCustomDNSModel = &AwsTgwSiteViewsCustomDNS{}
+		var awsTgwSiteCustomDNSModel = &AwsTgwSiteCustomDNS{}
 		customDnsElement := specData.GetCustomDns()
 
 		// data specToModelNested StringField --> InsideNameserver
 		if customDnsElement.GetInsideNameserver() != "" {
-			awsTgwSiteViewsCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
+			awsTgwSiteCustomDNSModel.InsideNameserver = types.StringValue(customDnsElement.GetInsideNameserver())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteViewsCustomDNSModel.InsideNameserver = types.StringNull()
+			awsTgwSiteCustomDNSModel.InsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> InsideNameserverV6
 		if customDnsElement.GetInsideNameserverV6() != "" {
-			awsTgwSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
+			awsTgwSiteCustomDNSModel.InsideNameserverV6 = types.StringValue(customDnsElement.GetInsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteViewsCustomDNSModel.InsideNameserverV6 = types.StringNull()
+			awsTgwSiteCustomDNSModel.InsideNameserverV6 = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserver
 		if customDnsElement.GetOutsideNameserver() != "" {
-			awsTgwSiteViewsCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
+			awsTgwSiteCustomDNSModel.OutsideNameserver = types.StringValue(customDnsElement.GetOutsideNameserver())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteViewsCustomDNSModel.OutsideNameserver = types.StringNull()
+			awsTgwSiteCustomDNSModel.OutsideNameserver = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> OutsideNameserverV6
 		if customDnsElement.GetOutsideNameserverV6() != "" {
-			awsTgwSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
+			awsTgwSiteCustomDNSModel.OutsideNameserverV6 = types.StringValue(customDnsElement.GetOutsideNameserverV6())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteViewsCustomDNSModel.OutsideNameserverV6 = types.StringNull()
+			awsTgwSiteCustomDNSModel.OutsideNameserverV6 = types.StringNull()
 		}
 
 		customDnsObj, customDnsDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteCustomDnsModelAttributeMap,
-			awsTgwSiteViewsCustomDNSModel,
+			awsTgwSiteCustomDNSModel,
 		)
 		response.Diagnostics.Append(customDnsDiags...)
 		data.CustomDns = customDnsObj
@@ -6300,7 +6004,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 		directConnectChoiceChoices := specData.GetDirectConnectChoice()
 
 		// The model struct that will be populated by the nested template.
-		var directConnectChoiceChoicesModel = &AwsTgwSiteGlobalSpecTypeDirectConnectChoice{}
+		var directConnectChoiceChoicesModel = &AwsTgwSiteDirectConnectChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6371,30 +6075,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
 					directConnectEnabledAttributeMap["asn_choice"] = types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledAsnChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested ArrayOfStringField --> CloudAggregatedPrefix
-				if len(directConnectEnabledElement.GetCloudAggregatedPrefix()) > 0 {
-					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetCloudAggregatedPrefix())
-					response.Diagnostics.Append(listDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = listValue
-				} else {
-					directConnectEnabledAttributeMap["cloud_aggregated_prefix"] = types.ListNull(types.StringType)
-				}
-
-				// data specToModelNested ArrayOfStringField --> DcConnectAggregatedPrefix
-				if len(directConnectEnabledElement.GetDcConnectAggregatedPrefix()) > 0 {
-					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, directConnectEnabledElement.GetDcConnectAggregatedPrefix())
-					response.Diagnostics.Append(listDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = listValue
-				} else {
-					directConnectEnabledAttributeMap["dc_connect_aggregated_prefix"] = types.ListNull(types.StringType)
 				}
 
 				// data specToModelNested RequiredOneOfField --> VifChoice
@@ -6491,16 +6171,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 							if len(hostedVifsElement.GetVifList()) > 0 {
 								// Step 1: Always create a slice of model structs from the spec data.
 								// This slice serves as an intermediate representation.
-								vifListElements := make([]AwsTgwSiteViewsVifRegionConfig, 0, len(hostedVifsElement.GetVifList()))
+								vifListElements := make([]AwsTgwSiteVifRegionConfig, 0, len(hostedVifsElement.GetVifList()))
 								for _, vifListElement := range hostedVifsElement.GetVifList() {
-									awsTgwSiteViewsVifRegionConfigModel := AwsTgwSiteViewsVifRegionConfig{}
+									awsTgwSiteVifRegionConfigModel := AwsTgwSiteVifRegionConfig{}
 
 									// data specToModelNested RequiredStringField --> VifId
 									if vifListElement.GetVifId() != "" {
-										awsTgwSiteViewsVifRegionConfigModel.VifId = types.StringValue(vifListElement.GetVifId())
+										awsTgwSiteVifRegionConfigModel.VifId = types.StringValue(vifListElement.GetVifId())
 									} else {
 										// Empty string, set to null
-										awsTgwSiteViewsVifRegionConfigModel.VifId = types.StringNull()
+										awsTgwSiteVifRegionConfigModel.VifId = types.StringNull()
 									}
 
 									// data specToModelNested RequiredOneOfField --> VifRegionChoice
@@ -6547,13 +6227,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 										}
 
 										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										awsTgwSiteViewsVifRegionConfigModel.VifRegionChoice = finalObj
+										awsTgwSiteVifRegionConfigModel.VifRegionChoice = finalObj
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										awsTgwSiteViewsVifRegionConfigModel.VifRegionChoice = types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledVifChoiceHostedVifsVifListVifRegionChoiceModelAttributeMap)
+										awsTgwSiteVifRegionConfigModel.VifRegionChoice = types.ObjectNull(AwsTgwSiteDirectConnectChoiceDirectConnectEnabledVifChoiceHostedVifsVifListVifRegionChoiceModelAttributeMap)
 									}
 
-									vifListElements = append(vifListElements, awsTgwSiteViewsVifRegionConfigModel)
+									vifListElements = append(vifListElements, awsTgwSiteVifRegionConfigModel)
 								}
 								// CASE 1: The target field is a `types.List` or an attribute map.
 								// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -6762,32 +6442,32 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> DirectConnectInfo
 	if specData.GetDirectConnectInfo() != nil {
-		var awsTgwSiteViewsDirectConnectInfoModel = &AwsTgwSiteViewsDirectConnectInfo{}
+		var awsTgwSiteDirectConnectInfoModel = &AwsTgwSiteDirectConnectInfo{}
 		directConnectInfoElement := specData.GetDirectConnectInfo()
 
 		// data specToModelNested UintField --> Asn
-		awsTgwSiteViewsDirectConnectInfoModel.Asn = types.Int64Value(int64(directConnectInfoElement.GetAsn()))
+		awsTgwSiteDirectConnectInfoModel.Asn = types.Int64Value(int64(directConnectInfoElement.GetAsn()))
 
 		// data specToModelNested RequiredStringField --> DirectConnectGatewayId
 		if directConnectInfoElement.GetDirectConnectGatewayId() != "" {
-			awsTgwSiteViewsDirectConnectInfoModel.DirectConnectGatewayId = types.StringValue(directConnectInfoElement.GetDirectConnectGatewayId())
+			awsTgwSiteDirectConnectInfoModel.DirectConnectGatewayId = types.StringValue(directConnectInfoElement.GetDirectConnectGatewayId())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteViewsDirectConnectInfoModel.DirectConnectGatewayId = types.StringNull()
+			awsTgwSiteDirectConnectInfoModel.DirectConnectGatewayId = types.StringNull()
 		}
 
 		// data specToModelNested RequiredStringField --> VgwId
 		if directConnectInfoElement.GetVgwId() != "" {
-			awsTgwSiteViewsDirectConnectInfoModel.VgwId = types.StringValue(directConnectInfoElement.GetVgwId())
+			awsTgwSiteDirectConnectInfoModel.VgwId = types.StringValue(directConnectInfoElement.GetVgwId())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteViewsDirectConnectInfoModel.VgwId = types.StringNull()
+			awsTgwSiteDirectConnectInfoModel.VgwId = types.StringNull()
 		}
 
 		directConnectInfoObj, directConnectInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteDirectConnectInfoModelAttributeMap,
-			awsTgwSiteViewsDirectConnectInfoModel,
+			awsTgwSiteDirectConnectInfoModel,
 		)
 		response.Diagnostics.Append(directConnectInfoDiags...)
 		data.DirectConnectInfo = directConnectInfoObj
@@ -6796,16 +6476,12 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 	}
 
 	// data SpecToModelRoot StringField --> ErrorDescription
-	if specData.GetErrorDescription() != "" {
-		data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.ErrorDescription = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.ErrorDescription = types.StringValue(specData.GetErrorDescription())
 
 	// data SpecToModelRoot PointerField --> KubernetesUpgradeDrain
 	if specData.GetKubernetesUpgradeDrain() != nil {
-		var awsTgwSiteViewsKubernetesUpgradeDrainModel = &AwsTgwSiteViewsKubernetesUpgradeDrain{}
+		var awsTgwSiteK8sUpgradeDrainModel = &AwsTgwSiteK8sUpgradeDrain{}
 		kubernetesUpgradeDrainElement := specData.GetKubernetesUpgradeDrain()
 
 		// data specToModelNested RequiredOneOfField --> KubernetesUpgradeDrainEnableChoice
@@ -6907,16 +6583,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
+			awsTgwSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteViewsKubernetesUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(AwsTgwSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
+			awsTgwSiteK8sUpgradeDrainModel.KubernetesUpgradeDrainEnableChoice = types.ObjectNull(AwsTgwSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceModelAttributeMap)
 		}
 
 		kubernetesUpgradeDrainObj, kubernetesUpgradeDrainDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteKubernetesUpgradeDrainModelAttributeMap,
-			awsTgwSiteViewsKubernetesUpgradeDrainModel,
+			awsTgwSiteK8sUpgradeDrainModel,
 		)
 		response.Diagnostics.Append(kubernetesUpgradeDrainDiags...)
 		data.KubernetesUpgradeDrain = kubernetesUpgradeDrainObj
@@ -6934,7 +6610,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 		logsReceiverChoiceChoices := specData.GetLogsReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logsReceiverChoiceChoicesModel = &AwsTgwSiteGlobalSpecTypeLogsReceiverChoice{}
+		var logsReceiverChoiceChoicesModel = &AwsTgwSiteLogsReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -6969,7 +6645,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> OfflineSurvivabilityMode
 	if specData.GetOfflineSurvivabilityMode() != nil {
-		var awsTgwSiteViewsOfflineSurvivabilityModeTypeModel = &AwsTgwSiteViewsOfflineSurvivabilityModeType{}
+		var awsTgwSiteOfflineSurvivabilityModeTypeModel = &AwsTgwSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
 		// data specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
@@ -7015,16 +6691,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
+			awsTgwSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteViewsOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AwsTgwSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
+			awsTgwSiteOfflineSurvivabilityModeTypeModel.OfflineSurvivabilityModeChoice = types.ObjectNull(AwsTgwSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap)
 		}
 
 		offlineSurvivabilityModeObj, offlineSurvivabilityModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteOfflineSurvivabilityModeModelAttributeMap,
-			awsTgwSiteViewsOfflineSurvivabilityModeTypeModel,
+			awsTgwSiteOfflineSurvivabilityModeTypeModel,
 		)
 		response.Diagnostics.Append(offlineSurvivabilityModeDiags...)
 		data.OfflineSurvivabilityMode = offlineSurvivabilityModeObj
@@ -7034,7 +6710,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> Os
 	if specData.GetOs() != nil {
-		var awsTgwSiteViewsOperatingSystemTypeModel = &AwsTgwSiteViewsOperatingSystemType{}
+		var awsTgwSiteOperatingSystemTypeModel = &AwsTgwSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
 		// data specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
@@ -7081,16 +6757,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
+			awsTgwSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteViewsOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AwsTgwSiteOsOperatingSystemVersionChoiceModelAttributeMap)
+			awsTgwSiteOperatingSystemTypeModel.OperatingSystemVersionChoice = types.ObjectNull(AwsTgwSiteOsOperatingSystemVersionChoiceModelAttributeMap)
 		}
 
 		osObj, osDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteOsModelAttributeMap,
-			awsTgwSiteViewsOperatingSystemTypeModel,
+			awsTgwSiteOperatingSystemTypeModel,
 		)
 		response.Diagnostics.Append(osDiags...)
 		data.Os = osObj
@@ -7100,7 +6776,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> PerformanceEnhancementMode
 	if specData.GetPerformanceEnhancementMode() != nil {
-		var awsTgwSiteViewsPerformanceEnhancementModeTypeModel = &AwsTgwSiteViewsPerformanceEnhancementModeType{}
+		var awsTgwSitePerformanceEnhancementModeTypeModel = &AwsTgwSitePerformanceEnhancementModeType{}
 		performanceEnhancementModeElement := specData.GetPerformanceEnhancementMode()
 
 		// data specToModelNested RequiredOneOfField --> PerfModeChoice
@@ -7115,144 +6791,22 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 			// Process nested choices, populating the temporary attribute map
 
-			// data specToModelNested PointerOfOneOfField --> PerfModeL3Enhanced
-			// <no value>
-			// false
-			{
-				perfModeL3EnhancedOptionsWrapper, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
-				perfModeL3EnhancedAttributeMap := make(map[string]attr.Value)
+			// data specToModelNested BoolOfOneOfPointerField --> PerfModeL3Enhanced
+			_, isPerfModeL3Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced)
 
-				if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
-					perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
-
-					// data specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
-					if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						perfModeL3EnhancedperfModeChoiceChoices := perfModeL3EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> Jumbo
-						_, isJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_Jumbo)
-
-						if isJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["jumbo"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> NoJumbo
-						_, isNoJumbo := perfModeL3EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo)
-
-						if isNoJumbo {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolValue(true)
-						} else {
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap["no_jumbo"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL3EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL3EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL3EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL3EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL3EnhancedObj, perfModeL3EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap, perfModeL3EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL3EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = perfModeL3EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttributeMap)
-				}
+			if isPerfModeL3Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l3_enhanced"] = types.BoolNull()
 			}
 
-			// data specToModelNested PointerOfOneOfField --> PerfModeL7Enhanced
-			// <no value>
-			// false
-			{
-				perfModeL7EnhancedOptionsWrapper, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
-				perfModeL7EnhancedAttributeMap := make(map[string]attr.Value)
+			// data specToModelNested BoolOfOneOfPointerField --> PerfModeL7Enhanced
+			_, isPerfModeL7Enhanced := performanceEnhancementModeperfModeChoiceChoices.(*ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced)
 
-				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
-					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
-
-					// data specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
-					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						perfModeL7EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						perfModeL7EnhancedperfModeChoiceChoices := perfModeL7EnhancedElement.GetPerfModeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> JumboDisabled
-						_, isJumboDisabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled)
-
-						if isJumboDisabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_disabled"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> JumboEnabled
-						_, isJumboEnabled := perfModeL7EnhancedperfModeChoiceChoices.(*ves_io_schema_views.L7PerformanceEnhancementType_JumboEnabled)
-
-						if isJumboEnabled {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolValue(true)
-						} else {
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap["jumbo_enabled"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, perfModeL7EnhancedperfModeChoiceChoicesObjDiags := types.ObjectValue(
-							AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							perfModeL7EnhancedperfModeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(perfModeL7EnhancedperfModeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						perfModeL7EnhancedAttributeMap["perf_mode_choice"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap)
-					}
-
-					perfModeL7EnhancedObj, perfModeL7EnhancedObjDiags := types.ObjectValue(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap, perfModeL7EnhancedAttributeMap)
-					response.Diagnostics.Append(perfModeL7EnhancedObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = perfModeL7EnhancedObj
-				} else {
-					performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttributeMap)
-				}
+			if isPerfModeL7Enhanced {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolValue(true)
+			} else {
+				performanceEnhancementModeperfModeChoiceChoicesAttributeMap["perf_mode_l7_enhanced"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -7268,16 +6822,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
+			awsTgwSitePerformanceEnhancementModeTypeModel.PerfModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteViewsPerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap)
+			awsTgwSitePerformanceEnhancementModeTypeModel.PerfModeChoice = types.ObjectNull(AwsTgwSitePerformanceEnhancementModePerfModeChoiceModelAttributeMap)
 		}
 
 		performanceEnhancementModeObj, performanceEnhancementModeDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSitePerformanceEnhancementModeModelAttributeMap,
-			awsTgwSiteViewsPerformanceEnhancementModeTypeModel,
+			awsTgwSitePerformanceEnhancementModeTypeModel,
 		)
 		response.Diagnostics.Append(performanceEnhancementModeDiags...)
 		data.PerformanceEnhancementMode = performanceEnhancementModeObj
@@ -7286,16 +6840,12 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 	}
 
 	// data SpecToModelRoot StringField --> SuggestedAction
-	if specData.GetSuggestedAction() != "" {
-		data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.SuggestedAction = types.StringNull()
-	}
+	// The resource defaults this field to "", so API "" must stay "" to match it.
+	data.SuggestedAction = types.StringValue(specData.GetSuggestedAction())
 
 	// data SpecToModelRoot PointerField --> Sw
 	if specData.GetSw() != nil {
-		var awsTgwSiteViewsVolterraSoftwareTypeModel = &AwsTgwSiteViewsVolterraSoftwareType{}
+		var awsTgwSiteVolterraSoftwareTypeModel = &AwsTgwSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
 		// data specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
@@ -7342,16 +6892,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
+			awsTgwSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteViewsVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AwsTgwSiteSwVolterraSwVersionChoiceModelAttributeMap)
+			awsTgwSiteVolterraSoftwareTypeModel.VolterraSwVersionChoice = types.ObjectNull(AwsTgwSiteSwVolterraSwVersionChoiceModelAttributeMap)
 		}
 
 		swObj, swDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteSwModelAttributeMap,
-			awsTgwSiteViewsVolterraSoftwareTypeModel,
+			awsTgwSiteVolterraSoftwareTypeModel,
 		)
 		response.Diagnostics.Append(swDiags...)
 		data.Sw = swObj
@@ -7371,7 +6921,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> TgwInfo
 	if specData.GetTgwInfo() != nil {
-		var awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel = &AwsTgwSiteAwsTgwSiteAWSTGWInfoConfigType{}
+		var awsTgwSiteAWSTGWInfoConfigTypeModel = &AwsTgwSiteAWSTGWInfoConfigType{}
 		tgwInfoElement := specData.GetTgwInfo()
 
 		// data specToModelNested RequiredArrayOfStringField --> PrivateIps
@@ -7381,9 +6931,9 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.PrivateIps = listValue
+			awsTgwSiteAWSTGWInfoConfigTypeModel.PrivateIps = listValue
 		} else {
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.PrivateIps = types.ListNull(types.StringType)
+			awsTgwSiteAWSTGWInfoConfigTypeModel.PrivateIps = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested RequiredArrayOfStringField --> PublicIps
@@ -7393,66 +6943,66 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.PublicIps = listValue
+			awsTgwSiteAWSTGWInfoConfigTypeModel.PublicIps = listValue
 		} else {
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.PublicIps = types.ListNull(types.StringType)
+			awsTgwSiteAWSTGWInfoConfigTypeModel.PublicIps = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested RequiredArrayOfPointerField --> SubnetIds
 		if len(tgwInfoElement.GetSubnetIds()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			subnetIdsElements := make([]AwsTgwSiteViewsAWSSubnetIdsType, 0, len(tgwInfoElement.GetSubnetIds()))
+			subnetIdsElements := make([]AwsTgwSiteAWSSubnetIdsType, 0, len(tgwInfoElement.GetSubnetIds()))
 			for _, subnetIdsElement := range tgwInfoElement.GetSubnetIds() {
-				awsTgwSiteViewsAWSSubnetIdsTypeModel := AwsTgwSiteViewsAWSSubnetIdsType{}
+				awsTgwSiteAWSSubnetIdsTypeModel := AwsTgwSiteAWSSubnetIdsType{}
 
 				// data specToModelNested StringField --> AzName
 				if subnetIdsElement.GetAzName() != "" {
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.AzName = types.StringValue(subnetIdsElement.GetAzName())
+					awsTgwSiteAWSSubnetIdsTypeModel.AzName = types.StringValue(subnetIdsElement.GetAzName())
 				} else {
 					// Empty string, set to null
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.AzName = types.StringNull()
+					awsTgwSiteAWSSubnetIdsTypeModel.AzName = types.StringNull()
 				}
 
 				// data specToModelNested PointerField --> InsideSubnet
 				if subnetIdsElement.GetInsideSubnet() != nil {
 					// Create the nested Go struct
-					awsTgwSiteViewsAWSSubnetInfoTypeModel := &AwsTgwSiteViewsAWSSubnetInfoType{}
+					awsTgwSiteAWSSubnetInfoTypeModel := &AwsTgwSiteAWSSubnetInfoType{}
 					insideSubnetElement := subnetIdsElement.GetInsideSubnet()
 
 					// Recursively populate the nested struct
 
 					// data specToModelNested RequiredStringField --> AzName
 					if insideSubnetElement.GetAzName() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.AzName = types.StringValue(insideSubnetElement.GetAzName())
+						awsTgwSiteAWSSubnetInfoTypeModel.AzName = types.StringValue(insideSubnetElement.GetAzName())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.AzName = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.AzName = types.StringNull()
 					}
 
 					// data specToModelNested StringField --> Id
 					if insideSubnetElement.GetId() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Id = types.StringValue(insideSubnetElement.GetId())
+						awsTgwSiteAWSSubnetInfoTypeModel.Id = types.StringValue(insideSubnetElement.GetId())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Id = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.Id = types.StringNull()
 					}
 
 					// data specToModelNested RequiredStringField --> Ipv4Prefix
 					if insideSubnetElement.GetIpv4Prefix() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringValue(insideSubnetElement.GetIpv4Prefix())
+						awsTgwSiteAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringValue(insideSubnetElement.GetIpv4Prefix())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					awsTgwSiteViewsAWSSubnetInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteTgwInfoSubnetIdsInsideSubnetModelAttributeMap, awsTgwSiteViewsAWSSubnetInfoTypeModel)
+					awsTgwSiteAWSSubnetInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteTgwInfoSubnetIdsInsideSubnetModelAttributeMap, awsTgwSiteAWSSubnetInfoTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.InsideSubnet = awsTgwSiteViewsAWSSubnetInfoTypeModelObj
+					awsTgwSiteAWSSubnetIdsTypeModel.InsideSubnet = awsTgwSiteAWSSubnetInfoTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7461,56 +7011,56 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.InsideSubnet = types.ObjectNull(AwsTgwSiteTgwInfoSubnetIdsInsideSubnetModelAttributeMap)
+					awsTgwSiteAWSSubnetIdsTypeModel.InsideSubnet = types.ObjectNull(AwsTgwSiteTgwInfoSubnetIdsInsideSubnetModelAttributeMap)
 				}
 
 				// data specToModelNested StringField --> InsideSubnetId
 				if subnetIdsElement.GetInsideSubnetId() != "" {
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.InsideSubnetId = types.StringValue(subnetIdsElement.GetInsideSubnetId())
+					awsTgwSiteAWSSubnetIdsTypeModel.InsideSubnetId = types.StringValue(subnetIdsElement.GetInsideSubnetId())
 				} else {
 					// Empty string, set to null
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.InsideSubnetId = types.StringNull()
+					awsTgwSiteAWSSubnetIdsTypeModel.InsideSubnetId = types.StringNull()
 				}
 
 				// data specToModelNested PointerField --> OutsideSubnet
 				if subnetIdsElement.GetOutsideSubnet() != nil {
 					// Create the nested Go struct
-					awsTgwSiteViewsAWSSubnetInfoTypeModel := &AwsTgwSiteViewsAWSSubnetInfoType{}
+					awsTgwSiteAWSSubnetInfoTypeModel := &AwsTgwSiteAWSSubnetInfoType{}
 					outsideSubnetElement := subnetIdsElement.GetOutsideSubnet()
 
 					// Recursively populate the nested struct
 
 					// data specToModelNested RequiredStringField --> AzName
 					if outsideSubnetElement.GetAzName() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.AzName = types.StringValue(outsideSubnetElement.GetAzName())
+						awsTgwSiteAWSSubnetInfoTypeModel.AzName = types.StringValue(outsideSubnetElement.GetAzName())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.AzName = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.AzName = types.StringNull()
 					}
 
 					// data specToModelNested StringField --> Id
 					if outsideSubnetElement.GetId() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Id = types.StringValue(outsideSubnetElement.GetId())
+						awsTgwSiteAWSSubnetInfoTypeModel.Id = types.StringValue(outsideSubnetElement.GetId())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Id = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.Id = types.StringNull()
 					}
 
 					// data specToModelNested RequiredStringField --> Ipv4Prefix
 					if outsideSubnetElement.GetIpv4Prefix() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringValue(outsideSubnetElement.GetIpv4Prefix())
+						awsTgwSiteAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringValue(outsideSubnetElement.GetIpv4Prefix())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					awsTgwSiteViewsAWSSubnetInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteTgwInfoSubnetIdsOutsideSubnetModelAttributeMap, awsTgwSiteViewsAWSSubnetInfoTypeModel)
+					awsTgwSiteAWSSubnetInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteTgwInfoSubnetIdsOutsideSubnetModelAttributeMap, awsTgwSiteAWSSubnetInfoTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.OutsideSubnet = awsTgwSiteViewsAWSSubnetInfoTypeModelObj
+					awsTgwSiteAWSSubnetIdsTypeModel.OutsideSubnet = awsTgwSiteAWSSubnetInfoTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7519,56 +7069,56 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.OutsideSubnet = types.ObjectNull(AwsTgwSiteTgwInfoSubnetIdsOutsideSubnetModelAttributeMap)
+					awsTgwSiteAWSSubnetIdsTypeModel.OutsideSubnet = types.ObjectNull(AwsTgwSiteTgwInfoSubnetIdsOutsideSubnetModelAttributeMap)
 				}
 
 				// data specToModelNested StringField --> OutsideSubnetId
 				if subnetIdsElement.GetOutsideSubnetId() != "" {
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.OutsideSubnetId = types.StringValue(subnetIdsElement.GetOutsideSubnetId())
+					awsTgwSiteAWSSubnetIdsTypeModel.OutsideSubnetId = types.StringValue(subnetIdsElement.GetOutsideSubnetId())
 				} else {
 					// Empty string, set to null
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.OutsideSubnetId = types.StringNull()
+					awsTgwSiteAWSSubnetIdsTypeModel.OutsideSubnetId = types.StringNull()
 				}
 
 				// data specToModelNested PointerField --> WorkloadSubnet
 				if subnetIdsElement.GetWorkloadSubnet() != nil {
 					// Create the nested Go struct
-					awsTgwSiteViewsAWSSubnetInfoTypeModel := &AwsTgwSiteViewsAWSSubnetInfoType{}
+					awsTgwSiteAWSSubnetInfoTypeModel := &AwsTgwSiteAWSSubnetInfoType{}
 					workloadSubnetElement := subnetIdsElement.GetWorkloadSubnet()
 
 					// Recursively populate the nested struct
 
 					// data specToModelNested RequiredStringField --> AzName
 					if workloadSubnetElement.GetAzName() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.AzName = types.StringValue(workloadSubnetElement.GetAzName())
+						awsTgwSiteAWSSubnetInfoTypeModel.AzName = types.StringValue(workloadSubnetElement.GetAzName())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.AzName = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.AzName = types.StringNull()
 					}
 
 					// data specToModelNested StringField --> Id
 					if workloadSubnetElement.GetId() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Id = types.StringValue(workloadSubnetElement.GetId())
+						awsTgwSiteAWSSubnetInfoTypeModel.Id = types.StringValue(workloadSubnetElement.GetId())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Id = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.Id = types.StringNull()
 					}
 
 					// data specToModelNested RequiredStringField --> Ipv4Prefix
 					if workloadSubnetElement.GetIpv4Prefix() != "" {
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringValue(workloadSubnetElement.GetIpv4Prefix())
+						awsTgwSiteAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringValue(workloadSubnetElement.GetIpv4Prefix())
 					} else {
 						// Empty string, set to null
-						awsTgwSiteViewsAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringNull()
+						awsTgwSiteAWSSubnetInfoTypeModel.Ipv4Prefix = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					awsTgwSiteViewsAWSSubnetInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteTgwInfoSubnetIdsWorkloadSubnetModelAttributeMap, awsTgwSiteViewsAWSSubnetInfoTypeModel)
+					awsTgwSiteAWSSubnetInfoTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteTgwInfoSubnetIdsWorkloadSubnetModelAttributeMap, awsTgwSiteAWSSubnetInfoTypeModel)
 					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.WorkloadSubnet = awsTgwSiteViewsAWSSubnetInfoTypeModelObj
+					awsTgwSiteAWSSubnetIdsTypeModel.WorkloadSubnet = awsTgwSiteAWSSubnetInfoTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -7577,18 +7127,18 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.WorkloadSubnet = types.ObjectNull(AwsTgwSiteTgwInfoSubnetIdsWorkloadSubnetModelAttributeMap)
+					awsTgwSiteAWSSubnetIdsTypeModel.WorkloadSubnet = types.ObjectNull(AwsTgwSiteTgwInfoSubnetIdsWorkloadSubnetModelAttributeMap)
 				}
 
 				// data specToModelNested StringField --> WorkloadSubnetId
 				if subnetIdsElement.GetWorkloadSubnetId() != "" {
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.WorkloadSubnetId = types.StringValue(subnetIdsElement.GetWorkloadSubnetId())
+					awsTgwSiteAWSSubnetIdsTypeModel.WorkloadSubnetId = types.StringValue(subnetIdsElement.GetWorkloadSubnetId())
 				} else {
 					// Empty string, set to null
-					awsTgwSiteViewsAWSSubnetIdsTypeModel.WorkloadSubnetId = types.StringNull()
+					awsTgwSiteAWSSubnetIdsTypeModel.WorkloadSubnetId = types.StringNull()
 				}
 
-				subnetIdsElements = append(subnetIdsElements, awsTgwSiteViewsAWSSubnetIdsTypeModel)
+				subnetIdsElements = append(subnetIdsElements, awsTgwSiteAWSSubnetIdsTypeModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -7597,43 +7147,43 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.SubnetIds = subnetIdsListValue
+			awsTgwSiteAWSTGWInfoConfigTypeModel.SubnetIds = subnetIdsListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.SubnetIds = types.ListNull(types.ObjectType{AttrTypes: AwsTgwSiteTgwInfoSubnetIdsModelAttributeMap})
+			awsTgwSiteAWSTGWInfoConfigTypeModel.SubnetIds = types.ListNull(types.ObjectType{AttrTypes: AwsTgwSiteTgwInfoSubnetIdsModelAttributeMap})
 		}
 
 		// data specToModelNested RequiredStringField --> TgwId
 		if tgwInfoElement.GetTgwId() != "" {
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.TgwId = types.StringValue(tgwInfoElement.GetTgwId())
+			awsTgwSiteAWSTGWInfoConfigTypeModel.TgwId = types.StringValue(tgwInfoElement.GetTgwId())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.TgwId = types.StringNull()
+			awsTgwSiteAWSTGWInfoConfigTypeModel.TgwId = types.StringNull()
 		}
 
 		// data specToModelNested RequiredStringField --> VpcId
 		if tgwInfoElement.GetVpcId() != "" {
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.VpcId = types.StringValue(tgwInfoElement.GetVpcId())
+			awsTgwSiteAWSTGWInfoConfigTypeModel.VpcId = types.StringValue(tgwInfoElement.GetVpcId())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.VpcId = types.StringNull()
+			awsTgwSiteAWSTGWInfoConfigTypeModel.VpcId = types.StringNull()
 		}
 
 		// data specToModelNested StringField --> VpcName
 		if tgwInfoElement.GetVpcName() != "" {
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.VpcName = types.StringValue(tgwInfoElement.GetVpcName())
+			awsTgwSiteAWSTGWInfoConfigTypeModel.VpcName = types.StringValue(tgwInfoElement.GetVpcName())
 		} else {
 			// Empty string, set to null
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel.VpcName = types.StringNull()
+			awsTgwSiteAWSTGWInfoConfigTypeModel.VpcName = types.StringNull()
 		}
 
 		tgwInfoObj, tgwInfoDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteTgwInfoModelAttributeMap,
-			awsTgwSiteAwsTgwSiteAWSTGWInfoConfigTypeModel,
+			awsTgwSiteAWSTGWInfoConfigTypeModel,
 		)
 		response.Diagnostics.Append(tgwInfoDiags...)
 		data.TgwInfo = tgwInfoObj
@@ -7643,7 +7193,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> TgwSecurity
 	if specData.GetTgwSecurity() != nil {
-		var awsTgwSiteAwsTgwSiteSecurityConfigTypeModel = &AwsTgwSiteAwsTgwSiteSecurityConfigType{}
+		var awsTgwSiteSecConfigTypeModel = &AwsTgwSiteSecConfigType{}
 		tgwSecurityElement := specData.GetTgwSecurity()
 
 		// data specToModelNested RequiredOneOfField --> EastWestServicePolicyChoice
@@ -7760,10 +7310,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteSecurityConfigTypeModel.EastWestServicePolicyChoice = finalObj
+			awsTgwSiteSecConfigTypeModel.EastWestServicePolicyChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteSecurityConfigTypeModel.EastWestServicePolicyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityEastWestServicePolicyChoiceModelAttributeMap)
+			awsTgwSiteSecConfigTypeModel.EastWestServicePolicyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityEastWestServicePolicyChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> ForwardProxyChoice
@@ -7880,10 +7430,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteSecurityConfigTypeModel.ForwardProxyChoice = finalObj
+			awsTgwSiteSecConfigTypeModel.ForwardProxyChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteSecurityConfigTypeModel.ForwardProxyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityForwardProxyChoiceModelAttributeMap)
+			awsTgwSiteSecConfigTypeModel.ForwardProxyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityForwardProxyChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> NetworkPolicyChoice
@@ -8062,16 +7612,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteSecurityConfigTypeModel.NetworkPolicyChoice = finalObj
+			awsTgwSiteSecConfigTypeModel.NetworkPolicyChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteSecurityConfigTypeModel.NetworkPolicyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityNetworkPolicyChoiceModelAttributeMap)
+			awsTgwSiteSecConfigTypeModel.NetworkPolicyChoice = types.ObjectNull(AwsTgwSiteTgwSecurityNetworkPolicyChoiceModelAttributeMap)
 		}
 
 		tgwSecurityObj, tgwSecurityDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteTgwSecurityModelAttributeMap,
-			awsTgwSiteAwsTgwSiteSecurityConfigTypeModel,
+			awsTgwSiteSecConfigTypeModel,
 		)
 		response.Diagnostics.Append(tgwSecurityDiags...)
 		data.TgwSecurity = tgwSecurityObj
@@ -8115,17 +7665,17 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot ArrayOfPointerField --> VipParamsPerAz
 	if len(specData.GetVipParamsPerAz()) > 0 {
-		vipParamsPerAzElements := make([]AwsTgwSiteSitePublishVIPParamsPerAz, 0, len(specData.GetVipParamsPerAz()))
+		vipParamsPerAzElements := make([]AwsTgwSitePublishVIPParamsPerAz, 0, len(specData.GetVipParamsPerAz()))
 
 		for _, vipParamsPerAzElement := range specData.GetVipParamsPerAz() {
-			awsTgwSiteSitePublishVIPParamsPerAzModel := AwsTgwSiteSitePublishVIPParamsPerAz{}
+			awsTgwSitePublishVIPParamsPerAzModel := AwsTgwSitePublishVIPParamsPerAz{}
 
 			// data specToModelNested StringField --> AzName
 			if vipParamsPerAzElement.GetAzName() != "" {
-				awsTgwSiteSitePublishVIPParamsPerAzModel.AzName = types.StringValue(vipParamsPerAzElement.GetAzName())
+				awsTgwSitePublishVIPParamsPerAzModel.AzName = types.StringValue(vipParamsPerAzElement.GetAzName())
 			} else {
 				// Empty string, set to null
-				awsTgwSiteSitePublishVIPParamsPerAzModel.AzName = types.StringNull()
+				awsTgwSitePublishVIPParamsPerAzModel.AzName = types.StringNull()
 			}
 
 			// data specToModelNested ArrayOfStringField --> InsideVip
@@ -8135,17 +7685,17 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 				if response.Diagnostics.HasError() {
 					return
 				}
-				awsTgwSiteSitePublishVIPParamsPerAzModel.InsideVip = listValue
+				awsTgwSitePublishVIPParamsPerAzModel.InsideVip = listValue
 			} else {
-				awsTgwSiteSitePublishVIPParamsPerAzModel.InsideVip = types.ListNull(types.StringType)
+				awsTgwSitePublishVIPParamsPerAzModel.InsideVip = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested StringField --> InsideVipCname
 			if vipParamsPerAzElement.GetInsideVipCname() != "" {
-				awsTgwSiteSitePublishVIPParamsPerAzModel.InsideVipCname = types.StringValue(vipParamsPerAzElement.GetInsideVipCname())
+				awsTgwSitePublishVIPParamsPerAzModel.InsideVipCname = types.StringValue(vipParamsPerAzElement.GetInsideVipCname())
 			} else {
 				// Empty string, set to null
-				awsTgwSiteSitePublishVIPParamsPerAzModel.InsideVipCname = types.StringNull()
+				awsTgwSitePublishVIPParamsPerAzModel.InsideVipCname = types.StringNull()
 			}
 
 			// data specToModelNested ArrayOfStringField --> InsideVipV6
@@ -8155,9 +7705,9 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 				if response.Diagnostics.HasError() {
 					return
 				}
-				awsTgwSiteSitePublishVIPParamsPerAzModel.InsideVipV6 = listValue
+				awsTgwSitePublishVIPParamsPerAzModel.InsideVipV6 = listValue
 			} else {
-				awsTgwSiteSitePublishVIPParamsPerAzModel.InsideVipV6 = types.ListNull(types.StringType)
+				awsTgwSitePublishVIPParamsPerAzModel.InsideVipV6 = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested RequiredArrayOfStringField --> OutsideVip
@@ -8167,17 +7717,17 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 				if response.Diagnostics.HasError() {
 					return
 				}
-				awsTgwSiteSitePublishVIPParamsPerAzModel.OutsideVip = listValue
+				awsTgwSitePublishVIPParamsPerAzModel.OutsideVip = listValue
 			} else {
-				awsTgwSiteSitePublishVIPParamsPerAzModel.OutsideVip = types.ListNull(types.StringType)
+				awsTgwSitePublishVIPParamsPerAzModel.OutsideVip = types.ListNull(types.StringType)
 			}
 
 			// data specToModelNested StringField --> OutsideVipCname
 			if vipParamsPerAzElement.GetOutsideVipCname() != "" {
-				awsTgwSiteSitePublishVIPParamsPerAzModel.OutsideVipCname = types.StringValue(vipParamsPerAzElement.GetOutsideVipCname())
+				awsTgwSitePublishVIPParamsPerAzModel.OutsideVipCname = types.StringValue(vipParamsPerAzElement.GetOutsideVipCname())
 			} else {
 				// Empty string, set to null
-				awsTgwSiteSitePublishVIPParamsPerAzModel.OutsideVipCname = types.StringNull()
+				awsTgwSitePublishVIPParamsPerAzModel.OutsideVipCname = types.StringNull()
 			}
 
 			// data specToModelNested ArrayOfStringField --> OutsideVipV6
@@ -8187,12 +7737,12 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 				if response.Diagnostics.HasError() {
 					return
 				}
-				awsTgwSiteSitePublishVIPParamsPerAzModel.OutsideVipV6 = listValue
+				awsTgwSitePublishVIPParamsPerAzModel.OutsideVipV6 = listValue
 			} else {
-				awsTgwSiteSitePublishVIPParamsPerAzModel.OutsideVipV6 = types.ListNull(types.StringType)
+				awsTgwSitePublishVIPParamsPerAzModel.OutsideVipV6 = types.ListNull(types.StringType)
 			}
 
-			vipParamsPerAzElements = append(vipParamsPerAzElements, awsTgwSiteSitePublishVIPParamsPerAzModel)
+			vipParamsPerAzElements = append(vipParamsPerAzElements, awsTgwSitePublishVIPParamsPerAzModel)
 		}
 
 		{
@@ -8219,13 +7769,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> VnConfig
 	if specData.GetVnConfig() != nil {
-		var awsTgwSiteAwsTgwSiteVnConfigurationModel = &AwsTgwSiteAwsTgwSiteVnConfiguration{}
+		var awsTgwSiteVnCfgModel = &AwsTgwSiteVnCfg{}
 		vnConfigElement := specData.GetVnConfig()
 
 		// data specToModelNested PointerField --> AllowedVipPort
 		if vnConfigElement.GetAllowedVipPort() != nil {
 			// Create the nested Go struct
-			awsTgwSiteViewsAllowedVIPPortsModel := &AwsTgwSiteViewsAllowedVIPPorts{}
+			awsTgwSiteAllowedVIPPortsModel := &AwsTgwSiteAllowedVIPPorts{}
 			allowedVipPortElement := vnConfigElement.GetAllowedVipPort()
 
 			// Recursively populate the nested struct
@@ -8319,19 +7869,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				awsTgwSiteViewsAllowedVIPPortsModel.PortChoice = finalObj
+				awsTgwSiteAllowedVIPPortsModel.PortChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				awsTgwSiteViewsAllowedVIPPortsModel.PortChoice = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortPortChoiceModelAttributeMap)
+				awsTgwSiteAllowedVIPPortsModel.PortChoice = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortPortChoiceModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			awsTgwSiteViewsAllowedVIPPortsModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigAllowedVipPortModelAttributeMap, awsTgwSiteViewsAllowedVIPPortsModel)
+			awsTgwSiteAllowedVIPPortsModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigAllowedVipPortModelAttributeMap, awsTgwSiteAllowedVIPPortsModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.AllowedVipPort = awsTgwSiteViewsAllowedVIPPortsModelObj
+			awsTgwSiteVnCfgModel.AllowedVipPort = awsTgwSiteAllowedVIPPortsModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -8340,13 +7890,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.AllowedVipPort = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortModelAttributeMap)
+			awsTgwSiteVnCfgModel.AllowedVipPort = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> AllowedVipPortSli
 		if vnConfigElement.GetAllowedVipPortSli() != nil {
 			// Create the nested Go struct
-			awsTgwSiteViewsAllowedVIPPortsModel := &AwsTgwSiteViewsAllowedVIPPorts{}
+			awsTgwSiteAllowedVIPPortsModel := &AwsTgwSiteAllowedVIPPorts{}
 			allowedVipPortSliElement := vnConfigElement.GetAllowedVipPortSli()
 
 			// Recursively populate the nested struct
@@ -8440,19 +7990,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				awsTgwSiteViewsAllowedVIPPortsModel.PortChoice = finalObj
+				awsTgwSiteAllowedVIPPortsModel.PortChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				awsTgwSiteViewsAllowedVIPPortsModel.PortChoice = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortSliPortChoiceModelAttributeMap)
+				awsTgwSiteAllowedVIPPortsModel.PortChoice = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortSliPortChoiceModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			awsTgwSiteViewsAllowedVIPPortsModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigAllowedVipPortSliModelAttributeMap, awsTgwSiteViewsAllowedVIPPortsModel)
+			awsTgwSiteAllowedVIPPortsModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigAllowedVipPortSliModelAttributeMap, awsTgwSiteAllowedVIPPortsModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.AllowedVipPortSli = awsTgwSiteViewsAllowedVIPPortsModelObj
+			awsTgwSiteVnCfgModel.AllowedVipPortSli = awsTgwSiteAllowedVIPPortsModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -8461,7 +8011,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.AllowedVipPortSli = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortSliModelAttributeMap)
+			awsTgwSiteVnCfgModel.AllowedVipPortSli = types.ObjectNull(AwsTgwSiteVnConfigAllowedVipPortSliModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> DcClusterGroupChoice
@@ -8588,10 +8138,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.DcClusterGroupChoice = finalObj
+			awsTgwSiteVnCfgModel.DcClusterGroupChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.DcClusterGroupChoice = types.ObjectNull(AwsTgwSiteVnConfigDcClusterGroupChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.DcClusterGroupChoice = types.ObjectNull(AwsTgwSiteVnConfigDcClusterGroupChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> GlobalNetworkChoice
@@ -8620,9 +8170,9 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					if len(globalNetworkListElement.GetGlobalNetworkConnections()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						globalNetworkConnectionsElements := make([]AwsTgwSiteViewsGlobalNetworkConnectionType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
+						globalNetworkConnectionsElements := make([]AwsTgwSiteGlobalNetConnType, 0, len(globalNetworkListElement.GetGlobalNetworkConnections()))
 						for _, globalNetworkConnectionsElement := range globalNetworkListElement.GetGlobalNetworkConnections() {
-							awsTgwSiteViewsGlobalNetworkConnectionTypeModel := AwsTgwSiteViewsGlobalNetworkConnectionType{}
+							awsTgwSiteGlobalNetConnTypeModel := AwsTgwSiteGlobalNetConnType{}
 
 							// data specToModelNested RequiredOneOfField --> ConnectionChoice
 							// <no value>
@@ -8791,13 +8341,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								awsTgwSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = finalObj
+								awsTgwSiteGlobalNetConnTypeModel.ConnectionChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								awsTgwSiteViewsGlobalNetworkConnectionTypeModel.ConnectionChoice = types.ObjectNull(AwsTgwSiteVnConfigGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
+								awsTgwSiteGlobalNetConnTypeModel.ConnectionChoice = types.ObjectNull(AwsTgwSiteVnConfigGlobalNetworkChoiceGlobalNetworkListGlobalNetworkConnectionsConnectionChoiceModelAttributeMap)
 							}
 
-							globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, awsTgwSiteViewsGlobalNetworkConnectionTypeModel)
+							globalNetworkConnectionsElements = append(globalNetworkConnectionsElements, awsTgwSiteGlobalNetConnTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -8848,10 +8398,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.GlobalNetworkChoice = finalObj
+			awsTgwSiteVnCfgModel.GlobalNetworkChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.GlobalNetworkChoice = types.ObjectNull(AwsTgwSiteVnConfigGlobalNetworkChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.GlobalNetworkChoice = types.ObjectNull(AwsTgwSiteVnConfigGlobalNetworkChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
@@ -8880,9 +8430,9 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					if len(insideStaticRoutesElement.GetStaticRouteList()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						staticRouteListElements := make([]AwsTgwSiteViewsSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
+						staticRouteListElements := make([]AwsTgwSiteSiteStaticRoutesType, 0, len(insideStaticRoutesElement.GetStaticRouteList()))
 						for _, staticRouteListElement := range insideStaticRoutesElement.GetStaticRouteList() {
-							awsTgwSiteViewsSiteStaticRoutesTypeModel := AwsTgwSiteViewsSiteStaticRoutesType{}
+							awsTgwSiteSiteStaticRoutesTypeModel := AwsTgwSiteSiteStaticRoutesType{}
 
 							// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 							// <no value>
@@ -9003,7 +8553,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 											// data specToModelNested PointerField --> NexthopAddress
 											if nexthopElement.GetNexthopAddress() != nil {
 												// Create the nested Go struct
-												awsTgwSiteIpAddressTypeModel := &AwsTgwSiteIpAddressType{}
+												awsTgwSiteIpAddrTypeModel := &AwsTgwSiteIpAddrType{}
 												nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 												// Recursively populate the nested struct
@@ -9032,26 +8582,26 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 															// data specToModelNested PointerField --> Ipv4
 															if dualStackElement.GetIpv4() != nil {
 																// Create the nested Go struct
-																awsTgwSiteIpv4AddressTypeModel := &AwsTgwSiteIpv4AddressType{}
+																awsTgwSiteIpv4AddrTypeModel := &AwsTgwSiteIpv4AddrType{}
 																ipv4Element := dualStackElement.GetIpv4()
 
 																// Recursively populate the nested struct
 
 																// data specToModelNested StringField --> Addr
 																if ipv4Element.GetAddr() != "" {
-																	awsTgwSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																	awsTgwSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																} else {
 																	// Empty string, set to null
-																	awsTgwSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																	awsTgwSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																}
 
 																// This field needs to be converted to a types.ObjectValue before assignment.
-																awsTgwSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, awsTgwSiteIpv4AddressTypeModel)
+																awsTgwSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, awsTgwSiteIpv4AddrTypeModel)
 																response.Diagnostics.Append(objDiags...)
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																dualStackAttributeMap["ipv4"] = awsTgwSiteIpv4AddressTypeModelObj
+																dualStackAttributeMap["ipv4"] = awsTgwSiteIpv4AddrTypeModelObj
 
 															} else {
 																// The source field is nil (e.g. redacted by the API).
@@ -9066,26 +8616,26 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 															// data specToModelNested PointerField --> Ipv6
 															if dualStackElement.GetIpv6() != nil {
 																// Create the nested Go struct
-																awsTgwSiteIpv6AddressTypeModel := &AwsTgwSiteIpv6AddressType{}
+																awsTgwSiteIpv6AddrTypeModel := &AwsTgwSiteIpv6AddrType{}
 																ipv6Element := dualStackElement.GetIpv6()
 
 																// Recursively populate the nested struct
 
 																// data specToModelNested StringField --> Addr
 																if ipv6Element.GetAddr() != "" {
-																	awsTgwSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																	awsTgwSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																} else {
 																	// Empty string, set to null
-																	awsTgwSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																	awsTgwSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																}
 
 																// This field needs to be converted to a types.ObjectValue before assignment.
-																awsTgwSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, awsTgwSiteIpv6AddressTypeModel)
+																awsTgwSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, awsTgwSiteIpv6AddrTypeModel)
 																response.Diagnostics.Append(objDiags...)
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																dualStackAttributeMap["ipv6"] = awsTgwSiteIpv6AddressTypeModelObj
+																dualStackAttributeMap["ipv6"] = awsTgwSiteIpv6AddrTypeModelObj
 
 															} else {
 																// The source field is nil (e.g. redacted by the API).
@@ -9137,35 +8687,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 														}
 													}
 
-													// data specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// data specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -9179,19 +8700,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													awsTgwSiteIpAddressTypeModel.VerChoice = finalObj
+													awsTgwSiteIpAddrTypeModel.VerChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													awsTgwSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+													awsTgwSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												awsTgwSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, awsTgwSiteIpAddressTypeModel)
+												awsTgwSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, awsTgwSiteIpAddrTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												awsTgwSiteNextHopTypeModel.NexthopAddress = awsTgwSiteIpAddressTypeModelObj
+												awsTgwSiteNextHopTypeModel.NexthopAddress = awsTgwSiteIpAddrTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -9287,38 +8808,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 														}
 													}
 
-													// data specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// data specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// data specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -9390,13 +8879,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								awsTgwSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+								awsTgwSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								awsTgwSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+								awsTgwSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceInsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 							}
 
-							staticRouteListElements = append(staticRouteListElements, awsTgwSiteViewsSiteStaticRoutesTypeModel)
+							staticRouteListElements = append(staticRouteListElements, awsTgwSiteSiteStaticRoutesTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -9447,10 +8936,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.InsideStaticRouteChoice = finalObj
+			awsTgwSiteVnCfgModel.InsideStaticRouteChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.InsideStaticRouteChoice = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.InsideStaticRouteChoice = types.ObjectNull(AwsTgwSiteVnConfigInsideStaticRouteChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
@@ -9488,9 +8977,9 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 					if len(outsideStaticRoutesElement.GetStaticRouteList()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						staticRouteListElements := make([]AwsTgwSiteViewsSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
+						staticRouteListElements := make([]AwsTgwSiteSiteStaticRoutesType, 0, len(outsideStaticRoutesElement.GetStaticRouteList()))
 						for _, staticRouteListElement := range outsideStaticRoutesElement.GetStaticRouteList() {
-							awsTgwSiteViewsSiteStaticRoutesTypeModel := AwsTgwSiteViewsSiteStaticRoutesType{}
+							awsTgwSiteSiteStaticRoutesTypeModel := AwsTgwSiteSiteStaticRoutesType{}
 
 							// data specToModelNested RequiredOneOfField --> ConfigModeChoice
 							// <no value>
@@ -9611,7 +9100,7 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 											// data specToModelNested PointerField --> NexthopAddress
 											if nexthopElement.GetNexthopAddress() != nil {
 												// Create the nested Go struct
-												awsTgwSiteIpAddressTypeModel := &AwsTgwSiteIpAddressType{}
+												awsTgwSiteIpAddrTypeModel := &AwsTgwSiteIpAddrType{}
 												nexthopAddressElement := nexthopElement.GetNexthopAddress()
 
 												// Recursively populate the nested struct
@@ -9640,26 +9129,26 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 															// data specToModelNested PointerField --> Ipv4
 															if dualStackElement.GetIpv4() != nil {
 																// Create the nested Go struct
-																awsTgwSiteIpv4AddressTypeModel := &AwsTgwSiteIpv4AddressType{}
+																awsTgwSiteIpv4AddrTypeModel := &AwsTgwSiteIpv4AddrType{}
 																ipv4Element := dualStackElement.GetIpv4()
 
 																// Recursively populate the nested struct
 
 																// data specToModelNested StringField --> Addr
 																if ipv4Element.GetAddr() != "" {
-																	awsTgwSiteIpv4AddressTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
+																	awsTgwSiteIpv4AddrTypeModel.Addr = types.StringValue(ipv4Element.GetAddr())
 																} else {
 																	// Empty string, set to null
-																	awsTgwSiteIpv4AddressTypeModel.Addr = types.StringNull()
+																	awsTgwSiteIpv4AddrTypeModel.Addr = types.StringNull()
 																}
 
 																// This field needs to be converted to a types.ObjectValue before assignment.
-																awsTgwSiteIpv4AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, awsTgwSiteIpv4AddressTypeModel)
+																awsTgwSiteIpv4AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv4ModelAttributeMap, awsTgwSiteIpv4AddrTypeModel)
 																response.Diagnostics.Append(objDiags...)
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																dualStackAttributeMap["ipv4"] = awsTgwSiteIpv4AddressTypeModelObj
+																dualStackAttributeMap["ipv4"] = awsTgwSiteIpv4AddrTypeModelObj
 
 															} else {
 																// The source field is nil (e.g. redacted by the API).
@@ -9674,26 +9163,26 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 															// data specToModelNested PointerField --> Ipv6
 															if dualStackElement.GetIpv6() != nil {
 																// Create the nested Go struct
-																awsTgwSiteIpv6AddressTypeModel := &AwsTgwSiteIpv6AddressType{}
+																awsTgwSiteIpv6AddrTypeModel := &AwsTgwSiteIpv6AddrType{}
 																ipv6Element := dualStackElement.GetIpv6()
 
 																// Recursively populate the nested struct
 
 																// data specToModelNested StringField --> Addr
 																if ipv6Element.GetAddr() != "" {
-																	awsTgwSiteIpv6AddressTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
+																	awsTgwSiteIpv6AddrTypeModel.Addr = types.StringValue(ipv6Element.GetAddr())
 																} else {
 																	// Empty string, set to null
-																	awsTgwSiteIpv6AddressTypeModel.Addr = types.StringNull()
+																	awsTgwSiteIpv6AddrTypeModel.Addr = types.StringNull()
 																}
 
 																// This field needs to be converted to a types.ObjectValue before assignment.
-																awsTgwSiteIpv6AddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, awsTgwSiteIpv6AddressTypeModel)
+																awsTgwSiteIpv6AddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerDualStackIpv6ModelAttributeMap, awsTgwSiteIpv6AddrTypeModel)
 																response.Diagnostics.Append(objDiags...)
 																if response.Diagnostics.HasError() {
 																	return
 																}
-																dualStackAttributeMap["ipv6"] = awsTgwSiteIpv6AddressTypeModelObj
+																dualStackAttributeMap["ipv6"] = awsTgwSiteIpv6AddrTypeModelObj
 
 															} else {
 																// The source field is nil (e.g. redacted by the API).
@@ -9745,35 +9234,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 														}
 													}
 
-													// data specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := nexthopAddressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// data specToModelNested StringField --> Addr
-															if ipv6Element.GetAddr() != "" {
-																ipv6AttributeMap["addr"] = types.StringValue(ipv6Element.GetAddr())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["addr"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															nexthopAddressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -9787,19 +9247,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 													}
 
 													// Assign the final object to the correct place (either the root model or a parent's attribute map)
-													awsTgwSiteIpAddressTypeModel.VerChoice = finalObj
+													awsTgwSiteIpAddrTypeModel.VerChoice = finalObj
 												} else {
 													// The OneOf field is nil in the source spec, so set the Terraform object to null.
-													awsTgwSiteIpAddressTypeModel.VerChoice = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
+													awsTgwSiteIpAddrTypeModel.VerChoice = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressVerModelAttributeMap)
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												awsTgwSiteIpAddressTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, awsTgwSiteIpAddressTypeModel)
+												awsTgwSiteIpAddrTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteNexthopNexthopAddressModelAttributeMap, awsTgwSiteIpAddrTypeModel)
 												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
-												awsTgwSiteNextHopTypeModel.NexthopAddress = awsTgwSiteIpAddressTypeModelObj
+												awsTgwSiteNextHopTypeModel.NexthopAddress = awsTgwSiteIpAddrTypeModelObj
 
 											} else {
 												// The source field is nil (e.g. redacted by the API).
@@ -9895,38 +9355,6 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 														}
 													}
 
-													// data specToModelNested PointerOfOneOfField --> Ipv6
-													// <no value>
-													// false
-													{
-														ipv6OptionsWrapper, isIpv6 := subnetsverChoiceChoices.(*ves_io_schema.IpSubnetType_Ipv6)
-														ipv6AttributeMap := make(map[string]attr.Value)
-
-														if isIpv6 && ipv6OptionsWrapper != nil && ipv6OptionsWrapper.Ipv6 != nil {
-															ipv6Element := ipv6OptionsWrapper.Ipv6
-
-															// data specToModelNested UintField --> Plen
-															ipv6AttributeMap["plen"] = types.Int64Value(int64(ipv6Element.GetPlen()))
-
-															// data specToModelNested StringField --> Prefix
-															if ipv6Element.GetPrefix() != "" {
-																ipv6AttributeMap["prefix"] = types.StringValue(ipv6Element.GetPrefix())
-															} else {
-																// Empty string, set to null
-																ipv6AttributeMap["prefix"] = types.StringNull()
-															}
-
-															ipv6Obj, ipv6ObjDiags := types.ObjectValue(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap, ipv6AttributeMap)
-															response.Diagnostics.Append(ipv6ObjDiags...)
-															if response.Diagnostics.HasError() {
-																return
-															}
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-														} else {
-															subnetsverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceCustomStaticRouteSubnetsVerIpv6ModelAttributeMap)
-														}
-													}
-
 													// --- End of Choices ---
 
 													// Create the final ObjectValue for this OneOf field
@@ -9998,13 +9426,13 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 								}
 
 								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								awsTgwSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
+								awsTgwSiteSiteStaticRoutesTypeModel.ConfigModeChoice = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								awsTgwSiteViewsSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
+								awsTgwSiteSiteStaticRoutesTypeModel.ConfigModeChoice = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceOutsideStaticRoutesStaticRouteListConfigModeChoiceModelAttributeMap)
 							}
 
-							staticRouteListElements = append(staticRouteListElements, awsTgwSiteViewsSiteStaticRoutesTypeModel)
+							staticRouteListElements = append(staticRouteListElements, awsTgwSiteSiteStaticRoutesTypeModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10046,10 +9474,10 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.OutsideStaticRouteChoice = finalObj
+			awsTgwSiteVnCfgModel.OutsideStaticRouteChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.OutsideStaticRouteChoice = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.OutsideStaticRouteChoice = types.ObjectNull(AwsTgwSiteVnConfigOutsideStaticRouteChoiceModelAttributeMap)
 		}
 
 		// data specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
@@ -10095,16 +9523,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.SiteMeshGroupChoice = finalObj
+			awsTgwSiteVnCfgModel.SiteMeshGroupChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteAwsTgwSiteVnConfigurationModel.SiteMeshGroupChoice = types.ObjectNull(AwsTgwSiteVnConfigSiteMeshGroupChoiceModelAttributeMap)
+			awsTgwSiteVnCfgModel.SiteMeshGroupChoice = types.ObjectNull(AwsTgwSiteVnConfigSiteMeshGroupChoiceModelAttributeMap)
 		}
 
 		vnConfigObj, vnConfigDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteVnConfigModelAttributeMap,
-			awsTgwSiteAwsTgwSiteVnConfigurationModel,
+			awsTgwSiteVnCfgModel,
 		)
 		response.Diagnostics.Append(vnConfigDiags...)
 		data.VnConfig = vnConfigObj
@@ -10114,16 +9542,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> VpcAttachments
 	if specData.GetVpcAttachments() != nil {
-		var awsTgwSiteAwsTgwSiteVPCAttachmentListTypeModel = &AwsTgwSiteAwsTgwSiteVPCAttachmentListType{}
+		var awsTgwSiteVPCAttachmentListTypeModel = &AwsTgwSiteVPCAttachmentListType{}
 		vpcAttachmentsElement := specData.GetVpcAttachments()
 
 		// data specToModelNested ArrayOfPointerField --> VpcList
 		if len(vpcAttachmentsElement.GetVpcList()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			vpcListElements := make([]AwsTgwSiteAwsTgwSiteVPCAttachmentType, 0, len(vpcAttachmentsElement.GetVpcList()))
+			vpcListElements := make([]AwsTgwSiteVPCAttachmentType, 0, len(vpcAttachmentsElement.GetVpcList()))
 			for _, vpcListElement := range vpcAttachmentsElement.GetVpcList() {
-				awsTgwSiteAwsTgwSiteVPCAttachmentTypeModel := AwsTgwSiteAwsTgwSiteVPCAttachmentType{}
+				awsTgwSiteVPCAttachmentTypeModel := AwsTgwSiteVPCAttachmentType{}
 
 				// data specToModelNested MapOfStringField --> Labels
 				if vpcListElement.GetLabels() != nil {
@@ -10134,24 +9562,24 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 						return
 					}
 					// Assign the typed map to the model
-					awsTgwSiteAwsTgwSiteVPCAttachmentTypeModel.Labels = labelsMap
+					awsTgwSiteVPCAttachmentTypeModel.Labels = labelsMap
 				} else {
 					// Protobuf omits empty maps (returns nil), but the plan may have had an empty map (not null).
 					// Use an empty map value instead of null to avoid "inconsistent result after apply" errors.
 					// API returned nil (Protobuf omits empty maps). Set to null.
 					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
-					awsTgwSiteAwsTgwSiteVPCAttachmentTypeModel.Labels = types.MapNull(types.StringType)
+					awsTgwSiteVPCAttachmentTypeModel.Labels = types.MapNull(types.StringType)
 				}
 
 				// data specToModelNested StringField --> VpcId
 				if vpcListElement.GetVpcId() != "" {
-					awsTgwSiteAwsTgwSiteVPCAttachmentTypeModel.VpcId = types.StringValue(vpcListElement.GetVpcId())
+					awsTgwSiteVPCAttachmentTypeModel.VpcId = types.StringValue(vpcListElement.GetVpcId())
 				} else {
 					// Empty string, set to null
-					awsTgwSiteAwsTgwSiteVPCAttachmentTypeModel.VpcId = types.StringNull()
+					awsTgwSiteVPCAttachmentTypeModel.VpcId = types.StringNull()
 				}
 
-				vpcListElements = append(vpcListElements, awsTgwSiteAwsTgwSiteVPCAttachmentTypeModel)
+				vpcListElements = append(vpcListElements, awsTgwSiteVPCAttachmentTypeModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -10160,19 +9588,19 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			if response.Diagnostics.HasError() {
 				return
 			}
-			awsTgwSiteAwsTgwSiteVPCAttachmentListTypeModel.VpcList = vpcListListValue
+			awsTgwSiteVPCAttachmentListTypeModel.VpcList = vpcListListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			awsTgwSiteAwsTgwSiteVPCAttachmentListTypeModel.VpcList = types.ListNull(types.ObjectType{AttrTypes: AwsTgwSiteVpcAttachmentsVpcListModelAttributeMap})
+			awsTgwSiteVPCAttachmentListTypeModel.VpcList = types.ListNull(types.ObjectType{AttrTypes: AwsTgwSiteVpcAttachmentsVpcListModelAttributeMap})
 		}
 
 		vpcAttachmentsObj, vpcAttachmentsDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteVpcAttachmentsModelAttributeMap,
-			awsTgwSiteAwsTgwSiteVPCAttachmentListTypeModel,
+			awsTgwSiteVPCAttachmentListTypeModel,
 		)
 		response.Diagnostics.Append(vpcAttachmentsDiags...)
 		data.VpcAttachments = vpcAttachmentsObj
@@ -10182,10 +9610,11 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 
 	// data SpecToModelRoot PointerField --> WafSignatures
 	if specData.GetWafSignatures() != nil {
-		var awsTgwSiteCommonWafLiveSignaturesUpdateModel = &AwsTgwSiteCommonWafLiveSignaturesUpdate{}
+		var awsTgwSiteLiveSignaturesUpdateModel = &AwsTgwSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// data specToModelNested OneOfField --> SignaturesUpdateModeChoice
+		// data specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
+		// <no value>
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10227,16 +9656,16 @@ func (d *DataSourceF5XCAwsTgwSite) Read(ctx context.Context, request datasource.
 			}
 
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			awsTgwSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
+			awsTgwSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			awsTgwSiteCommonWafLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AwsTgwSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
+			awsTgwSiteLiveSignaturesUpdateModel.SignaturesUpdateModeChoice = types.ObjectNull(AwsTgwSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap)
 		}
 
 		wafSignaturesObj, wafSignaturesDiags := utils.GoStructToObjectValue(
 			ctx,
 			AwsTgwSiteWafSignaturesModelAttributeMap,
-			awsTgwSiteCommonWafLiveSignaturesUpdateModel,
+			awsTgwSiteLiveSignaturesUpdateModel,
 		)
 		response.Diagnostics.Append(wafSignaturesDiags...)
 		data.WafSignatures = wafSignaturesObj

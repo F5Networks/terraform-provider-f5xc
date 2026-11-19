@@ -32,6 +32,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -40,6 +41,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -241,7 +243,7 @@ var V1HttpMonitorHealthPolicyModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DynamicThresholdPolicy
+// Attribute map for OneOfField --> DynamicThresholdPolicy
 var V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
 	"dynamic_threshold": types.ObjectType{
@@ -261,7 +263,7 @@ var V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttribut
 	},
 }
 
-// Attribute map for RequiredOneOfField --> StaticMaxThresholdPolicy
+// Attribute map for OneOfField --> StaticMaxThresholdPolicy
 var V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
 	"static_max_threshold": types.ObjectType{
@@ -279,7 +281,7 @@ var V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttr
 	"max_response_time": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> StaticMinThresholdPolicy
+// Attribute map for OneOfField --> StaticMinThresholdPolicy
 var V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
 	"static_min_threshold": types.ObjectType{
@@ -297,7 +299,7 @@ var V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttr
 	"min_response_time": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> IntervalChoice
+// Attribute map for OneOfField --> IntervalChoice
 var V1HttpMonitorIntervalChoiceModelAttributeMap = map[string]attr.Type{
 
 	"interval_12_hours": types.BoolType,
@@ -311,7 +313,7 @@ var V1HttpMonitorIntervalChoiceModelAttributeMap = map[string]attr.Type{
 	"interval_6_hours":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> Method
+// Attribute map for OneOfField --> Method
 var V1HttpMonitorMethodModelAttributeMap = map[string]attr.Type{
 
 	"delete": types.ObjectType{
@@ -373,8 +375,8 @@ func (r *ResourceF5XCV1HttpMonitor) Metadata(ctx context.Context, request resour
 func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a v1_http_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_http_monitor) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a v1_http_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_http_monitor) etc. can be fetched",
+		MarkdownDescription: "HTTP Monitor defines an HTTP synthetic monitor.",
+		Description:         "HTTP Monitor defines an HTTP synthetic monitor.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -454,7 +456,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					Attributes: map[string]schema.Attribute{
 						"source_choice": schema.SingleNestedAttribute{
 							Description:         "Source Choice A data plane source for execution of monitors",
-							MarkdownDescription: "Source Choice A data plane source for execution of monitors",
+							MarkdownDescription: "Source Choice A data plane source for execution of monitors<br>Exactly one of `aws` or `f5xc` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -467,20 +469,20 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 							Attributes: map[string]schema.Attribute{
 								"aws": schema.SingleNestedAttribute{
 									Description:         "AWS Region Amazon Web Services",
-									MarkdownDescription: "AWS Region Amazon Web Services",
+									MarkdownDescription: "AWS Region Amazon Web Services<br>Conflicts with `f5xc`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"regions": schema.ListAttribute{
 											Description:         "AWS Regions A specific source location within AWS",
-											MarkdownDescription: "AWS Regions A specific source location within AWS",
+											MarkdownDescription: "AWS Regions A specific source location within AWS<br>**Valid Options:** `['ca-central-1', 'ap-northeast-1', 'us-east-2', 'us-west-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'sa-east-1', 'ap-east-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-south-1', 'us-east-1']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.List{
-												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"eu-north-1", "us-west-1", "us-east-2", "ap-northeast-1", "ca-central-1"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ca-central-1", "ap-northeast-1", "us-east-2", "us-west-1", "eu-north-1", "eu-west-2", "me-south-1", "sa-east-1", "ap-east-1", "ap-southeast-1", "ap-southeast-2", "ap-south-1", "us-east-1"}...)),
 												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
 												listvalidator.UniqueValues(),
 											},
@@ -489,20 +491,20 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 								},
 								"f5xc": schema.SingleNestedAttribute{
 									Description:         "F5 Distributed Cloud F5 Distributed Cloud",
-									MarkdownDescription: "F5 Distributed Cloud F5 Distributed Cloud",
+									MarkdownDescription: "F5 Distributed Cloud F5 Distributed Cloud<br>Conflicts with `aws`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"regions": schema.ListAttribute{
 											Description:         "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
-											MarkdownDescription: "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
+											MarkdownDescription: "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud<br>**Valid Options:** `['ves-io-newyork', 'ves-io-sanjose', 'ves-io-paris', 'ves-io-ashburn', 'ves-io-dallas', 'ves-io-seattle', 'ves-io-toronto', 'ves-io-montreal', 'ves-io-saopaulo', 'ves-io-london', 'ves-io-frankfurt', 'ves-io-amsterdam', 'ves-io-stockholm', 'ves-io-lisbon', 'ves-io-madrid', 'ves-io-dubai', 'ves-io-telaviv', 'ves-io-tokyo', 'ves-io-osaka', 'ves-io-singapore', 'ves-io-hongkong', 'ves-io-sydney', 'ves-io-melbourne', 'ves-io-mumbai', 'ves-io-chennai', 'ves-io-jakarta']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.List{
-												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ves-io-newyork", "ves-io-paris", "ves-io-sanjose"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ves-io-newyork", "ves-io-sanjose", "ves-io-paris", "ves-io-ashburn", "ves-io-dallas", "ves-io-seattle", "ves-io-toronto", "ves-io-montreal", "ves-io-saopaulo", "ves-io-london", "ves-io-frankfurt", "ves-io-amsterdam", "ves-io-stockholm", "ves-io-lisbon", "ves-io-madrid", "ves-io-dubai", "ves-io-telaviv", "ves-io-tokyo", "ves-io-osaka", "ves-io-singapore", "ves-io-hongkong", "ves-io-sydney", "ves-io-melbourne", "ves-io-mumbai", "ves-io-chennai", "ves-io-jakarta"}...)),
 												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
 												listvalidator.UniqueValues(),
 											},
@@ -531,20 +533,23 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"dynamic_threshold_policy_choice": schema.SingleNestedAttribute{
 						Description:         "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.",
-						MarkdownDescription: "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.<br>Exactly one of `dynamic_threshold` or `dynamic_threshold_disabled` must be specified when `dynamic_threshold_policy_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"dynamic_threshold",
 								"dynamic_threshold_disabled",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"dynamic_threshold": schema.SingleNestedAttribute{
 								Description:         "dynamic_threshold",
-								MarkdownDescription: "dynamic_threshold",
+								MarkdownDescription: "dynamic_threshold<br>Conflicts with `dynamic_threshold_disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -577,7 +582,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 							},
 							"dynamic_threshold_disabled": schema.BoolAttribute{
 								Description:         "dynamic_threshold_disabled",
-								MarkdownDescription: "dynamic_threshold_disabled",
+								MarkdownDescription: "dynamic_threshold_disabled<br>Conflicts with `dynamic_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -589,20 +594,23 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"static_max_threshold_policy_choice": schema.SingleNestedAttribute{
 						Description:         "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.",
-						MarkdownDescription: "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.<br>Exactly one of `static_max_threshold` or `static_max_threshold_disabled` must be specified when `static_max_threshold_policy_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"static_max_threshold",
 								"static_max_threshold_disabled",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"static_max_threshold": schema.SingleNestedAttribute{
 								Description:         "static_max_threshold",
-								MarkdownDescription: "static_max_threshold",
+								MarkdownDescription: "static_max_threshold<br>Conflicts with `static_max_threshold_disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -634,7 +642,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 							},
 							"static_max_threshold_disabled": schema.BoolAttribute{
 								Description:         "static_max_threshold_disabled",
-								MarkdownDescription: "static_max_threshold_disabled",
+								MarkdownDescription: "static_max_threshold_disabled<br>Conflicts with `static_max_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -646,20 +654,23 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"static_min_threshold_policy_choice": schema.SingleNestedAttribute{
 						Description:         "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.",
-						MarkdownDescription: "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.<br>Exactly one of `static_min_threshold` or `static_min_threshold_disabled` must be specified when `static_min_threshold_policy_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"static_min_threshold",
 								"static_min_threshold_disabled",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"static_min_threshold": schema.SingleNestedAttribute{
 								Description:         "static_max_threshold",
-								MarkdownDescription: "static_max_threshold",
+								MarkdownDescription: "static_max_threshold<br>Conflicts with `static_min_threshold_disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -691,7 +702,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 							},
 							"static_min_threshold_disabled": schema.BoolAttribute{
 								Description:         "static_min_threshold_disabled",
-								MarkdownDescription: "static_min_threshold_disabled",
+								MarkdownDescription: "static_min_threshold_disabled<br>Conflicts with `static_min_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -713,12 +724,12 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 			},
 			"interval_choice": schema.SingleNestedAttribute{
 				Description:         "interval How often the monitor will run from each source location",
-				MarkdownDescription: "interval How often the monitor will run from each source location",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "interval How often the monitor will run from each source location<br>Exactly one of `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, or `interval_6_hours` must be specified when `interval_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"interval_12_hours",
 						"interval_15_mins",
 						"interval_1_day",
@@ -730,10 +741,13 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 						"interval_6_hours",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"interval_12_hours": schema.BoolAttribute{
 						Description:         "12 hours",
-						MarkdownDescription: "12 hours",
+						MarkdownDescription: "12 hours<br>Conflicts with `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -743,7 +757,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_15_mins": schema.BoolAttribute{
 						Description:         "15 minutes",
-						MarkdownDescription: "15 minutes",
+						MarkdownDescription: "15 minutes<br>Conflicts with `interval_12_hours`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -753,7 +767,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_1_day": schema.BoolAttribute{
 						Description:         "1 day",
-						MarkdownDescription: "1 day",
+						MarkdownDescription: "1 day<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -763,7 +777,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_1_hour": schema.BoolAttribute{
 						Description:         "1 hour",
-						MarkdownDescription: "1 hour",
+						MarkdownDescription: "1 hour<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -773,7 +787,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_1_min": schema.BoolAttribute{
 						Description:         "1 minute",
-						MarkdownDescription: "1 minute",
+						MarkdownDescription: "1 minute<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -783,7 +797,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_30_mins": schema.BoolAttribute{
 						Description:         "30 minutes",
-						MarkdownDescription: "30 minutes",
+						MarkdownDescription: "30 minutes<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -793,7 +807,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_30_secs": schema.BoolAttribute{
 						Description:         "30 seconds",
-						MarkdownDescription: "30 seconds",
+						MarkdownDescription: "30 seconds<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -803,7 +817,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_5_mins": schema.BoolAttribute{
 						Description:         "5 minutes",
-						MarkdownDescription: "5 minutes",
+						MarkdownDescription: "5 minutes<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -813,7 +827,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"interval_6_hours": schema.BoolAttribute{
 						Description:         "6 hours",
-						MarkdownDescription: "6 hours",
+						MarkdownDescription: "6 hours<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, and `interval_5_mins`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -825,12 +839,12 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 			},
 			"method_choice": schema.SingleNestedAttribute{
 				Description:         "method Must select POST, PATCH, PUT, or DELETE to enable Body Content",
-				MarkdownDescription: "method Must select POST, PATCH, PUT, or DELETE to enable Body Content",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "method Must select POST, PATCH, PUT, or DELETE to enable Body Content<br>Exactly one of `delete`, `get`, `head`, `options`, `patch`, `post`, or `put` must be specified when `method_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"delete",
 						"get",
 						"head",
@@ -840,20 +854,24 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 						"put",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"delete": schema.SingleNestedAttribute{
 						Description:         "DELETE DELETE method",
-						MarkdownDescription: "DELETE DELETE method",
+						MarkdownDescription: "DELETE DELETE method<br>Conflicts with `get`, `head`, `options`, `patch`, `post`, and `put`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"request_body": schema.StringAttribute{
 								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 								Validators: []validator.String{
 									stringvalidator.LengthAtMost(65535),
 								},
@@ -862,7 +880,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"get": schema.BoolAttribute{
 						Description:         "GET GET method",
-						MarkdownDescription: "GET GET method",
+						MarkdownDescription: "GET GET method<br>Conflicts with `delete`, `head`, `options`, `patch`, `post`, and `put`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -872,7 +890,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"head": schema.BoolAttribute{
 						Description:         "HEAD HEAD method",
-						MarkdownDescription: "HEAD HEAD method",
+						MarkdownDescription: "HEAD HEAD method<br>Conflicts with `delete`, `get`, `options`, `patch`, `post`, and `put`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -882,7 +900,7 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"options": schema.BoolAttribute{
 						Description:         "OPTIONS OPTIONS method",
-						MarkdownDescription: "OPTIONS OPTIONS method",
+						MarkdownDescription: "OPTIONS OPTIONS method<br>Conflicts with `delete`, `get`, `head`, `patch`, `post`, and `put`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -892,17 +910,18 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"patch": schema.SingleNestedAttribute{
 						Description:         "PATCH PATCH method",
-						MarkdownDescription: "PATCH PATCH method",
+						MarkdownDescription: "PATCH PATCH method<br>Conflicts with `delete`, `get`, `head`, `options`, `post`, and `put`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"request_body": schema.StringAttribute{
 								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 								Validators: []validator.String{
 									stringvalidator.LengthAtMost(65535),
 								},
@@ -911,17 +930,18 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"post": schema.SingleNestedAttribute{
 						Description:         "POST POST method",
-						MarkdownDescription: "POST POST method",
+						MarkdownDescription: "POST POST method<br>Conflicts with `delete`, `get`, `head`, `options`, `patch`, and `put`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"request_body": schema.StringAttribute{
 								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 								Validators: []validator.String{
 									stringvalidator.LengthAtMost(65535),
 								},
@@ -930,17 +950,18 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 					},
 					"put": schema.SingleNestedAttribute{
 						Description:         "PUT PUT method",
-						MarkdownDescription: "PUT PUT method",
+						MarkdownDescription: "PUT PUT method<br>Conflicts with `delete`, `get`, `head`, `options`, `patch`, and `post`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"request_body": schema.StringAttribute{
 								Description:         "content Ensure appropriate request headers are added based on the content type added here",
-								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`",
+								MarkdownDescription: "content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`<br>**Default:** ``",
 								Required:            false,
 								Optional:            true,
-								Computed:            false,
+								Computed:            true,
+								Default:             stringdefault.StaticString(""),
 								Validators: []validator.String{
 									stringvalidator.LengthAtMost(65535),
 								},
@@ -962,10 +983,11 @@ func (r *ResourceF5XCV1HttpMonitor) Schema(ctx context.Context, request resource
 			},
 			"receive": schema.StringAttribute{
 				Description:         "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.",
-				MarkdownDescription: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.<br>**Validation:** `Length LengthAtMost(2048)`",
+				MarkdownDescription: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.<br>**Validation:** `Length LengthAtMost(2048)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(2048),
 				},
@@ -1133,9 +1155,17 @@ func (r *ResourceF5XCV1HttpMonitor) ModifyPlan(ctx context.Context, req resource
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCV1HttpMonitorModel
 
 	// Read Terraform plan data into the model
@@ -1301,6 +1331,15 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> HealthPolicy
 		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
 			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
+			healthPolicySpec.DynamicThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{
+				DynamicThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMaxThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{
+				StaticMaxThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMinThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{
+				StaticMinThresholdDisabled: &ves_io_schema.Empty{},
+			}
 			spec.HealthPolicy = healthPolicySpec
 			var healthPolicyModel V1HttpMonitorHealthPolicy
 
@@ -1311,7 +1350,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
+			// resource modelToSpecNested OneOfField --> DynamicThresholdPolicy
 			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
 				healthPolicyDynamicThresholdPolicyChoiceModel := V1HttpMonitorDynamicThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1389,7 +1428,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMaxThresholdPolicy
 			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1HttpMonitorStaticMaxThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1446,7 +1485,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMinThresholdPolicy
 			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMinThresholdPolicyChoiceModel := V1HttpMonitorStaticMinThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1511,7 +1550,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		spec.IgnoreCertErrors = bool(data.IgnoreCertErrors.ValueBool())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
+	// resource modelToSpecRoot OneOfField --> IntervalChoice
 	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
 		intervalChoiceModel := V1HttpMonitorIntervalChoice{}
 		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1582,9 +1621,13 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			spec.IntervalChoice = interval6HoursSpecBool
 		}
 
+	} else {
+		spec.IntervalChoice = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Interval_1Min{
+			Interval_1Min: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> Method
+	// resource modelToSpecRoot OneOfField --> Method
 	if !data.MethodChoice.IsNull() && !data.MethodChoice.IsUnknown() {
 		methodChoiceModel := V1HttpMonitorMethodChoice{}
 		response.Diagnostics.Append(data.MethodChoice.As(ctx, &methodChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1606,6 +1649,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorDeleteModel.RequestBody.IsNull() && !v1HttpMonitorDeleteModel.RequestBody.IsUnknown() {
 				deleteOneOfSpec.Delete.RequestBody = string(v1HttpMonitorDeleteModel.RequestBody.ValueString())
+			} else {
+				deleteOneOfSpec.Delete.RequestBody = ""
 			}
 
 		}
@@ -1645,6 +1690,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorPatchModel.RequestBody.IsNull() && !v1HttpMonitorPatchModel.RequestBody.IsUnknown() {
 				patchOneOfSpec.Patch.RequestBody = string(v1HttpMonitorPatchModel.RequestBody.ValueString())
+			} else {
+				patchOneOfSpec.Patch.RequestBody = ""
 			}
 
 		}
@@ -1663,6 +1710,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorPostModel.RequestBody.IsNull() && !v1HttpMonitorPostModel.RequestBody.IsUnknown() {
 				postOneOfSpec.Post.RequestBody = string(v1HttpMonitorPostModel.RequestBody.ValueString())
+			} else {
+				postOneOfSpec.Post.RequestBody = ""
 			}
 
 		}
@@ -1681,10 +1730,16 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorPutModel.RequestBody.IsNull() && !v1HttpMonitorPutModel.RequestBody.IsUnknown() {
 				putOneOfSpec.Put.RequestBody = string(v1HttpMonitorPutModel.RequestBody.ValueString())
+			} else {
+				putOneOfSpec.Put.RequestBody = ""
 			}
 
 		}
 
+	} else {
+		spec.Method = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Get{
+			Get: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
@@ -1756,7 +1811,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1779,7 +1834,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "v1_http_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "v1_http_monitor", err),
 		)
 		return
 	}
@@ -2073,6 +2128,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1HttpMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1HttpMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -2101,8 +2157,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		var v1HttpMonitorHealthPolicyModel = &V1HttpMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> DynamicThresholdPolicy
 		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -2204,11 +2259,11 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMaxThresholdPolicy
 		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -2297,11 +2352,11 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMinThresholdPolicy
 		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -2390,6 +2445,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
@@ -2410,7 +2466,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
 	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
 
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// resource SpecToModelRoot OneOfField --> IntervalChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -2470,8 +2526,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var intervalChoiceChoices interface{}
 		if v := rawSpecMap["interval_choice"]; v != nil {
 			intervalChoiceChoices = v
@@ -2702,7 +2758,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> Method
+	// resource SpecToModelRoot OneOfField --> Method
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -2754,8 +2810,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var methodChoiceChoices interface{}
 		if v := rawSpecMap["method"]; v != nil {
 			methodChoiceChoices = v
@@ -2779,12 +2835,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 				deleteElement := deleteOptionsWrapper.Delete
 
 				// resource specToModelNested StringField --> RequestBody
-				if deleteElement.GetRequestBody() != "" {
-					deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					deleteAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
 
 				deleteObj, deleteObjDiags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
 				response.Diagnostics.Append(deleteObjDiags...)
@@ -2874,12 +2926,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 				patchElement := patchOptionsWrapper.Patch
 
 				// resource specToModelNested StringField --> RequestBody
-				if patchElement.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					patchAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
 
 				patchObj, patchObjDiags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
 				response.Diagnostics.Append(patchObjDiags...)
@@ -2903,12 +2951,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 				postElement := postOptionsWrapper.Post
 
 				// resource specToModelNested StringField --> RequestBody
-				if postElement.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					postAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
 
 				postObj, postObjDiags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
 				response.Diagnostics.Append(postObjDiags...)
@@ -2932,12 +2976,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 				putElement := putOptionsWrapper.Put
 
 				// resource specToModelNested StringField --> RequestBody
-				if putElement.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
 
 				putObj, putObjDiags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
 				response.Diagnostics.Append(putObjDiags...)
@@ -2977,12 +3017,8 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
 	if len(specData.GetRequestHeaders()) > 0 {
@@ -3028,14 +3064,12 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
 		}
 		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
-		var priorValRequestHeaders types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("request_headers"), &priorValRequestHeaders)
-		if !priorValRequestHeaders.IsNull() && !priorValRequestHeaders.IsUnknown() {
-			data.RequestHeaders = priorValRequestHeaders
+		if !data.RequestHeaders.IsNull() && !data.RequestHeaders.IsUnknown() && len(data.RequestHeaders.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.RequestHeaders = basetypes.NewListValueMust(requestHeadersObjectType, nil)
 		} else {
 			data.RequestHeaders = nullRequestHeadersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
@@ -3048,7 +3082,12 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 			}
 			data.ResponseCodes = listValue
 		} else {
-			data.ResponseCodes = types.ListNull(types.StringType)
+			if !data.ResponseCodes.IsNull() && !data.ResponseCodes.IsUnknown() && len(data.ResponseCodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.ResponseCodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.ResponseCodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -3056,7 +3095,7 @@ func (r *ResourceF5XCV1HttpMonitor) Create(ctx context.Context, request resource
 	responseTimeoutValue := specData.GetResponseTimeout()
 	if responseTimeoutValue > 0 {
 		data.ResponseTimeout = types.Int64Value(int64(responseTimeoutValue))
-	} else {
+	} else if data.ResponseTimeout.IsNull() || data.ResponseTimeout.IsUnknown() {
 		data.ResponseTimeout = types.Int64Null()
 	}
 
@@ -3125,20 +3164,19 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "v1_http_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "v1_http_monitor", err),
 		)
 		return
 	}
@@ -3426,6 +3464,7 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1HttpMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1HttpMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -3454,8 +3493,7 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		var v1HttpMonitorHealthPolicyModel = &V1HttpMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> DynamicThresholdPolicy
 		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -3557,11 +3595,14 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
-			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectValueMust(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"dynamic_threshold":          types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap),
+				"dynamic_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMaxThresholdPolicy
 		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -3650,11 +3691,14 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
-			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectValueMust(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"static_max_threshold":          types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap),
+				"static_max_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMinThresholdPolicy
 		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -3743,7 +3787,11 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
-			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectValueMust(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"static_min_threshold":          types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap),
+				"static_min_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
 		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
@@ -3763,7 +3811,7 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
 	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
 
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// resource SpecToModelRoot OneOfField --> IntervalChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -3823,8 +3871,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var intervalChoiceChoices interface{}
 		if v := rawSpecMap["interval_choice"]; v != nil {
 			intervalChoiceChoices = v
@@ -4052,10 +4100,23 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
+
+		if data.IntervalChoice.IsNull() || data.IntervalChoice.IsUnknown() || ((data.IntervalChoice.Attributes()["interval_12_hours"].IsNull() || data.IntervalChoice.Attributes()["interval_12_hours"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_15_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_15_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_day"].IsNull() || data.IntervalChoice.Attributes()["interval_1_day"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_hour"].IsNull() || data.IntervalChoice.Attributes()["interval_1_hour"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_min"].IsNull() || data.IntervalChoice.Attributes()["interval_1_min"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_30_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_30_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_30_secs"].IsNull() || data.IntervalChoice.Attributes()["interval_30_secs"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_5_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_5_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_6_hours"].IsNull() || data.IntervalChoice.Attributes()["interval_6_hours"].IsUnknown())) {
+			data.IntervalChoice = types.ObjectValueMust(V1HttpMonitorIntervalChoiceModelAttributeMap, map[string]attr.Value{
+				"interval_12_hours": types.BoolNull(),
+				"interval_15_mins":  types.BoolNull(),
+				"interval_1_day":    types.BoolNull(),
+				"interval_1_hour":   types.BoolNull(),
+				"interval_1_min":    types.BoolValue(true),
+				"interval_30_mins":  types.BoolNull(),
+				"interval_30_secs":  types.BoolNull(),
+				"interval_5_mins":   types.BoolNull(),
+				"interval_6_hours":  types.BoolNull(),
+			})
+		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> Method
+	// resource SpecToModelRoot OneOfField --> Method
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -4107,8 +4168,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var methodChoiceChoices interface{}
 		if v := rawSpecMap["method"]; v != nil {
 			methodChoiceChoices = v
@@ -4132,12 +4193,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 				deleteElement := deleteOptionsWrapper.Delete
 
 				// resource specToModelNested StringField --> RequestBody
-				if deleteElement.GetRequestBody() != "" {
-					deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					deleteAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
 
 				deleteObj, deleteObjDiags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
 				response.Diagnostics.Append(deleteObjDiags...)
@@ -4227,12 +4284,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 				patchElement := patchOptionsWrapper.Patch
 
 				// resource specToModelNested StringField --> RequestBody
-				if patchElement.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					patchAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
 
 				patchObj, patchObjDiags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
 				response.Diagnostics.Append(patchObjDiags...)
@@ -4256,12 +4309,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 				postElement := postOptionsWrapper.Post
 
 				// resource specToModelNested StringField --> RequestBody
-				if postElement.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					postAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
 
 				postObj, postObjDiags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
 				response.Diagnostics.Append(postObjDiags...)
@@ -4285,12 +4334,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 				putElement := putOptionsWrapper.Put
 
 				// resource specToModelNested StringField --> RequestBody
-				if putElement.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
 
 				putObj, putObjDiags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
 				response.Diagnostics.Append(putObjDiags...)
@@ -4320,7 +4365,18 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.MethodChoice = types.ObjectNull(V1HttpMonitorMethodModelAttributeMap)
+
+		if data.MethodChoice.IsNull() || data.MethodChoice.IsUnknown() || ((data.MethodChoice.Attributes()["delete"].(types.Object).IsNull() || data.MethodChoice.Attributes()["delete"].(types.Object).IsUnknown() || (data.MethodChoice.Attributes()["delete"].(types.Object).Attributes()["request_body"].IsNull() || data.MethodChoice.Attributes()["delete"].(types.Object).Attributes()["request_body"].IsUnknown())) && (data.MethodChoice.Attributes()["get"].IsNull() || data.MethodChoice.Attributes()["get"].IsUnknown()) && (data.MethodChoice.Attributes()["head"].IsNull() || data.MethodChoice.Attributes()["head"].IsUnknown()) && (data.MethodChoice.Attributes()["options"].IsNull() || data.MethodChoice.Attributes()["options"].IsUnknown()) && (data.MethodChoice.Attributes()["patch"].(types.Object).IsNull() || data.MethodChoice.Attributes()["patch"].(types.Object).IsUnknown() || (data.MethodChoice.Attributes()["patch"].(types.Object).Attributes()["request_body"].IsNull() || data.MethodChoice.Attributes()["patch"].(types.Object).Attributes()["request_body"].IsUnknown())) && (data.MethodChoice.Attributes()["post"].(types.Object).IsNull() || data.MethodChoice.Attributes()["post"].(types.Object).IsUnknown() || (data.MethodChoice.Attributes()["post"].(types.Object).Attributes()["request_body"].IsNull() || data.MethodChoice.Attributes()["post"].(types.Object).Attributes()["request_body"].IsUnknown())) && (data.MethodChoice.Attributes()["put"].(types.Object).IsNull() || data.MethodChoice.Attributes()["put"].(types.Object).IsUnknown() || (data.MethodChoice.Attributes()["put"].(types.Object).Attributes()["request_body"].IsNull() || data.MethodChoice.Attributes()["put"].(types.Object).Attributes()["request_body"].IsUnknown()))) {
+			data.MethodChoice = types.ObjectValueMust(V1HttpMonitorMethodModelAttributeMap, map[string]attr.Value{
+				"delete":  types.ObjectNull(V1HttpMonitorMethodDeleteModelAttributeMap),
+				"get":     types.BoolValue(true),
+				"head":    types.BoolNull(),
+				"options": types.BoolNull(),
+				"patch":   types.ObjectNull(V1HttpMonitorMethodPatchModelAttributeMap),
+				"post":    types.ObjectNull(V1HttpMonitorMethodPostModelAttributeMap),
+				"put":     types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -4330,12 +4386,8 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
 	if len(specData.GetRequestHeaders()) > 0 {
@@ -4381,14 +4433,12 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
 		}
 		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
-		var priorValRequestHeaders types.List
-		_ = request.State.GetAttribute(ctx, path.Root("request_headers"), &priorValRequestHeaders)
-		if !priorValRequestHeaders.IsNull() && !priorValRequestHeaders.IsUnknown() {
-			data.RequestHeaders = priorValRequestHeaders
+		if !data.RequestHeaders.IsNull() && !data.RequestHeaders.IsUnknown() && len(data.RequestHeaders.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.RequestHeaders = basetypes.NewListValueMust(requestHeadersObjectType, nil)
 		} else {
 			data.RequestHeaders = nullRequestHeadersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
@@ -4401,7 +4451,12 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 			}
 			data.ResponseCodes = listValue
 		} else {
-			data.ResponseCodes = types.ListNull(types.StringType)
+			if !data.ResponseCodes.IsNull() && !data.ResponseCodes.IsUnknown() && len(data.ResponseCodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.ResponseCodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.ResponseCodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -4409,7 +4464,7 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 	responseTimeoutValue := specData.GetResponseTimeout()
 	if responseTimeoutValue > 0 {
 		data.ResponseTimeout = types.Int64Value(int64(responseTimeoutValue))
-	} else {
+	} else if data.ResponseTimeout.IsNull() || data.ResponseTimeout.IsUnknown() {
 		data.ResponseTimeout = types.Int64Null()
 	}
 
@@ -4444,6 +4499,12 @@ func (r *ResourceF5XCV1HttpMonitor) Read(ctx context.Context, request resource.R
 }
 
 func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCV1HttpMonitorModel
@@ -4629,6 +4690,15 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> HealthPolicy
 		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
 			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
+			healthPolicySpec.DynamicThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{
+				DynamicThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMaxThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{
+				StaticMaxThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMinThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{
+				StaticMinThresholdDisabled: &ves_io_schema.Empty{},
+			}
 			spec.HealthPolicy = healthPolicySpec
 			var healthPolicyModel V1HttpMonitorHealthPolicy
 
@@ -4639,7 +4709,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
+			// resource modelToSpecNested OneOfField --> DynamicThresholdPolicy
 			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
 				healthPolicyDynamicThresholdPolicyChoiceModel := V1HttpMonitorDynamicThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4717,7 +4787,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMaxThresholdPolicy
 			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1HttpMonitorStaticMaxThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4774,7 +4844,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMinThresholdPolicy
 			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMinThresholdPolicyChoiceModel := V1HttpMonitorStaticMinThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4839,7 +4909,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		spec.IgnoreCertErrors = bool(data.IgnoreCertErrors.ValueBool())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
+	// resource modelToSpecRoot OneOfField --> IntervalChoice
 	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
 		intervalChoiceModel := V1HttpMonitorIntervalChoice{}
 		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4910,9 +4980,13 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			spec.IntervalChoice = interval6HoursSpecBool
 		}
 
+	} else {
+		spec.IntervalChoice = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Interval_1Min{
+			Interval_1Min: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> Method
+	// resource modelToSpecRoot OneOfField --> Method
 	if !data.MethodChoice.IsNull() && !data.MethodChoice.IsUnknown() {
 		methodChoiceModel := V1HttpMonitorMethodChoice{}
 		response.Diagnostics.Append(data.MethodChoice.As(ctx, &methodChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4934,6 +5008,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorDeleteModel.RequestBody.IsNull() && !v1HttpMonitorDeleteModel.RequestBody.IsUnknown() {
 				deleteOneOfSpec.Delete.RequestBody = string(v1HttpMonitorDeleteModel.RequestBody.ValueString())
+			} else {
+				deleteOneOfSpec.Delete.RequestBody = ""
 			}
 
 		}
@@ -4973,6 +5049,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorPatchModel.RequestBody.IsNull() && !v1HttpMonitorPatchModel.RequestBody.IsUnknown() {
 				patchOneOfSpec.Patch.RequestBody = string(v1HttpMonitorPatchModel.RequestBody.ValueString())
+			} else {
+				patchOneOfSpec.Patch.RequestBody = ""
 			}
 
 		}
@@ -4991,6 +5069,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorPostModel.RequestBody.IsNull() && !v1HttpMonitorPostModel.RequestBody.IsUnknown() {
 				postOneOfSpec.Post.RequestBody = string(v1HttpMonitorPostModel.RequestBody.ValueString())
+			} else {
+				postOneOfSpec.Post.RequestBody = ""
 			}
 
 		}
@@ -5009,10 +5089,16 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			// resource modelToSpecNested StringField --> RequestBody
 			if !v1HttpMonitorPutModel.RequestBody.IsNull() && !v1HttpMonitorPutModel.RequestBody.IsUnknown() {
 				putOneOfSpec.Put.RequestBody = string(v1HttpMonitorPutModel.RequestBody.ValueString())
+			} else {
+				putOneOfSpec.Put.RequestBody = ""
 			}
 
 		}
 
+	} else {
+		spec.Method = &ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ReplaceSpecType_Get{
+			Get: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
@@ -5084,7 +5170,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -5092,15 +5178,11 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "v1_http_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "v1_http_monitor", err),
 		)
 		return
 	}
@@ -5109,13 +5191,15 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_http_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "v1_http_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "v1_http_monitor", err),
 		)
 		return
 	}
@@ -5221,34 +5305,27 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -5277,17 +5354,23 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -5403,6 +5486,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1HttpMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1HttpMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1HttpMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -5431,8 +5515,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		var v1HttpMonitorHealthPolicyModel = &V1HttpMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> DynamicThresholdPolicy
 		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -5534,11 +5617,11 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1HttpMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMaxThresholdPolicy
 		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -5627,11 +5710,11 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1HttpMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMinThresholdPolicy
 		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -5720,6 +5803,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1HttpMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1HttpMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
@@ -5740,7 +5824,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	// resource SpecToModelRoot BoolField --> IgnoreCertErrors
 	data.IgnoreCertErrors = types.BoolValue(specData.GetIgnoreCertErrors())
 
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// resource SpecToModelRoot OneOfField --> IntervalChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -5800,8 +5884,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var intervalChoiceChoices interface{}
 		if v := rawSpecMap["interval_choice"]; v != nil {
 			intervalChoiceChoices = v
@@ -6032,7 +6116,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		data.IntervalChoice = types.ObjectNull(V1HttpMonitorIntervalChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> Method
+	// resource SpecToModelRoot OneOfField --> Method
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -6084,8 +6168,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var methodChoiceChoices interface{}
 		if v := rawSpecMap["method"]; v != nil {
 			methodChoiceChoices = v
@@ -6109,12 +6193,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 				deleteElement := deleteOptionsWrapper.Delete
 
 				// resource specToModelNested StringField --> RequestBody
-				if deleteElement.GetRequestBody() != "" {
-					deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					deleteAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				deleteAttributeMap["request_body"] = types.StringValue(deleteElement.GetRequestBody())
 
 				deleteObj, deleteObjDiags := types.ObjectValue(V1HttpMonitorMethodDeleteModelAttributeMap, deleteAttributeMap)
 				response.Diagnostics.Append(deleteObjDiags...)
@@ -6204,12 +6284,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 				patchElement := patchOptionsWrapper.Patch
 
 				// resource specToModelNested StringField --> RequestBody
-				if patchElement.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					patchAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				patchAttributeMap["request_body"] = types.StringValue(patchElement.GetRequestBody())
 
 				patchObj, patchObjDiags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
 				response.Diagnostics.Append(patchObjDiags...)
@@ -6233,12 +6309,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 				postElement := postOptionsWrapper.Post
 
 				// resource specToModelNested StringField --> RequestBody
-				if postElement.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					postAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				postAttributeMap["request_body"] = types.StringValue(postElement.GetRequestBody())
 
 				postObj, postObjDiags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
 				response.Diagnostics.Append(postObjDiags...)
@@ -6262,12 +6334,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 				putElement := putOptionsWrapper.Put
 
 				// resource specToModelNested StringField --> RequestBody
-				if putElement.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
+				// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+				putAttributeMap["request_body"] = types.StringValue(putElement.GetRequestBody())
 
 				putObj, putObjDiags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
 				response.Diagnostics.Append(putObjDiags...)
@@ -6307,12 +6375,8 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot ArrayOfPointerField --> RequestHeaders
 	if len(specData.GetRequestHeaders()) > 0 {
@@ -6358,14 +6422,12 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
 		}
 		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
-		var priorValRequestHeaders types.List
-		_ = request.State.GetAttribute(ctx, path.Root("request_headers"), &priorValRequestHeaders)
-		if !priorValRequestHeaders.IsNull() && !priorValRequestHeaders.IsUnknown() {
-			data.RequestHeaders = priorValRequestHeaders
+		if !data.RequestHeaders.IsNull() && !data.RequestHeaders.IsUnknown() && len(data.RequestHeaders.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.RequestHeaders = basetypes.NewListValueMust(requestHeadersObjectType, nil)
 		} else {
 			data.RequestHeaders = nullRequestHeadersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
@@ -6378,7 +6440,12 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 			}
 			data.ResponseCodes = listValue
 		} else {
-			data.ResponseCodes = types.ListNull(types.StringType)
+			if !data.ResponseCodes.IsNull() && !data.ResponseCodes.IsUnknown() && len(data.ResponseCodes.Elements()) == 0 {
+				// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+				data.ResponseCodes = types.ListValueMust(types.StringType, nil)
+			} else {
+				data.ResponseCodes = types.ListNull(types.StringType)
+			}
 		}
 	}
 
@@ -6386,7 +6453,7 @@ func (r *ResourceF5XCV1HttpMonitor) Update(ctx context.Context, request resource
 	responseTimeoutValue := specData.GetResponseTimeout()
 	if responseTimeoutValue > 0 {
 		data.ResponseTimeout = types.Int64Value(int64(responseTimeoutValue))
-	} else {
+	} else if data.ResponseTimeout.IsNull() || data.ResponseTimeout.IsUnknown() {
 		data.ResponseTimeout = types.Int64Null()
 	}
 
@@ -6484,7 +6551,7 @@ func (r *ResourceF5XCV1HttpMonitor) Delete(ctx context.Context, request resource
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "v1_http_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "v1_http_monitor", err),
 		)
 		return
 	}

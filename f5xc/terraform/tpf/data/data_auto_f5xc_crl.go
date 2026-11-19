@@ -28,11 +28,11 @@ type DataSourceF5XCCrl struct {
 	client *client.APIClient
 }
 
-type CrlGlobalSpecTypeAccessInfoChoice struct {
+type CrlAccessInfoChoice struct {
 	HttpAccess types.Object `tfsdk:"http_access"`
 }
 
-type CrlGlobalSpecTypeHttpAccess struct {
+type CrlHttpAccess struct {
 	Path types.String `tfsdk:"path"`
 }
 
@@ -81,8 +81,8 @@ func (d *DataSourceF5XCCrl) Metadata(ctx context.Context, request datasource.Met
 func (r *DataSourceF5XCCrl) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a crl This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of crl) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a crl This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of crl) etc. can be fetched",
+		MarkdownDescription: "Certificate Revocation List(CRL)<br><br>It contains information about CRL server and how to download the CRL file<br>CRL file is used to validate the certificate presented to check whether it is revoked or not.<br>Clients offerring revoked certificate will not be allowed to access the HTTP Loadbalancer.<br>CRL file is downloaded/refreshed based on the refresh interval.",
+		Description:         "Certificate Revocation List(CRL) It contains information about CRL server and how to download the CRL file CRL file is used to validate the certificate presented to check whether it is revoked or not. Clients offerring revoked certificate will not be allowed to access the HTTP Loadbalancer. CRL file is downloaded/refreshed based on the refresh interval.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -226,7 +226,7 @@ func (d *DataSourceF5XCCrl) Read(ctx context.Context, request datasource.ReadReq
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "crl", err))
 		return
 	}
 
@@ -297,7 +297,7 @@ func (d *DataSourceF5XCCrl) Read(ctx context.Context, request datasource.ReadReq
 		accessInfoChoiceChoices := specData.GetAccessInfoChoice()
 
 		// The model struct that will be populated by the nested template.
-		var accessInfoChoiceChoicesModel = &CrlGlobalSpecTypeAccessInfoChoice{}
+		var accessInfoChoiceChoicesModel = &CrlAccessInfoChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

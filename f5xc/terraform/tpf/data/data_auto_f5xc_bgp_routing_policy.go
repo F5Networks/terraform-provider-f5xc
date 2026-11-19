@@ -28,16 +28,16 @@ type DataSourceF5XCBgpRoutingPolicy struct {
 	client *client.APIClient
 }
 
-type BgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicy struct {
+type BgpRoutingPolicyBgpRoutePolicy struct {
 	Action types.Object `tfsdk:"action"`
 	Match  types.Object `tfsdk:"match"`
 }
 
-type BgpRoutingPolicyBgpRoutingPolicyBgpRouteAction struct {
+type BgpRoutingPolicyBgpRouteAction struct {
 	ActionTypeChoice types.Object `tfsdk:"action_type_choice"`
 }
 
-type BgpRoutingPolicyBgpRouteActionActionTypeChoice struct {
+type BgpRoutingPolicyActionTypeChoice struct {
 	Allow           types.Bool   `tfsdk:"allow"`
 	AsPath          types.String `tfsdk:"as_path"`
 	Community       types.Object `tfsdk:"community"`
@@ -46,15 +46,15 @@ type BgpRoutingPolicyBgpRouteActionActionTypeChoice struct {
 	Metric          types.Int64  `tfsdk:"metric"`
 }
 
-type BgpRoutingPolicyBgpRouteActionCommunity struct {
+type BgpRoutingPolicyCommunity struct {
 	Community types.List `tfsdk:"community"`
 }
 
-type BgpRoutingPolicyBgpRoutingPolicyBgpRouteMatch struct {
+type BgpRoutingPolicyBgpRouteMatch struct {
 	TypeOfMatchChoice types.Object `tfsdk:"type_of_match_choice"`
 }
 
-type BgpRoutingPolicyBgpRouteMatchTypeOfMatchChoice struct {
+type BgpRoutingPolicyTypeOfMatchChoice struct {
 	AsPath     types.String `tfsdk:"as_path"`
 	Community  types.Object `tfsdk:"community"`
 	IpPrefixes types.Object `tfsdk:"ip_prefixes"`
@@ -64,16 +64,16 @@ type BgpRoutingPolicyBgpRouteMatchCommunity struct {
 	Community types.List `tfsdk:"community"`
 }
 
-type BgpRoutingPolicyBgpRouteMatchIpPrefixes struct {
+type BgpRoutingPolicyIpPrefixes struct {
 	Prefixes types.List `tfsdk:"prefixes"`
 }
 
-type BgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatch struct {
+type BgpRoutingPolicyBgpPrefixMatch struct {
 	IpPrefixes              types.String `tfsdk:"ip_prefixes"`
 	PrefixLengthMatchChoice types.Object `tfsdk:"prefix_length_match_choice"`
 }
 
-type BgpRoutingPolicyBgpPrefixMatchPrefixLengthMatchChoice struct {
+type BgpRoutingPolicyPrefixLengthMatchChoice struct {
 	EqualOrLongerThan types.Bool `tfsdk:"equal_or_longer_than"`
 	ExactMatch        types.Bool `tfsdk:"exact_match"`
 	LongerThan        types.Bool `tfsdk:"longer_than"`
@@ -211,8 +211,8 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "BGP Route Filter BGP route filter is a collection of match condition and action to be taken on match. All the fields to evaluate match criteria will be extracted from BGP route being processed. IP prefix, BGP community and AS PATH, all fields which can be specified and all the fields must match with BGP route for action to be applied",
-		Description:         "BGP Route Filter BGP route filter is a collection of match condition and action to be taken on match. All the fields to evaluate match criteria will be extracted from BGP route being processed. IP prefix, BGP community and AS PATH, all fields which can be specified and all the fields must match with BGP route for action to be applied",
+		MarkdownDescription: "BGP Routing Policy is a list of rules, which contains match criteria and<br>action to be taken upon match. This helps in filtering routes which are<br>exported or imported by BGP peers",
+		Description:         "BGP Routing Policy is a list of rules, which contains match criteria and action to be taken upon match. This helps in filtering routes which are exported or imported by BGP peers",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -468,7 +468,7 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "bgp_routing_policy", err))
 		return
 	}
 
@@ -530,15 +530,15 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Rules
-	rulesElementsSpectToModel := make([]BgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicy, 0, len(specData.GetRules()))
+	rulesElementsSpectToModel := make([]BgpRoutingPolicyBgpRoutePolicy, 0, len(specData.GetRules()))
 
 	for _, rulesElement := range specData.GetRules() {
-		bgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicyModel := BgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicy{}
+		bgpRoutingPolicyBgpRoutePolicyModel := BgpRoutingPolicyBgpRoutePolicy{}
 
 		// data specToModelNested PointerField --> Action
 		if rulesElement.GetAction() != nil {
 			// Create the nested Go struct
-			bgpRoutingPolicyBgpRoutingPolicyBgpRouteActionModel := &BgpRoutingPolicyBgpRoutingPolicyBgpRouteAction{}
+			bgpRoutingPolicyBgpRouteActionModel := &BgpRoutingPolicyBgpRouteAction{}
 			actionElement := rulesElement.GetAction()
 
 			// Recursively populate the nested struct
@@ -648,19 +648,19 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				bgpRoutingPolicyBgpRoutingPolicyBgpRouteActionModel.ActionTypeChoice = finalObj
+				bgpRoutingPolicyBgpRouteActionModel.ActionTypeChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				bgpRoutingPolicyBgpRoutingPolicyBgpRouteActionModel.ActionTypeChoice = types.ObjectNull(BgpRoutingPolicyRulesActionActionTypeModelAttributeMap)
+				bgpRoutingPolicyBgpRouteActionModel.ActionTypeChoice = types.ObjectNull(BgpRoutingPolicyRulesActionActionTypeModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			bgpRoutingPolicyBgpRoutingPolicyBgpRouteActionModelObj, objDiags := types.ObjectValueFrom(ctx, BgpRoutingPolicyRulesActionModelAttributeMap, bgpRoutingPolicyBgpRoutingPolicyBgpRouteActionModel)
+			bgpRoutingPolicyBgpRouteActionModelObj, objDiags := types.ObjectValueFrom(ctx, BgpRoutingPolicyRulesActionModelAttributeMap, bgpRoutingPolicyBgpRouteActionModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			bgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicyModel.Action = bgpRoutingPolicyBgpRoutingPolicyBgpRouteActionModelObj
+			bgpRoutingPolicyBgpRoutePolicyModel.Action = bgpRoutingPolicyBgpRouteActionModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -669,13 +669,13 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			bgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicyModel.Action = types.ObjectNull(BgpRoutingPolicyRulesActionModelAttributeMap)
+			bgpRoutingPolicyBgpRoutePolicyModel.Action = types.ObjectNull(BgpRoutingPolicyRulesActionModelAttributeMap)
 		}
 
 		// data specToModelNested PointerField --> Match
 		if rulesElement.GetMatch() != nil {
 			// Create the nested Go struct
-			bgpRoutingPolicyBgpRoutingPolicyBgpRouteMatchModel := &BgpRoutingPolicyBgpRoutingPolicyBgpRouteMatch{}
+			bgpRoutingPolicyBgpRouteMatchModel := &BgpRoutingPolicyBgpRouteMatch{}
 			matchElement := rulesElement.GetMatch()
 
 			// Recursively populate the nested struct
@@ -749,16 +749,16 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 						if len(ipPrefixesElement.GetPrefixes()) > 0 {
 							// Step 1: Always create a slice of model structs from the spec data.
 							// This slice serves as an intermediate representation.
-							prefixesElements := make([]BgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatch, 0, len(ipPrefixesElement.GetPrefixes()))
+							prefixesElements := make([]BgpRoutingPolicyBgpPrefixMatch, 0, len(ipPrefixesElement.GetPrefixes()))
 							for _, prefixesElement := range ipPrefixesElement.GetPrefixes() {
-								bgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatchModel := BgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatch{}
+								bgpRoutingPolicyBgpPrefixMatchModel := BgpRoutingPolicyBgpPrefixMatch{}
 
 								// data specToModelNested StringField --> IpPrefixes
 								if prefixesElement.GetIpPrefixes() != "" {
-									bgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatchModel.IpPrefixes = types.StringValue(prefixesElement.GetIpPrefixes())
+									bgpRoutingPolicyBgpPrefixMatchModel.IpPrefixes = types.StringValue(prefixesElement.GetIpPrefixes())
 								} else {
 									// Empty string, set to null
-									bgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatchModel.IpPrefixes = types.StringNull()
+									bgpRoutingPolicyBgpPrefixMatchModel.IpPrefixes = types.StringNull()
 								}
 
 								// data specToModelNested OneOfField --> PrefixLengthMatch
@@ -812,13 +812,13 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 									}
 
 									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									bgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatchModel.PrefixLengthMatchChoice = finalObj
+									bgpRoutingPolicyBgpPrefixMatchModel.PrefixLengthMatchChoice = finalObj
 								} else {
 									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									bgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatchModel.PrefixLengthMatchChoice = types.ObjectNull(BgpRoutingPolicyRulesMatchTypeOfMatchIpPrefixesPrefixesPrefixLengthMatchModelAttributeMap)
+									bgpRoutingPolicyBgpPrefixMatchModel.PrefixLengthMatchChoice = types.ObjectNull(BgpRoutingPolicyRulesMatchTypeOfMatchIpPrefixesPrefixesPrefixLengthMatchModelAttributeMap)
 								}
 
-								prefixesElements = append(prefixesElements, bgpRoutingPolicyBgpRoutingPolicyBgpPrefixMatchModel)
+								prefixesElements = append(prefixesElements, bgpRoutingPolicyBgpPrefixMatchModel)
 							}
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// The intermediate slice of structs must be converted to a `types.ListValue`.
@@ -860,19 +860,19 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 				}
 
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				bgpRoutingPolicyBgpRoutingPolicyBgpRouteMatchModel.TypeOfMatchChoice = finalObj
+				bgpRoutingPolicyBgpRouteMatchModel.TypeOfMatchChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				bgpRoutingPolicyBgpRoutingPolicyBgpRouteMatchModel.TypeOfMatchChoice = types.ObjectNull(BgpRoutingPolicyRulesMatchTypeOfMatchModelAttributeMap)
+				bgpRoutingPolicyBgpRouteMatchModel.TypeOfMatchChoice = types.ObjectNull(BgpRoutingPolicyRulesMatchTypeOfMatchModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
-			bgpRoutingPolicyBgpRoutingPolicyBgpRouteMatchModelObj, objDiags := types.ObjectValueFrom(ctx, BgpRoutingPolicyRulesMatchModelAttributeMap, bgpRoutingPolicyBgpRoutingPolicyBgpRouteMatchModel)
+			bgpRoutingPolicyBgpRouteMatchModelObj, objDiags := types.ObjectValueFrom(ctx, BgpRoutingPolicyRulesMatchModelAttributeMap, bgpRoutingPolicyBgpRouteMatchModel)
 			response.Diagnostics.Append(objDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			bgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicyModel.Match = bgpRoutingPolicyBgpRoutingPolicyBgpRouteMatchModelObj
+			bgpRoutingPolicyBgpRoutePolicyModel.Match = bgpRoutingPolicyBgpRouteMatchModelObj
 
 		} else {
 			// The source field is nil (e.g. redacted by the API).
@@ -881,10 +881,10 @@ func (d *DataSourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request datas
 			// because the API may always return a non-nil struct (with REDACTED values) for this field,
 			// making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
-			bgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicyModel.Match = types.ObjectNull(BgpRoutingPolicyRulesMatchModelAttributeMap)
+			bgpRoutingPolicyBgpRoutePolicyModel.Match = types.ObjectNull(BgpRoutingPolicyRulesMatchModelAttributeMap)
 		}
 
-		rulesElementsSpectToModel = append(rulesElementsSpectToModel, bgpRoutingPolicyBgpRoutingPolicyBgpRoutePolicyModel)
+		rulesElementsSpectToModel = append(rulesElementsSpectToModel, bgpRoutingPolicyBgpRoutePolicyModel)
 	}
 
 	{

@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -27,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -151,7 +152,7 @@ var AlertPolicyNotificationParametersModelAttributeMap = map[string]attr.Type{
 	"repeat_interval": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> GroupBy
+// Attribute map for OneOfField --> GroupBy
 var AlertPolicyNotificationParametersGroupByModelAttributeMap = map[string]attr.Type{
 
 	"custom": types.ObjectType{
@@ -197,7 +198,7 @@ var AlertPolicyRoutesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Action
+// Attribute map for OneOfField --> Action
 var AlertPolicyRoutesActionModelAttributeMap = map[string]attr.Type{
 
 	"dont_send": types.BoolType,
@@ -335,7 +336,7 @@ var AlertPolicyRoutesNotificationParametersModelAttributeMap = map[string]attr.T
 	"repeat_interval": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> GroupBy
+// Attribute map for OneOfField --> GroupBy
 var AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap = map[string]attr.Type{
 
 	"custom": types.ObjectType{
@@ -365,8 +366,8 @@ func (r *ResourceF5XCAlertPolicy) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a alert_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_policy) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a alert_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_policy) etc. can be fetched",
+		MarkdownDescription: "Alert Policy is used to specify a set of routes to match the incoming alert and the set of receivers to<br>send the alert notification if there is a match.<br>An Alert policy object defines a node in the Alert policy routing tree. An incoming alert matches the<br>routes defined in the alert policy in order till a match is found. If the action defined in the matching route is send,<br>then the alert is sent to all the receivers associated with the alert policy, else the alert is not sent<br>to any receiver.",
+		Description:         "Alert Policy is used to specify a set of routes to match the incoming alert and the set of receivers to send the alert notification if there is a match. An Alert policy object defines a node in the Alert policy routing tree. An incoming alert matches the routes defined in the alert policy in order till a match is found. If the action defined in the matching route is send, then the alert is sent to all the receivers associated with the alert policy, else the alert is not sent to any receiver.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -441,22 +442,25 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"group_by_choice": schema.SingleNestedAttribute{
 						Description:         "Group By Set of labels to group the alerts",
-						MarkdownDescription: "Group By Set of labels to group the alerts",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Group By Set of labels to group the alerts<br>Exactly one of `custom`, `default`, `individual`, or `ves_io_group` must be specified when `group_by_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"custom",
 								"default",
 								"individual",
 								"ves_io_group",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"custom": schema.SingleNestedAttribute{
 								Description:         "Custom Specify set of labels for grouping the alerts",
-								MarkdownDescription: "Custom Specify set of labels for grouping the alerts",
+								MarkdownDescription: "Custom Specify set of labels for grouping the alerts<br>Conflicts with `default`, `individual`, and `ves_io_group`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -481,7 +485,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							},
 							"default": schema.BoolAttribute{
 								Description:         "Default Group the alerts by severity, group name and alert name",
-								MarkdownDescription: "Default Group the alerts by severity, group name and alert name",
+								MarkdownDescription: "Default Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `individual`, and `ves_io_group`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -492,7 +496,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							},
 							"individual": schema.BoolAttribute{
 								Description:         "Individual This option disables grouping of alerts",
-								MarkdownDescription: "Individual This option disables grouping of alerts",
+								MarkdownDescription: "Individual This option disables grouping of alerts<br>Conflicts with `custom`, `default`, and `ves_io_group`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -502,7 +506,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							},
 							"ves_io_group": schema.BoolAttribute{
 								Description:         "F5XC Defined Group Group the alerts by severity, group name and alert name",
-								MarkdownDescription: "F5XC Defined Group Group the alerts by severity, group name and alert name",
+								MarkdownDescription: "F5XC Defined Group Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `default`, and `individual`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -588,7 +592,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							Optional:            false,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								stringplanmodifier.UseNonNullStateForUnknown(),
 							},
 						},
 					},
@@ -607,20 +611,23 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 					Attributes: map[string]schema.Attribute{
 						"action_choice": schema.SingleNestedAttribute{
 							Description:         "Action Action associated with the match condition",
-							MarkdownDescription: "Action Action associated with the match condition",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "Action Action associated with the match condition<br>Exactly one of `dont_send` or `send` must be specified when `action_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"dont_send",
 									"send",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"dont_send": schema.BoolAttribute{
 									Description:         "Do Not Send Do not send the alert",
-									MarkdownDescription: "Do Not Send Do not send the alert",
+									MarkdownDescription: "Do Not Send Do not send the alert<br>Conflicts with `send`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -630,7 +637,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 								},
 								"send": schema.BoolAttribute{
 									Description:         "Send Send the alert",
-									MarkdownDescription: "Send Send the alert",
+									MarkdownDescription: "Send Send the alert<br>Conflicts with `dont_send`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -642,7 +649,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 						},
 						"matcher_choice": schema.SingleNestedAttribute{
 							Description:         "Matcher Match condition for the alert",
-							MarkdownDescription: "Matcher Match condition for the alert",
+							MarkdownDescription: "Matcher Match condition for the alert<br>Exactly one of `alertname`, `alertname_regex`, `any`, `custom`, `group`, or `severity` must be specified when `matcher_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -659,7 +666,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							Attributes: map[string]schema.Attribute{
 								"alertname": schema.ListAttribute{
 									Description:         "Alertname Matches the alertname of the alert",
-									MarkdownDescription: "Alertname Matches the alertname of the alert<br>**Allowed Values (choose one):** `['APISecurityRiskScoreHighDetected', 'APISecuritySensitiveDataInResponseDetected', 'APISecurityShadowAPIDetected', 'APISecurityTooManyAttacks', 'APISecurityUnUsedAPIDetected', 'BotDefenseTooManySecurityEvents', 'DNSZoneIgnoredDuplicateRecord', 'L7DDoS', 'DDoSAutoMitigation', 'MaliciousUserDetected', 'RoutedDDoSAlertNotification', 'RoutedDDoSMitigationNotification', 'RoutedDDoSTunnelStatusUpdateNotification', 'ServiceClientError', 'ServiceClientErrorPerSourceSite', 'ServiceEndpointHealthcheckFailure', 'ServiceHealthLow', 'ServicePolicyTooManyAttacks', 'ServiceServerError', 'ServiceServerErrorPerSourceSite', 'ServiceUnavailable', 'SiteCustomerTunnelInterfaceDown', 'SitePhysicalInterfaceDown', 'SyntheticMonitorHealthCritical', 'ThreatCampaign', 'TLSAutomaticCertificateExpired', 'TLSAutomaticCertificateRenewalFailure', 'TLSAutomaticCertificateRenewalStillFailing', 'TLSCustomCertificateExpired', 'TLSCustomCertificateExpiring', 'TLSCustomCertificateExpiringSoon', 'TunnelsToCustomerSiteDown', 'VesClientSideDefenseSensitiveFieldRead', 'VesClientSideDefenseSuspiciousDomain', 'WAFTooManyAttacks', 'WAFTooManyMaliciousBots']`",
+									MarkdownDescription: "Alertname Matches the alertname of the alert<br>**Allowed Values (choose one):** `['APISecurityRiskScoreHighDetected', 'APISecuritySensitiveDataInResponseDetected', 'APISecurityShadowAPIDetected', 'APISecurityTooManyAttacks', 'APISecurityUnUsedAPIDetected', 'BotDefenseTooManySecurityEvents', 'DNSZoneIgnoredDuplicateRecord', 'L7DDoS', 'DDoSAutoMitigation', 'MaliciousUserDetected', 'RoutedDDoSAlertNotification', 'RoutedDDoSMitigationNotification', 'RoutedDDoSTunnelStatusUpdateNotification', 'ServiceClientError', 'ServiceClientErrorPerSourceSite', 'ServiceEndpointHealthcheckFailure', 'ServiceHealthLow', 'ServicePolicyTooManyAttacks', 'ServiceServerError', 'ServiceServerErrorPerSourceSite', 'ServiceUnavailable', 'SiteCustomerTunnelInterfaceDown', 'SitePhysicalInterfaceDown', 'SyntheticMonitorHealthCritical', 'ThreatCampaign', 'TLSAutomaticCertificateExpired', 'TLSAutomaticCertificateRenewalFailure', 'TLSAutomaticCertificateRenewalStillFailing', 'TLSCustomCertificateExpired', 'TLSCustomCertificateExpiring', 'TLSCustomCertificateExpiringSoon', 'TunnelsToCustomerSiteDown', 'VesClientSideDefenseSensitiveFieldRead', 'VesClientSideDefenseSuspiciousDomain', 'WAFTooManyAttacks', 'WAFTooManyMaliciousBots']`<br>Conflicts with `alertname_regex`, `any`, `custom`, `group`, and `severity`.",
 									ElementType:         types.StringType,
 									Required:            false,
 									Optional:            true,
@@ -671,14 +678,14 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 								},
 								"alertname_regex": schema.StringAttribute{
 									Description:         "Alertname Regex Match Regular Expression match for the alertname",
-									MarkdownDescription: "Alertname Regex Match Regular Expression match for the alertname",
+									MarkdownDescription: "Alertname Regex Match Regular Expression match for the alertname<br>Conflicts with `alertname`, `any`, `custom`, `group`, and `severity`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 								},
 								"any": schema.BoolAttribute{
 									Description:         "Any Matches all alerts in the namespace",
-									MarkdownDescription: "Any Matches all alerts in the namespace",
+									MarkdownDescription: "Any Matches all alerts in the namespace<br>Conflicts with `alertname`, `alertname_regex`, `custom`, `group`, and `severity`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -688,7 +695,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 								},
 								"custom": schema.SingleNestedAttribute{
 									Description:         "Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route.",
-									MarkdownDescription: "Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route.",
+									MarkdownDescription: "Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route.<br>Conflicts with `alertname`, `alertname_regex`, `any`, `group`, and `severity`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -710,7 +717,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 												Attributes: map[string]schema.Attribute{
 													"matcher_type_choice": schema.SingleNestedAttribute{
 														Description:         "Matcher Type Either exact or regex match for the label",
-														MarkdownDescription: "Matcher Type Either exact or regex match for the label",
+														MarkdownDescription: "Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -723,14 +730,14 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 														Attributes: map[string]schema.Attribute{
 															"exact_match": schema.StringAttribute{
 																Description:         "Exact Match Equality match value for the label",
-																MarkdownDescription: "Exact Match Equality match value for the label",
+																MarkdownDescription: "Exact Match Equality match value for the label<br>Conflicts with `regex_match`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
 															},
 															"regex_match": schema.StringAttribute{
 																Description:         "Regex Match Regular expression match value for the label",
-																MarkdownDescription: "Regex Match Regular expression match value for the label",
+																MarkdownDescription: "Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -749,7 +756,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 											Attributes: map[string]schema.Attribute{
 												"matcher_type_choice": schema.SingleNestedAttribute{
 													Description:         "Matcher Type Either exact or regex match for the label",
-													MarkdownDescription: "Matcher Type Either exact or regex match for the label",
+													MarkdownDescription: "Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -762,14 +769,14 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 													Attributes: map[string]schema.Attribute{
 														"exact_match": schema.StringAttribute{
 															Description:         "Exact Match Equality match value for the label",
-															MarkdownDescription: "Exact Match Equality match value for the label",
+															MarkdownDescription: "Exact Match Equality match value for the label<br>Conflicts with `regex_match`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 														},
 														"regex_match": schema.StringAttribute{
 															Description:         "Regex Match Regular expression match value for the label",
-															MarkdownDescription: "Regex Match Regular expression match value for the label",
+															MarkdownDescription: "Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -787,7 +794,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 											Attributes: map[string]schema.Attribute{
 												"matcher_type_choice": schema.SingleNestedAttribute{
 													Description:         "Matcher Type Either exact or regex match for the label",
-													MarkdownDescription: "Matcher Type Either exact or regex match for the label",
+													MarkdownDescription: "Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -800,14 +807,14 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 													Attributes: map[string]schema.Attribute{
 														"exact_match": schema.StringAttribute{
 															Description:         "Exact Match Equality match value for the label",
-															MarkdownDescription: "Exact Match Equality match value for the label",
+															MarkdownDescription: "Exact Match Equality match value for the label<br>Conflicts with `regex_match`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 														},
 														"regex_match": schema.StringAttribute{
 															Description:         "Regex Match Regular expression match value for the label",
-															MarkdownDescription: "Regex Match Regular expression match value for the label",
+															MarkdownDescription: "Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -825,7 +832,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 											Attributes: map[string]schema.Attribute{
 												"matcher_type_choice": schema.SingleNestedAttribute{
 													Description:         "Matcher Type Either exact or regex match for the label",
-													MarkdownDescription: "Matcher Type Either exact or regex match for the label",
+													MarkdownDescription: "Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -838,14 +845,14 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 													Attributes: map[string]schema.Attribute{
 														"exact_match": schema.StringAttribute{
 															Description:         "Exact Match Equality match value for the label",
-															MarkdownDescription: "Exact Match Equality match value for the label",
+															MarkdownDescription: "Exact Match Equality match value for the label<br>Conflicts with `regex_match`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 														},
 														"regex_match": schema.StringAttribute{
 															Description:         "Regex Match Regular expression match value for the label",
-															MarkdownDescription: "Regex Match Regular expression match value for the label",
+															MarkdownDescription: "Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -858,19 +865,18 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 								},
 								"group": schema.SingleNestedAttribute{
 									Description:         "Group Matches the group name of the alert",
-									MarkdownDescription: "Group Matches the group name of the alert",
+									MarkdownDescription: "Group Matches the group name of the alert<br>Conflicts with `alertname`, `alertname_regex`, `any`, `custom`, and `severity`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"groups": schema.ListAttribute{
 											Description:         "groups Name of groups to match the alert",
-											MarkdownDescription: "groups Name of groups to match the alert<br>**Valid Options:** `['CDN', 'CLOUD_LINK', 'DNS', 'IAAS_CAAS', 'INFRASTRUCTURE', 'ROUTED_DDOS', 'SECURITY', 'SECURITY_BOT_DEFENSE', 'SECURITY_CSD', 'SHAPE_SECURITY', 'SYNTHETIC_MONITORS', 'TIMESERIES_ANOMALY', 'TLS', 'UAM', 'VIRTUAL_HOST', 'VOLT_SHARE']` (Multiple selection allowed)<br>**Default:** `INFRASTRUCTURE`",
+											MarkdownDescription: "groups Name of groups to match the alert<br>**Valid Options:** `['CDN', 'CLOUD_LINK', 'DNS', 'IAAS_CAAS', 'INFRASTRUCTURE', 'ROUTED_DDOS', 'SECURITY', 'SECURITY_BOT_DEFENSE', 'SECURITY_CSD', 'SHAPE_SECURITY', 'SYNTHETIC_MONITORS', 'TIMESERIES_ANOMALY', 'TLS', 'UAM', 'VIRTUAL_HOST', 'VOLT_SHARE']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("INFRASTRUCTURE")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"CDN", "CLOUD_LINK", "DNS", "IAAS_CAAS", "INFRASTRUCTURE", "ROUTED_DDOS", "SECURITY", "SECURITY_BOT_DEFENSE", "SECURITY_CSD", "SHAPE_SECURITY", "SYNTHETIC_MONITORS", "TIMESERIES_ANOMALY", "TLS", "UAM", "VIRTUAL_HOST", "VOLT_SHARE"}...)),
 											},
@@ -879,19 +885,18 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 								},
 								"severity": schema.SingleNestedAttribute{
 									Description:         "Severity Matches the severity level of the alert",
-									MarkdownDescription: "Severity Matches the severity level of the alert",
+									MarkdownDescription: "Severity Matches the severity level of the alert<br>Conflicts with `alertname`, `alertname_regex`, `any`, `custom`, and `group`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"severities": schema.ListAttribute{
 											Description:         "Severities List of severity levels",
-											MarkdownDescription: "Severities List of severity levels<br>**Valid Options:** `['CRITICAL', 'MAJOR', 'MINOR']` (Multiple selection allowed)<br>**Default:** `MINOR`",
+											MarkdownDescription: "Severities List of severity levels<br>**Valid Options:** `['CRITICAL', 'MAJOR', 'MINOR']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
-											Computed:            true,
-											Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("MINOR")),
+											Computed:            false,
 											Validators: []validator.List{
 												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"CRITICAL", "MAJOR", "MINOR"}...)),
 											},
@@ -909,22 +914,25 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							Attributes: map[string]schema.Attribute{
 								"group_by_choice": schema.SingleNestedAttribute{
 									Description:         "Group By Set of labels to group the alerts",
-									MarkdownDescription: "Group By Set of labels to group the alerts",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
+									MarkdownDescription: "Group By Set of labels to group the alerts<br>Exactly one of `custom`, `default`, `individual`, or `ves_io_group` must be specified when `group_by_choice` is configured.",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
 									Validators: []validator.Object{
-										exactlyoneofvalidator.RequiredExactlyOneOf(
+										exactlyoneofvalidator.ExactlyOneOf(
 											"custom",
 											"default",
 											"individual",
 											"ves_io_group",
 										),
 									},
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseNonNullStateForUnknown(),
+									},
 									Attributes: map[string]schema.Attribute{
 										"custom": schema.SingleNestedAttribute{
 											Description:         "Custom Specify set of labels for grouping the alerts",
-											MarkdownDescription: "Custom Specify set of labels for grouping the alerts",
+											MarkdownDescription: "Custom Specify set of labels for grouping the alerts<br>Conflicts with `default`, `individual`, and `ves_io_group`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -949,7 +957,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 										},
 										"default": schema.BoolAttribute{
 											Description:         "Default Group the alerts by severity, group name and alert name",
-											MarkdownDescription: "Default Group the alerts by severity, group name and alert name",
+											MarkdownDescription: "Default Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `individual`, and `ves_io_group`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -960,7 +968,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 										},
 										"individual": schema.BoolAttribute{
 											Description:         "Individual This option disables grouping of alerts",
-											MarkdownDescription: "Individual This option disables grouping of alerts",
+											MarkdownDescription: "Individual This option disables grouping of alerts<br>Conflicts with `custom`, `default`, and `ves_io_group`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -970,7 +978,7 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 										},
 										"ves_io_group": schema.BoolAttribute{
 											Description:         "F5XC Defined Group Group the alerts by severity, group name and alert name",
-											MarkdownDescription: "F5XC Defined Group Group the alerts by severity, group name and alert name",
+											MarkdownDescription: "F5XC Defined Group Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `default`, and `individual`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1089,9 +1097,17 @@ func (r *ResourceF5XCAlertPolicy) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAlertPolicyModel
 
 	// Read Terraform plan data into the model
@@ -1176,6 +1192,9 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 		// resource modelToSpecRoot PointerField --> NotificationParameters
 		if !data.NotificationParameters.IsNull() && !data.NotificationParameters.IsUnknown() {
 			notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
+			notificationParametersSpec.GroupBy = &ves_io_schema_alert_policy.NotificationParameters_Individual{
+				Individual: &ves_io_schema.Empty{},
+			}
 			spec.NotificationParameters = notificationParametersSpec
 			var notificationParametersModel AlertPolicyNotificationParameters
 
@@ -1186,7 +1205,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GroupBy
+			// resource modelToSpecNested OneOfField --> GroupBy
 			if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
 				notificationParametersGroupByChoiceModel := AlertPolicyGroupByChoice{}
 				response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1307,8 +1326,11 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 		for i, routesElement := range routesElementsModelToSpec {
 			routesSpec[i] = &ves_io_schema_alert_policy.Route{}
+			routesSpec[i].Action = &ves_io_schema_alert_policy.Route_Send{
+				Send: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> Action
+			// resource modelToSpecNested OneOfField --> Action
 			if !routesElement.ActionChoice.IsNull() && !routesElement.ActionChoice.IsUnknown() {
 				routesActionChoiceModel := AlertPolicyActionChoice{}
 				response.Diagnostics.Append(routesElement.ActionChoice.As(ctx, &routesActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1641,9 +1663,12 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 				}
 
 				notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
+				notificationParametersSpec.GroupBy = &ves_io_schema_alert_policy.NotificationParameters_Individual{
+					Individual: &ves_io_schema.Empty{},
+				}
 				routesSpec[i].NotificationParameters = notificationParametersSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> GroupBy
+				// resource modelToSpecNested OneOfField --> GroupBy
 				if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
 					notificationParametersGroupByChoiceModel := AlertPolicyGroupByChoice{}
 					response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1731,7 +1756,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1754,7 +1779,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_alert_policy.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "alert_policy", err),
 		)
 		return
 	}
@@ -1877,8 +1902,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 		var alertPolicyNotificationParametersModel = &AlertPolicyNotificationParameters{}
 		notificationParametersElement := specData.GetNotificationParameters()
 
-		// resource specToModelNested RequiredOneOfField --> GroupBy
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> GroupBy
 		if notificationParametersElement.GetGroupBy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2060,8 +2084,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 		for _, routesElement := range specData.GetRoutes() {
 			alertPolicyRouteModel := AlertPolicyRoute{}
 
-			// resource specToModelNested RequiredOneOfField --> Action
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> Action
 			if routesElement.GetAction() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				routesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2602,8 +2625,7 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> GroupBy
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GroupBy
 				if notificationParametersElement.GetGroupBy() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2796,14 +2818,10 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "alert_policy", err),
 		)
 		return
 	}
@@ -2926,8 +2944,7 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 		var alertPolicyNotificationParametersModel = &AlertPolicyNotificationParameters{}
 		notificationParametersElement := specData.GetNotificationParameters()
 
-		// resource specToModelNested RequiredOneOfField --> GroupBy
-		// <no value>
+		// resource specToModelNested OneOfField --> GroupBy
 		if notificationParametersElement.GetGroupBy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3015,7 +3032,12 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 			alertPolicyNotificationParametersModel.GroupByChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
+			alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectValueMust(AlertPolicyNotificationParametersGroupByModelAttributeMap, map[string]attr.Value{
+				"custom":       types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap),
+				"default":      types.BoolNull(),
+				"individual":   types.BoolValue(true),
+				"ves_io_group": types.BoolNull(),
+			})
 		}
 
 		// resource specToModelNested StringField --> GroupInterval
@@ -3109,8 +3131,7 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 		for _, routesElement := range specData.GetRoutes() {
 			alertPolicyRouteModel := AlertPolicyRoute{}
 
-			// resource specToModelNested RequiredOneOfField --> Action
-			// <no value>
+			// resource specToModelNested OneOfField --> Action
 			if routesElement.GetAction() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				routesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3154,7 +3175,10 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 				alertPolicyRouteModel.ActionChoice = finalObj
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				alertPolicyRouteModel.ActionChoice = types.ObjectNull(AlertPolicyRoutesActionModelAttributeMap)
+				alertPolicyRouteModel.ActionChoice = types.ObjectValueMust(AlertPolicyRoutesActionModelAttributeMap, map[string]attr.Value{
+					"dont_send": types.BoolNull(),
+					"send":      types.BoolValue(true),
+				})
 			}
 
 			// resource specToModelNested OneOfField --> Matcher
@@ -3651,8 +3675,7 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> GroupBy
-				// <no value>
+				// resource specToModelNested OneOfField --> GroupBy
 				if notificationParametersElement.GetGroupBy() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3740,7 +3763,12 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 					alertPolicyNotificationParametersModel.GroupByChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap)
+					alertPolicyNotificationParametersModel.GroupByChoice = types.ObjectValueMust(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap, map[string]attr.Value{
+						"custom":       types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByCustomModelAttributeMap),
+						"default":      types.BoolNull(),
+						"individual":   types.BoolValue(true),
+						"ves_io_group": types.BoolNull(),
+					})
 				}
 
 				// resource specToModelNested StringField --> GroupInterval
@@ -3811,6 +3839,12 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAlertPolicyModel
@@ -3915,6 +3949,9 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 		// resource modelToSpecRoot PointerField --> NotificationParameters
 		if !data.NotificationParameters.IsNull() && !data.NotificationParameters.IsUnknown() {
 			notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
+			notificationParametersSpec.GroupBy = &ves_io_schema_alert_policy.NotificationParameters_Individual{
+				Individual: &ves_io_schema.Empty{},
+			}
 			spec.NotificationParameters = notificationParametersSpec
 			var notificationParametersModel AlertPolicyNotificationParameters
 
@@ -3925,7 +3962,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GroupBy
+			// resource modelToSpecNested OneOfField --> GroupBy
 			if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
 				notificationParametersGroupByChoiceModel := AlertPolicyGroupByChoice{}
 				response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4046,8 +4083,11 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 		for i, routesElement := range routesElementsModelToSpec {
 			routesSpec[i] = &ves_io_schema_alert_policy.Route{}
+			routesSpec[i].Action = &ves_io_schema_alert_policy.Route_Send{
+				Send: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> Action
+			// resource modelToSpecNested OneOfField --> Action
 			if !routesElement.ActionChoice.IsNull() && !routesElement.ActionChoice.IsUnknown() {
 				routesActionChoiceModel := AlertPolicyActionChoice{}
 				response.Diagnostics.Append(routesElement.ActionChoice.As(ctx, &routesActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4380,9 +4420,12 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 				}
 
 				notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
+				notificationParametersSpec.GroupBy = &ves_io_schema_alert_policy.NotificationParameters_Individual{
+					Individual: &ves_io_schema.Empty{},
+				}
 				routesSpec[i].NotificationParameters = notificationParametersSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> GroupBy
+				// resource modelToSpecNested OneOfField --> GroupBy
 				if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
 					notificationParametersGroupByChoiceModel := AlertPolicyGroupByChoice{}
 					response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4470,7 +4513,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4478,24 +4521,20 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_alert_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_alert_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "alert_policy", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_alert_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "alert_policy", err),
 		)
 		return
 	}
@@ -4617,8 +4656,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 		var alertPolicyNotificationParametersModel = &AlertPolicyNotificationParameters{}
 		notificationParametersElement := specData.GetNotificationParameters()
 
-		// resource specToModelNested RequiredOneOfField --> GroupBy
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> GroupBy
 		if notificationParametersElement.GetGroupBy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4800,8 +4838,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 		for _, routesElement := range specData.GetRoutes() {
 			alertPolicyRouteModel := AlertPolicyRoute{}
 
-			// resource specToModelNested RequiredOneOfField --> Action
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> Action
 			if routesElement.GetAction() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				routesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5342,8 +5379,7 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> GroupBy
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GroupBy
 				if notificationParametersElement.GetGroupBy() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5565,7 +5601,7 @@ func (r *ResourceF5XCAlertPolicy) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "alert_policy", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "alert_policy", err),
 		)
 		return
 	}

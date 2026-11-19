@@ -20,6 +20,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	acctest "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/test/acctest"
 	tokenSchema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/token"
 )
@@ -28,7 +29,7 @@ func TestAccResourceAutoF5XCToken_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-token-" + acctest.RandString(t, 8)
+	name := "example-token-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -37,22 +38,32 @@ func TestAccResourceAutoF5XCToken_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCTokenConfig_basic(name, namespace),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCTokenConfig_withDescription(name, namespace, "token basic updated"),
+				Config: testAccResourceAutoF5XCTokenConfig_withDescription(name, namespace, "token updated example"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +74,7 @@ func TestAccResourceAutoF5XCToken_descriptionTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-token-" + acctest.RandString(t, 8)
+	name := "example-token-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,22 +83,32 @@ func TestAccResourceAutoF5XCToken_descriptionTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCTokenConfig_withDescription(name, namespace, "site registration token for edge-a"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTokenConfig_withDescription(name, namespace, "site registration token for edge-b"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +119,7 @@ func TestAccResourceAutoF5XCToken_labelsTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-token-" + acctest.RandString(t, 8)
+	name := "example-token-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -106,23 +127,33 @@ func TestAccResourceAutoF5XCToken_labelsTransition(t *testing.T) {
 		CheckDestroy:             testAccCheckTokenDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCTokenConfig_withLabels(name, namespace, "edge", "test"),
+				Config: testAccResourceAutoF5XCTokenConfig_withLabels(name, namespace, "edge", "example"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCTokenConfig_withLabels(name, namespace, "platform", "staging"),
+				Config: testAccResourceAutoF5XCTokenConfig_withLabels(name, namespace, "platform", "example"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +164,7 @@ func TestAccResourceAutoF5XCToken_annotationsTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-token-" + acctest.RandString(t, 8)
+	name := "example-token-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -142,22 +173,32 @@ func TestAccResourceAutoF5XCToken_annotationsTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCTokenConfig_withAnnotations(name, namespace, "owner", "platform-team"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTokenConfig_withAnnotations(name, namespace, "owner", "infra-team"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,35 +209,49 @@ func TestAccResourceAutoF5XCToken_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := "system"
-	name := "tf-acc-token-" + acctest.RandString(t, 8)
+	name := "example-token-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckTokenDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceAutoF5XCTokenConfig_full(name, namespace, "token for site-bootstrap-a", "edge", "owner", "platform-team"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCTokenConfig_full(name, namespace, "token for site-bootstrap-b", "platform", "owner", "infra-team"),
+				ConfigPlanChecks: testAccSensitivePlanChecks(
+					"f5xc_token.example",
+					tfjsonpath.New("content"),
+				),
 			},
 			{
-				ResourceName:                         "f5xc_token.test",
+				ResourceName:                         "f5xc_token.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.test"),
+				ImportStateVerifyIgnore:              []string{"site_name"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_token.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCTokenConfig_full("example-token", "system", "Token full example", "edge", "owner", "platform-team"),
+		})
 }
 
 func testAccCheckTokenDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -205,7 +260,7 @@ func testAccCheckTokenDestroyProducer(t *testing.T) func(*terraform.State) error
 
 func testAccResourceAutoF5XCTokenConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_token" "test" {
+resource "f5xc_token" "example" {
   name      = %q
   namespace = %q
 }
@@ -214,7 +269,7 @@ resource "f5xc_token" "test" {
 
 func testAccResourceAutoF5XCTokenConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_token" "test" {
+resource "f5xc_token" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -224,7 +279,7 @@ resource "f5xc_token" "test" {
 
 func testAccResourceAutoF5XCTokenConfig_withLabels(name, namespace, team, env string) string {
 	return fmt.Sprintf(`
-resource "f5xc_token" "test" {
+resource "f5xc_token" "example" {
   name      = %q
   namespace = %q
 
@@ -238,7 +293,7 @@ resource "f5xc_token" "test" {
 
 func testAccResourceAutoF5XCTokenConfig_withAnnotations(name, namespace, key, value string) string {
 	return fmt.Sprintf(`
-resource "f5xc_token" "test" {
+resource "f5xc_token" "example" {
   name      = %q
   namespace = %q
 
@@ -251,14 +306,14 @@ resource "f5xc_token" "test" {
 
 func testAccResourceAutoF5XCTokenConfig_full(name, namespace, description, team, annotationKey, annotationValue string) string {
 	return fmt.Sprintf(`
-resource "f5xc_token" "test" {
+resource "f5xc_token" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
   labels = {
     team = %q
-    env  = "test"
+    env  = "example"
   }
 
   annotations = {

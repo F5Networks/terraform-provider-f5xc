@@ -11,6 +11,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	acctest "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/test/acctest"
 )
 
@@ -50,6 +53,10 @@ func testAccIsCRTTenant() bool {
 func blindFoldKeyB64(t testing.TB) string {
 	t.Helper()
 
+	if v := strings.TrimSpace(os.Getenv("F5XC_BLINDFOLD_KEY_B64")); v != "" {
+		return v
+	}
+
 	u := os.Getenv("F5XCProvider_URL")
 	switch {
 	case strings.Contains(u, "playground.staging.volterra.us"):
@@ -57,7 +64,7 @@ func blindFoldKeyB64(t testing.TB) string {
 	case strings.Contains(u, "customer1.crt.volterra.us"):
 		return testBlindFoldKeyB64Crt
 	default:
-		t.Fatalf("blindFoldKeyB64: no blindfold key configured for URL %q — add an entry to helpers.go", u)
+		t.Skipf("blindFoldKeyB64: no blindfold key configured for URL %q — set F5XC_BLINDFOLD_KEY_B64 or add an entry to helpers.go", u)
 		return ""
 	}
 }
@@ -84,7 +91,7 @@ func defaultCloudLinkAWSProfile(t testing.TB) cloudLinkAWSProfile {
 			Vlan:            354,
 		}
 	default:
-		t.Fatalf("defaultCloudLinkAWSProfile: no default AWS cloud_link profile configured for URL %q — set F5XC_CLOUD_LINK_AWS_CRED_NAME if only the credential differs, otherwise add a tenant mapping in helpers.go", u)
+		t.Skipf("defaultCloudLinkAWSProfile: no default AWS cloud_link profile configured for URL %q — set F5XC_CLOUD_LINK_AWS_CRED_NAME if only the credential differs, otherwise add a tenant mapping in helpers.go", u)
 		return cloudLinkAWSProfile{}
 	}
 }
@@ -93,6 +100,10 @@ func defaultCloudLinkAWSProfile(t testing.TB) cloudLinkAWSProfile {
 // reference used by infraprotect_asn_prefix acceptance tests for known tenants.
 func defaultInfraprotectApprovedASNRef(t testing.TB) string {
 	t.Helper()
+
+	if v := strings.TrimSpace(os.Getenv("F5XC_INFRAPROTECT_APPROVED_ASN_NAME")); v != "" {
+		return v
+	}
 
 	u := os.Getenv("F5XCProvider_URL")
 	return defaultInfraprotectApprovedASNRefName(u)
@@ -106,5 +117,13 @@ func defaultInfraprotectApprovedASNRefName(url string) string {
 		return "rr-asn"
 	default:
 		return ""
+	}
+}
+
+func testAccSensitivePlanChecks(resourceAddress string, attributePath tfjsonpath.Path) resource.ConfigPlanChecks {
+	return resource.ConfigPlanChecks{
+		PreApply: []plancheck.PlanCheck{
+			plancheck.ExpectSensitiveValue(resourceAddress, attributePath),
+		},
 	}
 }

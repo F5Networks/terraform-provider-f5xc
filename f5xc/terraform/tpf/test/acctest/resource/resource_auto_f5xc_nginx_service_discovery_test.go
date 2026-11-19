@@ -39,10 +39,10 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_basic(t *testing.T) {
 	t.Parallel()
 	requireNginxServiceDiscoveryAcceptanceEnabled(t)
 
-	name := "tf-acc-nginxsd-" + acctest.RandString(t, 8)
+	name := "example-nginxsd-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNginxServiceDiscoveryDestroyProducer(t),
@@ -51,31 +51,35 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNginxServiceDiscoveryConfig_basic("example-nginxsd", "default"),
+		})
 }
 
 func TestAccResourceAutoF5XCNginxServiceDiscovery_withLabels(t *testing.T) {
 	t.Parallel()
 	requireNginxServiceDiscoveryAcceptanceEnabled(t)
 
-	name := "tf-acc-nginxsd-" + acctest.RandString(t, 8)
+	name := "example-nginxsd-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -87,20 +91,20 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -111,7 +115,7 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_withAnnotations(t *testing.T) 
 	t.Parallel()
 	requireNginxServiceDiscoveryAcceptanceEnabled(t)
 
-	name := "tf-acc-nginxsd-" + acctest.RandString(t, 8)
+	name := "example-nginxsd-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -123,20 +127,20 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_withAnnotations(t *testing.T) 
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -147,7 +151,7 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_withConfigSyncGroup(t *testing
 	t.Parallel()
 	requireNginxServiceDiscoveryAcceptanceEnabled(t)
 
-	name := "tf-acc-nginxsd-" + acctest.RandString(t, 8)
+	name := "example-nginxsd-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -159,20 +163,20 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_withConfigSyncGroup(t *testing
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withConfigSyncGroup(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withConfigSyncGroupUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -183,10 +187,10 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_full(t *testing.T) {
 	t.Parallel()
 	requireNginxServiceDiscoveryAcceptanceEnabled(t)
 
-	name := "tf-acc-nginxsd-" + acctest.RandString(t, 8)
+	name := "example-nginxsd-" + acctest.RandString(t, 8)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckNginxServiceDiscoveryDestroyProducer(t),
@@ -195,24 +199,28 @@ func TestAccResourceAutoF5XCNginxServiceDiscovery_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCNginxServiceDiscoveryConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_nginx_service_discovery.test",
+				ResourceName:                         "f5xc_nginx_service_discovery.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_nginx_service_discovery.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCNginxServiceDiscoveryConfig_full("example-nginxsd", "default"),
+		})
 }
 
 func testAccCheckNginxServiceDiscoveryDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -221,21 +229,21 @@ func testAccCheckNginxServiceDiscoveryDestroyProducer(t *testing.T) func(*terraf
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "Acceptance test NGINX service discovery"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Basic NGINX service discovery example"
 
-	discovery_target = {
-		target_choice = {
-			nginx_instance = {
-				nginx_instance = [
-					{
-						name      = "nginx-instance-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      nginx_instance = {
+        nginx_instance = [
+          {
+            name      = "nginx-instance-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 }
@@ -244,56 +252,56 @@ resource "f5xc_nginx_service_discovery" "test" {
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "Acceptance test NGINX service discovery updated"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Updated basic NGINX service discovery example"
 
-	discovery_target = {
-		target_choice = {
-			nginx_instance = {
-				nginx_instance = [
-					{
-						name      = "nginx-instance-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      nginx_instance = {
+        nginx_instance = [
+          {
+            name      = "nginx-instance-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
-	server_block_filters = [
-		{
-			name_regex  = "^.*\\.example\\.com$"
-			port_ranges = "80,443"
-		}
-	]
+  server_block_filters = [
+    {
+      name_regex  = "^.*\\.example\\.com$"
+      port_ranges = "80,443"
+    }
+  ]
 }
 `, name, namespace, namespace)
 }
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "NGINX service discovery with labels"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "NGINX service discovery example with labels"
 
-	discovery_target = {
-		target_choice = {
-			nginx_instance = {
-				nginx_instance = [
-					{
-						name      = "nginx-instance-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      nginx_instance = {
+        nginx_instance = [
+          {
+            name      = "nginx-instance-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace, namespace)
@@ -301,26 +309,26 @@ resource "f5xc_nginx_service_discovery" "test" {
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "NGINX service discovery with labels"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "NGINX service discovery example with labels"
 
-	discovery_target = {
-		target_choice = {
-			nginx_instance = {
-				nginx_instance = [
-					{
-						name      = "nginx-instance-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      nginx_instance = {
+        nginx_instance = [
+          {
+            name      = "nginx-instance-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "nginx"
   }
 }
@@ -329,21 +337,21 @@ resource "f5xc_nginx_service_discovery" "test" {
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "NGINX service discovery with annotations"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "NGINX service discovery example with annotations"
 
-	discovery_target = {
-		target_choice = {
-			nginx_instance = {
-				nginx_instance = [
-					{
-						name      = "nginx-instance-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      nginx_instance = {
+        nginx_instance = [
+          {
+            name      = "nginx-instance-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
@@ -356,21 +364,21 @@ resource "f5xc_nginx_service_discovery" "test" {
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "NGINX service discovery with annotations"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "NGINX service discovery example with annotations"
 
-	discovery_target = {
-		target_choice = {
-			nginx_instance = {
-				nginx_instance = [
-					{
-						name      = "nginx-instance-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      nginx_instance = {
+        nginx_instance = [
+          {
+            name      = "nginx-instance-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
@@ -383,21 +391,21 @@ resource "f5xc_nginx_service_discovery" "test" {
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withConfigSyncGroup(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-	description = "NGINX service discovery with config sync group"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "NGINX service discovery example with config sync group"
 
-	discovery_target = {
-		target_choice = {
-			config_sync_group = {
-				config_sync_group = [
-					{
-						name      = "config-sync-group-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      config_sync_group = {
+        config_sync_group = [
+          {
+            name      = "config-sync-group-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 }
@@ -406,63 +414,63 @@ resource "f5xc_nginx_service_discovery" "test" {
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_withConfigSyncGroupUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-	description = "NGINX service discovery with config sync group updated"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "NGINX service discovery example with config sync group updated"
 
-	discovery_target = {
-		target_choice = {
-			config_sync_group = {
-				config_sync_group = [
-					{
-						name      = "config-sync-group-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      config_sync_group = {
+        config_sync_group = [
+          {
+            name      = "config-sync-group-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
-	server_block_filters = [
-		{
-			name_regex  = "^.*\\.internal\\.com$"
-			port_ranges = "8000-8100"
-		}
-	]
+  server_block_filters = [
+    {
+      name_regex  = "^.*\\.internal\\.com$"
+      port_ranges = "8000-8100"
+    }
+  ]
 }
 `, name, namespace, namespace)
 }
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "Full NGINX service discovery"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Full NGINX service discovery example"
 
-	discovery_target = {
-		target_choice = {
-			nginx_instance = {
-				nginx_instance = [
-					{
-						name      = "nginx-instance-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      nginx_instance = {
+        nginx_instance = [
+          {
+            name      = "nginx-instance-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
-	server_block_filters = [
-		{
-			name_regex  = "^.*\\.example\\.com$"
-			port_ranges = "80,443"
-		}
-	]
+  server_block_filters = [
+    {
+      name_regex  = "^.*\\.example\\.com$"
+      port_ranges = "80,443"
+    }
+  ]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -474,33 +482,33 @@ resource "f5xc_nginx_service_discovery" "test" {
 
 func testAccResourceAutoF5XCNginxServiceDiscoveryConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_nginx_service_discovery" "test" {
-	name        = %q
-	namespace   = %q
-  description = "Full NGINX service discovery updated"
+resource "f5xc_nginx_service_discovery" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Updated full NGINX service discovery example"
 
-	discovery_target = {
-		target_choice = {
-			config_sync_group = {
-				config_sync_group = [
-					{
-						name      = "config-sync-group-1"
-						namespace = %q
-					}
-				]
-			}
+  discovery_target = {
+    target_choice = {
+      config_sync_group = {
+        config_sync_group = [
+          {
+            name      = "config-sync-group-1"
+            namespace = %q
+          }
+        ]
+      }
     }
   }
 
-	server_block_filters = [
-		{
-			name_regex  = "^.*\\.internal\\.com$"
-			port_ranges = "8000-8100"
-		}
-	]
+  server_block_filters = [
+    {
+      name_regex  = "^.*\\.internal\\.com$"
+      port_ranges = "8000-8100"
+    }
+  ]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "nginx"
   }
 

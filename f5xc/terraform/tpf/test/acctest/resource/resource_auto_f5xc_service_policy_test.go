@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCServicePolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-service-policy-" + testAccRunSuffix(t)
+	name := "example-service-policy-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCServicePolicy_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCServicePolicyConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCServicePolicyConfig_withDescription(name, namespace, "service policy basic updated"),
+				Config: testAccResourceAutoF5XCServicePolicyConfig_withDescription(name, namespace, "Service policy updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCServicePolicy_withServerChoiceTransition(t *testing.
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-service-policy-" + testAccRunSuffix(t)
+	name := "example-service-policy-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCServicePolicy_withServerChoiceTransition(t *testing.
 				Config: testAccResourceAutoF5XCServicePolicyConfig_withAnyServer(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCServicePolicyConfig_withServerName(name, namespace, "svc.prod.example.com"),
+				Config: testAccResourceAutoF5XCServicePolicyConfig_withServerName(name, namespace, "svc.example.com"),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccResourceAutoF5XCServicePolicy_withRuleChoiceAllowDenyAllTransition(t
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-service-policy-" + testAccRunSuffix(t)
+	name := "example-service-policy-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCServicePolicy_withRuleChoiceAllowDenyAllTransition(t
 				Config: testAccResourceAutoF5XCServicePolicyConfig_withAllowAllRequests(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCServicePolicyConfig_withDenyAllRequests(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,7 +133,7 @@ func TestAccResourceAutoF5XCServicePolicy_withAllowListDefaultActionTransition(t
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-service-policy-" + testAccRunSuffix(t)
+	name := "example-service-policy-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCServicePolicy_withAllowListDefaultActionTransition(t
 				Config: testAccResourceAutoF5XCServicePolicyConfig_withAllowListDefaultAction(name, namespace, "default_action_allow"),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCServicePolicyConfig_withAllowListDefaultAction(name, namespace, "default_action_deny"),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -168,7 +168,7 @@ func TestAccResourceAutoF5XCServicePolicy_withDenyListDefaultActionTransition(t 
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-service-policy-" + testAccRunSuffix(t)
+	name := "example-service-policy-" + testAccRunSuffix(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -179,59 +179,63 @@ func TestAccResourceAutoF5XCServicePolicy_withDenyListDefaultActionTransition(t 
 				Config: testAccResourceAutoF5XCServicePolicyConfig_withDenyListDefaultAction(name, namespace, "default_action_next_policy"),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCServicePolicyConfig_withDenyListDefaultAction(name, namespace, "default_action_deny"),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
 	})
 }
 
-func TestAccResourceAutoF5XCServicePolicy_withRuleListActionTransitionFull(t *testing.T) {
+func TestAccResourceAutoF5XCServicePolicy_Full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.DefaultNamespace()
-	name := "tf-acc-service-policy-" + testAccRunSuffix(t)
+	name := "example-service-policy-" + testAccRunSuffix(t)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckServicePolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceAutoF5XCServicePolicyConfig_full(name, namespace, "test", "platform", "owner-a", "ALLOW", true),
+				Config: testAccResourceAutoF5XCServicePolicyConfig_full(name, namespace, "example", "platform", "example-owner", "ALLOW", true),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
-				Config: testAccResourceAutoF5XCServicePolicyConfig_full(name, namespace, "prod", "security", "owner-b", "DENY", false),
+				Config: testAccResourceAutoF5XCServicePolicyConfig_full(name, namespace, "example", "security", "example-owner-alt", "DENY", false),
 			},
 			{
-				ResourceName:                         "f5xc_service_policy.test",
+				ResourceName:                         "f5xc_service_policy.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_service_policy.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCServicePolicyConfig_full("example-service-policy", "default", "example", "platform", "example-owner", "ALLOW", true),
+		})
 }
 
 func testAccCheckServicePolicyDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -240,7 +244,7 @@ func testAccCheckServicePolicyDestroyProducer(t *testing.T) func(*terraform.Stat
 
 func testAccResourceAutoF5XCServicePolicyConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -257,7 +261,7 @@ resource "f5xc_service_policy" "test" {
 
 func testAccResourceAutoF5XCServicePolicyConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name        = %q
   namespace   = %q
   description = %q
@@ -275,7 +279,7 @@ resource "f5xc_service_policy" "test" {
 
 func testAccResourceAutoF5XCServicePolicyConfig_withAnyServer(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -292,7 +296,7 @@ resource "f5xc_service_policy" "test" {
 
 func testAccResourceAutoF5XCServicePolicyConfig_withServerName(name, namespace, serverName string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -309,7 +313,7 @@ resource "f5xc_service_policy" "test" {
 
 func testAccResourceAutoF5XCServicePolicyConfig_withAllowAllRequests(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -326,7 +330,7 @@ resource "f5xc_service_policy" "test" {
 
 func testAccResourceAutoF5XCServicePolicyConfig_withDenyAllRequests(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -343,7 +347,7 @@ resource "f5xc_service_policy" "test" {
 
 func testAccResourceAutoF5XCServicePolicyConfig_withAllowListDefaultAction(name, namespace, defaultActionField string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -372,7 +376,7 @@ resource "f5xc_service_policy" "test" {
 
 func testAccResourceAutoF5XCServicePolicyConfig_withDenyListDefaultAction(name, namespace, defaultActionField string) string {
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -406,7 +410,7 @@ func testAccResourceAutoF5XCServicePolicyConfig_full(name, namespace, env, team,
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_service_policy" "test" {
+resource "f5xc_service_policy" "example" {
   name      = %q
   namespace = %q
 
@@ -420,7 +424,7 @@ resource "f5xc_service_policy" "test" {
   }
 
   server_choice = {
-    server_name = "svc.test.example.com"
+    server_name = "svc.example.com"
   }
 
   rule_choice = {
@@ -428,7 +432,7 @@ resource "f5xc_service_policy" "test" {
       rules = [
         {
           metadata = {
-            name        = "inline-rule-1"
+            name        = "inline-example-rule"
             description = "inline rule"
           }
 

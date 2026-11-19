@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -35,6 +36,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -103,7 +105,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> IkeKeyLifetime
+// Attribute map for OneOfField --> IkeKeyLifetime
 var IkePhase2ProfileIkeKeyLifetimeModelAttributeMap = map[string]attr.Type{
 
 	"ike_keylifetime_hours": types.ObjectType{
@@ -155,8 +157,8 @@ func (r *ResourceF5XCIkePhase2Profile) Metadata(ctx context.Context, request res
 func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a ike_phase2_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase2_profile) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a ike_phase2_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase2_profile) etc. can be fetched",
+		MarkdownDescription: "IKE Phase2 profile mainly includes the following<br>1. Encryption protocols to be used for IKE SA<br>2. Authentication Protocols to be used for IKE SA<br>3. DH group (if PFS is enabled)<br>4. Key lifetime etc",
+		Description:         "IKE Phase2 profile mainly includes the following 1. Encryption protocols to be used for IKE SA 2. Authentication Protocols to be used for IKE SA 3. DH group (if PFS is enabled) 4. Key lifetime etc",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -248,21 +250,24 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 			},
 			"ike_key_lifetime_choice": schema.SingleNestedAttribute{
 				Description:         "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
-				MarkdownDescription: "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated<br>Exactly one of `ike_keylifetime_hours`, `ike_keylifetime_minutes`, or `use_default_keylifetime` must be specified when `ike_key_lifetime_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"ike_keylifetime_hours",
 						"ike_keylifetime_minutes",
 						"use_default_keylifetime",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"ike_keylifetime_hours": schema.SingleNestedAttribute{
 						Description:         "Hours Set IKE Key Lifetime in Hours",
-						MarkdownDescription: "Hours Set IKE Key Lifetime in Hours",
+						MarkdownDescription: "Hours Set IKE Key Lifetime in Hours<br>Conflicts with `ike_keylifetime_minutes` and `use_default_keylifetime`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -281,7 +286,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					},
 					"ike_keylifetime_minutes": schema.SingleNestedAttribute{
 						Description:         "Minutes Set IKE Key Lifetime in minutes",
-						MarkdownDescription: "Minutes Set IKE Key Lifetime in minutes",
+						MarkdownDescription: "Minutes Set IKE Key Lifetime in minutes<br>Conflicts with `ike_keylifetime_hours` and `use_default_keylifetime`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -300,7 +305,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					},
 					"use_default_keylifetime": schema.BoolAttribute{
 						Description:         "Default Use default key lifetime (4Hrs)",
-						MarkdownDescription: "Default Use default key lifetime (4Hrs)",
+						MarkdownDescription: "Default Use default key lifetime (4Hrs)<br>Conflicts with `ike_keylifetime_hours` and `ike_keylifetime_minutes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -312,7 +317,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 			},
 			"pfs_mode_choice": schema.SingleNestedAttribute{
 				Description:         "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel",
-				MarkdownDescription: "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel",
+				MarkdownDescription: "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel<br>Exactly one of `dh_group_set` or `disable_pfs` must be specified when `pfs_mode_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -325,7 +330,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 				Attributes: map[string]schema.Attribute{
 					"dh_group_set": schema.SingleNestedAttribute{
 						Description:         "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
-						MarkdownDescription: "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
+						MarkdownDescription: "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.<br>Conflicts with `disable_pfs`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -346,7 +351,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					},
 					"disable_pfs": schema.BoolAttribute{
 						Description:         "Disabled Disable PFS for this tunnel",
-						MarkdownDescription: "Disabled Disable PFS for this tunnel",
+						MarkdownDescription: "Disabled Disable PFS for this tunnel<br>Conflicts with `dh_group_set`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -418,9 +423,17 @@ func (r *ResourceF5XCIkePhase2Profile) ModifyPlan(ctx context.Context, req resou
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCIkePhase2ProfileModel
 
 	// Read Terraform plan data into the model
@@ -551,7 +564,7 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		spec.EncryptionAlgos = encryptionAlgosSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource modelToSpecRoot OneOfField --> IkeKeyLifetime
 	if !data.IkeKeyLifetimeChoice.IsNull() && !data.IkeKeyLifetimeChoice.IsUnknown() {
 		ikeKeyLifetimeChoiceModel := IkePhase2ProfileIkeKeyLifetimeChoice{}
 		response.Diagnostics.Append(data.IkeKeyLifetimeChoice.As(ctx, &ikeKeyLifetimeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -602,6 +615,10 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			spec.IkeKeyLifetime = useDefaultKeylifetimeSpecBool
 		}
 
+	} else {
+		spec.IkeKeyLifetime = &ves_io_schema_views_ike_phase2_profile.CreateSpecType_UseDefaultKeylifetime{
+			UseDefaultKeylifetime: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> PfsMode
@@ -660,7 +677,7 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -683,7 +700,7 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "ike_phase2_profile", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "ike_phase2_profile", err),
 		)
 		return
 	}
@@ -816,6 +833,9 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 				return
 			}
 			data.AuthenticationAlgos = listValue
+		} else if !data.AuthenticationAlgos.IsNull() && !data.AuthenticationAlgos.IsUnknown() && len(data.AuthenticationAlgos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.AuthenticationAlgos = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.AuthenticationAlgos = types.ListNull(types.StringType)
 		}
@@ -836,12 +856,15 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 				return
 			}
 			data.EncryptionAlgos = listValue
+		} else if !data.EncryptionAlgos.IsNull() && !data.EncryptionAlgos.IsUnknown() && len(data.EncryptionAlgos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EncryptionAlgos = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.EncryptionAlgos = types.ListNull(types.StringType)
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource SpecToModelRoot OneOfField --> IkeKeyLifetime
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -928,8 +951,6 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
 	}
 
@@ -1059,14 +1080,10 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "ike_phase2_profile", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "ike_phase2_profile", err),
 		)
 		return
 	}
@@ -1199,6 +1216,9 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 				return
 			}
 			data.AuthenticationAlgos = listValue
+		} else if !data.AuthenticationAlgos.IsNull() && !data.AuthenticationAlgos.IsUnknown() && len(data.AuthenticationAlgos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.AuthenticationAlgos = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.AuthenticationAlgos = types.ListNull(types.StringType)
 		}
@@ -1219,12 +1239,15 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 				return
 			}
 			data.EncryptionAlgos = listValue
+		} else if !data.EncryptionAlgos.IsNull() && !data.EncryptionAlgos.IsUnknown() && len(data.EncryptionAlgos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EncryptionAlgos = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.EncryptionAlgos = types.ListNull(types.StringType)
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource SpecToModelRoot OneOfField --> IkeKeyLifetime
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -1311,9 +1334,14 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
-		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
+
+		if data.IkeKeyLifetimeChoice.IsNull() || data.IkeKeyLifetimeChoice.IsUnknown() || ((data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).IsUnknown() || (data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).Attributes()["duration"].IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).Attributes()["duration"].IsUnknown())) && (data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).IsUnknown() || (data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).Attributes()["duration"].IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).Attributes()["duration"].IsUnknown())) && (data.IkeKeyLifetimeChoice.Attributes()["use_default_keylifetime"].IsNull() || data.IkeKeyLifetimeChoice.Attributes()["use_default_keylifetime"].IsUnknown())) {
+			data.IkeKeyLifetimeChoice = types.ObjectValueMust(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap, map[string]attr.Value{
+				"ike_keylifetime_hours":   types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap),
+				"ike_keylifetime_minutes": types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap),
+				"use_default_keylifetime": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot OneOfField --> PfsMode
@@ -1408,6 +1436,12 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 }
 
 func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCIkePhase2ProfileModel
@@ -1558,7 +1592,7 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		spec.EncryptionAlgos = encryptionAlgosSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource modelToSpecRoot OneOfField --> IkeKeyLifetime
 	if !data.IkeKeyLifetimeChoice.IsNull() && !data.IkeKeyLifetimeChoice.IsUnknown() {
 		ikeKeyLifetimeChoiceModel := IkePhase2ProfileIkeKeyLifetimeChoice{}
 		response.Diagnostics.Append(data.IkeKeyLifetimeChoice.As(ctx, &ikeKeyLifetimeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1609,6 +1643,10 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			spec.IkeKeyLifetime = useDefaultKeylifetimeSpecBool
 		}
 
+	} else {
+		spec.IkeKeyLifetime = &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_UseDefaultKeylifetime{
+			UseDefaultKeylifetime: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> PfsMode
@@ -1667,7 +1705,7 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1675,24 +1713,20 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "ike_phase2_profile", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "ike_phase2_profile", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "ike_phase2_profile", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "ike_phase2_profile", err),
 		)
 		return
 	}
@@ -1824,6 +1858,9 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 				return
 			}
 			data.AuthenticationAlgos = listValue
+		} else if !data.AuthenticationAlgos.IsNull() && !data.AuthenticationAlgos.IsUnknown() && len(data.AuthenticationAlgos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.AuthenticationAlgos = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.AuthenticationAlgos = types.ListNull(types.StringType)
 		}
@@ -1844,12 +1881,15 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 				return
 			}
 			data.EncryptionAlgos = listValue
+		} else if !data.EncryptionAlgos.IsNull() && !data.EncryptionAlgos.IsUnknown() && len(data.EncryptionAlgos.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.EncryptionAlgos = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.EncryptionAlgos = types.ListNull(types.StringType)
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource SpecToModelRoot OneOfField --> IkeKeyLifetime
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -1936,8 +1976,6 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
 	}
 
@@ -2096,7 +2134,7 @@ func (r *ResourceF5XCIkePhase2Profile) Delete(ctx context.Context, request resou
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "ike_phase2_profile", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "ike_phase2_profile", err),
 		)
 		return
 	}

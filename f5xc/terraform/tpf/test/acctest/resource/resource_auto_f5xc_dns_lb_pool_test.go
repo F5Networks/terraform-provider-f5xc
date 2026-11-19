@@ -28,7 +28,7 @@ func TestAccResourceAutoF5XCDnsLBPool_basic(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-dns-pool-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-pool-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCDnsLBPool_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDnsLBPoolConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDnsLBPoolConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -63,7 +63,7 @@ func TestAccResourceAutoF5XCDnsLBPool_withLoadBalancingModeTransition(t *testing
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-dns-pool-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-pool-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -72,26 +72,26 @@ func TestAccResourceAutoF5XCDnsLBPool_withLoadBalancingModeTransition(t *testing
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withLoadBalancingMode(name, namespace, "ROUND_ROBIN")},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withLoadBalancingMode(name, namespace, "RATIO_MEMBER")},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withLoadBalancingMode(name, namespace, "PRIORITY")},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -102,7 +102,7 @@ func TestAccResourceAutoF5XCDnsLBPool_withTTLChoiceTransition(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-dns-pool-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-pool-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -111,18 +111,18 @@ func TestAccResourceAutoF5XCDnsLBPool_withTTLChoiceTransition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withUseRRSetTTL(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withCustomTTL(name, namespace, 120)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -133,38 +133,41 @@ func TestAccResourceAutoF5XCDnsLBPool_withPoolTypeTransition_A_AAAA_MX(t *testin
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-dns-pool-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-pool-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsLBPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withAPool(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withAAAAPool(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withMXPool(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsLBPoolConfig_withAAAAPool(name, namespace),
 	})
 }
 
@@ -172,30 +175,33 @@ func TestAccResourceAutoF5XCDnsLBPool_withPoolTypeTransition_CNAME_SRV(t *testin
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-dns-pool-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-pool-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsLBPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withCNAMEPool(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_withSRVPool(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsLBPoolConfig_withSRVPool(name, namespace),
 	})
 }
 
@@ -203,30 +209,33 @@ func TestAccResourceAutoF5XCDnsLBPool_full(t *testing.T) {
 	t.Parallel()
 
 	namespace := acctest.SystemNamespace()
-	name := "tf-acc-dns-pool-" + acctest.RandString(t, 8)
+	name := "example-dns-lb-pool-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsLBPoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_full(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{Config: testAccResourceAutoF5XCDnsLBPoolConfig_fullUpdated(name, namespace)},
 			{
-				ResourceName:                         "f5xc_dns_lb_pool.test",
+				ResourceName:                         "f5xc_dns_lb_pool.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_dns_lb_pool.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDnsLBPoolConfig_full(name, namespace),
 	})
 }
 
@@ -240,10 +249,10 @@ func testAccResourceAutoF5XCDnsLBPoolConfig_basic(name, namespace string) string
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name        = %q
   namespace   = %q
-  description = "dns lb pool updated"
+  description = "DNS LB pool example updated"
 
   pool_type_choice = {
     a_pool = {
@@ -273,7 +282,7 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_withLoadBalancingMode(name, namespace, mode string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name      = %q
   namespace = %q
 
@@ -305,7 +314,7 @@ func testAccResourceAutoF5XCDnsLBPoolConfig_withUseRRSetTTL(name, namespace stri
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_withCustomTTL(name, namespace string, ttl int) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name      = %q
   namespace = %q
 
@@ -333,7 +342,7 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_withAPool(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name      = %q
   namespace = %q
 
@@ -365,7 +374,7 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_withAAAAPool(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name      = %q
   namespace = %q
 
@@ -394,7 +403,7 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_withCNAMEPool(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name      = %q
   namespace = %q
 
@@ -426,7 +435,7 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_withMXPool(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name      = %q
   namespace = %q
 
@@ -455,7 +464,7 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_withSRVPool(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name      = %q
   namespace = %q
 
@@ -487,13 +496,13 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name        = %q
   namespace   = %q
-  description = "dns lb pool full"
+  description = "DNS LB pool example"
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -534,13 +543,13 @@ resource "f5xc_dns_lb_pool" "test" {
 
 func testAccResourceAutoF5XCDnsLBPoolConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_dns_lb_pool" "test" {
+resource "f5xc_dns_lb_pool" "example" {
   name        = %q
   namespace   = %q
-  description = "dns lb pool full updated"
+  description = "DNS LB pool example updated"
 
   labels = {
-    env = "prod"
+    env = "example"
   }
 
   annotations = {

@@ -163,6 +163,7 @@ func (c *CustomDataAPIRestClient) doRPCDNSLBHealthStatus(ctx context.Context, ca
 		_ = q
 		q.Add("name", fmt.Sprintf("%v", req.Name))
 		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
+		q.Add("virtual_host", fmt.Sprintf("%v", req.VirtualHost))
 
 		hReq.URL.RawQuery += q.Encode()
 	case "delete":
@@ -327,6 +328,7 @@ func (c *CustomDataAPIRestClient) doRPCDNSLBPoolHealthStatus(ctx context.Context
 		q.Add("dns_lb_name", fmt.Sprintf("%v", req.DnsLbName))
 		q.Add("dns_lb_pool_name", fmt.Sprintf("%v", req.DnsLbPoolName))
 		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
+		q.Add("virtual_host", fmt.Sprintf("%v", req.VirtualHost))
 
 		hReq.URL.RawQuery += q.Encode()
 	case "delete":
@@ -1148,6 +1150,14 @@ var CustomDataAPISwaggerJSON string = `{
                         "required": true,
                         "type": "string",
                         "x-displayname": "DNS Load Balancer Pool Name"
+                    },
+                    {
+                        "name": "virtual_host",
+                        "description": "x-example: \"app.example.com\"\nVirtual host used by DNS Load Balancer health checks",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "x-displayname": "Virtual Host"
                     }
                 ],
                 "tags": [
@@ -1360,6 +1370,14 @@ var CustomDataAPISwaggerJSON string = `{
                         "required": true,
                         "type": "string",
                         "x-displayname": "Name"
+                    },
+                    {
+                        "name": "virtual_host",
+                        "description": "Virtual host used by DNS Load Balancer health checks",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "x-displayname": "Virtual Host"
                     }
                 ],
                 "tags": [
@@ -1444,6 +1462,12 @@ var CustomDataAPISwaggerJSON string = `{
                         "$ref": "#/definitions/schemaMetricValue"
                     },
                     "x-displayname": "Status"
+                },
+                "virtual_host": {
+                    "type": "string",
+                    "description": " Virtual host used by DNS Load Balancer health checks",
+                    "title": "Virtual Host",
+                    "x-displayname": "Virtual Host"
                 }
             }
         },
@@ -1512,6 +1536,13 @@ var CustomDataAPISwaggerJSON string = `{
                         "$ref": "#/definitions/schemaMetricValue"
                     },
                     "x-displayname": "Status"
+                },
+                "virtual_host": {
+                    "type": "string",
+                    "description": " Virtual host used for DNS Load Balancer Pool HTTP health checks\n\nExample: - \"app.example.com\"-",
+                    "title": "Virtual Host",
+                    "x-displayname": "Virtual Host",
+                    "x-ves-example": "app.example.com"
                 }
             }
         },
@@ -1695,6 +1726,13 @@ var CustomDataAPISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.repeated.max_items": "2"
                     }
+                },
+                "virtual_host": {
+                    "type": "string",
+                    "description": " Virtual host used for DNS Load Balancer Pool Member HTTP health checks\n\nExample: - \"app.example.com\"-",
+                    "title": "Virtual Host",
+                    "x-displayname": "Virtual Host",
+                    "x-ves-example": "app.example.com"
                 }
             }
         },

@@ -66,8 +66,8 @@ func (d *DataSourceF5XCPublicIp) Metadata(ctx context.Context, request datasourc
 func (r *DataSourceF5XCPublicIp) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a public_ip This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of public_ip) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a public_ip This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of public_ip) etc. can be fetched",
+		MarkdownDescription: "public_ip object represents a public IP address that is available on a set of virtual sites",
+		Description:         "public_ip object represents a public IP address that is available on a set of virtual sites",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -205,7 +205,7 @@ func (d *DataSourceF5XCPublicIp) Read(ctx context.Context, request datasource.Re
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_public_ip.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "public_ip", err))
 		return
 	}
 

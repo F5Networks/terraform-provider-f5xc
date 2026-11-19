@@ -18,7 +18,6 @@ import (
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -34,6 +33,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -45,6 +45,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/namespacetypevalidator"
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_protocol_policer "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/protocol_policer"
 )
@@ -176,8 +177,8 @@ func (r *ResourceF5XCProtocolPolicer) Metadata(ctx context.Context, request reso
 func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Protocol Policer Type Protocol policer has set or network protocol fields and flags to be match on a layer 4 packet and corresponding rate limit to be applied, this would be useful in specifying * Ratelimiting TCP sessions accepted from in a given duration * Ratelimiting various ICMP message type packets * Ratelimiting all UDP traffic * Ratelimting DNS traffic",
-		Description:         "Protocol Policer Type Protocol policer has set or network protocol fields and flags to be match on a layer 4 packet and corresponding rate limit to be applied, this would be useful in specifying * Ratelimiting TCP sessions accepted from in a given duration * Ratelimiting various ICMP message type packets * Ratelimiting all UDP traffic * Ratelimting DNS traffic",
+		MarkdownDescription: "Protocol policer has set or network protocol fields and flags to be match on<br>a layer 4 packet and corresponding rate limit to be applied, this would be<br>useful in specifying<br>* Ratelimiting TCP sessions accepted from in a given duration<br>* Ratelimiting various ICMP message type packets<br>* Ratelimiting all UDP traffic<br>* Ratelimting DNS traffic",
+		Description:         "Protocol policer has set or network protocol fields and flags to be match on a layer 4 packet and corresponding rate limit to be applied, this would be useful in specifying Ratelimiting TCP sessions accepted from in a given duration Ratelimiting various ICMP message type packets Ratelimiting all UDP traffic Ratelimting DNS traffic",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -233,7 +234,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"system"}...),
+					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
 			"uid": schema.StringAttribute{
@@ -290,7 +291,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 										Optional:            false,
 										Computed:            true,
 										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
+											stringplanmodifier.UseNonNullStateForUnknown(),
 										},
 									},
 								},
@@ -305,7 +306,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"type_choice": schema.SingleNestedAttribute{
 									Description:         "Type Provide various protocol specific match conditions",
-									MarkdownDescription: "Type Provide various protocol specific match conditions",
+									MarkdownDescription: "Type Provide various protocol specific match conditions<br>Exactly one of `dns`, `icmp`, `tcp`, or `udp` must be specified when `type_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -320,7 +321,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"dns": schema.BoolAttribute{
 											Description:         "DNS packet type Match all DNS packets",
-											MarkdownDescription: "DNS packet type Match all DNS packets",
+											MarkdownDescription: "DNS packet type Match all DNS packets<br>Conflicts with `icmp`, `tcp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -330,19 +331,18 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 										},
 										"icmp": schema.SingleNestedAttribute{
 											Description:         "ICMP packet type ICMP message types to be matched in packet",
-											MarkdownDescription: "ICMP packet type ICMP message types to be matched in packet",
+											MarkdownDescription: "ICMP packet type ICMP message types to be matched in packet<br>Conflicts with `dns`, `tcp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"type": schema.ListAttribute{
 													Description:         "type ICMP message type to be matched in packet",
-													MarkdownDescription: "type ICMP message type to be matched in packet<br>**Valid Options:** `['ALL_ICMP_MSG', 'ECHO_REPLY', 'ECHO_REQUEST']` (Multiple selection allowed)<br>**Default:** `ECHO_REPLY`",
+													MarkdownDescription: "type ICMP message type to be matched in packet<br>**Valid Options:** `['ALL_ICMP_MSG', 'ECHO_REPLY', 'ECHO_REQUEST']` (Multiple selection allowed)",
 													ElementType:         types.StringType,
 													Required:            false,
 													Optional:            true,
-													Computed:            true,
-													Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("ECHO_REPLY")),
+													Computed:            false,
 													Validators: []validator.List{
 														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ALL_ICMP_MSG", "ECHO_REPLY", "ECHO_REQUEST"}...)),
 													},
@@ -351,19 +351,18 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 										},
 										"tcp": schema.SingleNestedAttribute{
 											Description:         "TCP packet type TCP flags to be matched in packet",
-											MarkdownDescription: "TCP packet type TCP flags to be matched in packet",
+											MarkdownDescription: "TCP packet type TCP flags to be matched in packet<br>Conflicts with `dns`, `icmp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"flags": schema.ListAttribute{
 													Description:         "flags TCP flag to be matched in a TCP packet",
-													MarkdownDescription: "flags TCP flag to be matched in a TCP packet<br>**Valid Options:** `['ACK', 'ALL_TCP_FLAGS', 'FIN', 'KEEPALIVE', 'PSH', 'RST', 'SYN', 'URG']` (Multiple selection allowed)<br>**Default:** `FIN`",
+													MarkdownDescription: "flags TCP flag to be matched in a TCP packet<br>**Valid Options:** `['ACK', 'ALL_TCP_FLAGS', 'FIN', 'KEEPALIVE', 'PSH', 'RST', 'SYN', 'URG']` (Multiple selection allowed)",
 													ElementType:         types.StringType,
 													Required:            false,
 													Optional:            true,
-													Computed:            true,
-													Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("FIN")),
+													Computed:            false,
 													Validators: []validator.List{
 														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ACK", "ALL_TCP_FLAGS", "FIN", "KEEPALIVE", "PSH", "RST", "SYN", "URG"}...)),
 													},
@@ -372,7 +371,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 										},
 										"udp": schema.BoolAttribute{
 											Description:         "UDP packet type Match all UDP packets",
-											MarkdownDescription: "UDP packet type Match all UDP packets",
+											MarkdownDescription: "UDP packet type Match all UDP packets<br>Conflicts with `dns`, `icmp`, and `tcp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -449,9 +448,17 @@ func (r *ResourceF5XCProtocolPolicer) ModifyPlan(ctx context.Context, req resour
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCProtocolPolicer) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCProtocolPolicerModel
 
 	// Read Terraform plan data into the model
@@ -725,7 +732,7 @@ func (r *ResourceF5XCProtocolPolicer) Create(ctx context.Context, request resour
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_protocol_policer.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "protocol_policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "protocol_policer", err),
 		)
 		return
 	}
@@ -1076,14 +1083,12 @@ func (r *ResourceF5XCProtocolPolicer) Create(ctx context.Context, request resour
 			AttrTypes: ProtocolPolicerProtocolPolicerModelAttributeMap,
 		}
 		nullProtocolPolicerList := basetypes.NewListNull(protocolPolicerObjectType)
-		var priorValProtocolPolicer types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("protocol_policer"), &priorValProtocolPolicer)
-		if !priorValProtocolPolicer.IsNull() && !priorValProtocolPolicer.IsUnknown() {
-			data.ProtocolPolicer = priorValProtocolPolicer
+		if !data.ProtocolPolicer.IsNull() && !data.ProtocolPolicer.IsUnknown() && len(data.ProtocolPolicer.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ProtocolPolicer = basetypes.NewListValueMust(protocolPolicerObjectType, nil)
 		} else {
 			data.ProtocolPolicer = nullProtocolPolicerList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1129,14 +1134,10 @@ func (r *ResourceF5XCProtocolPolicer) Read(ctx context.Context, request resource
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "protocol_policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "protocol_policer", err),
 		)
 		return
 	}
@@ -1487,14 +1488,12 @@ func (r *ResourceF5XCProtocolPolicer) Read(ctx context.Context, request resource
 			AttrTypes: ProtocolPolicerProtocolPolicerModelAttributeMap,
 		}
 		nullProtocolPolicerList := basetypes.NewListNull(protocolPolicerObjectType)
-		var priorValProtocolPolicer types.List
-		_ = request.State.GetAttribute(ctx, path.Root("protocol_policer"), &priorValProtocolPolicer)
-		if !priorValProtocolPolicer.IsNull() && !priorValProtocolPolicer.IsUnknown() {
-			data.ProtocolPolicer = priorValProtocolPolicer
+		if !data.ProtocolPolicer.IsNull() && !data.ProtocolPolicer.IsUnknown() && len(data.ProtocolPolicer.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ProtocolPolicer = basetypes.NewListValueMust(protocolPolicerObjectType, nil)
 		} else {
 			data.ProtocolPolicer = nullProtocolPolicerList
 		}
-
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1506,6 +1505,12 @@ func (r *ResourceF5XCProtocolPolicer) Read(ctx context.Context, request resource
 }
 
 func (r *ResourceF5XCProtocolPolicer) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCProtocolPolicerModel
@@ -1784,24 +1789,20 @@ func (r *ResourceF5XCProtocolPolicer) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_policer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_policer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "protocol_policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "protocol_policer", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "protocol_policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "protocol_policer", err),
 		)
 		return
 	}
@@ -2151,14 +2152,12 @@ func (r *ResourceF5XCProtocolPolicer) Update(ctx context.Context, request resour
 			AttrTypes: ProtocolPolicerProtocolPolicerModelAttributeMap,
 		}
 		nullProtocolPolicerList := basetypes.NewListNull(protocolPolicerObjectType)
-		var priorValProtocolPolicer types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("protocol_policer"), &priorValProtocolPolicer)
-		if !priorValProtocolPolicer.IsNull() && !priorValProtocolPolicer.IsUnknown() {
-			data.ProtocolPolicer = priorValProtocolPolicer
+		if !data.ProtocolPolicer.IsNull() && !data.ProtocolPolicer.IsUnknown() && len(data.ProtocolPolicer.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.ProtocolPolicer = basetypes.NewListValueMust(protocolPolicerObjectType, nil)
 		} else {
 			data.ProtocolPolicer = nullProtocolPolicerList
 		}
-
 	}
 
 	// Restore the merged value for Optional+Computed map meta-attributes.
@@ -2233,7 +2232,7 @@ func (r *ResourceF5XCProtocolPolicer) Delete(ctx context.Context, request resour
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "protocol_policer", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "protocol_policer", err),
 		)
 		return
 	}

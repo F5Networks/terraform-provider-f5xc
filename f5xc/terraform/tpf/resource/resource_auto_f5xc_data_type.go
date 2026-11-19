@@ -19,7 +19,6 @@ import (
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
@@ -36,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -277,7 +277,7 @@ var DataTypeTypeModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> TypeChoice
+// Attribute map for OneOfField --> TypeChoice
 var DataTypeTypeTypeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom":     types.BoolType,
@@ -295,8 +295,8 @@ func (r *ResourceF5XCDataType) Metadata(ctx context.Context, request resource.Me
 func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a data_type This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of data_type) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a data_type This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of data_type) etc. can be fetched",
+		MarkdownDescription: "A data_type is defined by a set of rules. these rules include the patterns for which that data type will be detected.<br>A data type also includes information like it's related compliances weather is sensitive data and is it also pii.<br>A data type is either predefined - defined in system. or custom - defined by the user.",
+		Description:         "A data_type is defined by a set of rules. these rules include the patterns for which that data type will be detected. A data type also includes information like it's related compliances weather is sensitive data and is it also pii. A data type is either predefined - defined in system. or custom - defined by the user.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -364,14 +364,15 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 			},
 			"compliances": schema.ListAttribute{
 				Description:         "compliances Choose applicable compliance frameworks such as GDPR, PCI/DSS, or CCPA to ensure the platform identifies whether vulnerabilities in API endpoints handling this data type may cause a compliance breach",
-				MarkdownDescription: "compliances Choose applicable compliance frameworks such as GDPR, PCI/DSS, or CCPA to ensure the platform identifies whether vulnerabilities in API endpoints handling this data type may cause a compliance breach<br>**Valid Options:** `['APPI', 'CCPA', 'CPA_CO', 'CPRA_2023', 'DPA_UK', 'EPRIVACY_DIRECTIVE', 'GDPR', 'GLBA', 'HIPAA', 'ISO_IEC_27001', 'ISO_IEC_27701', 'LGPD', 'PCI_DSS', 'PDPA_SG', 'PIPEDA', 'SOC2', 'SOX']` (Multiple selection allowed)<br>**Default:** `UNSPECIFIED`",
+				MarkdownDescription: "compliances Choose applicable compliance frameworks such as GDPR, PCI/DSS, or CCPA to ensure the platform identifies whether vulnerabilities in API endpoints handling this data type may cause a compliance breach<br>**Valid Options:** `['APPI', 'CCPA', 'CPA_CO', 'CPRA_2023', 'DPA_UK', 'EPRIVACY_DIRECTIVE', 'GDPR', 'GLBA', 'HIPAA', 'ISO_IEC_27001', 'ISO_IEC_27701', 'LGPD', 'PCI_DSS', 'PDPA_SG', 'PIPEDA', 'SOC2', 'SOX']` (Multiple selection allowed)",
 				Required:            false,
 				Optional:            true,
-				Computed:            true,
+				Computed:            false,
 				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("UNSPECIFIED")),
 				Validators: []validator.List{
 					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"APPI", "CCPA", "CPA_CO", "CPRA_2023", "DPA_UK", "EPRIVACY_DIRECTIVE", "GDPR", "GLBA", "HIPAA", "ISO_IEC_27001", "ISO_IEC_27701", "LGPD", "PCI_DSS", "PDPA_SG", "PIPEDA", "SOC2", "SOX"}...)),
+					listvalidator.SizeAtMost(17),
+					listvalidator.UniqueValues(),
 				},
 			},
 			"is_pii": schema.BoolAttribute{
@@ -404,7 +405,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 					Attributes: map[string]schema.Attribute{
 						"pattern_choice": schema.SingleNestedAttribute{
 							Description:         "pattern choice Search the data type in the key, value or both",
-							MarkdownDescription: "pattern choice Search the data type in the key, value or both",
+							MarkdownDescription: "pattern choice Search the data type in the key, value or both<br>Exactly one of `key_pattern`, `key_value_pattern`, or `value_pattern` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -418,14 +419,14 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 							Attributes: map[string]schema.Attribute{
 								"key_pattern": schema.SingleNestedAttribute{
 									Description:         "key pattern Search for pattern across all field names in the specified sections.",
-									MarkdownDescription: "key pattern Search for pattern across all field names in the specified sections.",
+									MarkdownDescription: "key pattern Search for pattern across all field names in the specified sections.<br>Conflicts with `key_value_pattern` and `value_pattern`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"type_choice": schema.SingleNestedAttribute{
 											Description:         "type_choice How to detect the current rule. by regex/exact value or substring",
-											MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring",
+											MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -439,7 +440,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 											Attributes: map[string]schema.Attribute{
 												"exact_values": schema.SingleNestedAttribute{
 													Description:         "exact values Search for values that are exact match to at least one item of the list",
-													MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list",
+													MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -460,7 +461,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 												},
 												"regex_value": schema.StringAttribute{
 													Description:         "regex value Search for values matching this regular expression",
-													MarkdownDescription: "regex value Search for values matching this regular expression",
+													MarkdownDescription: "regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -470,7 +471,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 												},
 												"substring_value": schema.StringAttribute{
 													Description:         "subtstring Search for values that include this substring",
-													MarkdownDescription: "subtstring Search for values that include this substring",
+													MarkdownDescription: "subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -484,7 +485,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 								},
 								"key_value_pattern": schema.SingleNestedAttribute{
 									Description:         "key-value pattern Search for specific field and value patterns in the specified sections.",
-									MarkdownDescription: "key-value pattern Search for specific field and value patterns in the specified sections.",
+									MarkdownDescription: "key-value pattern Search for specific field and value patterns in the specified sections.<br>Conflicts with `key_pattern` and `value_pattern`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -498,7 +499,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 											Attributes: map[string]schema.Attribute{
 												"type_choice": schema.SingleNestedAttribute{
 													Description:         "type_choice How to detect the current rule. by regex/exact value or substring",
-													MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring",
+													MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -512,7 +513,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 													Attributes: map[string]schema.Attribute{
 														"exact_values": schema.SingleNestedAttribute{
 															Description:         "exact values Search for values that are exact match to at least one item of the list",
-															MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list",
+															MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -533,7 +534,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 														},
 														"regex_value": schema.StringAttribute{
 															Description:         "regex value Search for values matching this regular expression",
-															MarkdownDescription: "regex value Search for values matching this regular expression",
+															MarkdownDescription: "regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -543,7 +544,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 														},
 														"substring_value": schema.StringAttribute{
 															Description:         "subtstring Search for values that include this substring",
-															MarkdownDescription: "subtstring Search for values that include this substring",
+															MarkdownDescription: "subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -564,7 +565,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 											Attributes: map[string]schema.Attribute{
 												"type_choice": schema.SingleNestedAttribute{
 													Description:         "type_choice How to detect the current rule. by regex/exact value or substring",
-													MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring",
+													MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -578,7 +579,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 													Attributes: map[string]schema.Attribute{
 														"exact_values": schema.SingleNestedAttribute{
 															Description:         "exact values Search for values that are exact match to at least one item of the list",
-															MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list",
+															MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -599,7 +600,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 														},
 														"regex_value": schema.StringAttribute{
 															Description:         "regex value Search for values matching this regular expression",
-															MarkdownDescription: "regex value Search for values matching this regular expression",
+															MarkdownDescription: "regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -609,7 +610,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 														},
 														"substring_value": schema.StringAttribute{
 															Description:         "subtstring Search for values that include this substring",
-															MarkdownDescription: "subtstring Search for values that include this substring",
+															MarkdownDescription: "subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -625,14 +626,14 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 								},
 								"value_pattern": schema.SingleNestedAttribute{
 									Description:         "value pattern Search for pattern across all field values in the specified sections.",
-									MarkdownDescription: "value pattern Search for pattern across all field values in the specified sections.",
+									MarkdownDescription: "value pattern Search for pattern across all field values in the specified sections.<br>Conflicts with `key_pattern` and `key_value_pattern`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"type_choice": schema.SingleNestedAttribute{
 											Description:         "type_choice How to detect the current rule. by regex/exact value or substring",
-											MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring",
+											MarkdownDescription: "type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -646,7 +647,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 											Attributes: map[string]schema.Attribute{
 												"exact_values": schema.SingleNestedAttribute{
 													Description:         "exact values Search for values that are exact match to at least one item of the list",
-													MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list",
+													MarkdownDescription: "exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -667,7 +668,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 												},
 												"regex_value": schema.StringAttribute{
 													Description:         "regex value Search for values matching this regular expression",
-													MarkdownDescription: "regex value Search for values matching this regular expression",
+													MarkdownDescription: "regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -677,7 +678,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 												},
 												"substring_value": schema.StringAttribute{
 													Description:         "subtstring Search for values that include this substring",
-													MarkdownDescription: "subtstring Search for values that include this substring",
+													MarkdownDescription: "subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -701,25 +702,28 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"type_choice": schema.SingleNestedAttribute{
 						Description:         "OriginType Where should the pattern be searched",
-						MarkdownDescription: "OriginType Where should the pattern be searched",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "OriginType Where should the pattern be searched<br>Exactly one of `custom` or `predefined` must be specified when `type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"custom",
 								"predefined",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"custom": schema.BoolAttribute{
 								Description:         "Custom",
-								MarkdownDescription: "Custom",
+								MarkdownDescription: "Custom<br>Conflicts with `predefined`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -729,7 +733,7 @@ func (r *ResourceF5XCDataType) Schema(ctx context.Context, request resource.Sche
 							},
 							"predefined": schema.BoolAttribute{
 								Description:         "Predefined",
-								MarkdownDescription: "Predefined",
+								MarkdownDescription: "Predefined<br>Conflicts with `custom`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -803,9 +807,17 @@ func (r *ResourceF5XCDataType) ModifyPlan(ctx context.Context, req resource.Modi
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCDataType) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCDataTypeModel
 
 	// Read Terraform plan data into the model
@@ -1211,7 +1223,7 @@ func (r *ResourceF5XCDataType) Create(ctx context.Context, request resource.Crea
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1234,7 +1246,7 @@ func (r *ResourceF5XCDataType) Create(ctx context.Context, request resource.Crea
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_data_type.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "data_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "data_type", err),
 		)
 		return
 	}
@@ -1367,6 +1379,9 @@ func (r *ResourceF5XCDataType) Create(ctx context.Context, request resource.Crea
 				return
 			}
 			data.Compliances = listValue
+		} else if !data.Compliances.IsNull() && !data.Compliances.IsUnknown() && len(data.Compliances.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Compliances = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.Compliances = types.ListNull(types.StringType)
 		}
@@ -1891,8 +1906,7 @@ func (r *ResourceF5XCDataType) Create(ctx context.Context, request resource.Crea
 		var dataTypeOriginTypeModel = &DataTypeOriginType{}
 		typeElement := specData.GetType()
 
-		// resource specToModelNested RequiredOneOfField --> TypeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> TypeChoice
 		if typeElement.GetTypeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			typetypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1996,14 +2010,10 @@ func (r *ResourceF5XCDataType) Read(ctx context.Context, request resource.ReadRe
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_data_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_data_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "data_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "data_type", err),
 		)
 		return
 	}
@@ -2136,6 +2146,9 @@ func (r *ResourceF5XCDataType) Read(ctx context.Context, request resource.ReadRe
 				return
 			}
 			data.Compliances = listValue
+		} else if !data.Compliances.IsNull() && !data.Compliances.IsUnknown() && len(data.Compliances.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Compliances = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.Compliances = types.ListNull(types.StringType)
 		}
@@ -2660,8 +2673,7 @@ func (r *ResourceF5XCDataType) Read(ctx context.Context, request resource.ReadRe
 		var dataTypeOriginTypeModel = &DataTypeOriginType{}
 		typeElement := specData.GetType()
 
-		// resource specToModelNested RequiredOneOfField --> TypeChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> TypeChoice
 		if typeElement.GetTypeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			typetypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2705,7 +2717,10 @@ func (r *ResourceF5XCDataType) Read(ctx context.Context, request resource.ReadRe
 			dataTypeOriginTypeModel.TypeChoice = finalObj
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			dataTypeOriginTypeModel.TypeChoice = types.ObjectNull(DataTypeTypeTypeChoiceModelAttributeMap)
+			dataTypeOriginTypeModel.TypeChoice = types.ObjectValueMust(DataTypeTypeTypeChoiceModelAttributeMap, map[string]attr.Value{
+				"custom":     types.BoolValue(true),
+				"predefined": types.BoolNull(),
+			})
 		}
 
 		typeObj, typeDiags := utils.GoStructToObjectValue(
@@ -2748,6 +2763,12 @@ func (r *ResourceF5XCDataType) Read(ctx context.Context, request resource.ReadRe
 }
 
 func (r *ResourceF5XCDataType) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCDataTypeModel
@@ -3173,7 +3194,7 @@ func (r *ResourceF5XCDataType) Update(ctx context.Context, request resource.Upda
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -3181,24 +3202,20 @@ func (r *ResourceF5XCDataType) Update(ctx context.Context, request resource.Upda
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_data_type.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_data_type.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "data_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "data_type", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_data_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_data_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "data_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "data_type", err),
 		)
 		return
 	}
@@ -3330,6 +3347,9 @@ func (r *ResourceF5XCDataType) Update(ctx context.Context, request resource.Upda
 				return
 			}
 			data.Compliances = listValue
+		} else if !data.Compliances.IsNull() && !data.Compliances.IsUnknown() && len(data.Compliances.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.Compliances = types.ListValueMust(types.StringType, nil)
 		} else {
 			data.Compliances = types.ListNull(types.StringType)
 		}
@@ -3854,8 +3874,7 @@ func (r *ResourceF5XCDataType) Update(ctx context.Context, request resource.Upda
 		var dataTypeOriginTypeModel = &DataTypeOriginType{}
 		typeElement := specData.GetType()
 
-		// resource specToModelNested RequiredOneOfField --> TypeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> TypeChoice
 		if typeElement.GetTypeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			typetypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3988,7 +4007,7 @@ func (r *ResourceF5XCDataType) Delete(ctx context.Context, request resource.Dele
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "data_type", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "data_type", err),
 		)
 		return
 	}

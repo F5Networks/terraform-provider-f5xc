@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -244,8 +245,8 @@ func (r *ResourceF5XCFastAclRule) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a fast_acl_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of fast_acl_rule) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a fast_acl_rule This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of fast_acl_rule) etc. can be fetched",
+		MarkdownDescription: "Fast ACL rule<br>Rule consists of following:<br>1. Protocol to match from packet<br>2. List of source IP prefixes or a reference to IP prefix set, to which<br>source IP in packet should belong to.<br>3. Action to be applied if above fields match<br>`fast_acl` object would refer to `fast_acl_rule`, both objects together provides a<br>five tuple {destination ip, destination port, source ip, source port, protocol} to match<br>and an action to be applied. In five tuple rule provides source IP, source port and action<br><br>Supported actions are:<br>- Allow<br>- Deny<br>- Policer - Rate limit using policer defined<br>- Protocol Policer - Rate limit for various protocol type. Supported protocols are tcp, udp, icmp, dns",
+		Description:         "Fast ACL rule Rule consists of following: 1. Protocol to match from packet 2. List of source IP prefixes or a reference to IP prefix set, to which source IP in packet should belong to. 3. Action to be applied if above fields match `fast_acl` object would refer to `fast_acl_rule`, both objects together provides a five tuple {destination ip, destination port, source ip, source port, protocol} to match and an action to be applied. In five tuple rule provides source IP, source port and action Supported actions are: - Allow - Deny - Policer - Rate limit using policer defined - Protocol Policer - Rate limit for various protocol type. Supported protocols are tcp, udp, icmp, dns",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -320,7 +321,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"action_choice": schema.SingleNestedAttribute{
 						Description:         "action The type of action to perform",
-						MarkdownDescription: "action The type of action to perform",
+						MarkdownDescription: "action The type of action to perform<br>Exactly one of `policer_action`, `protocol_policer_action`, or `simple_action` must be specified when `action_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -334,7 +335,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 						Attributes: map[string]schema.Attribute{
 							"policer_action": schema.SingleNestedAttribute{
 								Description:         "policer_action Reference to policer object to which traffic would be subjected",
-								MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected",
+								MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected<br>Conflicts with `protocol_policer_action` and `simple_action`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -371,7 +372,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -381,7 +382,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 							},
 							"protocol_policer_action": schema.SingleNestedAttribute{
 								Description:         "protocol_policer_action Reference to protocol based policer object",
-								MarkdownDescription: "protocol_policer_action Reference to protocol based policer object",
+								MarkdownDescription: "protocol_policer_action Reference to protocol based policer object<br>Conflicts with `policer_action` and `simple_action`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -418,7 +419,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 													Optional:            false,
 													Computed:            true,
 													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.UseStateForUnknown(),
+														stringplanmodifier.UseNonNullStateForUnknown(),
 													},
 												},
 											},
@@ -428,7 +429,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 							},
 							"simple_action": schema.ListAttribute{
 								Description:         "simple_action Simple action like dropping or forwarding the traffic",
-								MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`",
+								MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>Conflicts with `policer_action` and `protocol_policer_action`.",
 								ElementType:         types.StringType,
 								Required:            false,
 								Optional:            true,
@@ -455,7 +456,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 					Attributes: map[string]schema.Attribute{
 						"port_value_type_choice": schema.SingleNestedAttribute{
 							Description:         "port_value_type_choice Match criteria for port",
-							MarkdownDescription: "port_value_type_choice Match criteria for port",
+							MarkdownDescription: "port_value_type_choice Match criteria for port<br>Exactly one of `all`, `dns`, or `user_defined` must be specified when `port_value_type_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -469,7 +470,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 							Attributes: map[string]schema.Attribute{
 								"all": schema.BoolAttribute{
 									Description:         "All port Matches all port",
-									MarkdownDescription: "All port Matches all port",
+									MarkdownDescription: "All port Matches all port<br>Conflicts with `dns` and `user_defined`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -479,7 +480,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 								},
 								"dns": schema.BoolAttribute{
 									Description:         "DNS port Matches dns port 53",
-									MarkdownDescription: "DNS port Matches dns port 53",
+									MarkdownDescription: "DNS port Matches dns port 53<br>Conflicts with `all` and `user_defined`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -489,7 +490,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 								},
 								"user_defined": schema.Int64Attribute{
 									Description:         "User defined Port Matches the user defined port",
-									MarkdownDescription: "User defined Port Matches the user defined port",
+									MarkdownDescription: "User defined Port Matches the user defined port<br>Conflicts with `all` and `dns`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -504,7 +505,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 			},
 			"source_choice": schema.SingleNestedAttribute{
 				Description:         "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
-				MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
+				MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set<br>Exactly one of `ip_prefix_set` or `prefix` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -517,7 +518,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"ip_prefix_set": schema.SingleNestedAttribute{
 						Description:         "ip_prefix_set Reference to IP prefix set object",
-						MarkdownDescription: "ip_prefix_set Reference to IP prefix set object",
+						MarkdownDescription: "ip_prefix_set Reference to IP prefix set object<br>Conflicts with `prefix`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -554,7 +555,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 											Optional:            false,
 											Computed:            true,
 											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.UseStateForUnknown(),
+												stringplanmodifier.UseNonNullStateForUnknown(),
 											},
 										},
 									},
@@ -564,7 +565,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 					},
 					"prefix": schema.SingleNestedAttribute{
 						Description:         "prefix List of IP prefixes",
-						MarkdownDescription: "prefix List of IP prefixes",
+						MarkdownDescription: "prefix List of IP prefixes<br>Conflicts with `ip_prefix_set`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -579,7 +580,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 								Validators: []validator.List{
 									listvalidator.SizeAtMost(256),
 									listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-										regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|::)/(12[0-8]|1[01]\d|[1-9]?\d)$`),
+										regexp.MustCompile(`^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,6}|:)))(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`),
 										"must be a valid IPv6 prefix",
 									)),
 								},
@@ -665,9 +666,17 @@ func (r *ResourceF5XCFastAclRule) ModifyPlan(ctx context.Context, req resource.M
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCFastAclRule) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCFastAclRuleModel
 
 	// Read Terraform plan data into the model
@@ -1035,7 +1044,7 @@ func (r *ResourceF5XCFastAclRule) Create(ctx context.Context, request resource.C
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1058,7 +1067,7 @@ func (r *ResourceF5XCFastAclRule) Create(ctx context.Context, request resource.C
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "fast_acl_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "fast_acl_rule", err),
 		)
 		return
 	}
@@ -1578,29 +1587,31 @@ func (r *ResourceF5XCFastAclRule) Create(ctx context.Context, request resource.C
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -1694,14 +1705,10 @@ func (r *ResourceF5XCFastAclRule) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "fast_acl_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "fast_acl_rule", err),
 		)
 		return
 	}
@@ -2221,29 +2228,31 @@ func (r *ResourceF5XCFastAclRule) Read(ctx context.Context, request resource.Rea
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForRead(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -2303,6 +2312,12 @@ func (r *ResourceF5XCFastAclRule) Read(ctx context.Context, request resource.Rea
 }
 
 func (r *ResourceF5XCFastAclRule) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCFastAclRuleModel
@@ -2690,7 +2705,7 @@ func (r *ResourceF5XCFastAclRule) Update(ctx context.Context, request resource.U
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -2698,24 +2713,20 @@ func (r *ResourceF5XCFastAclRule) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "fast_acl_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "fast_acl_rule", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "fast_acl_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "fast_acl_rule", err),
 		)
 		return
 	}
@@ -3234,29 +3245,31 @@ func (r *ResourceF5XCFastAclRule) Update(ctx context.Context, request resource.U
 						if response.Diagnostics.HasError() {
 							return
 						}
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: reconcile backend list order against client representation.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = listValue
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, listValue)
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					} else {
-						// State Healing: preserve prior list representation for marked fields.
+						// Semantic List Reconciliation: preserve explicitly configured empty list when API returns no entries.
 						var priorValIpv6Prefix types.List
 						response.Diagnostics.Append(request.Plan.GetAttribute(ctx, path.Root("source_choice").AtName("prefix").AtName("ipv6_prefix"), &priorValIpv6Prefix)...)
 						if response.Diagnostics.HasError() {
 							return
 						}
-						if !priorValIpv6Prefix.IsNull() && !priorValIpv6Prefix.IsUnknown() {
-							prefixAttributeMap["ipv6_prefix"] = priorValIpv6Prefix
-						} else {
-							prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+						reconciledListIpv6Prefix, reconcileDiagsIpv6Prefix := utils.ReconcileListForApply(ctx, priorValIpv6Prefix, types.ListNull(types.StringType))
+						response.Diagnostics.Append(reconcileDiagsIpv6Prefix...)
+						if response.Diagnostics.HasError() {
+							return
 						}
+						prefixAttributeMap["ipv6_prefix"] = reconciledListIpv6Prefix
 					}
 				}
 
@@ -3379,7 +3392,7 @@ func (r *ResourceF5XCFastAclRule) Delete(ctx context.Context, request resource.D
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "fast_acl_rule", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "fast_acl_rule", err),
 		)
 		return
 	}

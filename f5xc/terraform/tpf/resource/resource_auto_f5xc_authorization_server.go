@@ -14,11 +14,14 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -32,8 +35,10 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -50,18 +55,24 @@ type ResourceF5XCAuthorizationServer struct {
 	client *client.APIClient
 }
 
+type AuthzServerIssuerValChoice struct {
+	Issuer        types.String `tfsdk:"issuer"`
+	IssuerDisable types.Bool   `tfsdk:"issuer_disable"`
+}
+
 // ResourceF5XCAuthorizationServerModel describes the resource data model.
 type ResourceF5XCAuthorizationServerModel struct {
-	Annotations         types.Map         `tfsdk:"annotations"`
-	Description         types.String      `tfsdk:"description"`
-	Labels              types.Map         `tfsdk:"labels"`
-	Name                types.String      `tfsdk:"name"`
-	Namespace           types.String      `tfsdk:"namespace"`
-	Uid                 types.String      `tfsdk:"uid"`
-	JwksUri             types.String      `tfsdk:"jwks_uri"`
-	LastFetchStatus     types.List        `tfsdk:"last_fetch_status"`
-	LastSuccessfulFetch timetypes.RFC3339 `tfsdk:"last_successful_fetch"`
-	Timeouts            timeouts.Value    `tfsdk:"timeouts"`
+	Annotations            types.Map         `tfsdk:"annotations"`
+	Description            types.String      `tfsdk:"description"`
+	Labels                 types.Map         `tfsdk:"labels"`
+	Name                   types.String      `tfsdk:"name"`
+	Namespace              types.String      `tfsdk:"namespace"`
+	Uid                    types.String      `tfsdk:"uid"`
+	IssuerValidationChoice types.Object      `tfsdk:"issuer_validation_choice"`
+	JwksUri                types.String      `tfsdk:"jwks_uri"`
+	LastFetchStatus        types.List        `tfsdk:"last_fetch_status"`
+	LastSuccessfulFetch    timetypes.RFC3339 `tfsdk:"last_successful_fetch"`
+	Timeouts               timeouts.Value    `tfsdk:"timeouts"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -74,6 +85,12 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for OneOfField --> IssuerValidation
+var AuthorizationServerIssuerValidationModelAttributeMap = map[string]attr.Type{
+
+	"issuer":         types.StringType,
+	"issuer_disable": types.BoolType,
+}
 
 func NewResourceF5XCAuthorizationServer() resource.Resource {
 	return &ResourceF5XCAuthorizationServer{}
@@ -86,8 +103,8 @@ func (r *ResourceF5XCAuthorizationServer) Metadata(ctx context.Context, request 
 func (r *ResourceF5XCAuthorizationServer) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a authorization_server This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of authorization_server) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a authorization_server This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of authorization_server) etc. can be fetched",
+		MarkdownDescription: "Authorization Server Configuration",
+		Description:         "Authorization Server Configuration",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -151,6 +168,42 @@ func (r *ResourceF5XCAuthorizationServer) Schema(ctx context.Context, request re
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"issuer_validation_choice": schema.SingleNestedAttribute{
+				Description:         "issuer_validation Configure issuer validation for tokens issued by this Authorization Server.",
+				MarkdownDescription: "issuer_validation Configure issuer validation for tokens issued by this Authorization Server.<br>Exactly one of `issuer` or `issuer_disable` must be specified when `issuer_validation_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.ExactlyOneOf(
+						"issuer",
+						"issuer_disable",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"issuer": schema.StringAttribute{
+						Description:         "issuer",
+						MarkdownDescription: "issuer<br>**Validation:** `Length LengthAtMost(512)`<br>Conflicts with `issuer_disable`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.String{
+							stringvalidator.LengthAtMost(512),
+							stringvalidator.LengthAtLeast(1),
+						},
+					},
+					"issuer_disable": schema.BoolAttribute{
+						Description:         "issuer_disable",
+						MarkdownDescription: "issuer_disable<br>Conflicts with `issuer`.",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 				},
 			},
 			"jwks_uri": schema.StringAttribute{
@@ -249,9 +302,17 @@ func (r *ResourceF5XCAuthorizationServer) ModifyPlan(ctx context.Context, req re
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCAuthorizationServer) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCAuthorizationServerModel
 
 	// Read Terraform plan data into the model
@@ -332,13 +393,37 @@ func (r *ResourceF5XCAuthorizationServer) Create(ctx context.Context, request re
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	// resource modelToSpecRoot OneOfField --> IssuerValidation
+	if !data.IssuerValidationChoice.IsNull() && !data.IssuerValidationChoice.IsUnknown() {
+		issuerValidationChoiceModel := AuthzServerIssuerValChoice{}
+		response.Diagnostics.Append(data.IssuerValidationChoice.As(ctx, &issuerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested StringOfOneOfField --> Issuer
+		if !issuerValidationChoiceModel.Issuer.IsNull() && !issuerValidationChoiceModel.Issuer.IsUnknown() {
+			issuerSpecStr := &ves_io_schema_authorization_server.CreateSpecType_Issuer{}
+			issuerSpecStr.Issuer = string(issuerValidationChoiceModel.Issuer.ValueString())
+			spec.IssuerValidation = issuerSpecStr
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> IssuerDisable
+		if !issuerValidationChoiceModel.IssuerDisable.IsNull() && !issuerValidationChoiceModel.IssuerDisable.IsUnknown() {
+			issuerDisableSpecBool := &ves_io_schema_authorization_server.CreateSpecType_IssuerDisable{}
+			issuerDisableSpecBool.IssuerDisable = &ves_io_schema.Empty{}
+			spec.IssuerValidation = issuerDisableSpecBool
+		}
+
+	}
+
 	// resource modelToSpecRoot RequiredStringField --> JwksUri
 	spec.JwksUri = string(data.JwksUri.ValueString())
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -361,7 +446,7 @@ func (r *ResourceF5XCAuthorizationServer) Create(ctx context.Context, request re
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_authorization_server.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "authorization_server", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "authorization_server", err),
 		)
 		return
 	}
@@ -479,6 +564,58 @@ func (r *ResourceF5XCAuthorizationServer) Create(ctx context.Context, request re
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
+	// resource SpecToModelRoot OneOfField --> IssuerValidation
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetIssuerValidation() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		issuerValidationChoiceChoices := specData.GetIssuerValidation()
+
+		// The model struct that will be populated by the nested template.
+		var issuerValidationChoiceChoicesModel = &AuthzServerIssuerValChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested StringOfOneOfField --> Issuer
+		issuerItem, isIssuer := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_Issuer)
+
+		if isIssuer {
+			issuerValidationChoiceChoicesModel.Issuer = types.StringValue(string(issuerItem.Issuer))
+		} else {
+			// Empty string, set to null
+			issuerValidationChoiceChoicesModel.Issuer = types.StringNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IssuerDisable
+		_, isIssuerDisable := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_IssuerDisable)
+
+		if isIssuerDisable {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolValue(true)
+		} else {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			issuerValidationChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				AuthorizationServerIssuerValidationModelAttributeMap,
+				issuerValidationChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IssuerValidationChoice = issuerValidationChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.IssuerValidationChoice = types.ObjectNull(AuthorizationServerIssuerValidationModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot RequiredStringField --> JwksUri
 	if specData.GetJwksUri() != "" {
 		data.JwksUri = types.StringValue(specData.GetJwksUri())
@@ -550,14 +687,10 @@ func (r *ResourceF5XCAuthorizationServer) Read(ctx context.Context, request reso
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "authorization_server", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "authorization_server", err),
 		)
 		return
 	}
@@ -675,6 +808,58 @@ func (r *ResourceF5XCAuthorizationServer) Read(ctx context.Context, request reso
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
+	// resource SpecToModelRoot OneOfField --> IssuerValidation
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetIssuerValidation() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		issuerValidationChoiceChoices := specData.GetIssuerValidation()
+
+		// The model struct that will be populated by the nested template.
+		var issuerValidationChoiceChoicesModel = &AuthzServerIssuerValChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested StringOfOneOfField --> Issuer
+		issuerItem, isIssuer := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_Issuer)
+
+		if isIssuer {
+			issuerValidationChoiceChoicesModel.Issuer = types.StringValue(string(issuerItem.Issuer))
+		} else {
+			// Empty string, set to null
+			issuerValidationChoiceChoicesModel.Issuer = types.StringNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IssuerDisable
+		_, isIssuerDisable := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_IssuerDisable)
+
+		if isIssuerDisable {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolValue(true)
+		} else {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			issuerValidationChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				AuthorizationServerIssuerValidationModelAttributeMap,
+				issuerValidationChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IssuerValidationChoice = issuerValidationChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.IssuerValidationChoice = types.ObjectNull(AuthorizationServerIssuerValidationModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot RequiredStringField --> JwksUri
 	if specData.GetJwksUri() != "" {
 		data.JwksUri = types.StringValue(specData.GetJwksUri())
@@ -712,6 +897,12 @@ func (r *ResourceF5XCAuthorizationServer) Read(ctx context.Context, request reso
 }
 
 func (r *ResourceF5XCAuthorizationServer) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCAuthorizationServerModel
@@ -812,13 +1003,37 @@ func (r *ResourceF5XCAuthorizationServer) Update(ctx context.Context, request re
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	// resource modelToSpecRoot OneOfField --> IssuerValidation
+	if !data.IssuerValidationChoice.IsNull() && !data.IssuerValidationChoice.IsUnknown() {
+		issuerValidationChoiceModel := AuthzServerIssuerValChoice{}
+		response.Diagnostics.Append(data.IssuerValidationChoice.As(ctx, &issuerValidationChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested StringOfOneOfField --> Issuer
+		if !issuerValidationChoiceModel.Issuer.IsNull() && !issuerValidationChoiceModel.Issuer.IsUnknown() {
+			issuerSpecStr := &ves_io_schema_authorization_server.ReplaceSpecType_Issuer{}
+			issuerSpecStr.Issuer = string(issuerValidationChoiceModel.Issuer.ValueString())
+			spec.IssuerValidation = issuerSpecStr
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> IssuerDisable
+		if !issuerValidationChoiceModel.IssuerDisable.IsNull() && !issuerValidationChoiceModel.IssuerDisable.IsUnknown() {
+			issuerDisableSpecBool := &ves_io_schema_authorization_server.ReplaceSpecType_IssuerDisable{}
+			issuerDisableSpecBool.IssuerDisable = &ves_io_schema.Empty{}
+			spec.IssuerValidation = issuerDisableSpecBool
+		}
+
+	}
+
 	// resource modelToSpecRoot RequiredStringField --> JwksUri
 	spec.JwksUri = string(data.JwksUri.ValueString())
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -826,24 +1041,20 @@ func (r *ResourceF5XCAuthorizationServer) Update(ctx context.Context, request re
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_authorization_server.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_authorization_server.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "authorization_server", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "authorization_server", err),
 		)
 		return
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "authorization_server", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "authorization_server", err),
 		)
 		return
 	}
@@ -960,6 +1171,58 @@ func (r *ResourceF5XCAuthorizationServer) Update(ctx context.Context, request re
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
+	// resource SpecToModelRoot OneOfField --> IssuerValidation
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetIssuerValidation() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		issuerValidationChoiceChoices := specData.GetIssuerValidation()
+
+		// The model struct that will be populated by the nested template.
+		var issuerValidationChoiceChoicesModel = &AuthzServerIssuerValChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested StringOfOneOfField --> Issuer
+		issuerItem, isIssuer := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_Issuer)
+
+		if isIssuer {
+			issuerValidationChoiceChoicesModel.Issuer = types.StringValue(string(issuerItem.Issuer))
+		} else {
+			// Empty string, set to null
+			issuerValidationChoiceChoicesModel.Issuer = types.StringNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> IssuerDisable
+		_, isIssuerDisable := issuerValidationChoiceChoices.(*ves_io_schema_authorization_server.GlobalSpecType_IssuerDisable)
+
+		if isIssuerDisable {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolValue(true)
+		} else {
+			issuerValidationChoiceChoicesModel.IssuerDisable = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			issuerValidationChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				AuthorizationServerIssuerValidationModelAttributeMap,
+				issuerValidationChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IssuerValidationChoice = issuerValidationChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.IssuerValidationChoice = types.ObjectNull(AuthorizationServerIssuerValidationModelAttributeMap)
+	}
+
 	// resource SpecToModelRoot RequiredStringField --> JwksUri
 	if specData.GetJwksUri() != "" {
 		data.JwksUri = types.StringValue(specData.GetJwksUri())
@@ -1060,7 +1323,7 @@ func (r *ResourceF5XCAuthorizationServer) Delete(ctx context.Context, request re
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "authorization_server", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "authorization_server", err),
 		)
 		return
 	}

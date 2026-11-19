@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCRateLimiter_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ratelimiter-" + testAccRunSuffix(t)
+	name := "example-ratelimiter-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCRateLimiter_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCRateLimiterConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccResourceAutoF5XCRateLimiter_basic(t *testing.T) {
 func TestAccResourceAutoF5XCRateLimiter_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ratelimiter-" + testAccRunSuffix(t)
+	name := "example-ratelimiter-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCRateLimiter_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCRateLimiterConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +97,7 @@ func TestAccResourceAutoF5XCRateLimiter_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCRateLimiter_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ratelimiter-" + testAccRunSuffix(t)
+	name := "example-ratelimiter-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCRateLimiter_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCRateLimiterConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,10 +132,10 @@ func TestAccResourceAutoF5XCRateLimiter_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCRateLimiter_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-ratelimiter-" + testAccRunSuffix(t)
+	name := "example-ratelimiter-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckRateLimiterDestroyProducer(t),
@@ -144,24 +144,28 @@ func TestAccResourceAutoF5XCRateLimiter_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCRateLimiterConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCRateLimiterConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_rate_limiter.test",
+				ResourceName:                         "f5xc_rate_limiter.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_rate_limiter.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCRateLimiterConfig_full("example-ratelimiter", "default"),
+		})
 }
 
 func testAccCheckRateLimiterDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -170,66 +174,66 @@ func testAccCheckRateLimiterDestroyProducer(t *testing.T) func(*terraform.State)
 
 func testAccResourceAutoF5XCRateLimiterConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Acceptance test rate limiter"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Basic rate limiter example"
 
-	limits = [{
-		total_number = 100
-		unit         = ["MINUTE"]
+  limits = [{
+    total_number = 100
+    unit         = ["MINUTE"]
 
-		burst_multiplier = 1
+    burst_multiplier = 1
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCRateLimiterConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Acceptance test rate limiter updated"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Updated basic rate limiter example"
 
-	limits = [{
-		total_number = 200
-		unit         = ["MINUTE"]
+  limits = [{
+    total_number = 200
+    unit         = ["MINUTE"]
 
-		burst_multiplier = 2
+    burst_multiplier = 2
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 }
 `, name, namespace)
 }
 
 func testAccResourceAutoF5XCRateLimiterConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Rate limiter with labels"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Rate limiter example with labels"
 
-	limits = [{
-		total_number = 100
-		unit         = ["MINUTE"]
+  limits = [{
+    total_number = 100
+    unit         = ["MINUTE"]
 
-		burst_multiplier = 1
+    burst_multiplier = 1
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -237,24 +241,24 @@ resource "f5xc_rate_limiter" "test" {
 
 func testAccResourceAutoF5XCRateLimiterConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Rate limiter with labels"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Rate limiter example with labels"
 
-	limits = [{
-		total_number = 100
-		unit         = ["MINUTE"]
+  limits = [{
+    total_number = 100
+    unit         = ["MINUTE"]
 
-		burst_multiplier = 1
+    burst_multiplier = 1
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "api"
   }
 }
@@ -263,21 +267,21 @@ resource "f5xc_rate_limiter" "test" {
 
 func testAccResourceAutoF5XCRateLimiterConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Rate limiter with annotations"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Rate limiter example with annotations"
 
-	limits = [{
-		total_number = 100
-		unit         = ["MINUTE"]
+  limits = [{
+    total_number = 100
+    unit         = ["MINUTE"]
 
-		burst_multiplier = 1
+    burst_multiplier = 1
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 
   annotations = {
     owner = "platform-team"
@@ -288,21 +292,21 @@ resource "f5xc_rate_limiter" "test" {
 
 func testAccResourceAutoF5XCRateLimiterConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Rate limiter with annotations"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Rate limiter example with annotations"
 
-	limits = [{
-		total_number = 100
-		unit         = ["MINUTE"]
+  limits = [{
+    total_number = 100
+    unit         = ["MINUTE"]
 
-		burst_multiplier = 1
+    burst_multiplier = 1
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 
   annotations = {
     owner = "api-team"
@@ -313,24 +317,24 @@ resource "f5xc_rate_limiter" "test" {
 
 func testAccResourceAutoF5XCRateLimiterConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Full rate limiter"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Full rate limiter example"
 
-	limits = [{
-		total_number = 100
-		unit         = ["MINUTE"]
+  limits = [{
+    total_number = 100
+    unit         = ["MINUTE"]
 
-		burst_multiplier = 2
+    burst_multiplier = 2
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -342,24 +346,24 @@ resource "f5xc_rate_limiter" "test" {
 
 func testAccResourceAutoF5XCRateLimiterConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_rate_limiter" "test" {
-  name        = "%s"
-  namespace   = "%s"
-  description = "Full rate limiter updated"
+resource "f5xc_rate_limiter" "example" {
+  name        = %q
+  namespace   = %q
+  description = "Updated full rate limiter example"
 
-	limits = [{
-		total_number = 500
-		unit         = ["HOUR"]
+  limits = [{
+    total_number = 500
+    unit         = ["HOUR"]
 
-		burst_multiplier = 3
+    burst_multiplier = 3
 
-		action_choice = {
-			disabled = true
-		}
-	}]
+    action_choice = {
+      disabled = true
+    }
+  }]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "api"
   }
 

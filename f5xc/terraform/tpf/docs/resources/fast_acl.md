@@ -14,18 +14,114 @@
 page_title: "f5xc_fast_acl Resource - F5 XC Distributed Cloud"
 subcategory: "Network Security & Firewalls"
 description: |-
-  Fast ACL Fast ACL provides destination and specifies rules to protect the site from denial of service attacks. - It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}. - Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action - Destination is always provided as a combination of destination IP and port Typical Usecase(s) are: - Rate-limiting traffic to destination - Accepting traffic from certain source IPs to destination - Ratelimiting or dropping traffic from source IPs to destination These ACL rules are applied at very early stage in datapath ingress processing and form first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress), unlike session based ACL where action is calculated only on first packet in session. Fast ACL picks source based on Longest prefix match for faster processing, which differs from traditional ACL where rules are evaluated in order. If none of the rule matches then default action is to forward the packet Fast ACL on a customer edge(CE) Site Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site - Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall - Network Firewall is referred to by a Fleet - CE site is member of the Fleet - Only tenant can configure the set - Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE Selection of Destination - Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL Fast ACL on RE - Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s) - Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected Selection of public VIP destination - tenant ACL can pick VIP corresponding to tenant only Selection of shared VIP destination - tenant CANNOT use this option on RE. Custom prefixes destination - tenant CANNOT use this option on RE. Shared VIP services - tenant CANNOT use this option, is only meant for volterra administrators Default Protocol Policer - Is valid on CE and RE and configurable by any tenant - Used for rate limiting - Applied when none of the source rules match - Protocols supported are ICMP, TCP, UDP, DNS
+  Fast ACL provides destination and specifies rules to protect the site from denial of service attacks.<br>- It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}.<br>- Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action<br>- Destination is always provided as a combination of destination IP and port<br><br>Typical Usecase(s) are:<br>- Rate-limiting traffic to destination<br>- Accepting traffic from certain source IPs to destination<br>- Ratelimiting or dropping traffic from source IPs to destination<br><br>These ACL rules are applied at very early stage in datapath ingress processing and form<br>first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress),<br>unlike session based ACL where action is calculated only on first packet in session.<br><br>Fast ACL picks source based on Longest prefix match for faster processing, which differs<br>from traditional ACL where rules are evaluated in order. If none of the rule matches<br>then default action is to forward the packet<br><br>Fast ACL on a customer edge(CE) Site<br><br>Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site<br>- Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall<br>- Network Firewall is referred to by a Fleet<br>- CE site is member of the Fleet<br>- Only tenant can configure the set<br>- Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE<br><br>Selection of Destination<br>- Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL<br><br>Fast ACL on RE<br><br>- Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s)<br>- Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected<br><br>Selection of public VIP destination<br>- tenant ACL can pick VIP corresponding to tenant only<br>Selection of shared VIP destination<br>- tenant CANNOT use this option on RE.<br>Custom prefixes destination<br>- tenant CANNOT use this option on RE.<br>Shared VIP services<br>- tenant CANNOT use this option, is only meant for volterra administrators<br><br>Default Protocol Policer<br><br>- Is valid on CE and RE and configurable by any tenant<br>- Used for rate limiting<br>- Applied when none of the source rules match<br>- Protocols supported are ICMP, TCP, UDP, DNS
 ---
 
 # f5xc_fast_acl (Resource)
 
-Fast ACL Fast ACL provides destination and specifies rules to protect the site from denial of service attacks. - It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}. - Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action - Destination is always provided as a combination of destination IP and port Typical Usecase(s) are: - Rate-limiting traffic to destination - Accepting traffic from certain source IPs to destination - Ratelimiting or dropping traffic from source IPs to destination These ACL rules are applied at very early stage in datapath ingress processing and form first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress), unlike session based ACL where action is calculated only on first packet in session. Fast ACL picks source based on Longest prefix match for faster processing, which differs from traditional ACL where rules are evaluated in order. If none of the rule matches then default action is to forward the packet Fast ACL on a customer edge(CE) Site Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site - Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall - Network Firewall is referred to by a Fleet - CE site is member of the Fleet - Only tenant can configure the set - Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE Selection of Destination - Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL Fast ACL on RE - Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s) - Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected Selection of public VIP destination - tenant ACL can pick VIP corresponding to tenant only Selection of shared VIP destination - tenant CANNOT use this option on RE. Custom prefixes destination - tenant CANNOT use this option on RE. Shared VIP services - tenant CANNOT use this option, is only meant for volterra administrators Default Protocol Policer - Is valid on CE and RE and configurable by any tenant - Used for rate limiting - Applied when none of the source rules match - Protocols supported are ICMP, TCP, UDP, DNS
+Fast ACL provides destination and specifies rules to protect the site from denial of service attacks.<br>- It is specified in terms of five tuple of the packet {destination ip, destination port, source ip, source port, protocol}.<br>- Fast ACL provides destination IP and port with protocol while Fast ACL rules in ACL provide source IP, port and action<br>- Destination is always provided as a combination of destination IP and port<br><br>Typical Usecase(s) are:<br>- Rate-limiting traffic to destination<br>- Accepting traffic from certain source IPs to destination<br>- Ratelimiting or dropping traffic from source IPs to destination<br><br>These ACL rules are applied at very early stage in datapath ingress processing and form<br>first line of defence against attack. These rules are evaluated for each packet coming in to the system (ingress),<br>unlike session based ACL where action is calculated only on first packet in session.<br><br>Fast ACL picks source based on Longest prefix match for faster processing, which differs<br>from traditional ACL where rules are evaluated in order. If none of the rule matches<br>then default action is to forward the packet<br><br>Fast ACL on a customer edge(CE) Site<br><br>Fast ACL is selected from Fast ACL set on CE Site based on Fleet Configuration. Fast ACL set matching following condition are applied on a CE site<br>- Fast ACL set to which this Fast ACL belong is referred to by a Network Firewall<br>- Network Firewall is referred to by a Fleet<br>- CE site is member of the Fleet<br>- Only tenant can configure the set<br>- Network type supported are Site Local and Site Local Inside. Any other network type is not valid on CE<br><br>Selection of Destination<br>- Tenant can choose VIP(s) or interface IP(configured as VIP) via Fast ACL<br><br>Fast ACL on RE<br><br>- Fast ACL is picked from RE Fast ACL sets and can be defined by tenants for the public VIP(s)<br>- Network type supported for RE is Public. Sets with Fast ACL with any other network type will be rejected<br><br>Selection of public VIP destination<br>- tenant ACL can pick VIP corresponding to tenant only<br>Selection of shared VIP destination<br>- tenant CANNOT use this option on RE.<br>Custom prefixes destination<br>- tenant CANNOT use this option on RE.<br>Shared VIP services<br>- tenant CANNOT use this option, is only meant for volterra administrators<br><br>Default Protocol Policer<br><br>- Is valid on CE and RE and configurable by any tenant<br>- Used for rate limiting<br>- Applied when none of the source rules match<br>- Protocols supported are ICMP, TCP, UDP, DNS
 
 To get more information about f5xc_fast_acl, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/fast-acl)
 
+## Example Usage
 
+```terraform
+# Example: Fast Acl - Basic
+
+resource "f5xc_fast_acl" "example" {
+  name      = "example-fast-acl"
+  namespace = "system"
+
+  site_choice = {
+    site_acl = {
+      network_choice = {
+        outside_network = true
+      }
+      vip_choice = {
+        all_services = true
+      }
+    }
+  }
+}
+```
+
+```terraform
+# Example: Fast Acl - Full
+
+resource "f5xc_fast_acl" "example" {
+  name        = "example-fast-acl"
+  namespace   = "system"
+  description = "Full fast ACL example"
+
+  labels = {
+    env = "example"
+  }
+
+  annotations = {
+    owner = "platform"
+  }
+
+  site_choice = {
+    site_acl = {
+      network_choice = {
+        outside_network = true
+      }
+      vip_choice = {
+        all_services = true
+      }
+      fast_acl_rules = [
+        {
+          metadata = {
+            name        = "rule-allow"
+            description = "allow rule"
+          }
+          action = {
+            action_choice = {
+              simple_action = ["ALLOW"]
+            }
+          }
+          port = [
+            {
+              port_value_type_choice = {
+                user_defined = 8080
+              }
+            }
+          ]
+          source_choice = {
+            prefix = {
+              prefix = ["10.0.0.0/8"]
+            }
+          }
+        },
+        {
+          metadata = {
+            name = "rule-deny"
+          }
+          action = {
+            action_choice = {
+              simple_action = ["DENY"]
+            }
+          }
+          port = [
+            {
+              port_value_type_choice = {
+                dns = true
+              }
+            }
+          ]
+          source_choice = {
+            prefix = {
+              prefix = ["192.168.0.0/16"]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -34,7 +130,7 @@ To get more information about f5xc_fast_acl, refer:
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `site_choice` (Attributes) Site Choice Select type of sites where this acl will be applied (see [below for nested schema](#nestedatt--site_choice))
+- `site_choice` (Attributes) Site Choice Select type of sites where this acl will be applied<br>Exactly one of `re_acl` or `site_acl` must be specified. (see [below for nested schema](#nestedatt--site_choice))
 
 ### Optional
 
@@ -53,54 +149,16 @@ To get more information about f5xc_fast_acl, refer:
 
 Optional:
 
-- `re_acl` (Attributes) ACL for RE ACL will be applied at regional edge sites (see [below for nested schema](#nestedatt--site_choice--re_acl))
-- `site_acl` (Attributes) ACL for Site ACL will be applied at customer edge sites (see [below for nested schema](#nestedatt--site_choice--site_acl))
+- `re_acl` (Attributes) ACL for RE ACL will be applied at regional edge sites<br>Conflicts with `site_acl`. (see [below for nested schema](#nestedatt--site_choice--re_acl))
+- `site_acl` (Attributes) ACL for Site ACL will be applied at customer edge sites<br>Conflicts with `re_acl`. (see [below for nested schema](#nestedatt--site_choice--site_acl))
 
 <a id="nestedatt--site_choice--re_acl"></a>
 ### Nested Schema for `site_choice.re_acl`
 
-Required:
-
-- `vip_choice` (Attributes) VIP Choice Select VIP(s) where Fast ACL will be applied. Fast ACL with shared VIP not supported. (see [below for nested schema](#nestedatt--site_choice--re_acl--vip_choice))
-
 Optional:
 
 - `fast_acl_rules` (Attributes List) Rules Fast ACL rules to match (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules))
-
-<a id="nestedatt--site_choice--re_acl--vip_choice"></a>
-### Nested Schema for `site_choice.re_acl.vip_choice`
-
-Optional:
-
-- `all_public_vips` (Boolean) All Public VIP(s) Apply this Fast ACL to all public vips
-- `default_tenant_vip` (Boolean) Default Tenant VIP(s) Apply this Fast ACL to Default(dedicated) Tenant VIP
-- `selected_tenant_vip` (Attributes) Chose Specific VIP(s) Do not apply to dedicated Tenant VIP Apply this Fast ACL to List of some selected public VIP(s) (see [below for nested schema](#nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip))
-
-<a id="nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip"></a>
-### Nested Schema for `site_choice.re_acl.vip_choice.selected_tenant_vip`
-
-Required:
-
-- `public_ip_refs` (Attributes List) Apply to Dedicated Public VIP Select additional public VIP(s) (see [below for nested schema](#nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip--public_ip_refs))
-
-Optional:
-
-- `default_tenant_vip` (Boolean) Include Default Tenant VIP Include tenant vip in list of specific VIP(s)<br>**Default:** `false`
-
-<a id="nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip--public_ip_refs"></a>
-### Nested Schema for `site_choice.re_acl.vip_choice.selected_tenant_vip.public_ip_refs`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
+- `vip_choice` (Attributes) VIP Choice Select VIP(s) where Fast ACL will be applied. Fast ACL with shared VIP not supported.<br>Exactly one of `all_public_vips`, `default_tenant_vip`, or `selected_tenant_vip` must be specified when `vip_choice` is configured. (see [below for nested schema](#nestedatt--site_choice--re_acl--vip_choice))
 
 <a id="nestedatt--site_choice--re_acl--fast_acl_rules"></a>
 ### Nested Schema for `site_choice.re_acl.fast_acl_rules`
@@ -109,7 +167,7 @@ Required:
 
 - `action` (Attributes) action Action to be applied if traffic matched rule (pass, deny or rate limit) (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--action))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--metadata))
-- `source_choice` (Attributes) source IP match criteria, source can be either a prefix list or reference to IP prefix set (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--source_choice))
+- `source_choice` (Attributes) source IP match criteria, source can be either a prefix list or reference to IP prefix set<br>Exactly one of `ip_prefix_set` or `prefix` must be specified. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--source_choice))
 
 Optional:
 
@@ -120,16 +178,16 @@ Optional:
 
 Optional:
 
-- `action_choice` (Attributes) action The type of action to perform (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice))
+- `action_choice` (Attributes) action The type of action to perform<br>Exactly one of `policer_action`, `protocol_policer_action`, or `simple_action` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice))
 
 <a id="nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice"></a>
 ### Nested Schema for `site_choice.re_acl.fast_acl_rules.action.action_choice`
 
 Optional:
 
-- `policer_action` (Attributes) policer_action Reference to policer object to which traffic would be subjected (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice--policer_action))
-- `protocol_policer_action` (Attributes) protocol_policer_action Reference to protocol based policer object (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice--protocol_policer_action))
-- `simple_action` (List of String) simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`
+- `policer_action` (Attributes) policer_action Reference to policer object to which traffic would be subjected<br>Conflicts with `protocol_policer_action` and `simple_action`. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice--policer_action))
+- `protocol_policer_action` (Attributes) protocol_policer_action Reference to protocol based policer object<br>Conflicts with `policer_action` and `simple_action`. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice--protocol_policer_action))
+- `simple_action` (List of String) simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>Conflicts with `policer_action` and `protocol_policer_action`.
 
 <a id="nestedatt--site_choice--re_acl--fast_acl_rules--action--action_choice--policer_action"></a>
 ### Nested Schema for `site_choice.re_acl.fast_acl_rules.action.action_choice.policer_action`
@@ -192,8 +250,8 @@ Optional:
 
 Optional:
 
-- `ip_prefix_set` (Attributes) ip_prefix_set Reference to IP prefix set object (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--source_choice--ip_prefix_set))
-- `prefix` (Attributes) prefix List of IP prefixes (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--source_choice--prefix))
+- `ip_prefix_set` (Attributes) ip_prefix_set Reference to IP prefix set object<br>Conflicts with `prefix`. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--source_choice--ip_prefix_set))
+- `prefix` (Attributes) prefix List of IP prefixes<br>Conflicts with `ip_prefix_set`. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--source_choice--prefix))
 
 <a id="nestedatt--site_choice--re_acl--fast_acl_rules--source_choice--ip_prefix_set"></a>
 ### Nested Schema for `site_choice.re_acl.fast_acl_rules.source_choice.ip_prefix_set`
@@ -231,16 +289,51 @@ Optional:
 
 Optional:
 
-- `port_value_type_choice` (Attributes) port_value_type_choice Match criteria for port (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--port--port_value_type_choice))
+- `port_value_type_choice` (Attributes) port_value_type_choice Match criteria for port<br>Exactly one of `all`, `dns`, or `user_defined` must be specified when `port_value_type_choice` is configured. (see [below for nested schema](#nestedatt--site_choice--re_acl--fast_acl_rules--port--port_value_type_choice))
 
 <a id="nestedatt--site_choice--re_acl--fast_acl_rules--port--port_value_type_choice"></a>
 ### Nested Schema for `site_choice.re_acl.fast_acl_rules.port.port_value_type_choice`
 
 Optional:
 
-- `all` (Boolean) All port Matches all port
-- `dns` (Boolean) DNS port Matches dns port 53
-- `user_defined` (Number) User defined Port Matches the user defined port
+- `all` (Boolean) All port Matches all port<br>Conflicts with `dns` and `user_defined`.
+- `dns` (Boolean) DNS port Matches dns port 53<br>Conflicts with `all` and `user_defined`.
+- `user_defined` (Number) User defined Port Matches the user defined port<br>Conflicts with `all` and `dns`.
+
+
+
+
+<a id="nestedatt--site_choice--re_acl--vip_choice"></a>
+### Nested Schema for `site_choice.re_acl.vip_choice`
+
+Optional:
+
+- `all_public_vips` (Boolean) All Public VIP(s) Apply this Fast ACL to all public vips<br>Conflicts with `default_tenant_vip` and `selected_tenant_vip`.
+- `default_tenant_vip` (Boolean) Default Tenant VIP(s) Apply this Fast ACL to Default(dedicated) Tenant VIP<br>Conflicts with `all_public_vips` and `selected_tenant_vip`.
+- `selected_tenant_vip` (Attributes) Chose Specific VIP(s) Do not apply to dedicated Tenant VIP Apply this Fast ACL to List of some selected public VIP(s)<br>Conflicts with `all_public_vips` and `default_tenant_vip`. (see [below for nested schema](#nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip))
+
+<a id="nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip"></a>
+### Nested Schema for `site_choice.re_acl.vip_choice.selected_tenant_vip`
+
+Required:
+
+- `public_ip_refs` (Attributes List) Apply to Dedicated Public VIP Select additional public VIP(s) (see [below for nested schema](#nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip--public_ip_refs))
+
+Optional:
+
+- `default_tenant_vip` (Boolean) Include Default Tenant VIP Include tenant vip in list of specific VIP(s)<br>**Default:** `false`
+
+<a id="nestedatt--site_choice--re_acl--vip_choice--selected_tenant_vip--public_ip_refs"></a>
+### Nested Schema for `site_choice.re_acl.vip_choice.selected_tenant_vip.public_ip_refs`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
 
 
 
@@ -249,33 +342,11 @@ Optional:
 <a id="nestedatt--site_choice--site_acl"></a>
 ### Nested Schema for `site_choice.site_acl`
 
-Required:
-
-- `network_choice` (Attributes) Network Select Network where this ACL will be applied (see [below for nested schema](#nestedatt--site_choice--site_acl--network_choice))
-- `vip_choice` (Attributes) Destination IP Choice Can be applied to ip addresses seen by the site. (see [below for nested schema](#nestedatt--site_choice--site_acl--vip_choice))
-
 Optional:
 
 - `fast_acl_rules` (Attributes List) Rules Fast ACL rules to match (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules))
-
-<a id="nestedatt--site_choice--site_acl--network_choice"></a>
-### Nested Schema for `site_choice.site_acl.network_choice`
-
-Optional:
-
-- `inside_network` (Boolean) Inside Network Site Local Inside network
-- `outside_network` (Boolean) Outside Network Site Local Outside network
-
-
-<a id="nestedatt--site_choice--site_acl--vip_choice"></a>
-### Nested Schema for `site_choice.site_acl.vip_choice`
-
-Optional:
-
-- `all_services` (Boolean) All VIP(S) Destination will be all VIP(s), interface IP(s) and configured VIP(s) Port and protocol is picked up from advertise policies
-- `interface_services` (Boolean) Interface Services Destination matching any IP address assigned to the interfaces (e.g from DHCP) and is used as (VIP) Port and protocol is picked up from advertise policies
-- `vip_services` (Boolean) VIP Services Destination matching configured VIP(s) Port and protocol is picked up from advertise policies
-
+- `network_choice` (Attributes) Network Select Network where this ACL will be applied<br>Exactly one of `inside_network` or `outside_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--site_choice--site_acl--network_choice))
+- `vip_choice` (Attributes) Destination IP Choice Can be applied to ip addresses seen by the site.<br>Exactly one of `all_services`, `interface_services`, or `vip_services` must be specified when `vip_choice` is configured. (see [below for nested schema](#nestedatt--site_choice--site_acl--vip_choice))
 
 <a id="nestedatt--site_choice--site_acl--fast_acl_rules"></a>
 ### Nested Schema for `site_choice.site_acl.fast_acl_rules`
@@ -284,7 +355,7 @@ Required:
 
 - `action` (Attributes) action Action to be applied if traffic matched rule (pass, deny or rate limit) (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--action))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--metadata))
-- `source_choice` (Attributes) source IP match criteria, source can be either a prefix list or reference to IP prefix set (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--source_choice))
+- `source_choice` (Attributes) source IP match criteria, source can be either a prefix list or reference to IP prefix set<br>Exactly one of `ip_prefix_set` or `prefix` must be specified. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--source_choice))
 
 Optional:
 
@@ -295,16 +366,16 @@ Optional:
 
 Optional:
 
-- `action_choice` (Attributes) action The type of action to perform (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice))
+- `action_choice` (Attributes) action The type of action to perform<br>Exactly one of `policer_action`, `protocol_policer_action`, or `simple_action` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice))
 
 <a id="nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice"></a>
 ### Nested Schema for `site_choice.site_acl.fast_acl_rules.action.action_choice`
 
 Optional:
 
-- `policer_action` (Attributes) policer_action Reference to policer object to which traffic would be subjected (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice--policer_action))
-- `protocol_policer_action` (Attributes) protocol_policer_action Reference to protocol based policer object (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice--protocol_policer_action))
-- `simple_action` (List of String) simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`
+- `policer_action` (Attributes) policer_action Reference to policer object to which traffic would be subjected<br>Conflicts with `protocol_policer_action` and `simple_action`. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice--policer_action))
+- `protocol_policer_action` (Attributes) protocol_policer_action Reference to protocol based policer object<br>Conflicts with `policer_action` and `simple_action`. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice--protocol_policer_action))
+- `simple_action` (List of String) simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>Conflicts with `policer_action` and `protocol_policer_action`.
 
 <a id="nestedatt--site_choice--site_acl--fast_acl_rules--action--action_choice--policer_action"></a>
 ### Nested Schema for `site_choice.site_acl.fast_acl_rules.action.action_choice.policer_action`
@@ -367,8 +438,8 @@ Optional:
 
 Optional:
 
-- `ip_prefix_set` (Attributes) ip_prefix_set Reference to IP prefix set object (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--source_choice--ip_prefix_set))
-- `prefix` (Attributes) prefix List of IP prefixes (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--source_choice--prefix))
+- `ip_prefix_set` (Attributes) ip_prefix_set Reference to IP prefix set object<br>Conflicts with `prefix`. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--source_choice--ip_prefix_set))
+- `prefix` (Attributes) prefix List of IP prefixes<br>Conflicts with `ip_prefix_set`. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--source_choice--prefix))
 
 <a id="nestedatt--site_choice--site_acl--fast_acl_rules--source_choice--ip_prefix_set"></a>
 ### Nested Schema for `site_choice.site_acl.fast_acl_rules.source_choice.ip_prefix_set`
@@ -406,18 +477,37 @@ Optional:
 
 Optional:
 
-- `port_value_type_choice` (Attributes) port_value_type_choice Match criteria for port (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--port--port_value_type_choice))
+- `port_value_type_choice` (Attributes) port_value_type_choice Match criteria for port<br>Exactly one of `all`, `dns`, or `user_defined` must be specified when `port_value_type_choice` is configured. (see [below for nested schema](#nestedatt--site_choice--site_acl--fast_acl_rules--port--port_value_type_choice))
 
 <a id="nestedatt--site_choice--site_acl--fast_acl_rules--port--port_value_type_choice"></a>
 ### Nested Schema for `site_choice.site_acl.fast_acl_rules.port.port_value_type_choice`
 
 Optional:
 
-- `all` (Boolean) All port Matches all port
-- `dns` (Boolean) DNS port Matches dns port 53
-- `user_defined` (Number) User defined Port Matches the user defined port
+- `all` (Boolean) All port Matches all port<br>Conflicts with `dns` and `user_defined`.
+- `dns` (Boolean) DNS port Matches dns port 53<br>Conflicts with `all` and `user_defined`.
+- `user_defined` (Number) User defined Port Matches the user defined port<br>Conflicts with `all` and `dns`.
 
 
+
+
+<a id="nestedatt--site_choice--site_acl--network_choice"></a>
+### Nested Schema for `site_choice.site_acl.network_choice`
+
+Optional:
+
+- `inside_network` (Boolean) Inside Network Site Local Inside network<br>Conflicts with `outside_network`.
+- `outside_network` (Boolean) Outside Network Site Local Outside network<br>Conflicts with `inside_network`.
+
+
+<a id="nestedatt--site_choice--site_acl--vip_choice"></a>
+### Nested Schema for `site_choice.site_acl.vip_choice`
+
+Optional:
+
+- `all_services` (Boolean) All VIP(S) Destination will be all VIP(s), interface IP(s) and configured VIP(s) Port and protocol is picked up from advertise policies<br>Conflicts with `interface_services` and `vip_services`.
+- `interface_services` (Boolean) Interface Services Destination matching any IP address assigned to the interfaces (e.g from DHCP) and is used as (VIP) Port and protocol is picked up from advertise policies<br>Conflicts with `all_services` and `vip_services`.
+- `vip_services` (Boolean) VIP Services Destination matching configured VIP(s) Port and protocol is picked up from advertise policies<br>Conflicts with `all_services` and `interface_services`.
 
 
 
@@ -450,7 +540,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -458,13 +548,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_fast_acl.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_fast_acl.example"
+	to = f5xc_fast_acl.example
 }
 ```

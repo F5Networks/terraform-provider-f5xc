@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCAzureVnetSite_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-azure-vnet-site-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-site-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,21 +39,21 @@ func TestAccResourceAutoF5XCAzureVnetSite_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
 			{
-				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_withDescription(name, namespace, "azure vnet site basic updated"),
+				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_withDescription(name, namespace, "azure vnet site updated example"),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -64,7 +64,7 @@ func TestAccResourceAutoF5XCAzureVnetSite_basic(t *testing.T) {
 func TestAccResourceAutoF5XCAzureVnetSite_withIngressEgressGw(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-azure-vnet-site-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-site-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -76,10 +76,10 @@ func TestAccResourceAutoF5XCAzureVnetSite_withIngressEgressGw(t *testing.T) {
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_ingressEgressGw(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -87,10 +87,10 @@ func TestAccResourceAutoF5XCAzureVnetSite_withIngressEgressGw(t *testing.T) {
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_ingressEgressGwWithForwardProxy(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -101,7 +101,7 @@ func TestAccResourceAutoF5XCAzureVnetSite_withIngressEgressGw(t *testing.T) {
 func TestAccResourceAutoF5XCAzureVnetSite_withWorkerNodesTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-azure-vnet-site-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-site-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -113,10 +113,10 @@ func TestAccResourceAutoF5XCAzureVnetSite_withWorkerNodesTransition(t *testing.T
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_withWorkerNodes(name, namespace, "no_worker_nodes = true"),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -124,10 +124,10 @@ func TestAccResourceAutoF5XCAzureVnetSite_withWorkerNodesTransition(t *testing.T
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_withWorkerNodes(name, namespace, "nodes_per_az = 1"),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -138,7 +138,7 @@ func TestAccResourceAutoF5XCAzureVnetSite_withWorkerNodesTransition(t *testing.T
 func TestAccResourceAutoF5XCAzureVnetSite_withBlockedServicesTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-azure-vnet-site-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-site-" + acctest.RandString(t, 6)
 	namespace := "system"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -150,10 +150,10 @@ func TestAccResourceAutoF5XCAzureVnetSite_withBlockedServicesTransition(t *testi
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_withBlockedServices(name, namespace, "block_all_services = true"),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -161,10 +161,10 @@ func TestAccResourceAutoF5XCAzureVnetSite_withBlockedServicesTransition(t *testi
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_withBlockedServices(name, namespace, "default_blocked_services = true"),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
@@ -175,10 +175,10 @@ func TestAccResourceAutoF5XCAzureVnetSite_withBlockedServicesTransition(t *testi
 func TestAccResourceAutoF5XCAzureVnetSite_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-azure-vnet-site-" + acctest.RandString(t, 6)
+	name := "example-azure-vnet-site-" + acctest.RandString(t, 6)
 	namespace := "system"
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckAzureVnetSiteDestroyProducer(t),
@@ -187,26 +187,30 @@ func TestAccResourceAutoF5XCAzureVnetSite_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_full(name, namespace, "dev", "platform"),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
 			{
-				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_full(name, namespace, "prod", "security"),
+				Config: testAccResourceAutoF5XCAzureVnetSiteConfig_full(name, namespace, "example", "security"),
 			},
 			{
-				ResourceName:                         "f5xc_azure_vnet_site.test",
+				ResourceName:                         "f5xc_azure_vnet_site.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_azure_vnet_site.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 				ImportStateVerifyIgnore:              []string{"validation_state"},
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAzureVnetSiteConfig_full(name, namespace, "dev", "platform"),
+		})
 }
 
 func testAccCheckAzureVnetSiteDestroyProducer(t *testing.T) func(*terraform.State) error {
@@ -215,11 +219,11 @@ func testAccCheckAzureVnetSiteDestroyProducer(t *testing.T) func(*terraform.Stat
 
 func testAccResourceAutoF5XCAzureVnetSiteConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_azure_vnet_site" "test" {
+resource "f5xc_azure_vnet_site" "example" {
   name      = %q
   namespace = %q
 
-  resource_group = "tf-acc-azure-rg"
+  resource_group = "example-azure-rg"
 
   region_choice = {
     azure_region = "eastus2"
@@ -254,7 +258,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   deployment_choice = {
     azure_cred = {
-      name      = "tf-acc-azure-cred"
+      name      = "example-azure-cred"
       namespace = %q
     }
   }
@@ -279,12 +283,12 @@ resource "f5xc_azure_vnet_site" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteConfig_withDescription(name, namespace, description string) string {
 	return fmt.Sprintf(`
-resource "f5xc_azure_vnet_site" "test" {
+resource "f5xc_azure_vnet_site" "example" {
   name        = %q
   namespace   = %q
   description = %q
 
-  resource_group = "tf-acc-azure-rg"
+  resource_group = "example-azure-rg"
 
   region_choice = {
     azure_region = "eastus2"
@@ -319,7 +323,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   deployment_choice = {
     azure_cred = {
-      name      = "tf-acc-azure-cred"
+      name      = "example-azure-cred"
       namespace = %q
     }
   }
@@ -344,11 +348,11 @@ resource "f5xc_azure_vnet_site" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteConfig_ingressEgressGw(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_azure_vnet_site" "test" {
+resource "f5xc_azure_vnet_site" "example" {
   name      = %q
   namespace = %q
 
-  resource_group = "tf-acc-azure-rg"
+  resource_group = "example-azure-rg"
 
   region_choice = {
     azure_region = "eastus2"
@@ -414,7 +418,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   deployment_choice = {
     azure_cred = {
-      name      = "tf-acc-azure-cred"
+      name      = "example-azure-cred"
       namespace = %q
     }
   }
@@ -439,11 +443,11 @@ resource "f5xc_azure_vnet_site" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteConfig_ingressEgressGwWithForwardProxy(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_azure_vnet_site" "test" {
+resource "f5xc_azure_vnet_site" "example" {
   name      = %q
   namespace = %q
 
-  resource_group = "tf-acc-azure-rg"
+  resource_group = "example-azure-rg"
 
   region_choice = {
     azure_region = "eastus2"
@@ -509,7 +513,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   deployment_choice = {
     azure_cred = {
-      name      = "tf-acc-azure-cred"
+      name      = "example-azure-cred"
       namespace = %q
     }
   }
@@ -534,11 +538,11 @@ resource "f5xc_azure_vnet_site" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteConfig_withWorkerNodes(name, namespace, workerNodesChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_azure_vnet_site" "test" {
+resource "f5xc_azure_vnet_site" "example" {
   name      = %q
   namespace = %q
 
-  resource_group = "tf-acc-azure-rg"
+  resource_group = "example-azure-rg"
 
   region_choice = {
     azure_region = "eastus2"
@@ -595,7 +599,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   deployment_choice = {
     azure_cred = {
-      name      = "tf-acc-azure-cred"
+      name      = "example-azure-cred"
       namespace = %q
     }
   }
@@ -620,11 +624,11 @@ resource "f5xc_azure_vnet_site" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteConfig_withBlockedServices(name, namespace, blockedServicesChoice string) string {
 	return fmt.Sprintf(`
-resource "f5xc_azure_vnet_site" "test" {
+resource "f5xc_azure_vnet_site" "example" {
   name      = %q
   namespace = %q
 
-  resource_group = "tf-acc-azure-rg"
+  resource_group = "example-azure-rg"
 
   region_choice = {
     azure_region = "eastus2"
@@ -659,7 +663,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   deployment_choice = {
     azure_cred = {
-      name      = "tf-acc-azure-cred"
+      name      = "example-azure-cred"
       namespace = %q
     }
   }
@@ -684,7 +688,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
 func testAccResourceAutoF5XCAzureVnetSiteConfig_full(name, namespace, envLabel, ownerLabel string) string {
 	return fmt.Sprintf(`
-resource "f5xc_azure_vnet_site" "test" {
+resource "f5xc_azure_vnet_site" "example" {
   name      = %q
   namespace = %q
 
@@ -700,7 +704,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   address = "123 Main Street, Seattle, US"
 
-  resource_group = "tf-acc-azure-rg"
+  resource_group = "example-azure-rg"
 
   region_choice = {
     azure_region = "eastus2"
@@ -757,7 +761,7 @@ resource "f5xc_azure_vnet_site" "test" {
 
   deployment_choice = {
     azure_cred = {
-      name      = "tf-acc-azure-cred"
+      name      = "example-azure-cred"
       namespace = %q
     }
   }

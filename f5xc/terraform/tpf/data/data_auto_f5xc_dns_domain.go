@@ -28,7 +28,7 @@ type DataSourceF5XCDnsDomain struct {
 	client *client.APIClient
 }
 
-type DnsDomainGlobalSpecTypeDomainChoice struct {
+type DnsDomainDomainChoice struct {
 	VolterraManaged types.Bool `tfsdk:"volterra_managed"`
 }
 
@@ -67,8 +67,8 @@ func (d *DataSourceF5XCDnsDomain) Metadata(ctx context.Context, request datasour
 func (r *DataSourceF5XCDnsDomain) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a dns_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_domain) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a dns_domain This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_domain) etc. can be fetched",
+		MarkdownDescription: "DNS Domain object is used for delegating DNS sub domain to volterra. It can also be<br>used to just let volterra know about a verified sub domain that can be used for different types of<br>load balancers<br><br>User configures domain 'example.com'<br><br>Status for this object will show following<br><br>* TXT RECORD value string<br>* Verification Pending<br><br>This TXT record value string is then programed into users DNS provider. F5XC then will verify the DNS sub domain<br>And status will change to<br><br>* List of nameservers<br>* Verification successful<br><br>Users can then Program the DNS provided with NS record for the sub domain",
+		Description:         "DNS Domain object is used for delegating DNS sub domain to volterra. It can also be used to just let volterra know about a verified sub domain that can be used for different types of load balancers User configures domain 'example.com' Status for this object will show following TXT RECORD value string Verification Pending This TXT record value string is then programed into users DNS provider. F5XC then will verify the DNS sub domain And status will change to List of nameservers Verification successful Users can then Program the DNS provided with NS record for the sub domain",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -193,7 +193,7 @@ func (d *DataSourceF5XCDnsDomain) Read(ctx context.Context, request datasource.R
 	defer cancel()
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_dns_domain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
-		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
+		response.Diagnostics.AddError("Client Error", utils.SanitizeAPIError(ctx, "read", "dns_domain", err))
 		return
 	}
 
@@ -281,7 +281,7 @@ func (d *DataSourceF5XCDnsDomain) Read(ctx context.Context, request datasource.R
 		domainChoiceChoices := specData.GetDomainChoice()
 
 		// The model struct that will be populated by the nested template.
-		var domainChoiceChoicesModel = &DnsDomainGlobalSpecTypeDomainChoice{}
+		var domainChoiceChoicesModel = &DnsDomainDomainChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 

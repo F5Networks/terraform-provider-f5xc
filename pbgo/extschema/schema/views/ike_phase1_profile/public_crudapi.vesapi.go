@@ -3003,7 +3003,6 @@ var APISwaggerJSON string = `{
             "description": "Definitions for Authentication Algorithms\n\n - AUTH_ALG_DEFAULT: Default Authentication\n\nUse Default Authentication (SHA256)\n - SHA256_HMAC: SHA256_HMAC\n\nUse SHA256_HMAC Authentication\n - SHA384_HMAC: SHA384_HMAC\n\nUse SHA384_HMAC Authentication\n - SHA512_HMAC: SHA512_HMAC\n\nUse SHA512_HMAC Authentication\n - AUTH_ALG_NONE: No Authentication\n\nSelect No Authentication if AEAD encryption is selected",
             "title": "AuthenticationAlgorithm",
             "enum": [
-                "AUTH_ALG_DEFAULT",
                 "SHA256_HMAC",
                 "SHA384_HMAC",
                 "SHA512_HMAC",
@@ -3048,12 +3047,12 @@ var APISwaggerJSON string = `{
                 },
                 "status": {
                     "type": "string",
-                    "description": " Status of the condition\n \"Success\" Validtion has succeded. Requested operation was successful.\n \"Failed\"  Validation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s\n \"Down\" Configuration is operationally down. e.g. down interface\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]\n",
+                    "description": " Status of the condition\n \"Success\" Validation has succeeded. Requested operation was successful.\n \"Failed\"  Validation or operation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s.\n \"Down\" Configuration is operationally down. e.g. down interface.\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs.\n \"InProgress\" Operation is in progress.\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]\n",
                     "title": "status",
                     "x-displayname": "Status",
                     "x-ves-example": "Failed",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]"
+                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]"
                     }
                 },
                 "type": {
@@ -3073,7 +3072,6 @@ var APISwaggerJSON string = `{
             "description": "Definitions for DH Groups\n\n - DH_GROUP_DEFAULT: Use Default DH Group\n\nUse default DH group (DH Group 19)\n - DH_GROUP_14: DH_GROUP_14\n\nUse DH_GROUP_14 Diffie Hellman Group\n - DH_GROUP_15: DH_GROUP_15\n\nUse DH_GROUP_15 Diffie Hellman Group\n - DH_GROUP_16: DH_GROUP_16\n\nUse DH_GROUP_16 Diffie Hellman Group\n - DH_GROUP_17: DH_GROUP_17\n\nUse DH_GROUP_17 Diffie Hellman Group\n - DH_GROUP_18: DH_GROUP_18\n\nUse DH_GROUP_18 Diffie Hellman Group\n - DH_GROUP_19: DH_GROUP_19\n\nUse DH_GROUP_19 Diffie Hellman Group\n - DH_GROUP_20: DH_GROUP_20\n\nUse DH_GROUP_20 Diffie Hellman Group\n - DH_GROUP_21: DH_GROUP_21\n\nUse DH_GROUP_21 Diffie Hellman Group\n - DH_GROUP_26: DH_GROUP_26\n\nUse DH_GROUP_26 Diffie Hellman Group",
             "title": "DHGroup",
             "enum": [
-                "DH_GROUP_DEFAULT",
                 "DH_GROUP_14",
                 "DH_GROUP_15",
                 "DH_GROUP_16",
@@ -3093,7 +3091,6 @@ var APISwaggerJSON string = `{
             "description": "Definitions for Encryption Algorithms\n\n - ENC_ALG_DEFAULT: Default Encryption\n\nSelect default Encryption Algorithm\n - AES128_CBC: AES128_CBC\n\nSelect AES128_CBC encryption algorithm\n - AES192_CBC: AES192_CBC\n\nSelect AES192_CBC encryption algorithm\n - AES256_CBC: AES256_CBC\n\nSelect AES256_CBC encryption algorithm\n - TRIPLE_DES_CBC: TRIPLE_DES_CBC\n\nSelect TRIPLE_DES_CBC encryption algorithm\n - AES128_GCM: AES128_GCM\n\nSelect AES128_GCM AEAD algorithm\n - AES192_GCM: AES192_GCM\n\nSelect AES192_GCM AEAD algorithm\n - AES256_GCM: AES256_GCM\n\nSelect AES256_GCM AEAD algorithm",
             "title": "EncryptionAlgorithm",
             "enum": [
-                "ENC_ALG_DEFAULT",
                 "AES128_CBC",
                 "AES192_CBC",
                 "AES256_CBC",
@@ -3387,7 +3384,6 @@ var APISwaggerJSON string = `{
             "description": "Definitions for PseudoRandomFunction(PRF)\n\n - PRF_DEFAULT: Default Pseudo Random Function\n\nUse Default Pseudo Random Function (PRFSHA256)\n - PRFSHA256: PRFSHA256\n\nUse PRFSHA256 Pseudo Random Function\n - PRFSHA384: PRFSHA384\n\nUse PRFSHA384 Pseudo Random Function\n - PRFSHA512: PRFSHA512\n\nUse PRFSHA512 Pseudo Random Function",
             "title": "PseudoRandomFunction",
             "enum": [
-                "PRF_DEFAULT",
                 "PRFSHA256",
                 "PRFSHA384",
                 "PRFSHA512"

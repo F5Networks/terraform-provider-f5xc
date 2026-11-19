@@ -31,6 +31,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -39,6 +40,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
@@ -217,7 +219,7 @@ var V1DnsMonitorHealthPolicyModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DynamicThresholdPolicy
+// Attribute map for OneOfField --> DynamicThresholdPolicy
 var V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
 	"dynamic_threshold": types.ObjectType{
@@ -237,7 +239,7 @@ var V1DnsMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttribute
 	},
 }
 
-// Attribute map for RequiredOneOfField --> StaticMaxThresholdPolicy
+// Attribute map for OneOfField --> StaticMaxThresholdPolicy
 var V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
 	"static_max_threshold": types.ObjectType{
@@ -255,7 +257,7 @@ var V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttri
 	"max_response_time": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> StaticMinThresholdPolicy
+// Attribute map for OneOfField --> StaticMinThresholdPolicy
 var V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
 	"static_min_threshold": types.ObjectType{
@@ -273,7 +275,7 @@ var V1DnsMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttri
 	"min_response_time": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> IntervalChoice
+// Attribute map for OneOfField --> IntervalChoice
 var V1DnsMonitorIntervalChoiceModelAttributeMap = map[string]attr.Type{
 
 	"interval_12_hours": types.BoolType,
@@ -294,7 +296,7 @@ var V1DnsMonitorNameServersModelAttributeMap = map[string]attr.Type{
 	"port":        types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> OnFailureToChoice
+// Attribute map for OneOfField --> OnFailureToChoice
 var V1DnsMonitorOnFailureToChoiceModelAttributeMap = map[string]attr.Type{
 
 	"on_failure_to_all": types.BoolType,
@@ -312,8 +314,8 @@ func (r *ResourceF5XCV1DnsMonitor) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "GetRequest is used to get different forms of a v1_dns_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_dns_monitor) etc. can be fetched",
-		Description:         "GetRequest is used to get different forms of a v1_dns_monitor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of v1_dns_monitor) etc. can be fetched",
+		MarkdownDescription: "DNS Monitor defines a DNS synthetic monitor.",
+		Description:         "DNS Monitor defines a DNS synthetic monitor.",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -408,7 +410,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					Attributes: map[string]schema.Attribute{
 						"source_choice": schema.SingleNestedAttribute{
 							Description:         "Source Choice A data plane source for execution of monitors",
-							MarkdownDescription: "Source Choice A data plane source for execution of monitors",
+							MarkdownDescription: "Source Choice A data plane source for execution of monitors<br>Exactly one of `aws` or `f5xc` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -421,20 +423,20 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 							Attributes: map[string]schema.Attribute{
 								"aws": schema.SingleNestedAttribute{
 									Description:         "AWS Region Amazon Web Services",
-									MarkdownDescription: "AWS Region Amazon Web Services",
+									MarkdownDescription: "AWS Region Amazon Web Services<br>Conflicts with `f5xc`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"regions": schema.ListAttribute{
 											Description:         "AWS Regions A specific source location within AWS",
-											MarkdownDescription: "AWS Regions A specific source location within AWS",
+											MarkdownDescription: "AWS Regions A specific source location within AWS<br>**Valid Options:** `['ca-central-1', 'ap-northeast-1', 'us-east-2', 'us-west-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'sa-east-1', 'ap-east-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-south-1', 'us-east-1']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.List{
-												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"eu-north-1", "us-west-1", "us-east-2", "ap-northeast-1", "ca-central-1"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ca-central-1", "ap-northeast-1", "us-east-2", "us-west-1", "eu-north-1", "eu-west-2", "me-south-1", "sa-east-1", "ap-east-1", "ap-southeast-1", "ap-southeast-2", "ap-south-1", "us-east-1"}...)),
 												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
 												listvalidator.UniqueValues(),
 											},
@@ -443,20 +445,20 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 								},
 								"f5xc": schema.SingleNestedAttribute{
 									Description:         "F5 Distributed Cloud F5 Distributed Cloud",
-									MarkdownDescription: "F5 Distributed Cloud F5 Distributed Cloud",
+									MarkdownDescription: "F5 Distributed Cloud F5 Distributed Cloud<br>Conflicts with `aws`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"regions": schema.ListAttribute{
 											Description:         "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
-											MarkdownDescription: "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
+											MarkdownDescription: "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud<br>**Valid Options:** `['ves-io-newyork', 'ves-io-sanjose', 'ves-io-paris', 'ves-io-ashburn', 'ves-io-dallas', 'ves-io-seattle', 'ves-io-toronto', 'ves-io-montreal', 'ves-io-saopaulo', 'ves-io-london', 'ves-io-frankfurt', 'ves-io-amsterdam', 'ves-io-stockholm', 'ves-io-lisbon', 'ves-io-madrid', 'ves-io-dubai', 'ves-io-telaviv', 'ves-io-tokyo', 'ves-io-osaka', 'ves-io-singapore', 'ves-io-hongkong', 'ves-io-sydney', 'ves-io-melbourne', 'ves-io-mumbai', 'ves-io-chennai', 'ves-io-jakarta']` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.List{
-												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ves-io-newyork", "ves-io-paris", "ves-io-sanjose"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ves-io-newyork", "ves-io-sanjose", "ves-io-paris", "ves-io-ashburn", "ves-io-dallas", "ves-io-seattle", "ves-io-toronto", "ves-io-montreal", "ves-io-saopaulo", "ves-io-london", "ves-io-frankfurt", "ves-io-amsterdam", "ves-io-stockholm", "ves-io-lisbon", "ves-io-madrid", "ves-io-dubai", "ves-io-telaviv", "ves-io-tokyo", "ves-io-osaka", "ves-io-singapore", "ves-io-hongkong", "ves-io-sydney", "ves-io-melbourne", "ves-io-mumbai", "ves-io-chennai", "ves-io-jakarta"}...)),
 												listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
 												listvalidator.UniqueValues(),
 											},
@@ -477,20 +479,23 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"dynamic_threshold_policy_choice": schema.SingleNestedAttribute{
 						Description:         "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.",
-						MarkdownDescription: "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.<br>Exactly one of `dynamic_threshold` or `dynamic_threshold_disabled` must be specified when `dynamic_threshold_policy_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"dynamic_threshold",
 								"dynamic_threshold_disabled",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"dynamic_threshold": schema.SingleNestedAttribute{
 								Description:         "dynamic_threshold",
-								MarkdownDescription: "dynamic_threshold",
+								MarkdownDescription: "dynamic_threshold<br>Conflicts with `dynamic_threshold_disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -523,7 +528,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 							},
 							"dynamic_threshold_disabled": schema.BoolAttribute{
 								Description:         "dynamic_threshold_disabled",
-								MarkdownDescription: "dynamic_threshold_disabled",
+								MarkdownDescription: "dynamic_threshold_disabled<br>Conflicts with `dynamic_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -535,20 +540,23 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"static_max_threshold_policy_choice": schema.SingleNestedAttribute{
 						Description:         "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.",
-						MarkdownDescription: "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.<br>Exactly one of `static_max_threshold` or `static_max_threshold_disabled` must be specified when `static_max_threshold_policy_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"static_max_threshold",
 								"static_max_threshold_disabled",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"static_max_threshold": schema.SingleNestedAttribute{
 								Description:         "static_max_threshold",
-								MarkdownDescription: "static_max_threshold",
+								MarkdownDescription: "static_max_threshold<br>Conflicts with `static_max_threshold_disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -580,7 +588,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 							},
 							"static_max_threshold_disabled": schema.BoolAttribute{
 								Description:         "static_max_threshold_disabled",
-								MarkdownDescription: "static_max_threshold_disabled",
+								MarkdownDescription: "static_max_threshold_disabled<br>Conflicts with `static_max_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -592,20 +600,23 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"static_min_threshold_policy_choice": schema.SingleNestedAttribute{
 						Description:         "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.",
-						MarkdownDescription: "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.<br>Exactly one of `static_min_threshold` or `static_min_threshold_disabled` must be specified when `static_min_threshold_policy_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"static_min_threshold",
 								"static_min_threshold_disabled",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"static_min_threshold": schema.SingleNestedAttribute{
 								Description:         "static_max_threshold",
-								MarkdownDescription: "static_max_threshold",
+								MarkdownDescription: "static_max_threshold<br>Conflicts with `static_min_threshold_disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -637,7 +648,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 							},
 							"static_min_threshold_disabled": schema.BoolAttribute{
 								Description:         "static_min_threshold_disabled",
-								MarkdownDescription: "static_min_threshold_disabled",
+								MarkdownDescription: "static_min_threshold_disabled<br>Conflicts with `static_min_threshold`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -651,12 +662,12 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 			},
 			"interval_choice": schema.SingleNestedAttribute{
 				Description:         "interval How often the monitor will run from each source location",
-				MarkdownDescription: "interval How often the monitor will run from each source location",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "interval How often the monitor will run from each source location<br>Exactly one of `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, or `interval_6_hours` must be specified when `interval_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"interval_12_hours",
 						"interval_15_mins",
 						"interval_1_day",
@@ -668,10 +679,13 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 						"interval_6_hours",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"interval_12_hours": schema.BoolAttribute{
 						Description:         "12 hours",
-						MarkdownDescription: "12 hours",
+						MarkdownDescription: "12 hours<br>Conflicts with `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -681,7 +695,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_15_mins": schema.BoolAttribute{
 						Description:         "15 minutes",
-						MarkdownDescription: "15 minutes",
+						MarkdownDescription: "15 minutes<br>Conflicts with `interval_12_hours`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -691,7 +705,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_1_day": schema.BoolAttribute{
 						Description:         "1 day",
-						MarkdownDescription: "1 day",
+						MarkdownDescription: "1 day<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -701,7 +715,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_1_hour": schema.BoolAttribute{
 						Description:         "1 hour",
-						MarkdownDescription: "1 hour",
+						MarkdownDescription: "1 hour<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -711,7 +725,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_1_min": schema.BoolAttribute{
 						Description:         "1 minute",
-						MarkdownDescription: "1 minute",
+						MarkdownDescription: "1 minute<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -721,7 +735,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_30_mins": schema.BoolAttribute{
 						Description:         "30 minutes",
-						MarkdownDescription: "30 minutes",
+						MarkdownDescription: "30 minutes<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -731,7 +745,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_30_secs": schema.BoolAttribute{
 						Description:         "30 seconds",
-						MarkdownDescription: "30 seconds",
+						MarkdownDescription: "30 seconds<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_5_mins`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -741,7 +755,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_5_mins": schema.BoolAttribute{
 						Description:         "5 minutes",
-						MarkdownDescription: "5 minutes",
+						MarkdownDescription: "5 minutes<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, and `interval_6_hours`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -751,7 +765,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"interval_6_hours": schema.BoolAttribute{
 						Description:         "6 hours",
-						MarkdownDescription: "6 hours",
+						MarkdownDescription: "6 hours<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, and `interval_5_mins`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -820,20 +834,23 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 			},
 			"on_failure_to_choice": schema.SingleNestedAttribute{
 				Description:         "on_failure_to The number of nameservers the monitor must fail against before the global monitor changes health",
-				MarkdownDescription: "on_failure_to The number of nameservers the monitor must fail against before the global monitor changes health",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "on_failure_to The number of nameservers the monitor must fail against before the global monitor changes health<br>Exactly one of `on_failure_to_all` or `on_failure_to_any` must be specified when `on_failure_to_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"on_failure_to_all",
 						"on_failure_to_any",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"on_failure_to_all": schema.BoolAttribute{
 						Description:         "ALL",
-						MarkdownDescription: "ALL",
+						MarkdownDescription: "ALL<br>Conflicts with `on_failure_to_any`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -843,7 +860,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					},
 					"on_failure_to_any": schema.BoolAttribute{
 						Description:         "ANY",
-						MarkdownDescription: "ANY",
+						MarkdownDescription: "ANY<br>Conflicts with `on_failure_to_all`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -855,7 +872,7 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 			},
 			"protocol": schema.StringAttribute{
 				Description:         "protocol",
-				MarkdownDescription: "protocol<br>**Default:** `UDP`",
+				MarkdownDescription: "protocol<br>**Default:** `UDP`<br>**Allowed Values (choose one):** `['UDP', 'TCP']`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -866,17 +883,18 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 			},
 			"receive": schema.StringAttribute{
 				Description:         "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy.",
-				MarkdownDescription: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy.<br>**Validation:** `Length LengthAtMost(2048)`",
+				MarkdownDescription: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy.<br>**Validation:** `Length LengthAtMost(2048)`<br>**Default:** ``",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(2048),
 				},
 			},
 			"record_type": schema.StringAttribute{
 				Description:         "record_type",
-				MarkdownDescription: "record_type<br>**Default:** `A`",
+				MarkdownDescription: "record_type<br>**Default:** `A`<br>**Allowed Values (choose one):** `['A', 'AAAA', 'CNAME', 'MX', 'NS', 'PTR', 'TXT', 'SOA', 'SRV']`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -958,9 +976,17 @@ func (r *ResourceF5XCV1DnsMonitor) ModifyPlan(ctx context.Context, req resource.
 			)
 		}
 	}
+
+	noopplan.Apply(ctx, req, resp)
 }
 
 func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	var data ResourceF5XCV1DnsMonitorModel
 
 	// Read Terraform plan data into the model
@@ -1124,6 +1150,15 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> HealthPolicy
 		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
 			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
+			healthPolicySpec.DynamicThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{
+				DynamicThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMaxThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{
+				StaticMaxThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMinThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{
+				StaticMinThresholdDisabled: &ves_io_schema.Empty{},
+			}
 			spec.HealthPolicy = healthPolicySpec
 			var healthPolicyModel V1DnsMonitorHealthPolicy
 
@@ -1134,7 +1169,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
+			// resource modelToSpecNested OneOfField --> DynamicThresholdPolicy
 			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
 				healthPolicyDynamicThresholdPolicyChoiceModel := V1DnsMonitorDynamicThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1212,7 +1247,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMaxThresholdPolicy
 			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1DnsMonitorStaticMaxThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1269,7 +1304,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMinThresholdPolicy
 			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMinThresholdPolicyChoiceModel := V1DnsMonitorStaticMinThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1329,7 +1364,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
+	// resource modelToSpecRoot OneOfField --> IntervalChoice
 	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
 		intervalChoiceModel := V1DnsMonitorIntervalChoice{}
 		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1400,6 +1435,10 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			spec.IntervalChoice = interval6HoursSpecBool
 		}
 
+	} else {
+		spec.IntervalChoice = &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_1Min{
+			Interval_1Min: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredUintField --> LookupTimeout
@@ -1441,7 +1480,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
 	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
 
-	// resource modelToSpecRoot RequiredOneOfField --> OnFailureToChoice
+	// resource modelToSpecRoot OneOfField --> OnFailureToChoice
 	if !data.OnFailureToChoice.IsNull() && !data.OnFailureToChoice.IsUnknown() {
 		onFailureToChoiceModel := V1DnsMonitorOnFailureToChoice{}
 		response.Diagnostics.Append(data.OnFailureToChoice.As(ctx, &onFailureToChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1463,6 +1502,10 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			spec.OnFailureToChoice = onFailureToAnySpecBool
 		}
 
+	} else {
+		spec.OnFailureToChoice = &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_OnFailureToAny{
+			OnFailureToAny: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredStringField --> Protocol
@@ -1482,7 +1525,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -1505,7 +1548,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	httpResp, err := r.client.CreateObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, req, opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to create %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "create", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -1807,6 +1850,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1DnsMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1DnsMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -1832,8 +1876,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		var v1DnsMonitorHealthPolicyModel = &V1DnsMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> DynamicThresholdPolicy
 		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -1935,11 +1978,11 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMaxThresholdPolicy
 		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -2028,11 +2071,11 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMinThresholdPolicy
 		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -2121,6 +2164,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
@@ -2138,7 +2182,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		data.HealthPolicy = types.ObjectNull(V1DnsMonitorHealthPolicyModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// resource SpecToModelRoot OneOfField --> IntervalChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -2198,8 +2242,8 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var intervalChoiceChoices interface{}
 		if v := rawSpecMap["interval_choice"]; v != nil {
 			intervalChoiceChoices = v
@@ -2475,14 +2519,12 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			AttrTypes: V1DnsMonitorNameServersModelAttributeMap,
 		}
 		nullNameServersList := basetypes.NewListNull(nameServersObjectType)
-		var priorValNameServers types.List
-		_ = request.Plan.GetAttribute(ctx, path.Root("name_servers"), &priorValNameServers)
-		if !priorValNameServers.IsNull() && !priorValNameServers.IsUnknown() {
-			data.NameServers = priorValNameServers
+		if !data.NameServers.IsNull() && !data.NameServers.IsUnknown() && len(data.NameServers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NameServers = basetypes.NewListValueMust(nameServersObjectType, nil)
 		} else {
 			data.NameServers = nullNameServersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -2491,7 +2533,7 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
+	// resource SpecToModelRoot OneOfField --> OnFailureToChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -2523,8 +2565,8 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var onFailureToChoiceChoices interface{}
 		if v := rawSpecMap["on_failure_to_choice"]; v != nil {
 			onFailureToChoiceChoices = v
@@ -2610,12 +2652,8 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot RequiredStringField --> RecordType
 	if specData.GetRecordType() != "" {
@@ -2674,20 +2712,19 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to read %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "read", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -2983,6 +3020,7 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1DnsMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1DnsMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -3008,8 +3046,7 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		var v1DnsMonitorHealthPolicyModel = &V1DnsMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> DynamicThresholdPolicy
 		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -3111,11 +3148,14 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectValueMust(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"dynamic_threshold":          types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap),
+				"dynamic_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMaxThresholdPolicy
 		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -3204,11 +3244,14 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectValueMust(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"static_max_threshold":          types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap),
+				"static_max_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMinThresholdPolicy
 		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -3297,7 +3340,11 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
-			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectValueMust(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap, map[string]attr.Value{
+				"static_min_threshold":          types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap),
+				"static_min_threshold_disabled": types.BoolValue(true),
+			})
 		}
 
 		healthPolicyObj, healthPolicyDiags := utils.GoStructToObjectValue(
@@ -3314,7 +3361,7 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		data.HealthPolicy = types.ObjectNull(V1DnsMonitorHealthPolicyModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// resource SpecToModelRoot OneOfField --> IntervalChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -3374,8 +3421,8 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var intervalChoiceChoices interface{}
 		if v := rawSpecMap["interval_choice"]; v != nil {
 			intervalChoiceChoices = v
@@ -3603,7 +3650,20 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.IntervalChoice = types.ObjectNull(V1DnsMonitorIntervalChoiceModelAttributeMap)
+
+		if data.IntervalChoice.IsNull() || data.IntervalChoice.IsUnknown() || ((data.IntervalChoice.Attributes()["interval_12_hours"].IsNull() || data.IntervalChoice.Attributes()["interval_12_hours"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_15_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_15_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_day"].IsNull() || data.IntervalChoice.Attributes()["interval_1_day"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_hour"].IsNull() || data.IntervalChoice.Attributes()["interval_1_hour"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_1_min"].IsNull() || data.IntervalChoice.Attributes()["interval_1_min"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_30_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_30_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_30_secs"].IsNull() || data.IntervalChoice.Attributes()["interval_30_secs"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_5_mins"].IsNull() || data.IntervalChoice.Attributes()["interval_5_mins"].IsUnknown()) && (data.IntervalChoice.Attributes()["interval_6_hours"].IsNull() || data.IntervalChoice.Attributes()["interval_6_hours"].IsUnknown())) {
+			data.IntervalChoice = types.ObjectValueMust(V1DnsMonitorIntervalChoiceModelAttributeMap, map[string]attr.Value{
+				"interval_12_hours": types.BoolNull(),
+				"interval_15_mins":  types.BoolNull(),
+				"interval_1_day":    types.BoolNull(),
+				"interval_1_hour":   types.BoolNull(),
+				"interval_1_min":    types.BoolValue(true),
+				"interval_30_mins":  types.BoolNull(),
+				"interval_30_secs":  types.BoolNull(),
+				"interval_5_mins":   types.BoolNull(),
+				"interval_6_hours":  types.BoolNull(),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
@@ -3651,14 +3711,12 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			AttrTypes: V1DnsMonitorNameServersModelAttributeMap,
 		}
 		nullNameServersList := basetypes.NewListNull(nameServersObjectType)
-		var priorValNameServers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("name_servers"), &priorValNameServers)
-		if !priorValNameServers.IsNull() && !priorValNameServers.IsUnknown() {
-			data.NameServers = priorValNameServers
+		if !data.NameServers.IsNull() && !data.NameServers.IsUnknown() && len(data.NameServers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NameServers = basetypes.NewListValueMust(nameServersObjectType, nil)
 		} else {
 			data.NameServers = nullNameServersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -3667,7 +3725,7 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
+	// resource SpecToModelRoot OneOfField --> OnFailureToChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -3699,8 +3757,8 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var onFailureToChoiceChoices interface{}
 		if v := rawSpecMap["on_failure_to_choice"]; v != nil {
 			onFailureToChoiceChoices = v
@@ -3774,7 +3832,13 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
+
+		if data.OnFailureToChoice.IsNull() || data.OnFailureToChoice.IsUnknown() || ((data.OnFailureToChoice.Attributes()["on_failure_to_all"].IsNull() || data.OnFailureToChoice.Attributes()["on_failure_to_all"].IsUnknown()) && (data.OnFailureToChoice.Attributes()["on_failure_to_any"].IsNull() || data.OnFailureToChoice.Attributes()["on_failure_to_any"].IsUnknown())) {
+			data.OnFailureToChoice = types.ObjectValueMust(V1DnsMonitorOnFailureToChoiceModelAttributeMap, map[string]attr.Value{
+				"on_failure_to_all": types.BoolNull(),
+				"on_failure_to_any": types.BoolValue(true),
+			})
+		}
 	}
 
 	// resource SpecToModelRoot RequiredStringField --> Protocol
@@ -3786,12 +3850,8 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot RequiredStringField --> RecordType
 	if specData.GetRecordType() != "" {
@@ -3816,6 +3876,12 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 }
 
 func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
+	defer func() {
+		if !response.Diagnostics.HasError() {
+			noopplan.RecordConfig(ctx, request.Config, response.Private)
+		}
+	}()
+
 	// Update is a replace and read operation
 
 	var data ResourceF5XCV1DnsMonitorModel
@@ -3999,6 +4065,15 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> HealthPolicy
 		if !data.HealthPolicy.IsNull() && !data.HealthPolicy.IsUnknown() {
 			healthPolicySpec := &ves_io_schema_observability_synthetic_monitor.HealthPolicy{}
+			healthPolicySpec.DynamicThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_DynamicThresholdDisabled{
+				DynamicThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMaxThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{
+				StaticMaxThresholdDisabled: &ves_io_schema.Empty{},
+			}
+			healthPolicySpec.StaticMinThresholdPolicy = &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMinThresholdDisabled{
+				StaticMinThresholdDisabled: &ves_io_schema.Empty{},
+			}
 			spec.HealthPolicy = healthPolicySpec
 			var healthPolicyModel V1DnsMonitorHealthPolicy
 
@@ -4009,7 +4084,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DynamicThresholdPolicy
+			// resource modelToSpecNested OneOfField --> DynamicThresholdPolicy
 			if !healthPolicyModel.DynamicThresholdPolicyChoice.IsNull() && !healthPolicyModel.DynamicThresholdPolicyChoice.IsUnknown() {
 				healthPolicyDynamicThresholdPolicyChoiceModel := V1DnsMonitorDynamicThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.DynamicThresholdPolicyChoice.As(ctx, &healthPolicyDynamicThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4087,7 +4162,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMaxThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMaxThresholdPolicy
 			if !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMaxThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMaxThresholdPolicyChoiceModel := V1DnsMonitorStaticMaxThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMaxThresholdPolicyChoice.As(ctx, &healthPolicyStaticMaxThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4144,7 +4219,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
+			// resource modelToSpecNested OneOfField --> StaticMinThresholdPolicy
 			if !healthPolicyModel.StaticMinThresholdPolicyChoice.IsNull() && !healthPolicyModel.StaticMinThresholdPolicyChoice.IsUnknown() {
 				healthPolicyStaticMinThresholdPolicyChoiceModel := V1DnsMonitorStaticMinThresholdPolicyChoice{}
 				response.Diagnostics.Append(healthPolicyModel.StaticMinThresholdPolicyChoice.As(ctx, &healthPolicyStaticMinThresholdPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4204,7 +4279,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IntervalChoice
+	// resource modelToSpecRoot OneOfField --> IntervalChoice
 	if !data.IntervalChoice.IsNull() && !data.IntervalChoice.IsUnknown() {
 		intervalChoiceModel := V1DnsMonitorIntervalChoice{}
 		response.Diagnostics.Append(data.IntervalChoice.As(ctx, &intervalChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4275,6 +4350,10 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			spec.IntervalChoice = interval6HoursSpecBool
 		}
 
+	} else {
+		spec.IntervalChoice = &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_1Min{
+			Interval_1Min: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredUintField --> LookupTimeout
@@ -4316,7 +4395,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
 	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
 
-	// resource modelToSpecRoot RequiredOneOfField --> OnFailureToChoice
+	// resource modelToSpecRoot OneOfField --> OnFailureToChoice
 	if !data.OnFailureToChoice.IsNull() && !data.OnFailureToChoice.IsUnknown() {
 		onFailureToChoiceModel := V1DnsMonitorOnFailureToChoice{}
 		response.Diagnostics.Append(data.OnFailureToChoice.As(ctx, &onFailureToChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4338,6 +4417,10 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			spec.OnFailureToChoice = onFailureToAnySpecBool
 		}
 
+	} else {
+		spec.OnFailureToChoice = &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_OnFailureToAny{
+			OnFailureToAny: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredStringField --> Protocol
@@ -4357,7 +4440,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
-	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination", "ves.io/app_type", "ves.io/api-scope", "ves.io/provider"} {
 		delete(meta.Labels, _omitKey)
 	}
 
@@ -4365,15 +4448,11 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -4382,13 +4461,15 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to replace read %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "v1_dns_monitor", err),
 		)
 		return
 	}
@@ -4494,34 +4575,27 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		annotationsApiMap := metaData.GetAnnotations()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(annotationsApiMap) > 0 {
-			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-			response.Diagnostics.Append(annotationsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
-			data.Annotations = annotationsMap
-		} else {
-			data.Annotations = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	{
-		apiValDescription := metaData.GetDescription()
-		if apiValDescription != "" {
-			data.Description = types.StringValue(apiValDescription)
-		} else {
-			var priorValDescription types.String
-			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
-			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
-				data.Description = priorValDescription
-			} else {
-				data.Description = types.StringValue(apiValDescription)
-			}
-		}
-	}
+	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
@@ -4550,17 +4624,23 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	//     Plan = unknown → falls through to API response path (same as scenario 2).
 	{
 		labelsApiMap := metaData.GetLabels()
-		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
-		if len(labelsApiMap) > 0 {
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
 			}
-			data.Labels = labelsMap
-		} else {
-			data.Labels = types.MapNull(types.StringType)
 		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
@@ -4684,6 +4764,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 				// Assign the final object to the correct place (either the root model or a parent's attribute map)
 				v1DnsMonitorSrcExternalModel.SourceChoice = finalObj
 			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				v1DnsMonitorSrcExternalModel.SourceChoice = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap)
 			}
 
@@ -4709,8 +4790,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		var v1DnsMonitorHealthPolicyModel = &V1DnsMonitorHealthPolicy{}
 		healthPolicyElement := specData.GetHealthPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DynamicThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> DynamicThresholdPolicy
 		// CreateSpecType: GetDynamicThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetDynamicThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -4812,11 +4892,11 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.DynamicThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMaxThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMaxThresholdPolicy
 		// CreateSpecType: GetStaticMaxThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMaxThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -4905,11 +4985,11 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMaxThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> StaticMinThresholdPolicy
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> StaticMinThresholdPolicy
 		// CreateSpecType: GetStaticMinThresholdPolicy() returns the oneof interface value.
 		if healthPolicyElement.GetStaticMinThresholdPolicy() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -4998,6 +5078,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			// Assign the final object to the correct place (either the root model or a parent's attribute map)
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = finalObj
 		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			v1DnsMonitorHealthPolicyModel.StaticMinThresholdPolicyChoice = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap)
 		}
 
@@ -5015,7 +5096,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		data.HealthPolicy = types.ObjectNull(V1DnsMonitorHealthPolicyModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IntervalChoice
+	// resource SpecToModelRoot OneOfField --> IntervalChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -5075,8 +5156,8 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var intervalChoiceChoices interface{}
 		if v := rawSpecMap["interval_choice"]; v != nil {
 			intervalChoiceChoices = v
@@ -5352,14 +5433,12 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			AttrTypes: V1DnsMonitorNameServersModelAttributeMap,
 		}
 		nullNameServersList := basetypes.NewListNull(nameServersObjectType)
-		var priorValNameServers types.List
-		_ = request.State.GetAttribute(ctx, path.Root("name_servers"), &priorValNameServers)
-		if !priorValNameServers.IsNull() && !priorValNameServers.IsUnknown() {
-			data.NameServers = priorValNameServers
+		if !data.NameServers.IsNull() && !data.NameServers.IsUnknown() && len(data.NameServers.Elements()) == 0 {
+			// Protobuf omits empty repeated fields, so echo back an explicitly configured empty list.
+			data.NameServers = basetypes.NewListValueMust(nameServersObjectType, nil)
 		} else {
 			data.NameServers = nullNameServersList
 		}
-
 	}
 
 	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
@@ -5368,7 +5447,7 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
+	// resource SpecToModelRoot OneOfField --> OnFailureToChoice
 	// true
 	// false
 	// This resource uses custom JSON resolution.
@@ -5400,8 +5479,8 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var onFailureToChoiceChoices interface{}
 		if v := rawSpecMap["on_failure_to_choice"]; v != nil {
 			onFailureToChoiceChoices = v
@@ -5487,12 +5566,8 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
-	}
+	// The schema plans an explicit empty-string default, so API "" must remain "" in state.
+	data.Receive = types.StringValue(specData.GetReceive())
 
 	// resource SpecToModelRoot RequiredStringField --> RecordType
 	if specData.GetRecordType() != "" {
@@ -5580,7 +5655,7 @@ func (r *ResourceF5XCV1DnsMonitor) Delete(ctx context.Context, request resource.
 		}
 
 		response.Diagnostics.AddError(
-			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "v1_dns_monitor", err),
+			"Client Error", utils.SanitizeAPIError(ctx, "delete", "v1_dns_monitor", err),
 		)
 		return
 	}

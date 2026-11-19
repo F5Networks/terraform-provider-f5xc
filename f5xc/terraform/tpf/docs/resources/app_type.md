@@ -14,18 +14,81 @@
 page_title: "f5xc_app_type Resource - F5 XC Distributed Cloud"
 subcategory: "App Security & Load Balancing"
 description: |-
-  Application type object App Type object defines a application profile type from an advanced monitoring/security point of view. An App type is a set of (micro) services that interact with one another and function as an application. Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services. App type object is the profile for one such application label. One can define various advanced security features that can be enabled for a given application in this object. All services in a given namespace that are labeled with same ves.io/app_type label are assumed to be a single application. In a different namespace as two different instances of same application. app_type object is recommended per tenant and present only in shared namespace. This way advanced security modeled developed for a given application can be shared across namespaces or deployments. app_setting object can be used to enable a app_type monitoring profile in a given namespace.
+  App Type object defines a application profile type from an advanced monitoring/security point of view.<br>An App type is a set of (micro) services that interact with one another and function as an application.<br>Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.<br>App type object is the profile for one such application label. One can define various advanced security features that can<br>be enabled for a given application in this object. All services in a given namespace that are labeled with<br>same ves.io/app_type label are assumed to be a single application. In a different namespace as two different<br>instances of same application.<br>app_type object is recommended per tenant and present only in shared namespace.<br>This way advanced security modeled developed for a given application can be shared across namespaces or deployments.<br>app_setting object can be used to enable a app_type monitoring profile in a given namespace.
 ---
 
 # f5xc_app_type (Resource)
 
-Application type object App Type object defines a application profile type from an advanced monitoring/security point of view. An App type is a set of (micro) services that interact with one another and function as an application. Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services. App type object is the profile for one such application label. One can define various advanced security features that can be enabled for a given application in this object. All services in a given namespace that are labeled with same ves.io/app_type label are assumed to be a single application. In a different namespace as two different instances of same application. app_type object is recommended per tenant and present only in shared namespace. This way advanced security modeled developed for a given application can be shared across namespaces or deployments. app_setting object can be used to enable a app_type monitoring profile in a given namespace.
+App Type object defines a application profile type from an advanced monitoring/security point of view.<br>An App type is a set of (micro) services that interact with one another and function as an application.<br>Services can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.<br>App type object is the profile for one such application label. One can define various advanced security features that can<br>be enabled for a given application in this object. All services in a given namespace that are labeled with<br>same ves.io/app_type label are assumed to be a single application. In a different namespace as two different<br>instances of same application.<br>app_type object is recommended per tenant and present only in shared namespace.<br>This way advanced security modeled developed for a given application can be shared across namespaces or deployments.<br>app_setting object can be used to enable a app_type monitoring profile in a given namespace.
 
 To get more information about f5xc_app_type, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/app-type)
 
+## Example Usage
 
+```terraform
+# Example: App Type - Feature Type Transition
+
+resource "f5xc_app_type" "example" {
+  name      = "example-app-type"
+  namespace = "shared"
+
+  features = [
+    {
+      type = ["USER_BEHAVIOR_ANALYSIS"]
+    }
+  ]
+}
+```
+
+```terraform
+# Example: App Type - Full
+
+resource "f5xc_app_type" "example" {
+  name        = "example-app-type"
+  namespace   = "shared"
+  description = "Full app type"
+
+  labels = {
+    env  = "example"
+    tier = "api"
+  }
+
+  features = [
+    {
+      type = ["BUSINESS_LOGIC_MARKUP"]
+    },
+    {
+      type = ["USER_BEHAVIOR_ANALYSIS"]
+    }
+  ]
+
+  business_logic_markup_setting = {
+    discovered_api_settings = {
+      purge_duration_for_inactive_discovered_apis = 3
+    }
+    learn_from_redirect_traffic_choice = {
+      enable = true
+    }
+  }
+}
+```
+
+```terraform
+# Example: App Type - Redirect Learning Transition
+
+resource "f5xc_app_type" "example" {
+  name      = "example-app-type"
+  namespace = "shared"
+
+  business_logic_markup_setting = {
+    learn_from_redirect_traffic_choice = {
+      enable = true
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -54,7 +117,7 @@ To get more information about f5xc_app_type, refer:
 Optional:
 
 - `discovered_api_settings` (Attributes) Discovered API Settings (see [below for nested schema](#nestedatt--business_logic_markup_setting--discovered_api_settings))
-- `learn_from_redirect_traffic_choice` (Attributes) Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx (see [below for nested schema](#nestedatt--business_logic_markup_setting--learn_from_redirect_traffic_choice))
+- `learn_from_redirect_traffic_choice` (Attributes) Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx<br>Exactly one of `disable` or `enable` must be specified when `learn_from_redirect_traffic_choice` is configured. (see [below for nested schema](#nestedatt--business_logic_markup_setting--learn_from_redirect_traffic_choice))
 
 <a id="nestedatt--business_logic_markup_setting--discovered_api_settings"></a>
 ### Nested Schema for `business_logic_markup_setting.discovered_api_settings`
@@ -69,7 +132,8 @@ Optional:
 
 Optional:
 
-- `enable` (Boolean) Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx
+- `disable` (Boolean) Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `disable`.
 
 
 
@@ -96,7 +160,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -104,13 +168,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_app_type.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_app_type.example"
+	to = f5xc_app_type.example
 }
 ```

@@ -14,18 +14,102 @@
 page_title: "f5xc_enhanced_firewall_policy Resource - F5 XC Distributed Cloud"
 subcategory: "Network Security & Firewalls"
 description: |-
-  Enhanced Firewall Policy Enhanced Firewall Policy defined firewall rules applied in the site Enhanced Firewall Policy defines rules in the form or 5 tuple, <source, source-port, destination, destination-port, protocol> Where, source : source can be specified in the form of - ip-address or ip-subnet to be matched with source-ip in packet - labels associated with the source of packet - tags associated with the source vpc, from where the packet originates - vpc-id for the source address source attributes are matched before any NAT processing of the packet source-port: matches the source-port in the packet destination: destination can be specified in the form of - ip-address or ip-subnet to be matched with destination-ip in packet - labels associated with the destination of packet - tags associated with the destination vpc, to where the packet is sent - vpc for the source address destination-port: matches the destination-port in the packet protocol: protocol of the IP packet The Enhanced Firewall Policies are applied as part of route processing The policies are always applied before any NAT processing so that source matching always happens on the original packet
+  Enhanced Firewall Policy defined firewall rules applied in the site<br>Enhanced Firewall Policy defines rules in the form or 5 tuple,<br><source, source-port, destination, destination-port, protocol><br><br>Where,<br>source : source can be specified in the form of<br>- ip-address or ip-subnet to be matched with source-ip in packet<br>- labels associated with the source of packet<br>- tags associated with the source vpc, from where the packet originates<br>- vpc-id for the source address<br>source attributes are matched before any NAT processing of the packet<br><br>source-port: matches the source-port in the packet<br><br>destination: destination can be specified in the form of<br>- ip-address or ip-subnet to be matched with destination-ip in packet<br>- labels associated with the destination of packet<br>- tags associated with the destination vpc, to where the packet is sent<br>- vpc for the source address<br><br>destination-port: matches the destination-port in the packet<br><br>protocol: protocol of the IP packet<br><br>The Enhanced Firewall Policies are applied as part of route processing<br>The policies are always applied before any NAT processing so that source<br>matching always happens on the original packet
 ---
 
 # f5xc_enhanced_firewall_policy (Resource)
 
-Enhanced Firewall Policy Enhanced Firewall Policy defined firewall rules applied in the site Enhanced Firewall Policy defines rules in the form or 5 tuple, <source, source-port, destination, destination-port, protocol> Where, source : source can be specified in the form of - ip-address or ip-subnet to be matched with source-ip in packet - labels associated with the source of packet - tags associated with the source vpc, from where the packet originates - vpc-id for the source address source attributes are matched before any NAT processing of the packet source-port: matches the source-port in the packet destination: destination can be specified in the form of - ip-address or ip-subnet to be matched with destination-ip in packet - labels associated with the destination of packet - tags associated with the destination vpc, to where the packet is sent - vpc for the source address destination-port: matches the destination-port in the packet protocol: protocol of the IP packet The Enhanced Firewall Policies are applied as part of route processing The policies are always applied before any NAT processing so that source matching always happens on the original packet
+Enhanced Firewall Policy defined firewall rules applied in the site<br>Enhanced Firewall Policy defines rules in the form or 5 tuple,<br><source, source-port, destination, destination-port, protocol><br><br>Where,<br>source : source can be specified in the form of<br>- ip-address or ip-subnet to be matched with source-ip in packet<br>- labels associated with the source of packet<br>- tags associated with the source vpc, from where the packet originates<br>- vpc-id for the source address<br>source attributes are matched before any NAT processing of the packet<br><br>source-port: matches the source-port in the packet<br><br>destination: destination can be specified in the form of<br>- ip-address or ip-subnet to be matched with destination-ip in packet<br>- labels associated with the destination of packet<br>- tags associated with the destination vpc, to where the packet is sent<br>- vpc for the source address<br><br>destination-port: matches the destination-port in the packet<br><br>protocol: protocol of the IP packet<br><br>The Enhanced Firewall Policies are applied as part of route processing<br>The policies are always applied before any NAT processing so that source<br>matching always happens on the original packet
 
 To get more information about f5xc_enhanced_firewall_policy, refer:
 
 - [API documentation](https://docs.cloud.f5.com/docs-v2/api/enhanced-firewall-policy)
 
+## Example Usage
 
+```terraform
+# Example: Enhanced Firewall Policy - Basic
+
+resource "f5xc_enhanced_firewall_policy" "example" {
+  name      = "example-enhanced-firewall-policy"
+  namespace = "system"
+
+  rule_choice = {
+    deny_all = true
+  }
+}
+```
+
+```terraform
+# Example: Enhanced Firewall Policy - Full
+
+resource "f5xc_enhanced_firewall_policy" "example" {
+  name        = "example-enhanced-firewall-policy"
+  namespace   = "system"
+  description = "Full enhanced firewall policy example"
+
+  labels = {
+    env = "example"
+  }
+
+  annotations = {
+    owner = "platform"
+  }
+
+  rule_choice = {
+    rule_list = {
+      rules = [
+        {
+          metadata = {
+            name        = "example-rule-full"
+            description = "Full rule example"
+          }
+
+          action_choice = {
+            allow = true
+          }
+
+          source_choice = {
+            source_prefix_list = {
+              prefixes      = ["10.0.0.0/8"]
+              ipv6_prefixes = ["2001:0db8:0002:0000:0000:0000:0000:0000/64"]
+            }
+          }
+
+          destination_choice = {
+            destination_prefix_list = {
+              prefixes      = ["172.16.0.0/12"]
+              ipv6_prefixes = ["2001:0db8:0003:0000:0000:0000:0000:0000/64"]
+            }
+          }
+
+          traffic_choice = {
+            all_tcp_traffic = true
+          }
+
+          advanced_action = {
+            action = ["NOLOG"]
+          }
+
+          label_matcher = {
+            keys = ["env"]
+          }
+        }
+      ]
+    }
+  }
+
+  segment_policy = {
+    src_segment_choice = {
+      src_any = true
+    }
+
+    dst_segment_choice = {
+      dst_any = true
+    }
+  }
+}
+```
 
 <!-- schema generated by tfplugindocs -->
 ## Schema
@@ -34,13 +118,13 @@ To get more information about f5xc_enhanced_firewall_policy, refer:
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `rule_choice` (Attributes) Select Enhanced Firewall Policy Rule Type Select specific/custom rules for Enhanced Firewall Policy (see [below for nested schema](#nestedatt--rule_choice))
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `rule_choice` (Attributes) Select Enhanced Firewall Policy Rule Type Select specific/custom rules for Enhanced Firewall Policy<br>Exactly one of `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, `deny_all`, or `rule_list` must be specified when `rule_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice))
 - `segment_policy` (Attributes) Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match (see [below for nested schema](#nestedatt--segment_policy))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -53,13 +137,13 @@ To get more information about f5xc_enhanced_firewall_policy, refer:
 
 Optional:
 
-- `allow_all` (Boolean) Allow all connections Allow all connections from any source to any destination
-- `allowed_destinations` (Attributes) List of allowed destination prefixes Allow all connections to list of destinations from any source (see [below for nested schema](#nestedatt--rule_choice--allowed_destinations))
-- `allowed_sources` (Attributes) List of allowed source prefixes Allow all connections from list of sources to any destination (see [below for nested schema](#nestedatt--rule_choice--allowed_sources))
-- `denied_destinations` (Attributes) List of denied destination prefixes Deny all connections to list of destinations from any source (see [below for nested schema](#nestedatt--rule_choice--denied_destinations))
-- `denied_sources` (Attributes) List of denied source prefixes Deny all connections from list of sources to any destination (see [below for nested schema](#nestedatt--rule_choice--denied_sources))
-- `deny_all` (Boolean) Deny all connections Deny all connections from any source to any destination
-- `rule_list` (Attributes) Custom Enhanced Firewall Policy Rule Selection Custom Enhanced Firewall Policy Rule Selection (see [below for nested schema](#nestedatt--rule_choice--rule_list))
+- `allow_all` (Boolean) Allow all connections Allow all connections from any source to any destination<br>Conflicts with `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, `deny_all`, and `rule_list`.
+- `allowed_destinations` (Attributes) List of allowed destination prefixes Allow all connections to list of destinations from any source<br>Conflicts with `allow_all`, `allowed_sources`, `denied_destinations`, `denied_sources`, `deny_all`, and `rule_list`. (see [below for nested schema](#nestedatt--rule_choice--allowed_destinations))
+- `allowed_sources` (Attributes) List of allowed source prefixes Allow all connections from list of sources to any destination<br>Conflicts with `allow_all`, `allowed_destinations`, `denied_destinations`, `denied_sources`, `deny_all`, and `rule_list`. (see [below for nested schema](#nestedatt--rule_choice--allowed_sources))
+- `denied_destinations` (Attributes) List of denied destination prefixes Deny all connections to list of destinations from any source<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_sources`, `deny_all`, and `rule_list`. (see [below for nested schema](#nestedatt--rule_choice--denied_destinations))
+- `denied_sources` (Attributes) List of denied source prefixes Deny all connections from list of sources to any destination<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `deny_all`, and `rule_list`. (see [below for nested schema](#nestedatt--rule_choice--denied_sources))
+- `deny_all` (Boolean) Deny all connections Deny all connections from any source to any destination<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, and `rule_list`.
+- `rule_list` (Attributes) Custom Enhanced Firewall Policy Rule Selection Custom Enhanced Firewall Policy Rule Selection<br>Conflicts with `allow_all`, `allowed_destinations`, `allowed_sources`, `denied_destinations`, `denied_sources`, and `deny_all`. (see [below for nested schema](#nestedatt--rule_choice--rule_list))
 
 <a id="nestedatt--rule_choice--allowed_destinations"></a>
 ### Nested Schema for `rule_choice.allowed_destinations`
@@ -109,25 +193,37 @@ Required:
 
 Required:
 
-- `action_choice` (Attributes) Action Action for any connection matching the rule (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--action_choice))
-- `destination_choice` (Attributes) Destination Traffic Filter Destination Traffic Filter for the policy (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--metadata))
-- `source_choice` (Attributes) Source Traffic Filter Source Traffic Filter for the policy (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice))
-- `traffic_choice` (Attributes) Traffic Type Select type of traffic to match (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--traffic_choice))
 
 Optional:
 
+- `action_choice` (Attributes) Action Action for any connection matching the rule<br>Exactly one of `allow`, `deny`, or `insert_service` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--action_choice))
 - `advanced_action` (Attributes) Advanced Action Log any connection matching the rule (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--advanced_action))
+- `destination_choice` (Attributes) Destination Traffic Filter Destination Traffic Filter for the policy<br>Exactly one of `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, or `outside_destinations` must be specified when `destination_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice))
 - `label_matcher` (Attributes) Common Label Matcher for Source and Destination A list of label keys that identify the label values that need to be the same for the source and destination. Note that the actual label values are not specified here, just the label keys. This facilitates reuse of policies across multiple dimensions such as deployment, environment, and location. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--label_matcher))
+- `source_choice` (Attributes) Source Traffic Filter Source Traffic Filter for the policy<br>Exactly one of `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, or `source_prefix_list` must be specified when `source_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice))
+- `traffic_choice` (Attributes) Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--traffic_choice))
+
+<a id="nestedatt--rule_choice--rule_list--rules--metadata"></a>
+### Nested Schema for `rule_choice.rule_list.rules.metadata`
+
+Required:
+
+- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
+
+Optional:
+
+- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
+
 
 <a id="nestedatt--rule_choice--rule_list--rules--action_choice"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.action_choice`
 
 Optional:
 
-- `allow` (Boolean) Allow Allow any connection matching the rule
-- `deny` (Boolean) Deny Deny any connection matching the rule
-- `insert_service` (Attributes) Service Send selected traffic to NFV Service of type Palo Alto Networks VM-Series Firewall for inspection (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--action_choice--insert_service))
+- `allow` (Boolean) Allow Allow any connection matching the rule<br>Conflicts with `deny` and `insert_service`.
+- `deny` (Boolean) Deny Deny any connection matching the rule<br>Conflicts with `allow` and `insert_service`.
+- `insert_service` (Attributes) Service Send selected traffic to NFV Service of type Palo Alto Networks VM-Series Firewall for inspection<br>Conflicts with `allow` and `deny`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--action_choice--insert_service))
 
 <a id="nestedatt--rule_choice--rule_list--rules--action_choice--insert_service"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.action_choice.insert_service`
@@ -151,20 +247,28 @@ Read-Only:
 
 
 
+<a id="nestedatt--rule_choice--rule_list--rules--advanced_action"></a>
+### Nested Schema for `rule_choice.rule_list.rules.advanced_action`
+
+Optional:
+
+- `action` (List of String) Action Enable or disable logging.<br>**Allowed Values (choose one):** `['LOG', 'NOLOG']`<br>**Default:** `NOLOG`<br>**Default:** `NOLOG`
+
+
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.destination_choice`
 
 Optional:
 
-- `all_destinations` (Boolean) All Destinations Any address that matches 0/0 ip prefix
-- `all_sli_vips` (Boolean) All VIP address on Site Local Inside Network Destination is virtual-ip of all loadbalancer on site-local-inside network
-- `all_slo_vips` (Boolean) All VIP address on Site Local Outside Network Destination is virtual-ip of all loadbalancer on site-local-outside network
-- `destination_aws_vpc_ids` (Attributes) AWS VPC Identifier Destination is any address in list of AWS VPCs (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_aws_vpc_ids))
-- `destination_ip_prefix_set` (Attributes) IP Prefix Set (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_ip_prefix_set))
-- `destination_label_selector` (Attributes) Destination Label selector Destination is a set of addresses determined by label selector expression These labels can be cloud tags defined on the vpc resource, labels on the global network or others. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_label_selector))
-- `destination_prefix_list` (Attributes) IP Prefix List Addresses that match one of the prefix in the list (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_prefix_list))
-- `inside_destinations` (Boolean) All Destination Reachable via all inside interfaces All addresses reachable in site-local inside interfaces
-- `outside_destinations` (Boolean) All Destination Reachable via all outside interfaces All addresses reachable in site-local outside interfaces
+- `all_destinations` (Boolean) All Destinations Any address that matches 0/0 ip prefix<br>Conflicts with `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.
+- `all_sli_vips` (Boolean) All VIP address on Site Local Inside Network Destination is virtual-ip of all loadbalancer on site-local-inside network<br>Conflicts with `all_destinations`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.
+- `all_slo_vips` (Boolean) All VIP address on Site Local Outside Network Destination is virtual-ip of all loadbalancer on site-local-outside network<br>Conflicts with `all_destinations`, `all_sli_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`.
+- `destination_aws_vpc_ids` (Attributes) AWS VPC Identifier Destination is any address in list of AWS VPCs<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_aws_vpc_ids))
+- `destination_ip_prefix_set` (Attributes) IP Prefix Set<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_label_selector`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_ip_prefix_set))
+- `destination_label_selector` (Attributes) Destination Label selector Destination is a set of addresses determined by label selector expression These labels can be cloud tags defined on the vpc resource, labels on the global network or others.<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_prefix_list`, `inside_destinations`, and `outside_destinations`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_label_selector))
+- `destination_prefix_list` (Attributes) IP Prefix List Addresses that match one of the prefix in the list<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `inside_destinations`, and `outside_destinations`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--destination_prefix_list))
+- `inside_destinations` (Boolean) All Destination Reachable via all inside interfaces All addresses reachable in site-local inside interfaces<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, and `outside_destinations`.
+- `outside_destinations` (Boolean) All Destination Reachable via all outside interfaces All addresses reachable in site-local outside interfaces<br>Conflicts with `all_destinations`, `all_sli_vips`, `all_slo_vips`, `destination_aws_vpc_ids`, `destination_ip_prefix_set`, `destination_label_selector`, `destination_prefix_list`, and `inside_destinations`.
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice--destination_aws_vpc_ids"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.destination_choice.destination_aws_vpc_ids`
@@ -213,16 +317,12 @@ Optional:
 
 
 
-<a id="nestedatt--rule_choice--rule_list--rules--metadata"></a>
-### Nested Schema for `rule_choice.rule_list.rules.metadata`
-
-Required:
-
-- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
+<a id="nestedatt--rule_choice--rule_list--rules--label_matcher"></a>
+### Nested Schema for `rule_choice.rule_list.rules.label_matcher`
 
 Optional:
 
-- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
+- `keys` (List of String) keys The list of label key names that have to match
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--source_choice"></a>
@@ -230,13 +330,13 @@ Optional:
 
 Optional:
 
-- `all_sources` (Boolean) All Sources Any address that matches 0/0 ip prefix
-- `inside_sources` (Boolean) All Source Reachable via all inside interfaces All addresses reachable in site-local inside interfaces
-- `outside_sources` (Boolean) All Source Reachable via all outside interfaces All addresses reachable in site-local outside interfaces
-- `source_aws_vpc_ids` (Attributes) AWS VPC Identifier Source is any address in list of AWS VPCs (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_aws_vpc_ids))
-- `source_ip_prefix_set` (Attributes) IP Prefix Set (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_ip_prefix_set))
-- `source_label_selector` (Attributes) Source Label selector Source is a set of addresses determined by label selector expression. These labels can be cloud tags defined on the vpc resource, labels on the global network or others. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_label_selector))
-- `source_prefix_list` (Attributes) ip prefix list Addresses that match one of the prefix in the list list contains sublist of both v4 and v6 prfix list (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_prefix_list))
+- `all_sources` (Boolean) All Sources Any address that matches 0/0 ip prefix<br>Conflicts with `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`.
+- `inside_sources` (Boolean) All Source Reachable via all inside interfaces All addresses reachable in site-local inside interfaces<br>Conflicts with `all_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`.
+- `outside_sources` (Boolean) All Source Reachable via all outside interfaces All addresses reachable in site-local outside interfaces<br>Conflicts with `all_sources`, `inside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`.
+- `source_aws_vpc_ids` (Attributes) AWS VPC Identifier Source is any address in list of AWS VPCs<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_ip_prefix_set`, `source_label_selector`, and `source_prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_aws_vpc_ids))
+- `source_ip_prefix_set` (Attributes) IP Prefix Set<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_label_selector`, and `source_prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_ip_prefix_set))
+- `source_label_selector` (Attributes) Source Label selector Source is a set of addresses determined by label selector expression. These labels can be cloud tags defined on the vpc resource, labels on the global network or others.<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, and `source_prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_label_selector))
+- `source_prefix_list` (Attributes) ip prefix list Addresses that match one of the prefix in the list list contains sublist of both v4 and v6 prfix list<br>Conflicts with `all_sources`, `inside_sources`, `outside_sources`, `source_aws_vpc_ids`, `source_ip_prefix_set`, and `source_label_selector`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--source_prefix_list))
 
 <a id="nestedatt--rule_choice--rule_list--rules--source_choice--source_aws_vpc_ids"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.source_choice.source_aws_vpc_ids`
@@ -290,18 +390,18 @@ Optional:
 
 Optional:
 
-- `all_tcp_traffic` (Boolean) All TCP Traffic Select all TCP traffic to match
-- `all_traffic` (Boolean) All Traffic Select all traffic to match
-- `all_udp_traffic` (Boolean) All UDP Traffic Select all UDP traffic to match
-- `applications` (Attributes) Specific Applications Select Application traffic to match (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--traffic_choice--applications))
-- `protocol_port_range` (Attributes) Protocol and Port Ranges Select specific protocol and port ranges traffic to match (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--traffic_choice--protocol_port_range))
+- `all_tcp_traffic` (Boolean) All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.
+- `all_traffic` (Boolean) All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.
+- `all_udp_traffic` (Boolean) All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.
+- `applications` (Attributes) Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--traffic_choice--applications))
+- `protocol_port_range` (Attributes) Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--traffic_choice--protocol_port_range))
 
 <a id="nestedatt--rule_choice--rule_list--rules--traffic_choice--applications"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.traffic_choice.applications`
 
 Optional:
 
-- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)<br>**Default:** `APPLICATION_HTTP`
+- `applications` (List of String) Applications Application protocols like HTTP, SNMP<br>**Valid Options:** `['APPLICATION_DNS', 'APPLICATION_HTTP', 'APPLICATION_HTTPS', 'APPLICATION_SNMP']` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--traffic_choice--protocol_port_range"></a>
@@ -310,24 +410,8 @@ Optional:
 Optional:
 
 - `port_ranges` (List of String) ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192
-- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`
+- `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`
 
-
-
-<a id="nestedatt--rule_choice--rule_list--rules--advanced_action"></a>
-### Nested Schema for `rule_choice.rule_list.rules.advanced_action`
-
-Optional:
-
-- `action` (List of String) Action Enable or disable logging.<br>**Allowed Values (choose one):** `['LOG', 'NOLOG']`<br>**Default:** `NOLOG`<br>**Default:** `NOLOG`
-
-
-<a id="nestedatt--rule_choice--rule_list--rules--label_matcher"></a>
-### Nested Schema for `rule_choice.rule_list.rules.label_matcher`
-
-Optional:
-
-- `keys` (List of String) keys The list of label key names that have to match
 
 
 
@@ -338,17 +422,17 @@ Optional:
 
 Optional:
 
-- `dst_segment_choice` (Attributes) Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice))
-- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice))
+- `dst_segment_choice` (Attributes) Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `dst_any`, `dst_segments`, or `intra_segment` must be specified when `dst_segment_choice` is configured. (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice))
+- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `src_any` or `src_segments` must be specified when `src_segment_choice` is configured. (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice))
 
 <a id="nestedatt--segment_policy--dst_segment_choice"></a>
 ### Nested Schema for `segment_policy.dst_segment_choice`
 
 Optional:
 
-- `dst_any` (Boolean) Any segment Traffic is not matched against any segment
-- `dst_segments` (Attributes) List of segments Traffic is matched against destination segment in selected segments (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice--dst_segments))
-- `intra_segment` (Boolean) Intra Segment Policy Traffic is matched for source and destination on the same segment
+- `dst_any` (Boolean) Any segment Traffic is not matched against any segment<br>Conflicts with `dst_segments` and `intra_segment`.
+- `dst_segments` (Attributes) List of segments Traffic is matched against destination segment in selected segments<br>Conflicts with `dst_any` and `intra_segment`. (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice--dst_segments))
+- `intra_segment` (Boolean) Intra Segment Policy Traffic is matched for source and destination on the same segment<br>Conflicts with `dst_any` and `dst_segments`.
 
 <a id="nestedatt--segment_policy--dst_segment_choice--dst_segments"></a>
 ### Nested Schema for `segment_policy.dst_segment_choice.dst_segments`
@@ -377,8 +461,8 @@ Read-Only:
 
 Optional:
 
-- `src_any` (Boolean) Any segment Traffic is not matched against any segment
-- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice--src_segments))
+- `src_any` (Boolean) Any segment Traffic is not matched against any segment<br>Conflicts with `src_segments`.
+- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments<br>Conflicts with `src_any`. (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice--src_segments))
 
 <a id="nestedatt--segment_policy--src_segment_choice--src_segments"></a>
 ### Nested Schema for `segment_policy.src_segment_choice.src_segments`
@@ -418,7 +502,7 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 
 > **Note:** Replace placeholder values (for example, `<namespace>`, `<name>`) with actual values.
 
-### Command-Line Import
+#### Command-Line Import
 
 Use the following `command` to import this resource from the command line:
 
@@ -426,13 +510,13 @@ Use the following `command` to import this resource from the command line:
 terraform import f5xc_enhanced_firewall_policy.example <namespace>/<name>
 ```
 
-### HCL Import Block
+#### HCL Import Block
 
 Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_enhanced_firewall_policy.example"
+	to = f5xc_enhanced_firewall_policy.example
 }
 ```

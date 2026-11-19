@@ -27,7 +27,7 @@ import (
 func TestAccResourceAutoF5XCDataType_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-datatype-" + acctest.RandString(t, 8)
+	name := "example-data-type-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,20 +39,20 @@ func TestAccResourceAutoF5XCDataType_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCDataTypeConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDataTypeConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccResourceAutoF5XCDataType_basic(t *testing.T) {
 func TestAccResourceAutoF5XCDataType_withLabels(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-datatype-" + acctest.RandString(t, 8)
+	name := "example-data-type-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,20 +74,20 @@ func TestAccResourceAutoF5XCDataType_withLabels(t *testing.T) {
 				Config: testAccResourceAutoF5XCDataTypeConfig_withLabels(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDataTypeConfig_withLabelsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -97,7 +97,7 @@ func TestAccResourceAutoF5XCDataType_withLabels(t *testing.T) {
 func TestAccResourceAutoF5XCDataType_withAnnotations(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-datatype-" + acctest.RandString(t, 8)
+	name := "example-data-type-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -109,20 +109,20 @@ func TestAccResourceAutoF5XCDataType_withAnnotations(t *testing.T) {
 				Config: testAccResourceAutoF5XCDataTypeConfig_withAnnotations(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDataTypeConfig_withAnnotationsUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -132,7 +132,7 @@ func TestAccResourceAutoF5XCDataType_withAnnotations(t *testing.T) {
 func TestAccResourceAutoF5XCDataType_withSensitiveData(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-datatype-" + acctest.RandString(t, 8)
+	name := "example-data-type-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -144,20 +144,20 @@ func TestAccResourceAutoF5XCDataType_withSensitiveData(t *testing.T) {
 				Config: testAccResourceAutoF5XCDataTypeConfig_withSensitiveData(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDataTypeConfig_withSensitiveDataUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -167,10 +167,10 @@ func TestAccResourceAutoF5XCDataType_withSensitiveData(t *testing.T) {
 func TestAccResourceAutoF5XCDataType_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-datatype-" + acctest.RandString(t, 8)
+	name := "example-data-type-" + testAccRunSuffix(t)
 	namespace := acctest.DefaultNamespace()
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataTypeDestroyProducer(t),
@@ -179,23 +179,26 @@ func TestAccResourceAutoF5XCDataType_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCDataTypeConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCDataTypeConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_data_type.test",
+				ResourceName:                         "f5xc_data_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_data_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
+	}, acctest.VcrTestOptions{
+		DocExampleCapture: true,
+		DocExampleConfig:  testAccResourceAutoF5XCDataTypeConfig_full(name, "default"),
 	})
 }
 
@@ -205,10 +208,10 @@ func testAccCheckDataTypeDestroyProducer(t *testing.T) func(*terraform.State) er
 
 func testAccResourceAutoF5XCDataTypeConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test data type"
+	description = "Data type example"
 
   is_sensitive_data = false
   is_pii            = false
@@ -229,10 +232,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Acceptance test data type updated"
+	description = "Data type example updated"
 
   is_sensitive_data = true
   is_pii            = false
@@ -253,10 +256,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_withLabels(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Data type with labels"
+	description = "Data type example"
 
   is_sensitive_data = false
   is_pii            = false
@@ -273,7 +276,7 @@ resource "f5xc_data_type" "test" {
 	}]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 }
 `, name, namespace)
@@ -281,10 +284,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_withLabelsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Data type with labels"
+	description = "Data type example updated"
 
   is_sensitive_data = false
   is_pii            = false
@@ -301,7 +304,7 @@ resource "f5xc_data_type" "test" {
 	}]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "data"
   }
 }
@@ -310,10 +313,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_withAnnotations(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Data type with annotations"
+	description = "Data type example"
 
   is_sensitive_data = false
   is_pii            = false
@@ -338,10 +341,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_withAnnotationsUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Data type with annotations"
+	description = "Data type example updated"
 
   is_sensitive_data = false
   is_pii            = false
@@ -366,10 +369,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_withSensitiveData(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Sensitive data type"
+	description = "Data type example"
 
   is_sensitive_data = true
   is_pii            = true
@@ -397,10 +400,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_withSensitiveDataUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Sensitive data type updated"
+	description = "Data type example updated"
 
   is_sensitive_data = true
   is_pii            = false
@@ -428,10 +431,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full data type"
+	description = "Data type example"
 
   is_sensitive_data = true
   is_pii            = true
@@ -455,7 +458,7 @@ resource "f5xc_data_type" "test" {
   }]
 
   labels = {
-    env = "test"
+    env = "example"
   }
 
   annotations = {
@@ -467,10 +470,10 @@ resource "f5xc_data_type" "test" {
 
 func testAccResourceAutoF5XCDataTypeConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_data_type" "test" {
+resource "f5xc_data_type" "example" {
   name        = "%s"
   namespace   = "%s"
-  description = "Full data type updated"
+	description = "Data type example updated"
 
   is_sensitive_data = true
   is_pii            = false
@@ -494,7 +497,7 @@ resource "f5xc_data_type" "test" {
   }]
 
   labels = {
-    env  = "staging"
+    env  = "example"
     tier = "data"
   }
 

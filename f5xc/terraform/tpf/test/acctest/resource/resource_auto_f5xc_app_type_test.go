@@ -26,8 +26,8 @@ import (
 func TestAccResourceAutoF5XCAppType_basic(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-app-type-" + testAccRunSuffix(t)
 	namespace := "shared"
+	name := "example-app-type-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -43,20 +43,20 @@ func TestAccResourceAutoF5XCAppType_basic(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppTypeConfig_basic(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppTypeConfig_basicUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -66,10 +66,10 @@ func TestAccResourceAutoF5XCAppType_basic(t *testing.T) {
 func TestAccResourceAutoF5XCAppType_withFeatureTypeTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-app-type-" + testAccRunSuffix(t)
 	namespace := "shared"
+	name := "example-app-type-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy: acctest.CheckDestroyProducerReplayAware(
@@ -83,41 +83,45 @@ func TestAccResourceAutoF5XCAppType_withFeatureTypeTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppTypeConfig_withFeatureType(name, namespace, "BUSINESS_LOGIC_MARKUP"),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppTypeConfig_withFeatureType(name, namespace, "USER_BEHAVIOR_ANALYSIS"),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppTypeConfig_withFeatureType(name, namespace, "USER_BEHAVIOR_ANALYSIS"),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAppTypeConfig_withFeatureType("example-app-type", "shared", "USER_BEHAVIOR_ANALYSIS"),
+		})
 }
 
 func TestAccResourceAutoF5XCAppType_withMultipleFeatures(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-app-type-" + testAccRunSuffix(t)
 	namespace := "shared"
+	name := "example-app-type-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -133,20 +137,20 @@ func TestAccResourceAutoF5XCAppType_withMultipleFeatures(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppTypeConfig_withMultipleFeatures(name, namespace, []string{"BUSINESS_LOGIC_MARKUP", "USER_BEHAVIOR_ANALYSIS"}),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppTypeConfig_withMultipleFeatures(name, namespace, []string{"PER_REQ_ANOMALY_DETECTION", "USER_BEHAVIOR_ANALYSIS"}),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -156,10 +160,10 @@ func TestAccResourceAutoF5XCAppType_withMultipleFeatures(t *testing.T) {
 func TestAccResourceAutoF5XCAppType_withRedirectLearningTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-app-type-" + testAccRunSuffix(t)
 	namespace := "shared"
+	name := "example-app-type-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy: acctest.CheckDestroyProducerReplayAware(
@@ -173,31 +177,35 @@ func TestAccResourceAutoF5XCAppType_withRedirectLearningTransition(t *testing.T)
 				Config: testAccResourceAutoF5XCAppTypeConfig_withRedirectLearning(name, namespace, false),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppTypeConfig_withRedirectLearning(name, namespace, true),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAppTypeConfig_withRedirectLearning("example-app-type", "shared", true),
+		})
 }
 
 func TestAccResourceAutoF5XCAppType_withPurgeDurationTransition(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-app-type-" + testAccRunSuffix(t)
 	namespace := "shared"
+	name := "example-app-type-" + acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -213,20 +221,20 @@ func TestAccResourceAutoF5XCAppType_withPurgeDurationTransition(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppTypeConfig_withPurgeDuration(name, namespace, 2),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppTypeConfig_withPurgeDuration(name, namespace, 7),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
@@ -236,10 +244,10 @@ func TestAccResourceAutoF5XCAppType_withPurgeDurationTransition(t *testing.T) {
 func TestAccResourceAutoF5XCAppType_full(t *testing.T) {
 	t.Parallel()
 
-	name := "tf-acc-app-type-" + testAccRunSuffix(t)
 	namespace := "shared"
+	name := "example-app-type-" + acctest.RandString(t, 8)
 
-	acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTestWithOptions(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		CheckDestroy: acctest.CheckDestroyProducerReplayAware(
@@ -253,29 +261,33 @@ func TestAccResourceAutoF5XCAppType_full(t *testing.T) {
 				Config: testAccResourceAutoF5XCAppTypeConfig_full(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 			{
 				Config: testAccResourceAutoF5XCAppTypeConfig_fullUpdated(name, namespace),
 			},
 			{
-				ResourceName:                         "f5xc_app_type.test",
+				ResourceName:                         "f5xc_app_type.example",
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.test"),
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_app_type.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
 			},
 		},
-	})
+	},
+		acctest.VcrTestOptions{
+			DocExampleCapture: true,
+			DocExampleConfig:  testAccResourceAutoF5XCAppTypeConfig_full("example-app-type", "shared"),
+		})
 }
 
 func testAccResourceAutoF5XCAppTypeConfig_basic(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = %q
 }
@@ -284,7 +296,7 @@ resource "f5xc_app_type" "test" {
 
 func testAccResourceAutoF5XCAppTypeConfig_basicUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name        = %q
   namespace   = %q
   description = "App type updated"
@@ -294,7 +306,7 @@ resource "f5xc_app_type" "test" {
 
 func testAccResourceAutoF5XCAppTypeConfig_withFeatureType(name, namespace, featureType string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = %q
 
@@ -324,7 +336,7 @@ func testAccResourceAutoF5XCAppTypeConfig_withMultipleFeatures(name, namespace s
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = %q
 
@@ -347,7 +359,7 @@ func testAccResourceAutoF5XCAppTypeConfig_withRedirectLearning(name, namespace s
 	}
 
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = %q
 %s
@@ -357,7 +369,7 @@ resource "f5xc_app_type" "test" {
 
 func testAccResourceAutoF5XCAppTypeConfig_withPurgeDuration(name, namespace string, days int64) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name      = %q
   namespace = %q
 
@@ -372,13 +384,13 @@ resource "f5xc_app_type" "test" {
 
 func testAccResourceAutoF5XCAppTypeConfig_full(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name        = %q
   namespace   = %q
   description = "Full app type"
 
   labels = {
-    env  = "test"
+    env  = "example"
     tier = "api"
   }
 
@@ -405,13 +417,13 @@ resource "f5xc_app_type" "test" {
 
 func testAccResourceAutoF5XCAppTypeConfig_fullUpdated(name, namespace string) string {
 	return fmt.Sprintf(`
-resource "f5xc_app_type" "test" {
+resource "f5xc_app_type" "example" {
   name        = %q
   namespace   = %q
   description = "Full app type updated"
 
   labels = {
-    env     = "test"
+    env     = "example"
     tier    = "api"
     updated = "true"
   }
